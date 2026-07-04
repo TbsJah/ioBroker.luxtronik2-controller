@@ -1,0 +1,115 @@
+{
+	"common": {
+		"name": "luxtronik2-controller",
+		"version": "0.0.1",
+		"news": {
+			"0.0.1": {
+				"en": "initial release",
+				"de": "Erstveröffentlichung",
+				"ru": "Начальная версия",
+				"pt": "lançamento inicial",
+				"nl": "Eerste uitgave",
+				"fr": "Première version",
+				"it": "Versione iniziale",
+				"es": "Versión inicial",
+				"pl": "Pierwsze wydanie",
+				"uk": "Початкова версія",
+				"zh-cn": "首次出版"
+			}
+		},
+		"titleLang": {
+			"en": "Luxtronik2 Controller",
+			"de": "Luxtronik2-Controller",
+			"ru": "Контроллер Luxtronik2",
+			"pt": "Controlador Luxtronik2",
+			"nl": "Luxtronik2-controller",
+			"fr": "Contrôleur Luxtronik2",
+			"it": "Controllore Luxtronik2",
+			"es": "Controlador Luxtronik2",
+			"pl": "Kontroler Luxtronik2",
+			"uk": "Контролер Luxtronik2",
+			"zh-cn": "Luxtronik2控制器"
+		},
+		"desc": {
+			"en": "Zugriff und Steuerung von Wärmepumpen mit einer Luxtronik 2.x Steuereinheit",
+			"de": "Zugriff und Steuerung von Wärmepumpen mit einer Luxtronik 2.x Steuereinheit",
+			"ru": "Zugriff und Steuerung von Wärmepumpen mit einer Luxtronik 2.x Steuereinheit",
+			"pt": "Zugriff e Steuerung von Wärmepumpen mit einer Luxtronik 2.x Steuereinheit",
+			"nl": "Zugriff en Steuerung van Wärmepompen met een Luxtronik 2.x Steuereinheit",
+			"fr": "Installation et installation de pompes à chaleur avec une installation de chauffage Luxtronik 2.x",
+			"it": "Zugriff and Steuerung of Wärmepumpen mit einer Luxtronik 2.x Steuereinheit",
+			"es": "Zugriff und Steuerung von Wärmepumpen con un Luxtronik 2.x Steuereinheit",
+			"pl": "Zugriff und Steuerung von Wärmepumpen mit einer Luxtronik 2.x Steuereinheit",
+			"uk": "Zugriff und Steuerung von Wärmepumpen mit einer Luxtronik 2.x Steuereinheit",
+			"zh-cn": "Luxtronik 2.x Steuereinheit 的 Zugriff 和 Steuerung von Wärmepumpen"
+		},
+		"authors": ["TbsJah <github.tbsjah@googlemail.com>"],
+		"keywords": [
+			"Luxtronik2",
+			"LWD50",
+			"Luft Wärme Pumpe",
+			"Heizung",
+			"LWP",
+			"Alpha InnoTec AIT",
+			"Buderus",
+			"Novelan"
+		],
+		"licenseInformation": {
+			"type": "free",
+			"license": "MIT"
+		},
+		"platform": "Javascript/Node.js",
+		"icon": "luxtronik2-controller.png",
+		"enabled": true,
+		"extIcon": "https://raw.githubusercontent.com/TbsJah/ioBroker.luxtronik2-controller/main/admin/luxtronik2-controller.png",
+		"readme": "https://github.com/TbsJah/ioBroker.luxtronik2-controller/blob/main/README.md",
+		"loglevel": "info",
+		"tier": 3,
+		"mode": "daemon",
+		"type": "climate-control",
+		"compact": true,
+		"connectionType": "local",
+		"dataSource": "poll",
+		"adminUI": {
+			"config": "json"
+		},
+		"dependencies": [
+			{
+				"js-controller": ">=6.0.11"
+			}
+		],
+		"globalDependencies": [
+			{
+				"admin": ">=7.0.23"
+			}
+		]
+	},
+	"native": {
+		"option1": true,
+		"option2": "42"
+	},
+	"objects": [],
+	"instanceObjects": [
+		{
+			"_id": "info",
+			"type": "channel",
+			"common": {
+				"name": "Information"
+			},
+			"native": {}
+		},
+		{
+			"_id": "info.connection",
+			"type": "state",
+			"common": {
+				"role": "indicator.connected",
+				"name": "Device or service connected",
+				"type": "boolean",
+				"read": true,
+				"write": false,
+				"def": false
+			},
+			"native": {}
+		}
+	]
+}
