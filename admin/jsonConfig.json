@@ -9,10 +9,37 @@
 			"icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMjQgMjQiPjxwYXRoIGQ9Ik0wIDBoMjR2MjRIMHoiIGZpbGw9Im5vbmUiLz48cGF0aCBmaWxsPSJjdXJyZW50Q29sb3IiIGQ9Ik0xMC44MjUgMjJxLS42NzUgMC0xLjE2Mi0uNDV0LS41ODgtMS4xTDguODUgMTguOHEtLjMyNS0uMTI1LS42MTItLjN0LS41NjMtLjM3NWwtMS41NS42NXEtLjYyNS4yNzUtMS4yNS4wNXQtLjk3NS0uOGwtMS4xNzUtMi4wNXEtLjM1LS41NzUtLjItMS4yMjV0LjY3NS0xLjA3NWwxLjMyNS0xUTQuNSAxMi41IDQuNSAxMi4zMzd2LS42NzVxMC0uMTYyLjAyNS0uMzM3bC0xLjMyNS0xUTIuNjc1IDkuOSAyLjUyNSA5LjI1dC4yLTEuMjI1TDMuOSA1Ljk3NXEuMzUtLjU3NS45NzUtLjh0MS4yNS4wNWwxLjU1LjY1cS4yNzUtLjIuNTc1LS4zNzV0LjYtLjNsLjIyNS0xLjY1cS4xLS42NS41ODgtMS4xVDEwLjgyNSAyaDIuMzVxLjY3NSAwIDEuMTYzLjQ1dC41ODcgMS4xbC4yMjUgMS42NXEuMzI1LjEyNS42MTMuM3QuNTYyLjM3NWwxLjU1LS42NXEuNjI1LS4yNzUgMS4yNS0uMDV0Ljk3NS44bDEuMTc1IDIuMDVxLjM1LjU3NS4yIDEuMjI1dC0uNjc1IDEuMDc1bC0xLjMyNSAxcS4wMjUuMTc1LjAyNS4zMzh2LjY3NHEwIC4xNjMtLjA1LjMzOGwxLjMyNSAxcS41MjUuNDI1LjY3NSAxLjA3NXQtLjIgMS4yMjVsLTEuMiAyLjA1cS0uMzUuNTc1LS45NzUuOHQtMS4yNS0uMDVsLTEuNS0uNjVxLS4yNzUuMi0uNTc1LjM3NXQtLjYuM2wtLjIyNSAxLjY1cS0uMS42NS0uNTg3IDEuMXQtMS4xNjMuNDV6bTEuMjI1LTYuNXExLjQ1IDAgMi40NzUtMS4wMjVUMTUuNTUgMTJ0LTEuMDI1LTIuNDc1VDEyLjA1IDguNXEtMS40NzUgMC0yLjQ4OCAxLjAyNVQ4LjU1IDEydDEuMDEzIDIuNDc1VDEyLjA1IDE1LjUiLz48L3N2Zz4=",
 			"items": {
 				"headerConnection": { "type": "header", "text": "Verbindungseinstellungen", "size": 4, "sm": 12 },
-				"host": { "type": "text", "label": "IP-Adresse (Host)", "sm": 12, "md": 4 },
-				"port": { "type": "number", "label": "Port", "sm": 12, "md": 4 },
-				"interval": { "type": "number", "label": "Abfrageintervall (Sekunden)", "min": 10, "sm": 12, "md": 4 },
-				"abstandRegelung": { "type": "divider" },
+				"host": {
+					"type": "text",
+					"label": "IP-Adresse (Host)",
+					"sm": 12,
+					"md": 4,
+					"default": "192.168.178.81"
+				},
+				"port": { "type": "number", "label": "Port", "sm": 12, "md": 4, "default": 8889 },
+				"interval": {
+					"type": "number",
+					"label": "Abfrageintervall (Sekunden)",
+					"min": 10,
+					"sm": 12,
+					"md": 4,
+					"default": 45
+				},
+				"abstandRegelung1": {
+					"type": "staticText",
+					"text": "",
+					"style": { "height": "20px" },
+					"sm": 12,
+					"md": 12
+				},
+				"abstandRegelung2": {
+					"type": "staticText",
+					"text": "",
+					"style": { "height": "20px" },
+					"sm": 12,
+					"md": 12
+				},
+
 				"regelung_aktiv": {
 					"type": "select",
 					"label": "Status der automatischen Regelung",
@@ -21,7 +48,8 @@
 						{ "label": "Inaktiv", "value": false }
 					],
 					"sm": 12,
-					"md": 12
+					"md": 12,
+					"default": true
 				},
 				"headerHeating": { "type": "header", "text": "Vorgabewerte Heizen", "size": 4, "sm": 12 },
 				"fusspunkt": {
@@ -29,42 +57,48 @@
 					"label": "Fußpunkt (°C)",
 					"sm": 12,
 					"md": 4,
-					"disabled": "data.regelung_aktiv === false"
+					"disabled": "data.regelung_aktiv === false",
+					"default": 21.7
 				},
 				"endpunkt": {
 					"type": "number",
 					"label": "Endpunkt (°C)",
 					"sm": 12,
 					"md": 4,
-					"disabled": "data.regelung_aktiv === false"
+					"disabled": "data.regelung_aktiv === false",
+					"default": 23
 				},
 				"sync_return_temperature_hysteresis": {
 					"type": "number",
 					"label": "Heizen Hysterese (K)",
 					"sm": 12,
 					"md": 4,
-					"disabled": "data.regelung_aktiv === false"
+					"disabled": "data.regelung_aktiv === false",
+					"default": 1.5
 				},
 				"sync_heating_system_circ_pump_voltage_minimal_heating": {
 					"type": "number",
 					"label": "HUP Min (V)",
 					"sm": 12,
 					"md": 6,
-					"disabled": "data.regelung_aktiv === false"
+					"disabled": "data.regelung_aktiv === false",
+					"default": 3
 				},
 				"sync_heating_system_circ_pump_voltage_nominal_heating": {
 					"type": "number",
 					"label": "HUP Nom (V)",
 					"sm": 12,
 					"md": 6,
-					"disabled": "data.regelung_aktiv === false"
+					"disabled": "data.regelung_aktiv === false",
+					"default": 7
 				},
 				"Heating_after_warmwater": {
 					"type": "checkbox",
 					"label": "Heizen nach Warmwasser",
 					"sm": 12,
 					"md": 12,
-					"disabled": "data.regelung_aktiv === false"
+					"disabled": "data.regelung_aktiv === false",
+					"default": true
 				},
 				"headerWater": { "type": "header", "text": "Vorgabewerte Warmwasser", "size": 4, "sm": 12 },
 				"sync_warmwater_target_temperature": {
@@ -72,28 +106,32 @@
 					"label": "WW Soll (°C)",
 					"sm": 12,
 					"md": 6,
-					"disabled": "data.regelung_aktiv === false"
+					"disabled": "data.regelung_aktiv === false",
+					"default": 54
 				},
 				"sync_hotwater_temperature_hysteresis": {
 					"type": "number",
 					"label": "WW Hysterese (K)",
 					"sm": 12,
 					"md": 6,
-					"disabled": "data.regelung_aktiv === false"
+					"disabled": "data.regelung_aktiv === false",
+					"default": 10
 				},
 				"sync_heating_system_circ_pump_voltage_minimal_water": {
 					"type": "number",
 					"label": "HUP Min (V)",
 					"sm": 12,
 					"md": 6,
-					"disabled": "data.regelung_aktiv === false"
+					"disabled": "data.regelung_aktiv === false",
+					"default": 3
 				},
 				"sync_heating_system_circ_pump_voltage_nominal_water": {
 					"type": "number",
 					"label": "HUP Nom (V)",
 					"sm": 12,
 					"md": 6,
-					"disabled": "data.regelung_aktiv === false"
+					"disabled": "data.regelung_aktiv === false",
+					"default": 10
 				},
 				"headerZip": { "type": "header", "text": "Vorgabewerte Zirkulationspumpe", "size": 4, "sm": 12 },
 				"zip_aktiv": {
@@ -101,21 +139,24 @@
 					"label": "ZIP Dauer an (s)",
 					"sm": 12,
 					"md": 4,
-					"disabled": "data.regelung_aktiv === false"
+					"disabled": "data.regelung_aktiv === false",
+					"default": 120
 				},
 				"zip_last_run_min": {
 					"type": "number",
 					"label": "ZIP Dauer aus (s)",
 					"sm": 12,
 					"md": 4,
-					"disabled": "data.regelung_aktiv === false"
+					"disabled": "data.regelung_aktiv === false",
+					"default": 600
 				},
 				"zip_aktiv_ww": {
 					"type": "number",
 					"label": "ZIP Dauer bei Warmwassererzeugung (s)",
 					"sm": 12,
 					"md": 4,
-					"disabled": "data.regelung_aktiv === false"
+					"disabled": "data.regelung_aktiv === false",
+					"default": 600
 				}
 			}
 		},
@@ -944,44 +985,51 @@
 			"label": "Benachrichtigungen",
 			"icon": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='currentColor' d='M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z'/%3E%3C/svg%3E",
 			"items": {
-				"telegram_aktiv": {
+				"telegram_warning": {
+					"type": "staticText",
+					"text": "⚠️ Kein Telegram-Adapter gefunden! Bitte installiere eine Telegram-Instanz, um diese Funktion zu nutzen.",
+					"style": { "color": "#d32f2f", "fontWeight": "bold", "marginBottom": "15px" },
+					"hidden": "data.telegram_instance  ? true : false",
+					"sm": 12
+				},
+				"telegram_enabled": {
 					"type": "checkbox",
 					"label": "Fehlermeldungen per Telegram senden",
+					"disabled": "!data.telegram_instance || data.telegram_instance === 'none'",
 					"sm": 12,
-					"md": 6
+					"md": 6,
+					"default": false
 				},
-				"show_errors_in_iobroker": {
+				"notification_bell": {
 					"type": "checkbox",
 					"label": "Fehler auch als Benachrichtigung (Glocke) zeigen",
 					"sm": 12,
-					"md": 6
+					"md": 6,
+					"default": false
 				},
 				"telegram_instance": {
 					"type": "instance",
 					"adapter": "telegram",
 					"label": "Telegram-Instanz",
 					"sm": 12,
-					"md": 6,
-					"hidden": "data.telegram_aktiv === false"
+					"md": 6
 				},
 				"telegram_receiver": {
 					"type": "text",
 					"label": "Empfänger (Name / Chat-ID - Optional)",
 					"help": "Leer lassen, um die Nachricht an alle bekannten Telegram-Benutzer zu senden.",
+					"disabled": "!data.telegram_instance || data.telegram_instance === 'none' || !data.telegram_enabled",
 					"sm": 12,
-					"md": 6,
-					"hidden": "data.telegram_aktiv === false"
+					"md": 6
 				},
-				"test_button": {
+				"telegram_test_btn": {
 					"type": "sendTo",
-					"label": "Test: Letzten Fehler senden",
-					"command": "sendTestError",
-					"data": {},
-					"color": "secondary",
-					"variant": "contained",
+					"label": "TEST: LETZTEN FEHLER SENDEN",
+					"command": "testTelegram",
+					"color": "primary",
 					"icon": "send",
 					"sm": 12,
-					"md": 4
+					"md": 6
 				}
 			}
 		},

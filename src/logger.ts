@@ -1,11 +1,11 @@
-import type { AdapterInstance } from "@iobroker/adapter-core";
+import type { AdapterInstance } from '@iobroker/adapter-core';
 
 // Speichert die Adapter-Instanz global für diese Laufzeit
 let adapter: AdapterInstance | null = null;
 // Speichert den Status der Debug-Checkbox aus ioBroker
 let customDebugActive = false;
 
-export type LogLevel = "info" | "warn" | "error" | "debug" | "silly";
+export type LogLevel = 'info' | 'warn' | 'error' | 'debug' | 'silly';
 
 /**
  * Initialisiert den Logger einmalig beim Start des Adapters.
@@ -32,7 +32,7 @@ export function setCustomDebug(active: boolean): void {
  * @param text Der Log-Text
  * @param level Das Loglevel (Standard: "info")
  */
-export function writeLog(text: string, level: LogLevel = "info"): void {
+export function writeLog(text: string, level: LogLevel = 'info'): void {
 	if (!adapter) {
 		// Fallback, falls der Logger (noch) nicht initialisiert wurde
 		console.log(`[${level.toUpperCase()}] ${text}`);
@@ -40,12 +40,12 @@ export function writeLog(text: string, level: LogLevel = "info"): void {
 	}
 
 	// Wenn es ein Debug-Log ist, aber der manuelle Schalter aus ist, ignorieren wir es
-	if (level === "debug" && !customDebugActive) {
+	if (level === 'debug' && !customDebugActive) {
 		return;
 	}
 
 	// Ruft dynamisch die passende ioBroker-Log-Funktion auf
-	if (adapter.log && typeof adapter.log[level] === "function") {
+	if (adapter.log && typeof adapter.log[level] === 'function') {
 		adapter.log[level](text);
 	} else {
 		adapter.log.info(`[${level.toUpperCase()}] ${text}`);

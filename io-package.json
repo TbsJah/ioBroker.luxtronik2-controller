@@ -43,9 +43,7 @@
 			"uk": "Zugriff und Steuerung von Wärmepumpen mit einer Luxtronik 2.x Steuereinheit",
 			"zh-cn": "Luxtronik 2.x Steuereinheit 的 Zugriff 和 Steuerung von Wärmepumpen"
 		},
-		"authors": [
-			"TbsJah <github.tbsjah@googlemail.com>"
-		],
+		"authors": ["TbsJah <github.tbsjah@googlemail.com>"],
 		"keywords": [
 			"Luxtronik2",
 			"LWD50",
@@ -70,6 +68,7 @@
 		"mode": "daemon",
 		"type": "climate-control",
 		"compact": true,
+		"messagebox": true,
 		"connectionType": "local",
 		"dataSource": "poll",
 		"adminUI": {
@@ -104,22 +103,23 @@
 		"zip_last_run_min": 600,
 		"regelung_aktiv": false,
 		"Heating_after_warmwater": true,
-		"telegram_aktiv": false,
-		"telegram_instance": "telegram.0",
+		"telegram_enabled": false,
+		"notification_bell": false,
 		"telegram_receiver": "",
+		"telegram_instance": "",
 		"motionSensors": [],
 		"motion_sensors_aktiv": false
 	},
 	"notifications": [
 		{
-			"scope": "lwd50a",
+			"scope": "luxtronik2-controller",
 			"name": {
-				"de": "LWD50A Wärmepumpe",
-				"en": "LWD50A Heat Pump"
+				"de": "Luxtronik2-Controller",
+				"en": "Luxtronik2-Controller"
 			},
 			"description": {
-				"de": "Benachrichtigungen vom LWD50A Adapter",
-				"en": "Notifications from the LWD50A adapter"
+				"de": "Benachrichtigungen vom Luxtronik2-Controller Adapter",
+				"en": "Notifications from the Luxtronik2-Controller adapter"
 			},
 			"categories": [
 				{

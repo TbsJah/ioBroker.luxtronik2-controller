@@ -27,7 +27,7 @@ var import_logger = require("./logger");
 var import_rawFunctions = require("./rawFunctions");
 var import_stateMapping = require("./stateMapping");
 var import_virtualStates = require("./virtualStates");
-class Lwd50a extends utils.Adapter {
+class Luxtronik2Controller extends utils.Adapter {
   pollingInterval;
   pump;
   createdStates = /* @__PURE__ */ new Set();
@@ -43,7 +43,7 @@ class Lwd50a extends utils.Adapter {
   constructor(options = {}) {
     super({
       ...options,
-      name: "lwd50a"
+      name: "luxtronik2-controller"
     });
     (0, import_logger.initLogger)(this);
     this.on("ready", this.onReady.bind(this));
@@ -51,20 +51,20 @@ class Lwd50a extends utils.Adapter {
     this.on("unload", this.onUnload.bind(this));
     this.on("message", this.onMessage.bind(this));
   }
-  resubscribeMotionSensors() {
-    const config = this.config;
-    if (config.motion_sensors_aktiv && Array.isArray(config.motionSensors)) {
-      for (const sensor of config.motionSensors) {
-        if (sensor.oid && typeof sensor.oid === "string") {
-          this.subscribeForeignStates(sensor.oid.trim());
-          (0, import_logger.writeLog)(`Sensor-Abo erneuert nach MQTT-Reconnect: ${sensor.oid}`, "info");
-        }
-      }
-    }
-  }
+  // private resubscribeMotionSensors(): void {
+  // 	const config = this.config as Record<string, any>;
+  // 	if (config.motion_sensors_aktiv && Array.isArray(config.motionSensors)) {
+  // 		for (const sensor of config.motionSensors) {
+  // 			if (sensor.oid && typeof sensor.oid === 'string') {
+  // 				this.subscribeForeignStates(sensor.oid.trim());
+  // 				writeLog(`Sensor-Abo erneuert nach MQTT-Reconnect: ${sensor.oid}`, 'info');
+  // 			}
+  // 		}
+  // 	}
+  // }
   sendTelegramNotification(message) {
     const config = this.config;
-    if (config.telegram_aktiv && config.telegram_instance) {
+    if (config.telegram_enabled && config.telegram_instance) {
       const sendObj = { text: message };
       if (config.telegram_receiver && config.telegram_receiver.trim() !== "") {
         const receiver = config.telegram_receiver.trim();
@@ -79,19 +79,19 @@ class Lwd50a extends utils.Adapter {
     }
   }
   async onMessage(obj) {
-    if (obj.command === "sendTestError") {
+    if (obj.command === "testTelegram") {
       try {
         (0, import_logger.writeLog)("Test-Button empfangen!", "info");
         const config = this.config;
-        const isTelegramActive = config.telegram_aktiv && config.telegram_instance;
-        const isIoBrokerNotifyActive = config.show_errors_in_iobroker;
+        const isTelegramActive = config.telegram_enabled === true && config.telegram_instance && config.telegram_instance !== "none";
+        const isIoBrokerNotifyActive = config.notification_bell === true;
         if (!isTelegramActive && !isIoBrokerNotifyActive) {
           if (obj.callback) {
             void this.sendTo(
               obj.from,
               obj.command,
               {
-                error: "Fehler: Weder Telegram noch ioBroker-Benachrichtigungen sind aktiv! Bitte Konfiguration speichern."
+                error: "Fehler: Weder Telegram noch Glocke sind aktiv gespeichert! Bitte erst SPEICHERN klicken."
               },
               obj.callback
             );
@@ -99,20 +99,17 @@ class Lwd50a extends utils.Adapter {
           return;
         }
         const lastErrorState = await this.getStateAsync((0, import_stateMapping.getDpPath)("Fehlerspeicher"));
+        let msg = "";
         if (lastErrorState && typeof lastErrorState.val === "string") {
           try {
             const errorList = JSON.parse(lastErrorState.val);
             if (Array.isArray(errorList) && errorList.length > 0) {
               const newestError = errorList[0];
-              const successMessages = [];
-              let msg = "\u{1F6A8} *Test-Alarm: Fehlerspeicher*\n\n";
+              msg = "\u{1F6A8} *Test-Alarm: Fehlerspeicher*\n\n";
               msg += `Aktuellster Fehler:
-`;
-              msg += `Code: ${newestError.code}
-`;
-              msg += `Fehler: ${newestError.beschreibung}
-`;
-              msg += `Datum: ${newestError.datum}
+Code: ${newestError.code}
+Fehler: ${newestError.beschreibung}
+Datum: ${newestError.datum}
 
 `;
               if (errorList.length > 1) {
@@ -120,65 +117,40 @@ class Lwd50a extends utils.Adapter {
 `;
                 for (let i = 1; i < errorList.length; i++) {
                   msg += `Datum: ${errorList[i].datum} 
- Code: ${errorList[i].code}
- Fehler: ${errorList[i].beschreibung}
+Code: ${errorList[i].code}
+Fehler: ${errorList[i].beschreibung}
 
 `;
                 }
               }
-              if (isIoBrokerNotifyActive) {
-                if (config.show_errors_in_iobroker && typeof this.registerNotification === "function") {
-                  await this.registerNotification("lwd50a", "lwpError", msg);
-                  (0, import_logger.writeLog)("Test-Benachrichtigung an ioBroker-Glocke gesendet.", "info");
-                  successMessages.push("Glocke");
-                }
-              }
-              if (isTelegramActive) {
-                this.sendTelegramNotification(msg);
-                (0, import_logger.writeLog)("Formatierte Test-Fehlermeldung via Telegram versendet.", "info");
-                successMessages.push("Telegram");
-              }
-              if (obj.callback) {
-                void this.sendTo(
-                  obj.from,
-                  obj.command,
-                  { result: `Erfolgreich ausgel\xF6st: ${successMessages.join(" & ")}` },
-                  obj.callback
-                );
-              }
-            } else {
-              if (obj.callback) {
-                void this.sendTo(
-                  obj.from,
-                  obj.command,
-                  { result: "Keine Fehler im Speicher gefunden. Es wurde nichts gesendet." },
-                  obj.callback
-                );
-              }
             }
           } catch (parseErr) {
             (0, import_logger.writeLog)(`JSON Parse-Fehler beim Test-Button: ${parseErr.message}`, "debug");
-            if (isTelegramActive) {
-              this.sendTelegramNotification(`Test-Alarm (Rohdaten): ${lastErrorState.val}`);
-            }
-            if (obj.callback) {
-              void this.sendTo(
-                obj.from,
-                obj.command,
-                { result: "Nachricht als Rohdaten gesendet (JSON Parse Fehler)." },
-                obj.callback
-              );
-            }
           }
-        } else {
-          if (obj.callback) {
-            void this.sendTo(
-              obj.from,
-              obj.command,
-              { result: "Kein Fehler-Status gefunden." },
-              obj.callback
-            );
+        }
+        if (msg === "") {
+          msg = "\u2705 *Erfolgreicher Test*\n\nDies ist eine generierte Test-Nachricht. Die Kommunikation zu Telegram und ioBroker funktioniert einwandfrei! (Es liegen aktuell keine echten Heizungsfehler vor).";
+        }
+        const successMessages = [];
+        if (isIoBrokerNotifyActive) {
+          if (typeof this.registerNotification === "function") {
+            await this.registerNotification("luxtronik2-controller", "lwpError", msg);
+            (0, import_logger.writeLog)("Test-Benachrichtigung an ioBroker-Glocke gesendet.", "info");
+            successMessages.push("Glocke");
           }
+        }
+        if (isTelegramActive) {
+          this.sendTelegramNotification(msg);
+          (0, import_logger.writeLog)(`Test-Fehlermeldung via Telegram versendet an ${config.telegram_instance}.`, "info");
+          successMessages.push("Telegram");
+        }
+        if (obj.callback) {
+          void this.sendTo(
+            obj.from,
+            obj.command,
+            { result: `Erfolgreich ausgel\xF6st: ${successMessages.join(" & ")}` },
+            obj.callback
+          );
         }
       } catch (err) {
         (0, import_logger.writeLog)(`Fehler beim Test-Button: ${err.message}`, "error");
@@ -233,6 +205,7 @@ class Lwd50a extends utils.Adapter {
     const config = this.config;
     const ip = config.host;
     const port = config.port || 8889;
+    await this.setState("info.connection", false, true);
     (0, import_logger.writeLog)(`Verbinde mit W\xE4rmepumpe auf ${ip}:${port}...`, "info");
     this.pump = luxtronik.createConnection(ip, port, { retryCount: 3, retryDelay: 2e3 });
     await this.cleanupStates();
@@ -263,6 +236,7 @@ class Lwd50a extends utils.Adapter {
       (0, import_logger.writeLog)("Eingestelltes Intervall war zu kurz. Wurde zum Schutz auf 10 Sekunden korrigiert.", "warn");
     }
     (0, import_logger.writeLog)(`Starte Polling-Intervall. Lese Daten und optimiere alle ${intervalSeconds} Sekunden.`, "info");
+    await this.setState("info.connection", true, true);
     this.pollingInterval = setInterval(() => {
       void this.updateData();
     }, intervalSeconds * 1e3);
@@ -849,9 +823,9 @@ Ein Fehler an der W\xE4rmepumpe wurde registriert:
 *Fehler:* ${newestError.beschreibung}
 *Datum:* ${newestError.datum}`;
               this.sendTelegramNotification(msg);
-              if (config.show_errors_in_iobroker) {
+              if (config.notification_bell) {
                 if (typeof this.registerNotification === "function") {
-                  await this.registerNotification("lwd50a", "lwpError", msg);
+                  await this.registerNotification("luxtronik2-controller", "lwpError", msg);
                 } else {
                   (0, import_logger.writeLog)(
                     `\u{1F6A8} W\xE4rmepumpen-Fehler: Code ${newestError.code} - ${newestError.beschreibung}`,
@@ -1119,8 +1093,8 @@ Ein Fehler an der W\xE4rmepumpe wurde registriert:
   }
 }
 if (require.main !== module) {
-  module.exports = (options) => new Lwd50a(options);
+  module.exports = (options) => new Luxtronik2Controller(options);
 } else {
-  (() => new Lwd50a())();
+  (() => new Luxtronik2Controller())();
 }
 //# sourceMappingURL=main.js.map

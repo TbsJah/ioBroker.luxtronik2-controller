@@ -22,10 +22,19 @@ declare global {
 			Heating_after_warmwater?: boolean;
 			motionSensors?: Array<{ name: string; oid: string }>;
 			motion_sensors_aktiv?: boolean;
+			telegram_warnings?: boolean;
+			telegram_enabled?: boolean;
+			notification_bell?: boolean;
+			telegram_receiver?: string;
+			telegram_instance?: string;
+			telegram_instance_id?: string;
+			telegram_receiver_id?: string;
+			telegram_receiver_name?: string;
+			telegram_receiver_type?: string;
+			telegram_receiver_isGroup?: boolean;
 		}
 	}
 }
 
 // this is required so the above AdapterConfig is found by TypeScript / type checking
-export { };
-
+export {};

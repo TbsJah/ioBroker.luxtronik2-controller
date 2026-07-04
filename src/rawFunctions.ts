@@ -1,6 +1,6 @@
-import type { AdapterInstance } from "@iobroker/adapter-core";
-import * as net from "net";
-import { writeLog } from "./logger";
+import type { AdapterInstance } from '@iobroker/adapter-core';
+import * as net from 'net';
+import { writeLog } from './logger';
 
 /**
  * Liest die kompletten Rohdaten (3003 oder 3004) direkt über einen TCP-Socket aus der Wärmepumpe.
@@ -26,7 +26,7 @@ export function readAllRaw(adapter: AdapterInstance, command: number): Promise<n
 			client.write(buffer);
 		});
 
-		client.on("data", (chunk: Buffer) => {
+		client.on('data', (chunk: Buffer) => {
 			responseData = Buffer.concat([responseData, chunk]);
 
 			const is3004 = command === 3004;
@@ -88,7 +88,7 @@ export function readAllRaw(adapter: AdapterInstance, command: number): Promise<n
 			resolve(allValues);
 		});
 
-		client.on("error", (err: Error) => {
+		client.on('error', (err: Error) => {
 			client.destroy();
 			if (finished) {
 				return;
@@ -98,7 +98,7 @@ export function readAllRaw(adapter: AdapterInstance, command: number): Promise<n
 		});
 
 		client.setTimeout(8000);
-		client.on("timeout", () => {
+		client.on('timeout', () => {
 			client.destroy();
 			if (finished) {
 				return;
@@ -117,20 +117,20 @@ export function readAllRaw(adapter: AdapterInstance, command: number): Promise<n
 export async function dumpAllRawToLog(adapter: AdapterInstance): Promise<void> {
 	try {
 		const dumpList = async (command: number, title: string): Promise<void> => {
-			writeLog("=======================================================", "info");
-			writeLog(`START COMPACT RAW DUMP: LISTE ${command} (${title})`, "info");
-			writeLog("=======================================================", "info");
+			writeLog('=======================================================', 'info');
+			writeLog(`START COMPACT RAW DUMP: LISTE ${command} (${title})`, 'info');
+			writeLog('=======================================================', 'info');
 			const data = await readAllRaw(adapter, command);
 			for (let i = 0; i < data.length; i++) {
-				writeLog(`[RAW ${command}] Index ${i.toString().padStart(3, " ")} = ${data[i]}`, "info");
+				writeLog(`[RAW ${command}] Index ${i.toString().padStart(3, ' ')} = ${data[i]}`, 'info');
 			}
-			writeLog(`--- ENDE LISTE ${command} (Insgesamt ${data.length} Indizes geloggt) ---`, "info");
-			writeLog("=======================================================", "info");
+			writeLog(`--- ENDE LISTE ${command} (Insgesamt ${data.length} Indizes geloggt) ---`, 'info');
+			writeLog('=======================================================', 'info');
 		};
 
-		await dumpList(3003, "PARAMETER");
-		await dumpList(3004, "MESSWERTE");
+		await dumpList(3003, 'PARAMETER');
+		await dumpList(3004, 'MESSWERTE');
 	} catch (err: any) {
-		writeLog(`Fehler beim Ausführen des Raw-Dumps: ${err.message}`, "error");
+		writeLog(`Fehler beim Ausführen des Raw-Dumps: ${err.message}`, 'error');
 	}
 }

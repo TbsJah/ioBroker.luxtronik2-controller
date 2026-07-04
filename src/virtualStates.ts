@@ -1,8 +1,8 @@
-import { STATE_MAPPING, getDpPath } from "./stateMapping";
+import { STATE_MAPPING, getDpPath } from './stateMapping';
 
 // Moderner, linter-konformer ES6-Import (benötigt die luxtronik2.d.ts im src-Ordner)
-import * as luxtronikTypes from "luxtronik2/types";
-import { writeLog } from "./logger";
+import * as luxtronikTypes from 'luxtronik2/types';
+import { writeLog } from './logger';
 
 /**
  * Erstellt alle virtuellen Datenpunkte dynamisch im ioBroker.
@@ -17,13 +17,13 @@ export async function initializeVirtualStates(adapter: any): Promise<void> {
 			const stateId = `${folderId}.${key}`;
 
 			await adapter.setObjectNotExistsAsync(folderId, {
-				type: "channel",
-				common: { name: folderId.split(".").pop() || folderId },
+				type: 'channel',
+				common: { name: folderId.split('.').pop() || folderId },
 				native: {},
 			});
 
 			await adapter.setObjectNotExistsAsync(stateId, {
-				type: "state",
+				type: 'state',
 				common: {
 					name: definition.name,
 					type: definition.type,
@@ -40,7 +40,7 @@ export async function initializeVirtualStates(adapter: any): Promise<void> {
 			if (definition.def !== undefined) {
 				const checkState = await adapter.getStateAsync(stateId);
 				if (!checkState || checkState.val === null) {
-					writeLog(`Initiale Erstellung: Setze Default-Wert [${definition.def}] für ${stateId}`, "info");
+					writeLog(`Initiale Erstellung: Setze Default-Wert [${definition.def}] für ${stateId}`, 'info');
 					await adapter.setStateAsync(stateId, { val: definition.def, ack: true });
 				}
 			}
@@ -79,12 +79,12 @@ async function calculateSum(
 			adapter.getStateAsync(sourceId2),
 		]);
 
-		const val1 = state1 && typeof state1.val === "number" ? state1.val : 0;
-		const val2 = state2 && typeof state2.val === "number" ? state2.val : 0;
+		const val1 = state1 && typeof state1.val === 'number' ? state1.val : 0;
+		const val2 = state2 && typeof state2.val === 'number' ? state2.val : 0;
 
 		await adapter.setStateChangedAsync(targetId, val1 + val2, true);
 	} catch (err: any) {
-		writeLog(`Fehler bei der Berechnung der ${logName}: ${err.message}`, "error");
+		writeLog(`Fehler bei der Berechnung der ${logName}: ${err.message}`, 'error');
 	}
 }
 
@@ -96,10 +96,10 @@ async function calculateSum(
 export async function calculateTotalThermalEnergy(adapter: any): Promise<void> {
 	await calculateSum(
 		adapter,
-		"Informationen.09_Wärmemenge.thermalenergy_heating",
-		"Informationen.09_Wärmemenge.thermalenergy_warmwater",
-		"Informationen.09_Wärmemenge.thermalenergy_total",
-		"Gesamt-Wärmemenge",
+		'Informationen.09_Wärmemenge.thermalenergy_heating',
+		'Informationen.09_Wärmemenge.thermalenergy_warmwater',
+		'Informationen.09_Wärmemenge.thermalenergy_total',
+		'Gesamt-Wärmemenge',
 	);
 }
 
@@ -111,10 +111,10 @@ export async function calculateTotalThermalEnergy(adapter: any): Promise<void> {
 export async function calculateTotalEnergy(adapter: any): Promise<void> {
 	await calculateSum(
 		adapter,
-		"Informationen.10_Energie.energy_heating",
-		"Informationen.10_Energie.energy_warmwater",
-		"Informationen.10_Energie.energy_total",
-		"Gesamt-Energie",
+		'Informationen.10_Energie.energy_heating',
+		'Informationen.10_Energie.energy_warmwater',
+		'Informationen.10_Energie.energy_total',
+		'Gesamt-Energie',
 	);
 }
 
@@ -161,7 +161,7 @@ async function updateHistory(
 			// Nur verarbeiten, wenn ein Code ungleich 0 vorliegt
 			if (code !== 0) {
 				const dateObject = new Date(timestamp * 1000);
-				const readableDate = timestamp > 0 ? dateObject.toLocaleString("de-DE") : "Unbekannt";
+				const readableDate = timestamp > 0 ? dateObject.toLocaleString('de-DE') : 'Unbekannt';
 
 				let beschreibung = `${fallbackPrefix} (${code})`;
 
@@ -189,7 +189,7 @@ async function updateHistory(
 		const jsonString = JSON.stringify(logList);
 		await adapter.setStateChangedAsync(targetId, jsonString, true);
 	} catch (err: any) {
-		writeLog(`Fehler bei der Generierung der JSON-Historie für ${targetId}: ${err.message}`, "error");
+		writeLog(`Fehler bei der Generierung der JSON-Historie für ${targetId}: ${err.message}`, 'error');
 	}
 }
 
@@ -205,9 +205,9 @@ export async function updateErrorHistory(adapter: any, rawValues: number[]): Pro
 		rawValues,
 		95, // Start-Index für Zeitstempel
 		100, // Start-Index für Codes
-		"Informationen.06_Fehlerspeicher.Fehlerspeicher",
-		["errorCodes", "codes"],
-		"Unbekannter Fehler",
+		'Informationen.06_Fehlerspeicher.Fehlerspeicher',
+		['errorCodes', 'codes'],
+		'Unbekannter Fehler',
 	);
 }
 
@@ -223,9 +223,9 @@ export async function updateOutageHistory(adapter: any, rawValues: number[]): Pr
 		rawValues,
 		111, // Start-Index für Zeitstempel
 		106, // Start-Index für Codes
-		"Informationen.07_Abschaltungen.Abschaltungen",
-		["outageCodes", "outages", "switchOffCodes"],
-		"Unbekannter Abschaltgrund",
+		'Informationen.07_Abschaltungen.Abschaltungen',
+		['outageCodes', 'outages', 'switchOffCodes'],
+		'Unbekannter Abschaltgrund',
 	);
 }
 
@@ -237,16 +237,16 @@ export async function updateOutageHistory(adapter: any, rawValues: number[]): Pr
 export async function calculateTemperatureSpread(adapter: any): Promise<void> {
 	try {
 		const [vorlaufState, ruecklaufState] = await Promise.all([
-			adapter.getStateAsync(getDpPath("temperature_supply")),
-			adapter.getStateAsync(getDpPath("temperature_return")),
+			adapter.getStateAsync(getDpPath('temperature_supply')),
+			adapter.getStateAsync(getDpPath('temperature_return')),
 		]);
 
 		if (vorlaufState && ruecklaufState && vorlaufState.val !== null && ruecklaufState.val !== null) {
 			const spreizung = parseFloat((Number(vorlaufState.val) - Number(ruecklaufState.val)).toFixed(2));
 
-			await adapter.setStateChangedAsync(getDpPath("spreizung_vorlauf_ruecklauf"), spreizung, true);
+			await adapter.setStateChangedAsync(getDpPath('spreizung_vorlauf_ruecklauf'), spreizung, true);
 		}
 	} catch (err: any) {
-		writeLog(`Fehler bei der Berechnung der Temperatur-Spreizung: ${err.message}`, "error");
+		writeLog(`Fehler bei der Berechnung der Temperatur-Spreizung: ${err.message}`, 'error');
 	}
 }
