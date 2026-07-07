@@ -1,27 +1,34 @@
-import { STATE_MAPPING, getDpPath } from './stateMapping';
-
-// Moderner, linter-konformer ES6-Import (benötigt die luxtronik2.d.ts im src-Ordner)
-import * as luxtronikTypes from 'luxtronik2/types';
+import { ERROR_CODES, OUTAGE_CODES, STATE_HEATING, STATE_ZEILE_1, STATE_ZEILE_2, STATE_ZEILE_3 } from './codes';
 import { writeLog } from './logger';
+// Imports anpassen
+import { STATE_MAPPING, getDpPath, getLuxIdByKey } from './stateMapping';
 
 /**
- * Erstellt alle virtuellen Datenpunkte dynamisch im ioBroker.
- * Übersetzt den Typ "json" automatisch in ein ioBroker-konformes Objekt und erstellt Channels.
+ * Erstellt ALLE Datenpunkte (virtuelle und echte) dynamisch im ioBroker.
+ * Liest die Struktur direkt aus dem STATE_MAPPING aus.
  *
  * @param adapter Die Instanz des ioBroker-Adapters (this)
  */
 export async function initializeVirtualStates(adapter: any): Promise<void> {
 	for (const [key, definition] of Object.entries(STATE_MAPPING)) {
-		if (definition.isVirtual) {
-			const folderId = definition.folder;
-			const stateId = `${folderId}.${key}`;
+		const folderId = definition.folder;
+		const stateId = `${folderId}.${key}`;
 
-			await adapter.setObjectNotExistsAsync(folderId, {
-				type: 'channel',
-				common: { name: folderId.split('.').pop() || folderId },
-				native: {},
-			});
+		try {
+			// 1. Ordnerstruktur sicher anlegen (unterstützt verschachtelte Ordner wie "A.B")
+			const folderParts = folderId.split('.');
+			let currentFolder = '';
 
+			for (const part of folderParts) {
+				currentFolder = currentFolder === '' ? part : `${currentFolder}.${part}`;
+				await adapter.setObjectNotExistsAsync(currentFolder, {
+					type: currentFolder.includes('.') ? 'channel' : 'folder',
+					common: { name: part },
+					native: {},
+				});
+			}
+
+			// 2. Den eigentlichen Datenpunkt anlegen
 			await adapter.setObjectNotExistsAsync(stateId, {
 				type: 'state',
 				common: {
@@ -31,25 +38,17 @@ export async function initializeVirtualStates(adapter: any): Promise<void> {
 					unit: definition.unit,
 					read: true,
 					write: definition.write || false,
-					def: definition.def, // <--- 1. ioBroker das Default mitteilen
+					def: definition.def,
+					states: definition.states, // <-- Extrem wichtig für Dropdown-Werte!
 				},
 				native: {},
 			});
-
-			// 2. NEU: Sofortiger Initial-Schreibbefehl
-			if (definition.def !== undefined) {
-				const checkState = await adapter.getStateAsync(stateId);
-				if (!checkState || checkState.val === null) {
-					writeLog(`Initiale Erstellung: Setze Default-Wert [${definition.def}] für ${stateId}`, 'info');
-					await adapter.setStateAsync(stateId, { val: definition.def, ack: true });
-				}
-			}
-
-			if (definition.write) {
-				adapter.subscribeStates(stateId);
-			}
+		} catch (err: any) {
+			writeLog(`Fehler beim Erstellen des Datenpunkts ${stateId}: ${err.message}`, 'error');
 		}
 	}
+
+	writeLog(`Alle Datenpunkte aus dem State-Mapping wurden erfolgreich initialisiert.`, 'info');
 }
 
 // ==========================================
@@ -133,63 +132,65 @@ export async function calculateTotalEnergy(adapter: any): Promise<void> {
  * @param dictKeys Array mit möglichen Objekt-Schlüsseln für das Wörterbuch im Luxtronik-Modul
  * @param fallbackPrefix Präfix für den Text, falls der Code gänzlich unbekannt ist
  */
+
 async function updateHistory(
 	adapter: any,
 	rawValues: number[],
-	startIdxTime: number,
-	startIdxCode: number,
-	targetId: string,
-	dictKeys: string[],
+	timeStartIndex: number,
+	codeStartIndex: number,
+	targetStateId: string,
+	_keys: string[],
 	fallbackPrefix: string,
+	codeMap: Record<number, string>,
 ): Promise<void> {
 	try {
-		// Prüfen, ob das Array groß genug ist (höchster benötigter Index + 5 Iterationen)
-		const requiredLength = Math.max(startIdxTime, startIdxCode) + 5;
-		if (!rawValues || rawValues.length < requiredLength) {
-			adapter.log.debug(`[Virtual DP] Historie für ${targetId} übersprungen: Unvollständiges Raw-Array.`);
-			return;
-		}
+		const historyList: any[] = [];
 
-		const logList = [];
-		const typesAny = luxtronikTypes;
-
-		// Schleife läuft exakt 5-mal
 		for (let i = 0; i < 5; i++) {
-			const timestamp = rawValues[startIdxTime + i];
-			const code = rawValues[startIdxCode + i];
+			const code = rawValues[codeStartIndex + i];
+			const timestamp = rawValues[timeStartIndex + i];
 
-			// Nur verarbeiten, wenn ein Code ungleich 0 vorliegt
-			if (code !== 0) {
-				const dateObject = new Date(timestamp * 1000);
-				const readableDate = timestamp > 0 ? dateObject.toLocaleString('de-DE') : 'Unbekannt';
+			if (timestamp !== undefined && timestamp > 0) {
+				const date = new Date(timestamp * 1000);
+				const formattedDate = date.toLocaleString('de-DE');
 
 				let beschreibung = `${fallbackPrefix} (${code})`;
 
-				// Dynamische Durchsuchung aller übergebenen Wörterbuch-Schlüssel in der Luxtronik-Lib
-				for (const dictKey of dictKeys) {
-					if (typesAny[dictKey] && typesAny[dictKey][code]) {
-						beschreibung = typesAny[dictKey][code];
-						break; // Text gefunden, Schleife abbrechen
-					} else if (typesAny[code]) {
-						beschreibung = typesAny[code]; // Letzter Fallback
-						break;
-					}
+				// Text aus der jeweils übergebenen Map ziehen
+				if (codeMap[code] !== undefined) {
+					beschreibung = codeMap[code];
 				}
 
-				logList.push({
-					index: i + 1,
+				historyList.push({
 					code: code,
 					beschreibung: beschreibung,
-					datum: readableDate,
-					timestamp: timestamp,
+					datum: formattedDate,
+					//timestamp: timestamp,
 				});
 			}
 		}
 
-		const jsonString = JSON.stringify(logList);
-		await adapter.setStateChangedAsync(targetId, jsonString, true);
+		historyList.sort((a, b) => b.timestamp - a.timestamp);
+
+		// Finale Liste mit Index (1-5) für Tabellen und inkl. Timestamp für Skripte
+		const cleanList = historyList.map((entry, idx) => {
+			return {
+				index: idx + 1,
+				code: entry.code,
+				beschreibung: entry.beschreibung,
+				datum: entry.datum,
+				timestamp: entry.timestamp,
+			};
+		});
+		const jsonStr = JSON.stringify(cleanList);
+
+		const currentState = await adapter.getStateAsync(targetStateId);
+		if (!currentState || currentState.val !== jsonStr) {
+			await adapter.setStateAsync(targetStateId, { val: jsonStr, ack: true });
+			writeLog(`Historie für ${targetStateId} aus Rohdaten aktualisiert.`, 'info');
+		}
 	} catch (err: any) {
-		writeLog(`Fehler bei der Generierung der JSON-Historie für ${targetId}: ${err.message}`, 'error');
+		writeLog(`Fehler beim Aktualisieren der Historie: ${err.message}`, 'error');
 	}
 }
 
@@ -206,11 +207,11 @@ export async function updateErrorHistory(adapter: any, rawValues: number[]): Pro
 		95, // Start-Index für Zeitstempel
 		100, // Start-Index für Codes
 		'Informationen.06_Fehlerspeicher.Fehlerspeicher',
-		['errorCodes', 'codes'],
+		[],
 		'Unbekannter Fehler',
+		ERROR_CODES, // <--- Gibt das Fehler-Wörterbuch mit
 	);
 }
-
 /**
  * Aktualisiert die Abschalthistorie (JSON) im ioBroker.
  *
@@ -224,8 +225,9 @@ export async function updateOutageHistory(adapter: any, rawValues: number[]): Pr
 		111, // Start-Index für Zeitstempel
 		106, // Start-Index für Codes
 		'Informationen.07_Abschaltungen.Abschaltungen',
-		['outageCodes', 'outages', 'switchOffCodes'],
+		[],
 		'Unbekannter Abschaltgrund',
+		OUTAGE_CODES, // <--- Gibt das Abschalt-Wörterbuch mit
 	);
 }
 
@@ -248,5 +250,296 @@ export async function calculateTemperatureSpread(adapter: any): Promise<void> {
 		}
 	} catch (err: any) {
 		writeLog(`Fehler bei der Berechnung der Temperatur-Spreizung: ${err.message}`, 'error');
+	}
+}
+
+/**
+ * Aktualisiert die Klartext-Strings für den Status der Wärmepumpe.
+ * Nutzt dynamisch das stateMapping für die Indizes und die Logik der Original-Bibliothek.
+ *
+ * @param adapter Die Instanz des ioBroker-Adapters (this)
+ * @param rawValues Die rohen Werte aus der Luxtronik
+ * @param rawParams Zusätzliche Parameter aus der Luxtronik zur Berechnung des Status
+ */
+export async function updateStatusStrings(adapter: any, rawValues: number[], rawParams: number[]): Promise<void> {
+	try {
+		// --- 1. Indizes aus dem Mapping dynamisch abrufen ---
+		const Heizgrenze = (rawParams[getLuxIdByKey('thresholdHeatingLimit')] || 0) / 10;
+		const Absenkung = (rawParams[getLuxIdByKey('deltaHeatingReduction')] || 0) / 10;
+		const AbsenkungMax = (rawParams[getLuxIdByKey('thresholdTemperatureSetBack')] || 0) / 10;
+		const RücklaufSollMin = (rawParams[getLuxIdByKey('returnTemperatureTargetMin')] || 15) / 10;
+		const RücklaufSoll = (rawValues[getLuxIdByKey('temperature_target_return')] || 15) / 10;
+		const BetriebsartHeizung = rawParams[getLuxIdByKey('heating_operation_mode')] || 0;
+		const Außentemperatur = (rawValues[getLuxIdByKey('temperature_outside')] || 0) / 10;
+		const Mitteltemperatur = (rawValues[getLuxIdByKey('Mitteltemperatur')] || 0) / 10;
+
+		let heatingStr = 'Unbekannt';
+
+		if (
+			BetriebsartHeizung === 0 &&
+			Mitteltemperatur >= Heizgrenze &&
+			(RücklaufSoll === RücklaufSollMin || (RücklaufSoll === 20 && Außentemperatur < 10))
+		) {
+			heatingStr = Außentemperatur >= 10 ? `Heizgrenze (Soll ${RücklaufSollMin} °C)` : 'Frostschutz (Soll 20 °C)';
+		} else {
+			heatingStr = STATE_HEATING[BetriebsartHeizung] || `unbekannt (${BetriebsartHeizung})`;
+			if (BetriebsartHeizung === 0) {
+				heatingStr =
+					AbsenkungMax <= Außentemperatur
+						? `${heatingStr} ${Absenkung} °C`
+						: `Normal da < ${AbsenkungMax} °C`;
+			}
+		}
+
+		const dpHeating = getDpPath('opStateHeatingString');
+		if (dpHeating) {
+			await adapter.setStateAsync(dpHeating, { val: heatingStr, ack: true });
+		}
+
+		// --- 2. Werte vorbereiten ---
+		const codeZ1 = rawValues[117];
+		const codeZ2 = rawValues[118];
+		const codeZ3 = rawValues[119];
+		const zeitSec = rawValues[120];
+
+		const hotWaterBoilerValve = rawValues[getLuxIdByKey('hotWaterBoilerValve')] || 0;
+		const opStateHotWaterOriginal = rawValues[124];
+
+		// Zeit formatieren
+		const h = Math.floor((zeitSec || 0) / 3600);
+		const m = Math.floor(((zeitSec || 0) % 3600) / 60);
+		const s = (zeitSec || 0) % 60;
+		const zeitString = `${h < 10 ? '0' : ''}${h}:${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+
+		const stateStr = STATE_ZEILE_3[codeZ3] || 'Unbekannt';
+		const dpExtState = getDpPath('heatpump_extendet_state_string');
+		if (dpExtState) {
+			await adapter.setStateAsync(dpExtState, { val: stateStr, ack: true });
+		}
+
+		let extStateStr = 'Unbekannt';
+		if (STATE_ZEILE_1[codeZ1]) {
+			const textZ2 = STATE_ZEILE_2[codeZ2] || '';
+			extStateStr = `${STATE_ZEILE_1[codeZ1]} ${textZ2} ${zeitString}`.trim();
+		}
+		const dpState = getDpPath('heatpump_state_string');
+		if (dpState) {
+			await adapter.setStateAsync(dpState, { val: extStateStr, ack: true });
+		}
+
+		let hotWaterStr = 'Unbekannt';
+		if (opStateHotWaterOriginal === 0) {
+			hotWaterStr = 'Sperrzeit';
+		} else if (opStateHotWaterOriginal === 1 && hotWaterBoilerValve === 1) {
+			hotWaterStr = 'Aufheizen';
+		} else if (opStateHotWaterOriginal === 1 && hotWaterBoilerValve === 0) {
+			hotWaterStr = 'Temp. OK';
+		} else if (opStateHotWaterOriginal === 3) {
+			hotWaterStr = 'Aus';
+		} else {
+			hotWaterStr = `Unknown [${opStateHotWaterOriginal}/${hotWaterBoilerValve}]`;
+		}
+		const dpHotWater = getDpPath('opStateHotWaterString');
+		if (dpHotWater) {
+			await adapter.setStateAsync(dpHotWater, { val: hotWaterStr, ack: true });
+		}
+	} catch (err: any) {
+		writeLog(`Fehler beim Aktualisieren der Status-Strings: ${err.message}`, 'error');
+	}
+}
+
+/**
+ * Liest die einzelnen Start/Ende Zeiten aus den Einstellungen
+ * und erzeugt ein formatiertes JSON-Array für die Informationstabellen.
+ *
+ * @param adapter Der ioBroker-Adapter zur Kommunikation mit den Datenpunkten.
+ */
+export async function updateTimerTables(adapter: any): Promise<void> {
+	try {
+		// 1. Hilfsfunktion: Holt die Zeit und formatiert sie sicher als "HH:mm"
+		const getTime = async (key: string): Promise<string> => {
+			try {
+				const dpPath = getDpPath(key);
+				if (!dpPath) {
+					return '00:00';
+				}
+
+				const state = await adapter.getStateAsync(dpPath);
+				if (state && typeof state.val === 'string') {
+					// Fängt "09:00", "9:00" oder unsaubere Strings auf
+					const match = state.val.match(/^(\d{1,2}):(\d{1,2})/);
+					if (match) {
+						return `${match[1].padStart(2, '0')}:${match[2].padStart(2, '0')}`;
+					}
+				}
+				return '00:00';
+			} catch {
+				return '00:00';
+			}
+		};
+
+		// 2. Hilfsfunktion: Baut das JSON für eine spezifische Tabelle zusammen
+		const processTable = async (
+			targetKey: string,
+			prefix: string,
+			endStr: string,
+			slots: number,
+		): Promise<void> => {
+			try {
+				const table: { on: string; off: string }[] = [];
+
+				for (let i = 1; i <= slots; i++) {
+					const [onTime, offTime] = await Promise.all([
+						getTime(`${prefix}Start${i}`),
+						getTime(`${prefix}${endStr}${i}`),
+					]);
+					table.push({ on: onTime, off: offTime });
+				}
+
+				// Nur schreiben, wenn es das Ziel im Mapping gibt
+				const targetPath = getDpPath(targetKey);
+				if (targetPath) {
+					// Das ", null, 2" formatiert das JSON exakt so schön wie in deinem Beispiel
+					const jsonStr = JSON.stringify(table, null, 2);
+					const current = await adapter.getStateAsync(targetPath);
+
+					// Nur in ioBroker schreiben, wenn sich wirklich was geändert hat
+					if (!current || current.val !== jsonStr) {
+						await adapter.setStateAsync(targetPath, { val: jsonStr, ack: true });
+					}
+				}
+			} catch {
+				// Ignorieren, falls ein Ziel (z.B. Zirkulation) noch nicht existiert
+			}
+		};
+
+		// 3. Konfiguration der Zuordnungen (Ziel-DP, Präfix, Suffix, Slot-Anzahl)
+		const configs = [
+			// === HEIZEN (3 Slots) ===
+			{ target: 'heatingOperationTimerTableWeek', prefix: 'HZ_MoSo_', end: 'End', slots: 3 },
+			{ target: 'heatingOperationTimerTable52MonFri', prefix: 'HZ_MoFr_', end: 'Ende', slots: 3 },
+			{ target: 'heatingOperationTimerTable52SatSun', prefix: 'HZ_SaSo_', end: 'Ende', slots: 3 },
+			{ target: 'heatingOperationTimerTableDayMonday', prefix: 'HZ_Montag_', end: 'Ende', slots: 3 },
+			{ target: 'heatingOperationTimerTableDayTuesday', prefix: 'HZ_Dienstag_', end: 'Ende', slots: 3 },
+			{ target: 'heatingOperationTimerTableDayWednesday', prefix: 'HZ_Mittwoch_', end: 'Ende', slots: 3 },
+			{ target: 'heatingOperationTimerTableDayThursday', prefix: 'HZ_Donnerstag_', end: 'Ende', slots: 3 },
+			{ target: 'heatingOperationTimerTableDayFriday', prefix: 'HZ_Freitag_', end: 'Ende', slots: 3 },
+			{ target: 'heatingOperationTimerTableDaySaturday', prefix: 'HZ_Samstag_', end: 'Ende', slots: 3 },
+			{ target: 'heatingOperationTimerTableDaySunday', prefix: 'HZ_Sonntag_', end: 'Ende', slots: 3 },
+
+			// === WARMWASSER (5 Slots) ===
+			{ target: 'hotWaterTableWeek', prefix: 'WW_MoSo_', end: 'End', slots: 5 },
+			{ target: 'hotWaterTable52MonFri', prefix: 'WW_MoFr_', end: 'Ende', slots: 5 },
+			{ target: 'hotWaterTable52SatSun', prefix: 'WW_SaSo_', end: 'Ende', slots: 5 },
+			{ target: 'hotWaterTableDayMonday', prefix: 'WW_Montag_', end: 'Ende', slots: 5 },
+			{ target: 'hotWaterTableDayTuesday', prefix: 'WW_Dienstag_', end: 'Ende', slots: 5 },
+			{ target: 'hotWaterTableDayWednesday', prefix: 'WW_Mittwoch_', end: 'Ende', slots: 5 },
+			{ target: 'hotWaterTableDayThursday', prefix: 'WW_Donnerstag_', end: 'Ende', slots: 5 },
+			{ target: 'hotWaterTableDayFriday', prefix: 'WW_Freitag_', end: 'Ende', slots: 5 },
+			{ target: 'hotWaterTableDaySaturday', prefix: 'WW_Samstag_', end: 'Ende', slots: 5 },
+			{ target: 'hotWaterTableDaySunday', prefix: 'WW_Sonntag_', end: 'Ende', slots: 5 },
+
+			// === ZIRKULATION (5 Slots) ===
+			// Hypothetische Ziel-Keys (Sobald du diese ins Mapping einträgst, läuft es automatisch mit)
+			{ target: 'hotWaterCircPumpTimerTableWeek', prefix: 'Zirkulation_MoSo_', end: 'End', slots: 5 },
+			{ target: 'hotWaterCircPumpTimerTable52MonFri', prefix: 'Zirkulation_MoFr_', end: 'Ende', slots: 5 },
+			{ target: 'hotWaterCircPumpTimerTable52SatSun', prefix: 'Zirkulation_SaSo_', end: 'Ende', slots: 5 },
+			{ target: 'hotWaterCircPumpTimerTableDayMonday', prefix: 'Zirkulation_Montag_', end: 'Ende', slots: 5 },
+			{ target: 'hotWaterCircPumpTimerTableDayTuesday', prefix: 'Zirkulation_Dienstag_', end: 'Ende', slots: 5 },
+			{
+				target: 'hotWaterCircPumpTimerTableDayWednesday',
+				prefix: 'Zirkulation_Mittwoch_',
+				end: 'Ende',
+				slots: 5,
+			},
+			{
+				target: 'hotWaterCircPumpTimerTableDayThursday',
+				prefix: 'Zirkulation_Donnerstag_',
+				end: 'Ende',
+				slots: 5,
+			},
+			{ target: 'hotWaterCircPumpTimerTableDayFriday', prefix: 'Zirkulation_Freitag_', end: 'Ende', slots: 5 },
+			{ target: 'hotWaterCircPumpTimerTableDaySaturday', prefix: 'Zirkulation_Samstag_', end: 'Ende', slots: 5 },
+			{ target: 'hotWaterCircPumpTimerTableDaySunday', prefix: 'Zirkulation_Sonntag_', end: 'Ende', slots: 5 },
+		];
+
+		// Führe die Generierung für alle Tabellen parallel oder nacheinander aus
+		for (const cfg of configs) {
+			await processTable(cfg.target, cfg.prefix, cfg.end, cfg.slots);
+		}
+	} catch (err: any) {
+		writeLog(`Fehler beim Erstellen der JSON-Timer-Tabellen: ${err.message}`, 'error');
+	}
+}
+/**
+ * Aktualisiert benutzerdefinierte Datenpunkte aus der dynamischen JSON-Tabelle.
+ *
+ * @param adapter Adapter-Instanz des ioBroker-Adapters, verwendet zum Lesen/Schreiben von States (z.B. adapter.getForeignStateAsync/adapter.setForeignStateAsync)
+ * @param rawValues Array mit rohen Datenwerten (z.B. aus den Messwerten)
+ * @param rawParams Array mit rohen Parameterwerten (z.B. aus den Luxtronik-Parametern)
+ */
+export async function updateCustomStates(adapter: any, rawValues: number[], rawParams: number[]): Promise<void> {
+	try {
+		const customStates = adapter.config.custom_states || [];
+		for (const custom of customStates) {
+			if (!custom.active || custom.luxId === undefined || !custom.name) {
+				continue;
+			}
+
+			const rawArray = custom.source === 'parameter' ? rawParams : rawValues;
+			const rawVal = rawArray[custom.luxId];
+
+			if (rawVal === undefined) {
+				continue;
+			}
+
+			let finalVal: any = rawVal;
+
+			// Typ-Konvertierung und Faktor-Verrechnung
+			// Typ-Konvertierung und Faktor-Verrechnung
+			if (custom.type === 'number') {
+				finalVal = Number(rawVal);
+				if (custom.factor !== undefined && custom.factor !== null) {
+					finalVal = finalVal * custom.factor;
+					finalVal = Math.round(finalVal * 10000) / 10000;
+				}
+			} else if (custom.type === 'boolean') {
+				finalVal = rawVal === 1 || String(rawVal).toLowerCase() === 'true';
+			} else if (custom.type === 'datetime') {
+				// NEU: Unix Timestamp in ein lesbares Datum umwandeln
+				const ts = Number(rawVal);
+				if (!isNaN(ts) && ts > 0) {
+					// x 1000, da JavaScript Millisekunden erwartet
+					finalVal = new Date(ts * 1000).toLocaleString('de-DE');
+				} else {
+					finalVal = 'Ungültig';
+				}
+			} else {
+				finalVal = String(rawVal);
+			}
+
+			// Gleiche Säuberungsfunktion für die ID wie in main.ts
+			const cleanId = custom.name
+				.replace(/ä/g, 'ae')
+				.replace(/ö/g, 'oe')
+				.replace(/ü/g, 'ue')
+				.replace(/Ä/g, 'Ae')
+				.replace(/Ö/g, 'Oe')
+				.replace(/Ü/g, 'Ue')
+				.replace(/ß/g, 'ss')
+				.replace(/[^a-zA-Z0-9_]/g, '_')
+				.replace(/_+/g, '_')
+				.replace(/^_|_$/g, '');
+
+			const stateId = `${adapter.namespace}.Benutzer.${cleanId}`;
+
+			// Nur schreiben, wenn Wert sich geändert hat
+			const current = await adapter.getForeignStateAsync(stateId);
+			if (!current || current.val !== finalVal) {
+				await adapter.setForeignStateAsync(stateId, { val: finalVal, ack: true });
+			}
+		}
+	} catch (err: any) {
+		writeLog(`Fehler beim Aktualisieren der benutzerdefinierten Werte: ${err.message}`, 'error');
 	}
 }

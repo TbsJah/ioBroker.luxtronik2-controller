@@ -29,7 +29,8 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 var rawFunctions_exports = {};
 __export(rawFunctions_exports, {
   dumpAllRawToLog: () => dumpAllRawToLog,
-  readAllRaw: () => readAllRaw
+  readAllRaw: () => readAllRaw,
+  writeRawParameter: () => writeRawParameter
 });
 module.exports = __toCommonJS(rawFunctions_exports);
 var net = __toESM(require("net"));
@@ -131,9 +132,52 @@ async function dumpAllRawToLog(adapter) {
     (0, import_logger.writeLog)(`Fehler beim Ausf\xFChren des Raw-Dumps: ${err.message}`, "error");
   }
 }
+function writeRawParameter(adapter, paramId, value) {
+  return new Promise((resolve, reject) => {
+    let finished = false;
+    const client = new net.Socket();
+    const host = adapter.config.host || "127.0.0.1";
+    const port = adapter.config.port ? Number(adapter.config.port) : 8889;
+    client.connect(port, host, () => {
+      const buffer = Buffer.alloc(12);
+      buffer.writeInt32BE(3002, 0);
+      buffer.writeInt32BE(paramId, 4);
+      buffer.writeInt32BE(value, 8);
+      client.write(buffer);
+    });
+    client.on("data", (chunk) => {
+      if (chunk.length >= 4) {
+        const responseCommand = chunk.readInt32BE(0);
+        if (responseCommand === 3002) {
+          client.destroy();
+          if (!finished) {
+            finished = true;
+            resolve();
+          }
+        }
+      }
+    });
+    client.on("error", (err) => {
+      client.destroy();
+      if (!finished) {
+        finished = true;
+        reject(err);
+      }
+    });
+    client.setTimeout(5e3);
+    client.on("timeout", () => {
+      client.destroy();
+      if (!finished) {
+        finished = true;
+        reject(new Error(`Timeout beim Schreiben von Parameter ${paramId}.`));
+      }
+    });
+  });
+}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   dumpAllRawToLog,
-  readAllRaw
+  readAllRaw,
+  writeRawParameter
 });
 //# sourceMappingURL=rawFunctions.js.map

@@ -19,7 +19,8 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 var stateMapping_exports = {};
 __export(stateMapping_exports, {
   STATE_MAPPING: () => STATE_MAPPING,
-  getDpPath: () => getDpPath
+  getDpPath: () => getDpPath,
+  getLuxIdByKey: () => getLuxIdByKey
 });
 module.exports = __toCommonJS(stateMapping_exports);
 const STATE_MAPPING = {
@@ -97,16 +98,6 @@ const STATE_MAPPING = {
     write: false,
     luxWriteId: "16",
     unit: "\xB0C",
-    factor: 10,
-    dataSource: "raw_value"
-  },
-  temperature_hot_water: {
-    folder: "Informationen.01_Temperaturen",
-    name: "Warmwassertemperatur",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C",
-    luxWriteId: "17",
     factor: 10,
     dataSource: "raw_value"
   },
@@ -247,7 +238,8 @@ const STATE_MAPPING = {
     type: "number",
     unit: "V",
     luxWriteId: "147",
-    dataSource: "raw_value"
+    dataSource: "raw_value",
+    factor: 100
   },
   NDin_pressure: {
     folder: "Informationen.02_Eingaenge",
@@ -394,9 +386,10 @@ const STATE_MAPPING = {
   },
   heatingSystemCircPump: {
     folder: "Informationen.03_Ausgaenge",
-    name: "Heizungssystem Zirkulationspumpe Laufindikator",
-    role: "indicator",
-    type: "boolean",
+    name: "Heizungsumw\xE4lzpumpe",
+    role: "value",
+    type: "number",
+    states: { 0: "Aus", 1: "Ein" },
     luxWriteId: "39",
     dataSource: "raw_value"
   },
@@ -431,8 +424,8 @@ const STATE_MAPPING = {
   Time_WPein_akt: {
     folder: "Informationen.04_Timer",
     name: "Aktuelle Einschaltzeit W\xE4rmepumpe",
-    role: "value",
-    type: "number",
+    role: "value.time",
+    type: "string",
     unit: "s",
     luxWriteId: "67",
     dataSource: "raw_value"
@@ -440,8 +433,8 @@ const STATE_MAPPING = {
   Time_ZWE1_akt: {
     folder: "Informationen.04_Timer",
     name: "Aktuelle Laufzeit ZWE1",
-    role: "value",
-    type: "number",
+    role: "value.time",
+    type: "string",
     unit: "s",
     luxWriteId: "68",
     dataSource: "raw_value"
@@ -449,8 +442,8 @@ const STATE_MAPPING = {
   Timer_EinschVerz: {
     folder: "Informationen.04_Timer",
     name: "Einschaltverz\xF6gerung Restzeit",
-    role: "value",
-    type: "number",
+    role: "value.time",
+    type: "string",
     unit: "s",
     luxWriteId: "70",
     dataSource: "raw_value"
@@ -458,8 +451,8 @@ const STATE_MAPPING = {
   Time_SSPAUS_akt: {
     folder: "Informationen.04_Timer",
     name: "Aktuelle Sperrzeit AUS",
-    role: "value",
-    type: "number",
+    role: "value.time",
+    type: "string",
     unit: "s",
     luxWriteId: "71",
     dataSource: "raw_value"
@@ -467,8 +460,8 @@ const STATE_MAPPING = {
   Time_SSPEIN_akt: {
     folder: "Informationen.04_Timer",
     name: "Aktuelle Sperrzeit EIN",
-    role: "value",
-    type: "number",
+    role: "value.time",
+    type: "string",
     unit: "s",
     luxWriteId: "72",
     dataSource: "raw_value"
@@ -476,8 +469,8 @@ const STATE_MAPPING = {
   Time_VDStd_akt: {
     folder: "Informationen.04_Timer",
     name: "Aktuelle Standzeit Verdichter",
-    role: "value",
-    type: "number",
+    role: "value.time",
+    type: "string",
     unit: "s",
     luxWriteId: "73",
     dataSource: "raw_value"
@@ -485,8 +478,8 @@ const STATE_MAPPING = {
   Time_HRM_akt: {
     folder: "Informationen.04_Timer",
     name: "Aktuelle Zeit HRM",
-    role: "value",
-    type: "number",
+    role: "value.time",
+    type: "string",
     unit: "s",
     luxWriteId: "74",
     dataSource: "raw_value"
@@ -494,8 +487,8 @@ const STATE_MAPPING = {
   Time_HRW_akt: {
     folder: "Informationen.04_Timer",
     name: "Aktuelle Zeit HRW",
-    role: "value",
-    type: "number",
+    role: "value.time",
+    type: "string",
     unit: "s",
     luxWriteId: "75",
     dataSource: "raw_value"
@@ -503,8 +496,8 @@ const STATE_MAPPING = {
   Time_Heissgas: {
     folder: "Informationen.04_Timer",
     name: "Zeit Hei\xDFgas\xFCberwachung",
-    role: "value",
-    type: "number",
+    role: "value.time",
+    type: "string",
     unit: "s",
     luxWriteId: "158",
     dataSource: "raw_value"
@@ -512,8 +505,8 @@ const STATE_MAPPING = {
   ahp_Zeit: {
     folder: "Informationen.04_Timer",
     name: "Zeit ahp-Stufe",
-    role: "value",
-    type: "number",
+    role: "value.time",
+    type: "string",
     unit: "s",
     luxWriteId: "123",
     dataSource: "raw_value"
@@ -662,7 +655,7 @@ const STATE_MAPPING = {
     folder: "Informationen.08_Betriebszustand",
     name: "Dauer aktueller Zustand",
     role: "value",
-    type: "number",
+    type: "string",
     unit: "s",
     luxWriteId: "120",
     dataSource: "raw_value"
@@ -831,72 +824,142 @@ const STATE_MAPPING = {
     type: "json",
     dataSource: "parameter"
   },
-  hotWaterCircPumpTimerTable52MonFri: {
+  hotWaterTable52MonFri: {
     folder: "Informationen.11_Tabellen.Warmwasser",
     name: "Warmwasserbetrieb Timer Tabelle Mo-Fr (5+2)",
     role: "string",
     type: "json",
     dataSource: "parameter"
   },
-  hotWaterCircPumpTimerTable52SatSun: {
+  hotWaterTable52SatSun: {
     folder: "Informationen.11_Tabellen.Warmwasser",
     name: "Warmwasserbetrieb Timer Tabelle Sa-So (5+2)",
     role: "string",
     type: "json",
     dataSource: "parameter"
   },
-  hotWaterCircPumpTimerTableDayFriday: {
+  hotWaterTableDayFriday: {
     folder: "Informationen.11_Tabellen.Warmwasser",
     name: "Warmwasserbetrieb Timer Tabelle Fr (Day Friday)",
     role: "string",
     type: "json",
     dataSource: "parameter"
   },
-  hotWaterCircPumpTimerTableDayMonday: {
+  hotWaterTableDayMonday: {
     folder: "Informationen.11_Tabellen.Warmwasser",
     name: "Warmwasserbetrieb Timer Tabelle Mo (Day Monday)",
     role: "string",
     type: "json",
     dataSource: "parameter"
   },
-  hotWaterCircPumpTimerTableDaySaturday: {
+  hotWaterTableDaySaturday: {
     folder: "Informationen.11_Tabellen.Warmwasser",
     name: "Warmwasserbetrieb Timer Tabelle Sa (Day Saturday)",
     role: "string",
     type: "json",
     dataSource: "parameter"
   },
-  hotWaterCircPumpTimerTableDaySunday: {
+  hotWaterTableDaySunday: {
     folder: "Informationen.11_Tabellen.Warmwasser",
     name: "Warmwasserbetrieb Timer Tabelle So (Day Sunday)",
     role: "string",
     type: "json",
     dataSource: "parameter"
   },
-  hotWaterCircPumpTimerTableDayThursday: {
+  hotWaterTableDayThursday: {
     folder: "Informationen.11_Tabellen.Warmwasser",
     name: "Warmwasserbetrieb Timer Tabelle Do (Day Thursday)",
     role: "string",
     type: "json",
     dataSource: "parameter"
   },
-  hotWaterCircPumpTimerTableDayTuesday: {
+  hotWaterTableDayTuesday: {
     folder: "Informationen.11_Tabellen.Warmwasser",
     name: "Warmwasserbetrieb Timer Tabelle Di (Day Tuesday)",
     role: "string",
     type: "json",
     dataSource: "parameter"
   },
-  hotWaterCircPumpTimerTableDayWednesday: {
+  hotWaterTableDayWednesday: {
     folder: "Informationen.11_Tabellen.Warmwasser",
     name: "Warmwasserbetrieb Timer Tabelle Mi (Day Wednesday)",
     role: "string",
     type: "json",
     dataSource: "parameter"
   },
-  hotWaterCircPumpTimerTableWeek: {
+  hotWaterTableWeek: {
     folder: "Informationen.11_Tabellen.Warmwasser",
     name: "Warmwasserbetrieb Timer Tabelle Wo (Day Week)",
+    role: "string",
+    type: "json",
+    dataSource: "parameter"
+  },
+  hotWaterCircPumpTimerTable52MonFri: {
+    folder: "Informationen.11_Tabellen.Zirkulation",
+    name: "Zirkulationsbetrieb Timer Tabelle Mo-Fr (5+2)",
+    role: "string",
+    type: "json",
+    dataSource: "parameter"
+  },
+  hotWaterCircPumpTimerTable52SatSun: {
+    folder: "Informationen.11_Tabellen.Zirkulation",
+    name: "Zirkulationsbetrieb Timer Tabelle Sa-So (5+2)",
+    role: "string",
+    type: "json",
+    dataSource: "parameter"
+  },
+  hotWaterCircPumpTimerTableDayFriday: {
+    folder: "Informationen.11_Tabellen.Zirkulation",
+    name: "Zirkulationsbetrieb Timer Tabelle Fr (Day Friday)",
+    role: "string",
+    type: "json",
+    dataSource: "parameter"
+  },
+  hotWaterCircPumpTimerTableDayMonday: {
+    folder: "Informationen.11_Tabellen.Zirkulation",
+    name: "Zirkulationsbetrieb Timer Tabelle Mo (Day Monday)",
+    role: "string",
+    type: "json",
+    dataSource: "parameter"
+  },
+  hotWaterCircPumpTimerTableDaySaturday: {
+    folder: "Informationen.11_Tabellen.Zirkulation",
+    name: "Zirkulationsbetrieb Timer Tabelle Sa (Day Saturday)",
+    role: "string",
+    type: "json",
+    dataSource: "parameter"
+  },
+  hotWaterCircPumpTimerTableDaySunday: {
+    folder: "Informationen.11_Tabellen.Zirkulation",
+    name: "Zirkulationsbetrieb Timer Tabelle So (Day Sunday)",
+    role: "string",
+    type: "json",
+    dataSource: "parameter"
+  },
+  hotWaterCircPumpTimerTableDayThursday: {
+    folder: "Informationen.11_Tabellen.Zirkulation",
+    name: "Zirkulationsbetrieb Timer Tabelle Do (Day Thursday)",
+    role: "string",
+    type: "json",
+    dataSource: "parameter"
+  },
+  hotWaterCircPumpTimerTableDayTuesday: {
+    folder: "Informationen.11_Tabellen.Zirkulation",
+    name: "Zirkulationsbetrieb Timer Tabelle Di (Day Tuesday)",
+    role: "string",
+    type: "json",
+    dataSource: "parameter"
+  },
+  hotWaterCircPumpTimerTableDayWednesday: {
+    folder: "Informationen.11_Tabellen.Zirkulation",
+    name: "Zirkulationsbetrieb Timer Tabelle Mi (Day Wednesday)",
+    role: "string",
+    type: "json",
+    dataSource: "parameter"
+  },
+  hotWaterCircPumpTimerTableWeek: {
+    folder: "Informationen.11_Tabellen.Zirkulation",
+    name: "Zirkulationsbetrieb Timer Tabelle Wo (Day Week)",
     role: "string",
     type: "json",
     dataSource: "parameter"
@@ -1088,6 +1151,20 @@ const STATE_MAPPING = {
     dataSource: "raw_parameter",
     required: true
   },
+  temperature_hot_water_target: {
+    folder: "Einstellungen.03_Warmwasser",
+    name: "Warmwasser Soll-Temperatur",
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C",
+    write: true,
+    luxWriteId: "105",
+    factor: 10,
+    min: 30,
+    max: 65,
+    dataSource: "raw_parameter",
+    required: true
+  },
   hotWaterTemperatureHysteresis: {
     folder: "Einstellungen.03_Warmwasser",
     name: "Warmwasser Hysterese",
@@ -1156,7 +1233,7 @@ const STATE_MAPPING = {
   },
   Activate_Zip: {
     folder: "Einstellungen.05_ZIP",
-    name: "Makro: ZIP Entl\xFCftung starten",
+    name: "Makro: ZIP starten",
     role: "switch",
     type: "boolean",
     write: true,
@@ -1222,6 +1299,112 @@ const STATE_MAPPING = {
     unit: "min",
     factor: 1
   },
+  temperature_supply_limit: {
+    folder: "Einstellungen.06_System-Einstellung",
+    name: "Vorlauftemperatur Maximum",
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C",
+    luxWriteId: "149",
+    factor: 10,
+    dataSource: "raw_parameter",
+    required: true,
+    write: true
+  },
+  temperature_return_limit: {
+    folder: "Einstellungen.06_System-Einstellung",
+    name: "R\xFCcklauftemperatur Soll Minimum",
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C",
+    luxWriteId: "87",
+    factor: 10,
+    dataSource: "raw_parameter",
+    required: true,
+    max: 75,
+    min: 35,
+    write: true
+  },
+  temperature_outdoor_max: {
+    folder: "Einstellungen.06_System-Einstellung",
+    name: "TAussen max",
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C",
+    luxWriteId: "91",
+    factor: 10,
+    dataSource: "raw_parameter",
+    required: true,
+    max: 45,
+    min: 20,
+    write: true
+  },
+  temperature_outdoor_min: {
+    folder: "Einstellungen.06_System-Einstellung",
+    name: "TAussen min",
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C",
+    luxWriteId: "92",
+    factor: 10,
+    dataSource: "raw_parameter",
+    required: true,
+    max: 10,
+    min: -20,
+    write: true
+  },
+  temperature_ZWE_possible: {
+    folder: "Einstellungen.06_System-Einstellung",
+    name: "Freig. ZWE",
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C",
+    luxWriteId: "90",
+    factor: 10,
+    dataSource: "raw_parameter",
+    write: true,
+    min: -20,
+    max: 20
+  },
+  temperature_hot_water_limit: {
+    folder: "Einstellungen.06_System-Einstellung",
+    name: "Max.Warmwassertemp.",
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C",
+    luxWriteId: "47",
+    factor: 10,
+    dataSource: "raw_parameter",
+    write: true,
+    min: 30,
+    max: 65
+  },
+  thresholdTemperatureSetBack: {
+    folder: "Einstellungen.06_System-Einstellung",
+    name: "Absenk. bis",
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C",
+    luxWriteId: "111",
+    factor: 10,
+    dataSource: "raw_parameter",
+    write: true,
+    min: -20,
+    max: 10
+  },
+  returnTemperatureTargetMin: {
+    folder: "Einstellungen.06_System-Einstellung",
+    name: "Min. R\xFCckl.Solltemp.",
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C",
+    luxWriteId: "979",
+    factor: 10,
+    dataSource: "raw_parameter",
+    write: true,
+    min: 15,
+    max: 30
+  },
   // Timer Tables Selection
   heatingOperationTimerTableSelected: {
     folder: "Einstellungen.07_Tabellen",
@@ -1234,10 +1417,20 @@ const STATE_MAPPING = {
   },
   hotWaterCircPumpTimerTableSelected: {
     folder: "Einstellungen.07_Tabellen",
-    name: "Aktuell ausgew\xE4hlte Tabelle Warmwasserbetrieb Timer",
+    name: "Aktuell ausgew\xE4hlte Tabelle Zirkulationsbetrieb Timer",
     role: "value",
     type: "number",
     luxWriteId: "506",
+    dataSource: "raw_parameter",
+    states: { 0: "Woche (Mo-So)", 1: "5+2 (Mo-Fr, Sa-So)", 2: "Tage (Mo, Di, ...)" },
+    required: true
+  },
+  hotWaterOperationTimerTableSelected: {
+    folder: "Einstellungen.07_Tabellen",
+    name: "Aktuell ausgew\xE4hlte Tabelle Warmwasserbetrieb Timer",
+    role: "value",
+    type: "number",
+    luxWriteId: "405",
     dataSource: "raw_parameter",
     states: { 0: "Woche (Mo-So)", 1: "5+2 (Mo-Fr, Sa-So)", 2: "Tage (Mo, Di, ...)" },
     required: true
@@ -1903,7 +2096,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "517",
+    luxWriteId: "416",
     write: true
   },
   WW_MoFr_Ende1: {
@@ -1912,7 +2105,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "518",
+    luxWriteId: "417",
     write: true
   },
   WW_MoFr_Start2: {
@@ -1921,7 +2114,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "519",
+    luxWriteId: "418",
     write: true
   },
   WW_MoFr_Ende2: {
@@ -1930,7 +2123,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "520",
+    luxWriteId: "419",
     write: true
   },
   WW_MoFr_Start3: {
@@ -1939,7 +2132,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "521",
+    luxWriteId: "420",
     write: true
   },
   WW_MoFr_Ende3: {
@@ -1948,7 +2141,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "522",
+    luxWriteId: "421",
     write: true
   },
   WW_MoFr_Start4: {
@@ -1957,7 +2150,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "523",
+    luxWriteId: "422",
     write: true
   },
   WW_MoFr_Ende4: {
@@ -1966,7 +2159,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "524",
+    luxWriteId: "423",
     write: true
   },
   WW_MoFr_Start5: {
@@ -1975,7 +2168,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "525",
+    luxWriteId: "424",
     write: true
   },
   WW_MoFr_Ende5: {
@@ -1984,7 +2177,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "526",
+    luxWriteId: "425",
     write: true
   },
   WW_SaSo_Start1: {
@@ -1993,7 +2186,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "527",
+    luxWriteId: "426",
     write: true
   },
   WW_SaSo_Ende1: {
@@ -2002,7 +2195,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "528",
+    luxWriteId: "427",
     write: true
   },
   WW_SaSo_Start2: {
@@ -2011,7 +2204,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "529",
+    luxWriteId: "428",
     write: true
   },
   WW_SaSo_Ende2: {
@@ -2020,7 +2213,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "530",
+    luxWriteId: "429",
     write: true
   },
   WW_SaSo_Start3: {
@@ -2029,7 +2222,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "531",
+    luxWriteId: "430",
     write: true
   },
   WW_SaSo_Ende3: {
@@ -2038,7 +2231,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "532",
+    luxWriteId: "431",
     write: true
   },
   WW_SaSo_Start4: {
@@ -2047,7 +2240,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "533",
+    luxWriteId: "432",
     write: true
   },
   WW_SaSo_Ende4: {
@@ -2056,7 +2249,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "534",
+    luxWriteId: "433",
     write: true
   },
   WW_SaSo_Start5: {
@@ -2065,7 +2258,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "535",
+    luxWriteId: "434",
     write: true
   },
   WW_SaSo_Ende5: {
@@ -2074,7 +2267,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "536",
+    luxWriteId: "435",
     write: true
   },
   // =========================================================
@@ -2086,7 +2279,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "537",
+    luxWriteId: "436",
     write: true
   },
   WW_Sonntag_Ende1: {
@@ -2095,7 +2288,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "538",
+    luxWriteId: "437",
     write: true
   },
   WW_Sonntag_Start2: {
@@ -2104,7 +2297,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "539",
+    luxWriteId: "438",
     write: true
   },
   WW_Sonntag_Ende2: {
@@ -2113,7 +2306,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "540",
+    luxWriteId: "439",
     write: true
   },
   WW_Sonntag_Start3: {
@@ -2122,7 +2315,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "541",
+    luxWriteId: "440",
     write: true
   },
   WW_Sonntag_Ende3: {
@@ -2131,7 +2324,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "542",
+    luxWriteId: "441",
     write: true
   },
   WW_Sonntag_Start4: {
@@ -2140,7 +2333,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "543",
+    luxWriteId: "442",
     write: true
   },
   WW_Sonntag_Ende4: {
@@ -2149,7 +2342,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "544",
+    luxWriteId: "443",
     write: true
   },
   WW_Sonntag_Start5: {
@@ -2158,7 +2351,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "545",
+    luxWriteId: "444",
     write: true
   },
   WW_Sonntag_Ende5: {
@@ -2167,7 +2360,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "546",
+    luxWriteId: "445",
     write: true
   },
   WW_Montag_Start1: {
@@ -2176,7 +2369,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "547",
+    luxWriteId: "446",
     write: true
   },
   WW_Montag_Ende1: {
@@ -2185,7 +2378,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "548",
+    luxWriteId: "447",
     write: true
   },
   WW_Montag_Start2: {
@@ -2194,7 +2387,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "549",
+    luxWriteId: "448",
     write: true
   },
   WW_Montag_Ende2: {
@@ -2203,7 +2396,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "550",
+    luxWriteId: "449",
     write: true
   },
   WW_Montag_Start3: {
@@ -2212,7 +2405,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "551",
+    luxWriteId: "450",
     write: true
   },
   WW_Montag_Ende3: {
@@ -2221,7 +2414,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "552",
+    luxWriteId: "451",
     write: true
   },
   WW_Montag_Start4: {
@@ -2230,7 +2423,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "553",
+    luxWriteId: "452",
     write: true
   },
   WW_Montag_Ende4: {
@@ -2239,7 +2432,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "554",
+    luxWriteId: "453",
     write: true
   },
   WW_Montag_Start5: {
@@ -2248,7 +2441,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "555",
+    luxWriteId: "454",
     write: true
   },
   WW_Montag_Ende5: {
@@ -2257,7 +2450,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "556",
+    luxWriteId: "455",
     write: true
   },
   WW_Dienstag_Start1: {
@@ -2266,7 +2459,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "557",
+    luxWriteId: "456",
     write: true
   },
   WW_Dienstag_Ende1: {
@@ -2275,7 +2468,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "558",
+    luxWriteId: "457",
     write: true
   },
   WW_Dienstag_Start2: {
@@ -2284,7 +2477,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "559",
+    luxWriteId: "458",
     write: true
   },
   WW_Dienstag_Ende2: {
@@ -2293,7 +2486,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "560",
+    luxWriteId: "459",
     write: true
   },
   WW_Dienstag_Start3: {
@@ -2302,7 +2495,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "561",
+    luxWriteId: "460",
     write: true
   },
   WW_Dienstag_Ende3: {
@@ -2311,7 +2504,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "562",
+    luxWriteId: "461",
     write: true
   },
   WW_Dienstag_Start4: {
@@ -2320,7 +2513,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "563",
+    luxWriteId: "462",
     write: true
   },
   WW_Dienstag_Ende4: {
@@ -2329,7 +2522,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "564",
+    luxWriteId: "463",
     write: true
   },
   WW_Dienstag_Start5: {
@@ -2338,7 +2531,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "565",
+    luxWriteId: "464",
     write: true
   },
   WW_Dienstag_Ende5: {
@@ -2347,7 +2540,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "566",
+    luxWriteId: "465",
     write: true
   },
   WW_Mittwoch_Start1: {
@@ -2356,7 +2549,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "567",
+    luxWriteId: "466",
     write: true
   },
   WW_Mittwoch_Ende1: {
@@ -2365,7 +2558,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "568",
+    luxWriteId: "467",
     write: true
   },
   WW_Mittwoch_Start2: {
@@ -2374,7 +2567,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "569",
+    luxWriteId: "468",
     write: true
   },
   WW_Mittwoch_Ende2: {
@@ -2383,7 +2576,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "570",
+    luxWriteId: "469",
     write: true
   },
   WW_Mittwoch_Start3: {
@@ -2392,7 +2585,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "571",
+    luxWriteId: "470",
     write: true
   },
   WW_Mittwoch_Ende3: {
@@ -2401,7 +2594,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "572",
+    luxWriteId: "471",
     write: true
   },
   WW_Mittwoch_Start4: {
@@ -2410,7 +2603,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "573",
+    luxWriteId: "472",
     write: true
   },
   WW_Mittwoch_Ende4: {
@@ -2419,7 +2612,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "574",
+    luxWriteId: "473",
     write: true
   },
   WW_Mittwoch_Start5: {
@@ -2428,7 +2621,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "575",
+    luxWriteId: "474",
     write: true
   },
   WW_Mittwoch_Ende5: {
@@ -2437,7 +2630,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "576",
+    luxWriteId: "475",
     write: true
   },
   WW_Donnerstag_Start1: {
@@ -2446,7 +2639,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "577",
+    luxWriteId: "476",
     write: true
   },
   WW_Donnerstag_Ende1: {
@@ -2455,7 +2648,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "578",
+    luxWriteId: "477",
     write: true
   },
   WW_Donnerstag_Start2: {
@@ -2464,7 +2657,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "579",
+    luxWriteId: "478",
     write: true
   },
   WW_Donnerstag_Ende2: {
@@ -2473,7 +2666,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "580",
+    luxWriteId: "479",
     write: true
   },
   WW_Donnerstag_Start3: {
@@ -2482,7 +2675,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "581",
+    luxWriteId: "480",
     write: true
   },
   WW_Donnerstag_Ende3: {
@@ -2491,7 +2684,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "582",
+    luxWriteId: "481",
     write: true
   },
   WW_Donnerstag_Start4: {
@@ -2500,7 +2693,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "583",
+    luxWriteId: "482",
     write: true
   },
   WW_Donnerstag_Ende4: {
@@ -2509,7 +2702,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "584",
+    luxWriteId: "483",
     write: true
   },
   WW_Donnerstag_Start5: {
@@ -2518,7 +2711,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "585",
+    luxWriteId: "484",
     write: true
   },
   WW_Donnerstag_Ende5: {
@@ -2527,7 +2720,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "586",
+    luxWriteId: "485",
     write: true
   },
   WW_Freitag_Start1: {
@@ -2536,7 +2729,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "587",
+    luxWriteId: "486",
     write: true
   },
   WW_Freitag_Ende1: {
@@ -2545,7 +2738,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "588",
+    luxWriteId: "487",
     write: true
   },
   WW_Freitag_Start2: {
@@ -2554,7 +2747,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "589",
+    luxWriteId: "488",
     write: true
   },
   WW_Freitag_Ende2: {
@@ -2563,7 +2756,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "590",
+    luxWriteId: "489",
     write: true
   },
   WW_Freitag_Start3: {
@@ -2572,7 +2765,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "591",
+    luxWriteId: "490",
     write: true
   },
   WW_Freitag_Ende3: {
@@ -2581,7 +2774,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "592",
+    luxWriteId: "491",
     write: true
   },
   WW_Freitag_Start4: {
@@ -2590,7 +2783,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "593",
+    luxWriteId: "492",
     write: true
   },
   WW_Freitag_Ende4: {
@@ -2599,7 +2792,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "594",
+    luxWriteId: "493",
     write: true
   },
   WW_Freitag_Start5: {
@@ -2608,7 +2801,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "595",
+    luxWriteId: "494",
     write: true
   },
   WW_Freitag_Ende5: {
@@ -2617,7 +2810,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "596",
+    luxWriteId: "495",
     write: true
   },
   WW_Samstag_Start1: {
@@ -2626,7 +2819,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "597",
+    luxWriteId: "496",
     write: true
   },
   WW_Samstag_Ende1: {
@@ -2635,7 +2828,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "598",
+    luxWriteId: "497",
     write: true
   },
   WW_Samstag_Start2: {
@@ -2644,7 +2837,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "599",
+    luxWriteId: "498",
     write: true
   },
   WW_Samstag_Ende2: {
@@ -2653,7 +2846,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "600",
+    luxWriteId: "499",
     write: true
   },
   WW_Samstag_Start3: {
@@ -2662,7 +2855,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "601",
+    luxWriteId: "500",
     write: true
   },
   WW_Samstag_Ende3: {
@@ -2671,7 +2864,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "602",
+    luxWriteId: "501",
     write: true
   },
   WW_Samstag_Start4: {
@@ -2680,7 +2873,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "603",
+    luxWriteId: "502",
     write: true
   },
   WW_Samstag_Ende4: {
@@ -2689,7 +2882,7 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "604",
+    luxWriteId: "503",
     write: true
   },
   WW_Samstag_Start5: {
@@ -2698,12 +2891,931 @@ const STATE_MAPPING = {
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
-    luxWriteId: "605",
+    luxWriteId: "504",
     write: true
   },
   WW_Samstag_Ende5: {
     folder: "Einstellungen.07_Tabellen.Warmwasser.Parameter.Days.Samstag",
     name: "Warmwasser Timer Ende 5 (Sa)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "505",
+    write: true
+  },
+  // =========================================================
+  // Zirkulation TIMER: WOCHE (MO-SO)
+  // =========================================================
+  Zirkulation_MoSo_Start1: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Mo-So",
+    name: "Zirkulation Timer Start 1 (Mo-So)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "507",
+    write: true,
+    required: true
+  },
+  Zirkulation_MoSo_End1: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Mo-So",
+    name: "Zirkulation Timer Ende 1 (Mo-So)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "508",
+    write: true,
+    required: true
+  },
+  Zirkulation_MoSo_Start2: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Mo-So",
+    name: "Zirkulation Timer Start 2 (Mo-So)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "509",
+    write: true,
+    required: true
+  },
+  Zirkulation_MoSo_End2: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Mo-So",
+    name: "Zirkulation Timer Ende 2 (Mo-So)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "510",
+    write: true,
+    required: true
+  },
+  Zirkulation_MoSo_Start3: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Mo-So",
+    name: "Zirkulation Timer Start 3 (Mo-So)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "511",
+    write: true,
+    required: true
+  },
+  Zirkulation_MoSo_End3: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Mo-So",
+    name: "Zirkulation Timer Ende 3 (Mo-So)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "512",
+    write: true,
+    required: true
+  },
+  Zirkulation_MoSo_Start4: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Mo-So",
+    name: "Zirkulation Timer Start 4 (Mo-So)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "513",
+    write: true,
+    required: true
+  },
+  Zirkulation_MoSo_End4: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Mo-So",
+    name: "Zirkulation Timer Ende 4 (Mo-So)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "514",
+    write: true,
+    required: true
+  },
+  Zirkulation_MoSo_Start5: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Mo-So",
+    name: "Zirkulation Timer Start 5 (Mo-So)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "515",
+    write: true,
+    required: true
+  },
+  Zirkulation_MoSo_End5: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Mo-So",
+    name: "Zirkulation Timer Ende 5 (Mo-So)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "516",
+    write: true,
+    required: true
+  },
+  // =========================================================
+  // Zirkulation TIMER: 5+2 (MO-FR & SA-SO)
+  // =========================================================
+  Zirkulation_MoFr_Start1: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.52_MoFr_SaSo",
+    name: "Zirkulation Timer Start 1 (Mo-Fr)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "517",
+    write: true
+  },
+  Zirkulation_MoFr_Ende1: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.52_MoFr_SaSo",
+    name: "Zirkulation Timer Ende 1 (Mo-Fr)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "518",
+    write: true
+  },
+  Zirkulation_MoFr_Start2: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.52_MoFr_SaSo",
+    name: "Zirkulation Timer Start 2 (Mo-Fr)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "519",
+    write: true
+  },
+  Zirkulation_MoFr_Ende2: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.52_MoFr_SaSo",
+    name: "Zirkulation Timer Ende 2 (Mo-Fr)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "520",
+    write: true
+  },
+  Zirkulation_MoFr_Start3: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.52_MoFr_SaSo",
+    name: "Zirkulation Timer Start 3 (Mo-Fr)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "521",
+    write: true
+  },
+  Zirkulation_MoFr_Ende3: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.52_MoFr_SaSo",
+    name: "Zirkulation Timer Ende 3 (Mo-Fr)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "522",
+    write: true
+  },
+  Zirkulation_MoFr_Start4: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.52_MoFr_SaSo",
+    name: "Zirkulation Timer Start 4 (Mo-Fr)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "523",
+    write: true
+  },
+  Zirkulation_MoFr_Ende4: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.52_MoFr_SaSo",
+    name: "Zirkulation Timer Ende 4 (Mo-Fr)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "524",
+    write: true
+  },
+  Zirkulation_MoFr_Start5: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.52_MoFr_SaSo",
+    name: "Zirkulation Timer Start 5 (Mo-Fr)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "525",
+    write: true
+  },
+  Zirkulation_MoFr_Ende5: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.52_MoFr_SaSo",
+    name: "Zirkulation Timer Ende 5 (Mo-Fr)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "526",
+    write: true
+  },
+  Zirkulation_SaSo_Start1: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.52_MoFr_SaSo",
+    name: "Zirkulation Timer Start 1 (Sa-So)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "527",
+    write: true
+  },
+  Zirkulation_SaSo_Ende1: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.52_MoFr_SaSo",
+    name: "Zirkulation Timer Ende 1 (Sa-So)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "528",
+    write: true
+  },
+  Zirkulation_SaSo_Start2: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.52_MoFr_SaSo",
+    name: "Zirkulation Timer Start 2 (Sa-So)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "529",
+    write: true
+  },
+  Zirkulation_SaSo_Ende2: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.52_MoFr_SaSo",
+    name: "Zirkulation Timer Ende 2 (Sa-So)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "530",
+    write: true
+  },
+  Zirkulation_SaSo_Start3: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.52_MoFr_SaSo",
+    name: "Zirkulation Timer Start 3 (Sa-So)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "531",
+    write: true
+  },
+  Zirkulation_SaSo_Ende3: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.52_MoFr_SaSo",
+    name: "Zirkulation Timer Ende 3 (Sa-So)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "532",
+    write: true
+  },
+  Zirkulation_SaSo_Start4: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.52_MoFr_SaSo",
+    name: "Zirkulation Timer Start 4 (Sa-So)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "533",
+    write: true
+  },
+  Zirkulation_SaSo_Ende4: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.52_MoFr_SaSo",
+    name: "Zirkulation Timer Ende 4 (Sa-So)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "534",
+    write: true
+  },
+  Zirkulation_SaSo_Start5: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.52_MoFr_SaSo",
+    name: "Zirkulation Timer Start 5 (Sa-So)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "535",
+    write: true
+  },
+  Zirkulation_SaSo_Ende5: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.52_MoFr_SaSo",
+    name: "Zirkulation Timer Ende 5 (Sa-So)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "536",
+    write: true
+  },
+  // =========================================================
+  // Zirkulation TIMER: EINZELTAGE
+  // =========================================================
+  Zirkulation_Sonntag_Start1: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Sonntag",
+    name: "Zirkulation Timer Start 1 (So)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "537",
+    write: true
+  },
+  Zirkulation_Sonntag_Ende1: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Sonntag",
+    name: "Zirkulation Timer Ende 1 (So)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "538",
+    write: true
+  },
+  Zirkulation_Sonntag_Start2: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Sonntag",
+    name: "Zirkulation Timer Start 2 (So)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "539",
+    write: true
+  },
+  Zirkulation_Sonntag_Ende2: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Sonntag",
+    name: "Zirkulation Timer Ende 2 (So)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "540",
+    write: true
+  },
+  Zirkulation_Sonntag_Start3: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Sonntag",
+    name: "Zirkulation Timer Start 3 (So)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "541",
+    write: true
+  },
+  Zirkulation_Sonntag_Ende3: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Sonntag",
+    name: "Zirkulation Timer Ende 3 (So)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "542",
+    write: true
+  },
+  Zirkulation_Sonntag_Start4: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Sonntag",
+    name: "Zirkulation Timer Start 4 (So)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "543",
+    write: true
+  },
+  Zirkulation_Sonntag_Ende4: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Sonntag",
+    name: "Zirkulation Timer Ende 4 (So)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "544",
+    write: true
+  },
+  Zirkulation_Sonntag_Start5: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Sonntag",
+    name: "Zirkulation Timer Start 5 (So)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "545",
+    write: true
+  },
+  Zirkulation_Sonntag_Ende5: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Sonntag",
+    name: "Zirkulation Timer Ende 5 (So)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "546",
+    write: true
+  },
+  Zirkulation_Montag_Start1: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Montag",
+    name: "Zirkulation Timer Start 1 (Mo)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "547",
+    write: true
+  },
+  Zirkulation_Montag_Ende1: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Montag",
+    name: "Zirkulation Timer Ende 1 (Mo)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "548",
+    write: true
+  },
+  Zirkulation_Montag_Start2: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Montag",
+    name: "Zirkulation Timer Start 2 (Mo)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "549",
+    write: true
+  },
+  Zirkulation_Montag_Ende2: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Montag",
+    name: "Zirkulation Timer Ende 2 (Mo)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "550",
+    write: true
+  },
+  Zirkulation_Montag_Start3: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Montag",
+    name: "Zirkulation Timer Start 3 (Mo)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "551",
+    write: true
+  },
+  Zirkulation_Montag_Ende3: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Montag",
+    name: "Zirkulation Timer Ende 3 (Mo)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "552",
+    write: true
+  },
+  Zirkulation_Montag_Start4: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Montag",
+    name: "Zirkulation Timer Start 4 (Mo)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "553",
+    write: true
+  },
+  Zirkulation_Montag_Ende4: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Montag",
+    name: "Zirkulation Timer Ende 4 (Mo)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "554",
+    write: true
+  },
+  Zirkulation_Montag_Start5: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Montag",
+    name: "Zirkulation Timer Start 5 (Mo)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "555",
+    write: true
+  },
+  Zirkulation_Montag_Ende5: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Montag",
+    name: "Zirkulation Timer Ende 5 (Mo)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "556",
+    write: true
+  },
+  Zirkulation_Dienstag_Start1: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Dienstag",
+    name: "Zirkulation Timer Start 1 (Di)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "557",
+    write: true
+  },
+  Zirkulation_Dienstag_Ende1: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Dienstag",
+    name: "Zirkulation Timer Ende 1 (Di)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "558",
+    write: true
+  },
+  Zirkulation_Dienstag_Start2: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Dienstag",
+    name: "Zirkulation Timer Start 2 (Di)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "559",
+    write: true
+  },
+  Zirkulation_Dienstag_Ende2: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Dienstag",
+    name: "Zirkulation Timer Ende 2 (Di)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "560",
+    write: true
+  },
+  Zirkulation_Dienstag_Start3: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Dienstag",
+    name: "Zirkulation Timer Start 3 (Di)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "561",
+    write: true
+  },
+  Zirkulation_Dienstag_Ende3: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Dienstag",
+    name: "Zirkulation Timer Ende 3 (Di)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "562",
+    write: true
+  },
+  Zirkulation_Dienstag_Start4: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Dienstag",
+    name: "Zirkulation Timer Start 4 (Di)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "563",
+    write: true
+  },
+  Zirkulation_Dienstag_Ende4: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Dienstag",
+    name: "Zirkulation Timer Ende 4 (Di)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "564",
+    write: true
+  },
+  Zirkulation_Dienstag_Start5: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Dienstag",
+    name: "Zirkulation Timer Start 5 (Di)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "565",
+    write: true
+  },
+  Zirkulation_Dienstag_Ende5: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Dienstag",
+    name: "Zirkulation Timer Ende 5 (Di)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "566",
+    write: true
+  },
+  Zirkulation_Mittwoch_Start1: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Mittwoch",
+    name: "Zirkulation Timer Start 1 (Mi)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "567",
+    write: true
+  },
+  Zirkulation_Mittwoch_Ende1: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Mittwoch",
+    name: "Zirkulation Timer Ende 1 (Mi)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "568",
+    write: true
+  },
+  Zirkulation_Mittwoch_Start2: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Mittwoch",
+    name: "Zirkulation Timer Start 2 (Mi)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "569",
+    write: true
+  },
+  Zirkulation_Mittwoch_Ende2: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Mittwoch",
+    name: "Zirkulation Timer Ende 2 (Mi)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "570",
+    write: true
+  },
+  Zirkulation_Mittwoch_Start3: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Mittwoch",
+    name: "Zirkulation Timer Start 3 (Mi)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "571",
+    write: true
+  },
+  Zirkulation_Mittwoch_Ende3: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Mittwoch",
+    name: "Zirkulation Timer Ende 3 (Mi)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "572",
+    write: true
+  },
+  Zirkulation_Mittwoch_Start4: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Mittwoch",
+    name: "Zirkulation Timer Start 4 (Mi)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "573",
+    write: true
+  },
+  Zirkulation_Mittwoch_Ende4: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Mittwoch",
+    name: "Zirkulation Timer Ende 4 (Mi)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "574",
+    write: true
+  },
+  Zirkulation_Mittwoch_Start5: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Mittwoch",
+    name: "Zirkulation Timer Start 5 (Mi)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "575",
+    write: true
+  },
+  Zirkulation_Mittwoch_Ende5: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Mittwoch",
+    name: "Zirkulation Timer Ende 5 (Mi)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "576",
+    write: true
+  },
+  Zirkulation_Donnerstag_Start1: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Donnerstag",
+    name: "Zirkulation Timer Start 1 (Do)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "577",
+    write: true
+  },
+  Zirkulation_Donnerstag_Ende1: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Donnerstag",
+    name: "Zirkulation Timer Ende 1 (Do)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "578",
+    write: true
+  },
+  Zirkulation_Donnerstag_Start2: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Donnerstag",
+    name: "Zirkulation Timer Start 2 (Do)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "579",
+    write: true
+  },
+  Zirkulation_Donnerstag_Ende2: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Donnerstag",
+    name: "Zirkulation Timer Ende 2 (Do)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "580",
+    write: true
+  },
+  Zirkulation_Donnerstag_Start3: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Donnerstag",
+    name: "Zirkulation Timer Start 3 (Do)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "581",
+    write: true
+  },
+  Zirkulation_Donnerstag_Ende3: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Donnerstag",
+    name: "Zirkulation Timer Ende 3 (Do)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "582",
+    write: true
+  },
+  Zirkulation_Donnerstag_Start4: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Donnerstag",
+    name: "Zirkulation Timer Start 4 (Do)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "583",
+    write: true
+  },
+  Zirkulation_Donnerstag_Ende4: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Donnerstag",
+    name: "Zirkulation Timer Ende 4 (Do)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "584",
+    write: true
+  },
+  Zirkulation_Donnerstag_Start5: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Donnerstag",
+    name: "Zirkulation Timer Start 5 (Do)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "585",
+    write: true
+  },
+  Zirkulation_Donnerstag_Ende5: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Donnerstag",
+    name: "Zirkulation Timer Ende 5 (Do)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "586",
+    write: true
+  },
+  Zirkulation_Freitag_Start1: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Freitag",
+    name: "Zirkulation Timer Start 1 (Fr)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "587",
+    write: true
+  },
+  Zirkulation_Freitag_Ende1: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Freitag",
+    name: "Zirkulation Timer Ende 1 (Fr)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "588",
+    write: true
+  },
+  Zirkulation_Freitag_Start2: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Freitag",
+    name: "Zirkulation Timer Start 2 (Fr)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "589",
+    write: true
+  },
+  Zirkulation_Freitag_Ende2: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Freitag",
+    name: "Zirkulation Timer Ende 2 (Fr)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "590",
+    write: true
+  },
+  Zirkulation_Freitag_Start3: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Freitag",
+    name: "Zirkulation Timer Start 3 (Fr)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "591",
+    write: true
+  },
+  Zirkulation_Freitag_Ende3: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Freitag",
+    name: "Zirkulation Timer Ende 3 (Fr)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "592",
+    write: true
+  },
+  Zirkulation_Freitag_Start4: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Freitag",
+    name: "Zirkulation Timer Start 4 (Fr)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "593",
+    write: true
+  },
+  Zirkulation_Freitag_Ende4: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Freitag",
+    name: "Zirkulation Timer Ende 4 (Fr)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "594",
+    write: true
+  },
+  Zirkulation_Freitag_Start5: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Freitag",
+    name: "Zirkulation Timer Start 5 (Fr)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "595",
+    write: true
+  },
+  Zirkulation_Freitag_Ende5: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Freitag",
+    name: "Zirkulation Timer Ende 5 (Fr)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "596",
+    write: true
+  },
+  Zirkulation_Samstag_Start1: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Samstag",
+    name: "Zirkulation Timer Start 1 (Sa)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "597",
+    write: true
+  },
+  Zirkulation_Samstag_Ende1: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Samstag",
+    name: "Zirkulation Timer Ende 1 (Sa)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "598",
+    write: true
+  },
+  Zirkulation_Samstag_Start2: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Samstag",
+    name: "Zirkulation Timer Start 2 (Sa)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "599",
+    write: true
+  },
+  Zirkulation_Samstag_Ende2: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Samstag",
+    name: "Zirkulation Timer Ende 2 (Sa)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "600",
+    write: true
+  },
+  Zirkulation_Samstag_Start3: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Samstag",
+    name: "Zirkulation Timer Start 3 (Sa)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "601",
+    write: true
+  },
+  Zirkulation_Samstag_Ende3: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Samstag",
+    name: "Zirkulation Timer Ende 3 (Sa)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "602",
+    write: true
+  },
+  Zirkulation_Samstag_Start4: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Samstag",
+    name: "Zirkulation Timer Start 4 (Sa)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "603",
+    write: true
+  },
+  Zirkulation_Samstag_Ende4: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Samstag",
+    name: "Zirkulation Timer Ende 4 (Sa)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "604",
+    write: true
+  },
+  Zirkulation_Samstag_Start5: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Samstag",
+    name: "Zirkulation Timer Start 5 (Sa)",
+    role: "value.datetime",
+    type: "string",
+    dataSource: "raw_parameter",
+    luxWriteId: "605",
+    write: true
+  },
+  Zirkulation_Samstag_Ende5: {
+    folder: "Einstellungen.07_Tabellen.Zirkulation.Parameter.Days.Samstag",
+    name: "Zirkulation Timer Ende 5 (Sa)",
     role: "value.datetime",
     type: "string",
     dataSource: "raw_parameter",
@@ -2796,9 +3908,17 @@ function getDpPath(key) {
   }
   return `${def.folder}.${key}`;
 }
+function getLuxIdByKey(key) {
+  const entry = STATE_MAPPING[key];
+  if (entry && entry.luxWriteId) {
+    return parseInt(entry.luxWriteId, 10);
+  }
+  return -1;
+}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   STATE_MAPPING,
-  getDpPath
+  getDpPath,
+  getLuxIdByKey
 });
 //# sourceMappingURL=stateMapping.js.map

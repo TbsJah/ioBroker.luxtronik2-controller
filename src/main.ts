@@ -2,17 +2,20 @@
  * Created with @iobroker/create-adapter v3.1.5
  */
 import * as utils from '@iobroker/adapter-core';
-import * as luxtronik from 'luxtronik2';
+
 import { initLogger, setCustomDebug, writeLog } from './logger';
-import { dumpAllRawToLog, readAllRaw } from './rawFunctions';
+import { dumpAllRawToLog, readAllRaw, writeRawParameter } from './rawFunctions';
 import { STATE_MAPPING, getDpPath } from './stateMapping';
 import {
 	calculateTemperatureSpread,
 	calculateTotalEnergy,
 	calculateTotalThermalEnergy,
 	initializeVirtualStates,
+	updateCustomStates,
 	updateErrorHistory,
 	updateOutageHistory,
+	updateStatusStrings,
+	updateTimerTables,
 } from './virtualStates';
 
 class Luxtronik2Controller extends utils.Adapter {
@@ -24,6 +27,8 @@ class Luxtronik2Controller extends utils.Adapter {
 	private isDebugLogActive = false;
 	private updateRunning = false;
 	private originalZipConfig: Record<string, any> | null = null;
+	private lastKnownErrorTimestamp: number | null = null;
+	private lastPumpOptimization: number = 0;
 
 	private writeQueue: (() => Promise<void>)[] = [];
 	private isWriting = false;
@@ -42,18 +47,6 @@ class Luxtronik2Controller extends utils.Adapter {
 		this.on('unload', this.onUnload.bind(this));
 		this.on('message', this.onMessage.bind(this));
 	}
-
-	// private resubscribeMotionSensors(): void {
-	// 	const config = this.config as Record<string, any>;
-	// 	if (config.motion_sensors_aktiv && Array.isArray(config.motionSensors)) {
-	// 		for (const sensor of config.motionSensors) {
-	// 			if (sensor.oid && typeof sensor.oid === 'string') {
-	// 				this.subscribeForeignStates(sensor.oid.trim());
-	// 				writeLog(`Sensor-Abo erneuert nach MQTT-Reconnect: ${sensor.oid}`, 'info');
-	// 			}
-	// 		}
-	// 	}
-	// }
 
 	private sendTelegramNotification(message: string): void {
 		const config = this.config as Record<string, any>;
@@ -162,64 +155,105 @@ class Luxtronik2Controller extends utils.Adapter {
 	}
 
 	// =========================================================
+	// ZENTRALE FILTER-LOGIK (Verbindet jsonConfig mit stateMapping)
+	// =========================================================
+	private isStateEnabled(key: string, definition: any, config: Record<string, any>): boolean {
+		// Systemrelevante Objekte dürfen niemals gelöscht werden
+		if (definition.required) {
+			return true;
+		}
+
+		// 1. Basis-Prüfung für die direkte Checkbox (Falls vorhanden)
+		const configKey = `sync_${key}`;
+		let isEnabled = true;
+
+		// Wenn der Haken in der UI explizit entfernt wurde (false)
+		if (config[configKey] === false || String(config[configKey]) === 'false') {
+			isEnabled = false;
+		}
+
+		// 2. Gruppen-Abhängigkeiten (Wenn Tabellen deaktiviert werden, auch deren Parameter sofort ausblenden)
+
+		// HEIZEN
+		if (key.startsWith('HZ_MoSo_')) {
+			isEnabled = config.sync_heatingOperationTimerTableWeek !== false;
+		} else if (key.startsWith('HZ_MoFr_') || key.startsWith('HZ_SaSo_')) {
+			isEnabled = config.sync_heatingOperationTimerTable52MonFri !== false;
+		} else if (key.startsWith('HZ_Montag_')) {
+			isEnabled = config.sync_heatingOperationTimerTableDayMonday !== false;
+		} else if (key.startsWith('HZ_Dienstag_')) {
+			isEnabled = config.sync_heatingOperationTimerTableDayTuesday !== false;
+		} else if (key.startsWith('HZ_Mittwoch_')) {
+			isEnabled = config.sync_heatingOperationTimerTableDayWednesday !== false;
+		} else if (key.startsWith('HZ_Donnerstag_')) {
+			isEnabled = config.sync_heatingOperationTimerTableDayThursday !== false;
+		} else if (key.startsWith('HZ_Freitag_')) {
+			isEnabled = config.sync_heatingOperationTimerTableDayFriday !== false;
+		} else if (key.startsWith('HZ_Samstag_')) {
+			isEnabled = config.sync_heatingOperationTimerTableDaySaturday !== false;
+		} else if (key.startsWith('HZ_Sonntag_')) {
+			isEnabled = config.sync_heatingOperationTimerTableDaySunday !== false;
+		} else if (key.startsWith('WW_MoSo_')) {
+			isEnabled = config.sync_hotWaterTableWeek !== false;
+		} else if (key.startsWith('WW_MoFr_') || key.startsWith('WW_SaSo_')) {
+			isEnabled = config.sync_hotWaterTable52MonFri !== false;
+		} else if (key.startsWith('WW_Montag_')) {
+			isEnabled = config.sync_hotWaterTableDayMonday !== false;
+		} else if (key.startsWith('WW_Dienstag_')) {
+			isEnabled = config.sync_hotWaterTableDayTuesday !== false;
+		} else if (key.startsWith('WW_Mittwoch_')) {
+			isEnabled = config.sync_hotWaterTableDayWednesday !== false;
+		} else if (key.startsWith('WW_Donnerstag_')) {
+			isEnabled = config.sync_hotWaterTableDayThursday !== false;
+		} else if (key.startsWith('WW_Freitag_')) {
+			isEnabled = config.sync_hotWaterTableDayFriday !== false;
+		} else if (key.startsWith('WW_Samstag_')) {
+			isEnabled = config.sync_hotWaterTableDaySaturday !== false;
+		} else if (key.startsWith('WW_Sonntag_')) {
+			isEnabled = config.sync_hotWaterTableDaySunday !== false;
+		} else if (key.startsWith('Zirkulation_MoSo_')) {
+			isEnabled = config.sync_hotWaterCircPumpTimerTableWeek !== false;
+		} else if (key.startsWith('Zirkulation_MoFr_') || key.startsWith('Zirkulation_SaSo_')) {
+			isEnabled = config.sync_hotWaterCircPumpTimerTable52MonFri !== false;
+		} else if (key.startsWith('Zirkulation_Montag_')) {
+			isEnabled = config.sync_hotWaterCircPumpTimerTableDayMonday !== false;
+		} else if (key.startsWith('Zirkulation_Dienstag_')) {
+			isEnabled = config.sync_hotWaterCircPumpTimerTableDayTuesday !== false;
+		} else if (key.startsWith('Zirkulation_Mittwoch_')) {
+			isEnabled = config.sync_hotWaterCircPumpTimerTableDayWednesday !== false;
+		} else if (key.startsWith('Zirkulation_Donnerstag_')) {
+			isEnabled = config.sync_hotWaterCircPumpTimerTableDayThursday !== false;
+		} else if (key.startsWith('Zirkulation_Freitag_')) {
+			isEnabled = config.sync_hotWaterCircPumpTimerTableDayFriday !== false;
+		} else if (key.startsWith('Zirkulation_Samstag_')) {
+			isEnabled = config.sync_hotWaterCircPumpTimerTableDaySaturday !== false;
+		} else if (key.startsWith('Zirkulation_Sonntag_')) {
+			isEnabled = config.sync_hotWaterCircPumpTimerTableDaySunday !== false;
+		}
+
+		return isEnabled;
+	}
+
+	// =========================================================
 	// AUFRÄUM-FUNKTION FÜR ABGEWÄHLTE DATENPUNKTE
 	// =========================================================
 	private async cleanupStates(): Promise<void> {
 		const config = this.config as Record<string, any>;
 
 		for (const [key, definition] of Object.entries(STATE_MAPPING)) {
-			if (definition.required) {
-				continue;
-			}
+			// Filter anwenden!
+			if (!this.isStateEnabled(key, definition, config)) {
+				const stateId = `${definition.folder}.${key}`;
 
-			let isEnabled = config[`sync_${key}`] !== false;
-
-			if (key.startsWith('HZ_MoSo_') || key.startsWith('HZ_MoSo_End')) {
-				isEnabled = config.sync_HZ_MoSo_Start1 !== false;
-			}
-			if (key.startsWith('HZ_MoFr_') || key.startsWith('HZ_SaSo_')) {
-				isEnabled = config.sync_HZ_MoFr_Start1 !== false;
-			}
-			if (
-				key.startsWith('HZ_Sonntag_') ||
-				key.startsWith('HZ_Montag_') ||
-				key.startsWith('HZ_Dienstag_') ||
-				key.startsWith('HZ_Mittwoch_') ||
-				key.startsWith('HZ_Donnerstag_') ||
-				key.startsWith('HZ_Freitag_') ||
-				key.startsWith('HZ_Samstag_')
-			) {
-				isEnabled = config.sync_HZ_Montag_Start1 !== false;
-			}
-
-			if (key.startsWith('WW_MoSo_') || key.startsWith('WW_MoSo_End')) {
-				isEnabled = config.sync_WW_MoSo_Start1 !== false;
-			}
-			if (key.startsWith('WW_MoFr_') || key.startsWith('WW_SaSo_')) {
-				isEnabled = config.sync_WW_MoFr_Start1 !== false;
-			}
-			if (
-				key.startsWith('WW_Sonntag_') ||
-				key.startsWith('WW_Montag_') ||
-				key.startsWith('WW_Dienstag_') ||
-				key.startsWith('WW_Mittwoch_') ||
-				key.startsWith('WW_Donnerstag_') ||
-				key.startsWith('WW_Freitag_') ||
-				key.startsWith('WW_Samstag_')
-			) {
-				isEnabled = config.sync_WW_Montag_Start1 !== false;
-			}
-
-			if (!isEnabled) {
-				const stateId = `${this.namespace}.${definition.folder}.${key}`;
 				try {
-					const obj = await this.getForeignObjectAsync(stateId);
-					if (obj) {
-						await this.delForeignObjectAsync(stateId);
-						writeLog(`Datenpunkt ${stateId} wurde deaktiviert und entfernt.`, 'info');
-					}
-				} catch {
-					// Ignorieren, wenn es bereits nicht mehr existiert
+					await this.delStateAsync(stateId).catch(() => {});
+					await this.delObjectAsync(stateId).catch(() => {});
+
+					this.createdStates.delete(stateId); // Aus dem lokalen Gedächtnis löschen
+
+					writeLog(`Datenpunkt '${stateId}' wurde abgewählt und rigoros entfernt.`, 'info');
+				} catch (err: any) {
+					writeLog(`Fehler beim Aufräumen von ${stateId}: ${err.message}`, 'debug');
 				}
 			}
 		}
@@ -231,11 +265,12 @@ class Luxtronik2Controller extends utils.Adapter {
 		const port = config.port || 8889;
 		await this.setState('info.connection', false, true);
 		writeLog(`Verbinde mit Wärmepumpe auf ${ip}:${port}...`, 'info');
-		this.pump = luxtronik.createConnection(ip, port, { retryCount: 3, retryDelay: 2000 });
 
-		await this.cleanupStates();
-		await this.ensureAllObjectsExist();
 		await initializeVirtualStates(this);
+		await this.cleanupStates();
+		await this.cleanupCustomStates();
+		await this.ensureAllObjectsExist();
+		await this.ensureCustomObjectsExist();
 
 		const debugState = await this.getStateAsync(getDpPath('Schreibe_Debug_Log'));
 		this.isDebugLogActive = debugState?.val === true;
@@ -279,47 +314,9 @@ class Luxtronik2Controller extends utils.Adapter {
 
 		try {
 			for (const [key, definition] of Object.entries(STATE_MAPPING)) {
-				if (!definition.required) {
-					let isEnabled = config[`sync_${key}`] !== false;
-
-					if (key.startsWith('HZ_MoSo_') || key.startsWith('HZ_MoSo_End')) {
-						isEnabled = config.sync_HZ_MoSo_Start1 !== false;
-					}
-					if (key.startsWith('HZ_MoFr_') || key.startsWith('HZ_SaSo_')) {
-						isEnabled = config.sync_HZ_MoFr_Start1 !== false;
-					}
-					if (
-						key.startsWith('HZ_Sonntag_') ||
-						key.startsWith('HZ_Montag_') ||
-						key.startsWith('HZ_Dienstag_') ||
-						key.startsWith('HZ_Mittwoch_') ||
-						key.startsWith('HZ_Donnerstag_') ||
-						key.startsWith('HZ_Freitag_') ||
-						key.startsWith('HZ_Samstag_')
-					) {
-						isEnabled = config.sync_HZ_Montag_Start1 !== false;
-					}
-					if (key.startsWith('WW_MoSo_') || key.startsWith('WW_MoSo_End')) {
-						isEnabled = config.sync_WW_MoSo_Start1 !== false;
-					}
-					if (key.startsWith('WW_MoFr_') || key.startsWith('WW_SaSo_')) {
-						isEnabled = config.sync_WW_MoFr_Start1 !== false;
-					}
-					if (
-						key.startsWith('WW_Sonntag_') ||
-						key.startsWith('WW_Montag_') ||
-						key.startsWith('WW_Dienstag_') ||
-						key.startsWith('WW_Mittwoch_') ||
-						key.startsWith('WW_Donnerstag_') ||
-						key.startsWith('WW_Freitag_') ||
-						key.startsWith('WW_Samstag_')
-					) {
-						isEnabled = config.sync_WW_Montag_Start1 !== false;
-					}
-
-					if (!isEnabled) {
-						continue;
-					}
+				// Wenn abgewählt -> Sofort überspringen!
+				if (!this.isStateEnabled(key, definition, config)) {
+					continue;
 				}
 
 				if (definition.isVirtual) {
@@ -403,7 +400,7 @@ class Luxtronik2Controller extends utils.Adapter {
 				try {
 					const targetWriteId = definition.luxWriteId;
 					const writeId = isRawWrite ? parseInt(targetWriteId, 10) : targetWriteId;
-					await this.queueWrite(writeId, valueToWrite, isRawWrite);
+					await this.queueWrite(writeId, valueToWrite);
 					await new Promise(r => setTimeout(r, 200));
 				} catch (err: any) {
 					writeLog(`Fehler beim Schreiben von ${mappingKey} an die Pumpe: ${err.message}`, 'error');
@@ -478,7 +475,7 @@ class Luxtronik2Controller extends utils.Adapter {
 				await this.setState(getDpPath(key as any), { val: val, ack: true });
 
 				const luxId = parseInt(def.luxWriteId as string, 10);
-				await this.queueWrite(luxId, rawVal, true);
+				await this.queueWrite(luxId, rawVal);
 				await new Promise(resolve => setTimeout(resolve, 100));
 			}
 		} catch (err: any) {
@@ -508,9 +505,9 @@ class Luxtronik2Controller extends utils.Adapter {
 
 				await this.restoreOriginalZipConfig();
 
-				await this.queueWrite(158, 0, true);
+				await this.queueWrite(158, 0);
 				await new Promise(resolve => setTimeout(resolve, 100));
-				await this.queueWrite(684, 0, true);
+				await this.queueWrite(684, 0);
 				await new Promise(resolve => setTimeout(resolve, 100));
 
 				await this.syncConfigValue('runDeaerate', 0);
@@ -636,10 +633,25 @@ class Luxtronik2Controller extends utils.Adapter {
 						await this.syncConfigValue('heating_curve_parallel_offset', config.fusspunkt);
 					}
 				}
-				if (spreizung < 6.5 && hupAktiv > 5.5) {
-					await this.syncConfigValue('heating_system_circ_pump_voltage_nominal', hupAktiv - 0.25);
-				} else if (spreizung > 7.5) {
-					await this.syncConfigValue('heating_system_circ_pump_voltage_nominal', hupAktiv + 0.25);
+
+				const now = Date.now();
+				if (now - this.lastPumpOptimization > 300000) {
+					if (spreizung < 6.5 && hupAktiv > 5.5) {
+						await this.syncConfigValue('heating_system_circ_pump_voltage_nominal', hupAktiv - 0.25);
+						this.lastPumpOptimization = now;
+						writeLog(
+							`Spreizung zu gering (${spreizung}K). HUP-Spannung auf ${hupAktiv - 0.25}V gesenkt. Nächste Prüfung in 5 Min.`,
+							'info',
+						);
+					} else if (spreizung > 7.5 && hupAktiv < 10) {
+						// + Sicherheit gegen Überdrehen (>10V)
+						await this.syncConfigValue('heating_system_circ_pump_voltage_nominal', hupAktiv + 0.25);
+						this.lastPumpOptimization = now;
+						writeLog(
+							`Spreizung zu hoch (${spreizung}K). HUP-Spannung auf ${hupAktiv + 0.25}V erhöht. Nächste Prüfung in 5 Min.`,
+							'info',
+						);
+					}
 				}
 
 				if (ruecklauf >= ruecklaufSoll + heizenHysterese - 0.1) {
@@ -677,75 +689,26 @@ class Luxtronik2Controller extends utils.Adapter {
 		}
 	}
 
-	private readPumpAsync(): Promise<any> {
+	private async writePumpAsync(cmd: string | number, val: any): Promise<void> {
 		if (this.isDebugLogActive) {
-			writeLog(`readPumpAsync Comand`, 'debug');
+			writeLog(`writePumpAsync Raw-Befehl: ID ${cmd}, val: ${val}`, 'debug');
 		}
-		return new Promise((resolve, reject) => {
-			let isFinished = false;
-			const timeout = setTimeout(() => {
-				if (isFinished) {
-					return;
-				}
-				isFinished = true;
-				reject(new Error('Timeout (35s): Luxtronik hat keine Antwort geliefert.'));
-			}, 35000);
+		const paramId = typeof cmd === 'string' ? parseInt(cmd, 10) : cmd;
+		let value = typeof val === 'string' ? parseInt(val, 10) : val;
 
-			this.pump.read((err: any, data: any): void => {
-				if (isFinished) {
-					return;
-				}
-				isFinished = true;
-				clearTimeout(timeout);
-				if (err) {
-					reject(err instanceof Error ? err : new Error(String(err)));
-				} else {
-					resolve(data);
-				}
-			});
-		});
+		// Boolean-Werte in 1/0 umwandeln
+		if (typeof value === 'boolean') {
+			value = value ? 1 : 0;
+		}
+
+		await writeRawParameter(this, paramId, value);
 	}
 
-	private writePumpAsync(cmd: string | number, val: any, isRaw = false): Promise<void> {
-		if (this.isDebugLogActive) {
-			writeLog(`writePumpAsync Comand: ${cmd}, val: ${val}`, 'debug');
-		}
-		return new Promise((resolve, reject) => {
-			let isFinished = false;
-			const timeout = setTimeout(() => {
-				if (isFinished) {
-					return;
-				}
-				isFinished = true;
-				reject(new Error(`Timeout (35s) beim Schreiben von [${cmd}].`));
-			}, 35000);
-
-			const cb = (err: any): void => {
-				if (isFinished) {
-					return;
-				}
-				isFinished = true;
-				clearTimeout(timeout);
-				if (err) {
-					reject(err instanceof Error ? err : new Error(String(err)));
-				} else {
-					resolve();
-				}
-			};
-
-			if (isRaw) {
-				this.pump.writeRaw(cmd, val, cb);
-			} else {
-				this.pump.write(cmd, val, cb);
-			}
-		});
-	}
-
-	private async queueWrite(cmd: string | number, val: any, isRaw: boolean): Promise<void> {
+	private async queueWrite(cmd: string | number, val: any): Promise<void> {
 		return new Promise((resolve, reject) => {
 			this.writeQueue.push(async () => {
 				try {
-					await this.writePumpAsync(cmd, val, isRaw);
+					await this.writePumpAsync(cmd, val);
 					resolve();
 				} catch (err) {
 					reject(err instanceof Error ? err : new Error(String(err)));
@@ -763,6 +726,8 @@ class Luxtronik2Controller extends utils.Adapter {
 		const task = this.writeQueue.shift();
 		if (task) {
 			await task();
+			// NEU: Die "Bremse" für die Luxtronik-Netzwerkkarte (300ms)
+			await new Promise(resolve => setTimeout(resolve, 300));
 		}
 		this.isWriting = false;
 		void this.processQueue();
@@ -786,7 +751,6 @@ class Luxtronik2Controller extends utils.Adapter {
 		try {
 			let rawParams: number[] = [];
 			let rawValues: number[] = [];
-			let coolchipData: any = null;
 
 			try {
 				rawParams = await readAllRaw(this, 3003);
@@ -802,20 +766,6 @@ class Luxtronik2Controller extends utils.Adapter {
 			}
 			await new Promise(r => setTimeout(r, 3500));
 
-			try {
-				coolchipData = await this.readPumpAsync();
-			} catch (err: any) {
-				if (err.message.includes('Timeout')) {
-					writeLog('Wärmepumpe ausgelastet (Timeout). Der Abfrage-Zyklus wird übersprungen.', 'debug');
-				} else {
-					writeLog(`Verbindungsfehler zur Wärmepumpe: ${err.message}`, 'error');
-				}
-			}
-
-			if (!coolchipData) {
-				return;
-			}
-
 			this.errorCount = 0;
 			await this.setState('info.connection', { val: true, ack: true });
 
@@ -827,46 +777,8 @@ class Luxtronik2Controller extends utils.Adapter {
 					continue;
 				}
 
-				if (!definition.required) {
-					let isEnabled = config[`sync_${key}`] !== false;
-					if (key.startsWith('HZ_MoSo_') || key.startsWith('HZ_MoSo_End')) {
-						isEnabled = config.sync_HZ_MoSo_Start1 !== false;
-					}
-					if (key.startsWith('HZ_MoFr_') || key.startsWith('HZ_SaSo_')) {
-						isEnabled = config.sync_HZ_MoFr_Start1 !== false;
-					}
-					if (
-						key.startsWith('HZ_Sonntag_') ||
-						key.startsWith('HZ_Montag_') ||
-						key.startsWith('HZ_Dienstag_') ||
-						key.startsWith('HZ_Mittwoch_') ||
-						key.startsWith('HZ_Donnerstag_') ||
-						key.startsWith('HZ_Freitag_') ||
-						key.startsWith('HZ_Samstag_')
-					) {
-						isEnabled = config.sync_HZ_Montag_Start1 !== false;
-					}
-					if (key.startsWith('WW_MoSo_') || key.startsWith('WW_MoSo_End')) {
-						isEnabled = config.sync_WW_MoSo_Start1 !== false;
-					}
-					if (key.startsWith('WW_MoFr_') || key.startsWith('WW_SaSo_')) {
-						isEnabled = config.sync_WW_MoFr_Start1 !== false;
-					}
-					if (
-						key.startsWith('WW_Sonntag_') ||
-						key.startsWith('WW_Montag_') ||
-						key.startsWith('WW_Dienstag_') ||
-						key.startsWith('WW_Mittwoch_') ||
-						key.startsWith('WW_Donnerstag_') ||
-						key.startsWith('WW_Freitag_') ||
-						key.startsWith('WW_Samstag_')
-					) {
-						isEnabled = config.sync_WW_Montag_Start1 !== false;
-					}
-
-					if (!isEnabled) {
-						continue;
-					}
+				if (!this.isStateEnabled(key, definition, config)) {
+					continue;
 				}
 
 				const luxId = definition.luxWriteId || key;
@@ -887,27 +799,24 @@ class Luxtronik2Controller extends utils.Adapter {
 							}
 							break;
 						case 'parameter':
-							value = coolchipData?.parameters?.[luxId];
-							break;
 						case 'value':
-							value = coolchipData?.values?.[luxId];
-							break;
 						case 'additional':
-							value = coolchipData?.additional?.[luxId];
+							// Die alte coolchip-Bibliothek ist entfernt.
+							// Diese alten Text-Werte (z. B. Firmware) werden ignoriert.
+							value = undefined;
 							break;
 					}
 				} else {
 					if (/^\d+$/.test(luxId)) {
 						const idx = parseInt(luxId, 10);
+						// Logik: Einstellungen sind meist Parameter (3003), Infos sind Messwerte (3004)
 						value = definition.folder.startsWith('Einstellungen') ? rawParams?.[idx] : rawValues?.[idx];
 						if (value !== undefined && definition.factor) {
 							value /= definition.factor;
 						}
 					} else {
-						value =
-							coolchipData?.values?.[luxId] ??
-							coolchipData?.parameters?.[luxId] ??
-							coolchipData?.additional?.[luxId];
+						// Fallback für alte Text-IDs (z.B. "firmware" statt einer Nummer)
+						value = undefined;
 					}
 				}
 
@@ -970,20 +879,45 @@ class Luxtronik2Controller extends utils.Adapter {
 						const newestError = newList[0];
 						const oldNewestError = oldList.length > 0 ? oldList[0] : null;
 
+						// Prüfen, ob wirklich ein neuer Fehler oben in der Liste steht
 						if (!oldNewestError || newestError.timestamp !== oldNewestError.timestamp) {
 							const msg = `🚨 *Störung Wärmepumpe!*\nEin Fehler an der Wärmepumpe wurde registriert:\n\n*Code:* ${newestError.code}\n*Fehler:* ${newestError.beschreibung}\n*Datum:* ${newestError.datum}`;
-							this.sendTelegramNotification(msg);
 
-							if (config.notification_bell) {
-								if (typeof this.registerNotification === 'function') {
-									await this.registerNotification('luxtronik2-controller', 'lwpError', msg);
-								} else {
-									writeLog(
-										`🚨 Wärmepumpen-Fehler: Code ${newestError.code} - ${newestError.beschreibung}`,
-										'warn',
-									);
+							// --- INTELLIGENTE FEHLER-ALARM LOGIK ---
+							// Wir nehmen die Werte jetzt direkt aus dem fertigen JSON-Objekt!
+							const currentErrorTimestamp = newestError.timestamp;
+							const currentErrorCode = newestError.code;
+
+							if (this.lastKnownErrorTimestamp === null) {
+								// 1. Adapter ist gerade gestartet. Wir merken uns den alten Zeitstempel lautlos.
+								if (currentErrorTimestamp !== undefined) {
+									this.lastKnownErrorTimestamp = currentErrorTimestamp;
+								}
+							} else if (
+								currentErrorTimestamp !== undefined &&
+								currentErrorTimestamp > this.lastKnownErrorTimestamp
+							) {
+								// 2. Die Zeit des Fehlers ist NEUER als unser Gedächtnis -> ECHTER NEUER FEHLER!
+								this.lastKnownErrorTimestamp = currentErrorTimestamp;
+
+								if (currentErrorCode !== 0) {
+									// Alarm auslösen!
+									this.sendTelegramNotification(msg);
+
+									const config = this.config as Record<string, any>;
+									if (config.notification_bell) {
+										if (typeof this.registerNotification === 'function') {
+											await this.registerNotification('luxtronik2-controller', 'lwpError', msg);
+										} else {
+											writeLog(
+												`🚨 Wärmepumpen-Fehler: Code ${newestError.code} - ${newestError.beschreibung}`,
+												'warn',
+											);
+										}
+									}
 								}
 							}
+							// ----------------------------------------
 						}
 					}
 				} catch {
@@ -993,6 +927,9 @@ class Luxtronik2Controller extends utils.Adapter {
 
 			await updateOutageHistory(this, rawValues);
 			await calculateTemperatureSpread(this);
+			await updateStatusStrings(this, rawValues, rawParams);
+			await updateCustomStates(this, rawValues, rawParams);
+			await updateTimerTables(this);
 			await this.runOptimizationSchedule();
 		} catch (err: any) {
 			this.errorCount++;
@@ -1015,13 +952,15 @@ class Luxtronik2Controller extends utils.Adapter {
 			if (this.pollingInterval) {
 				clearInterval(this.pollingInterval);
 			}
-			if (this.pump && typeof this.pump.disconnect === 'function') {
-				this.pump.disconnect();
-			}
 			if (this.zipTimer) {
 				clearTimeout(this.zipTimer);
 			}
-			writeLog('Adapter gestoppt.', 'info');
+
+			// Setze alle kritischen Status beim Beenden sicherheitshalber auf false
+			// Promise intentionally ignored
+			void this.setState('info.connection', false, true);
+
+			writeLog('Adapter wird beendet. Alle Timer und Verbindungen sauber gestoppt.', 'info');
 			callback();
 		} catch {
 			callback();
@@ -1039,8 +978,16 @@ class Luxtronik2Controller extends utils.Adapter {
 			const matchedSensor = config.motionSensors.find((s: any) => s.oid && s.oid.trim() === id);
 
 			if (matchedSensor && state.val === true) {
-				const now = Date.now();
+				// NEU: Wenn die Zirkulationspumpe physisch bereits läuft, tun wir gar nichts.
 				const zipOutState = await this.getStateAsync(getDpPath('ZIPout'));
+				if (zipOutState && zipOutState.val === 1) {
+					if (this.isDebugLogActive) {
+						writeLog(`Bewegung an '${matchedSensor.name}' ignoriert, da ZIP bereits läuft.`, 'debug');
+					}
+					return;
+				}
+
+				const now = Date.now();
 				const lastZipChange = zipOutState?.lc || 0;
 
 				if (now - lastZipChange > (config.zip_last_run_min || 600) * 1000) {
@@ -1212,9 +1159,9 @@ class Luxtronik2Controller extends utils.Adapter {
 					}
 
 					if (useDeaeration) {
-						await this.queueWrite(158, 1, true);
+						await this.queueWrite(158, 1);
 						await new Promise(r => setTimeout(r, 100));
-						await this.queueWrite(684, 1, true);
+						await this.queueWrite(684, 1);
 						await this.syncConfigValue('runDeaerate', 1);
 						await this.syncConfigValue('hotWaterCircPumpDeaerate', 1);
 					} else {
@@ -1253,7 +1200,7 @@ class Luxtronik2Controller extends utils.Adapter {
 						];
 
 						for (const u of updates) {
-							await this.queueWrite(parseInt(STATE_MAPPING[u.key].luxWriteId as string, 10), u.raw, true);
+							await this.queueWrite(parseInt(STATE_MAPPING[u.key].luxWriteId as string, 10), u.raw);
 							await new Promise(r => setTimeout(r, 100));
 						}
 					}
@@ -1286,18 +1233,120 @@ class Luxtronik2Controller extends utils.Adapter {
 				valueToWrite = state.val * definition.factor;
 			}
 
-			const isRawWrite =
-				definition.dataSource === 'raw_parameter' ||
-				definition.dataSource === 'raw_value' ||
-				(!definition.dataSource && /^\d+$/.test(definition.luxWriteId || ''));
-			if (isRawWrite && definition.unit === '°C' && typeof state.val === 'number' && !definition.factor) {
+			// Temperaturwerte für die Roh-Schnittstelle aufbereiten (z.B. 21.5 °C -> 215)
+			if (definition.unit === '°C' && typeof state.val === 'number' && !definition.factor) {
 				valueToWrite = state.val * 10;
 			}
 
 			const targetWriteId = definition.luxWriteId;
-			await this.queueWrite(isRawWrite ? parseInt(targetWriteId, 10) : targetWriteId, valueToWrite, isRawWrite);
+			// Wir übergeben die ID jetzt immer strikt als Zahl (Parameter-ID) und ohne das dritte Argument
+			await this.queueWrite(parseInt(targetWriteId, 10), valueToWrite);
 		} catch (err: any) {
 			writeLog(`Fehler bei Befehlsausführung: ${err.message}`, 'error');
+		}
+	}
+
+	// =========================================================
+	// BENUTZERDEFINIERTE WERTE (Custom States)
+	// =========================================================
+
+	private sanitizeName(name: string): string {
+		return name
+			.replace(/ä/g, 'ae')
+			.replace(/ö/g, 'oe')
+			.replace(/ü/g, 'ue')
+			.replace(/Ä/g, 'Ae')
+			.replace(/Ö/g, 'Oe')
+			.replace(/Ü/g, 'Ue')
+			.replace(/ß/g, 'ss')
+			.replace(/[^a-zA-Z0-9_]/g, '_')
+			.replace(/_+/g, '_')
+			.replace(/^_|_$/g, '');
+	}
+
+	private async cleanupCustomStates(): Promise<void> {
+		// NEU: TypeScript sagen, dass es ein dynamisches Objekt ist
+		const config = this.config as Record<string, any>;
+		const customStates = (config.custom_states as any[]) || [];
+
+		const activeIds = customStates
+			.filter(c => c.active && c.luxId !== undefined && c.name)
+			.map(c => `Benutzer.${this.sanitizeName(c.name)}`);
+
+		try {
+			const objects = await this.getAdapterObjectsAsync();
+			for (const id in objects) {
+				if (id.startsWith(`${this.namespace}.Benutzer.`)) {
+					const shortId = id.replace(`${this.namespace}.`, '');
+					if (shortId === 'Benutzer') {
+						continue;
+					} // Ordner selbst ignorieren
+
+					if (!activeIds.includes(shortId)) {
+						await this.delStateAsync(shortId).catch(() => {});
+						await this.delObjectAsync(shortId).catch(() => {});
+						this.createdStates.delete(shortId);
+						writeLog(`Benutzerdefinierter Datenpunkt '${shortId}' entfernt.`, 'info');
+					}
+				}
+			}
+		} catch (err: any) {
+			writeLog(`Fehler beim Aufräumen benutzerdefinierter Werte: ${err.message}`, 'debug');
+		}
+	}
+
+	private async ensureCustomObjectsExist(): Promise<void> {
+		// NEU: TypeScript sagen, dass es ein dynamisches Objekt ist
+		const config = this.config as Record<string, any>;
+		const customStates = (config.custom_states as any[]) || [];
+
+		if (customStates.some(c => c.active)) {
+			await this.setObjectNotExistsAsync('Benutzer', {
+				type: 'channel',
+				common: { name: 'Benutzerdefinierte Werte' },
+				native: {},
+			});
+		}
+
+		for (const custom of customStates) {
+			if (!custom.active || custom.luxId === undefined || !custom.name) {
+				continue;
+			}
+
+			const stateId = `Benutzer.${this.sanitizeName(custom.name)}`;
+
+			let role = 'state';
+			let targetType: ioBroker.CommonType = custom.type || 'string';
+
+			if (custom.type === 'number') {
+				role = 'value';
+			} else if (custom.type === 'string') {
+				role = 'text';
+			} else if (custom.type === 'boolean') {
+				role = 'indicator';
+			} else if (custom.type === 'datetime') {
+				role = 'value.datetime';
+				targetType = 'string'; // Wir speichern das fertige Datum als lesbaren Text
+			}
+
+			if (!this.createdStates.has(stateId)) {
+				await this.setObjectNotExistsAsync(stateId, {
+					type: 'state',
+					common: {
+						name: custom.name,
+						type: targetType, // <--- HIER 'targetType' statt 'custom.type || string' nutzen!
+						role: role,
+						unit: custom.unit || '',
+						read: true,
+						write: false,
+					},
+					native: {
+						luxId: custom.luxId,
+						source: custom.source,
+					},
+				});
+				this.createdStates.add(stateId);
+			}
 		}
 	}
 }

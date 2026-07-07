@@ -841,72 +841,142 @@
 							"sm": 12,
 							"md": 6
 						},
-						"sync_hotWaterCircPumpTimerTable52MonFri": {
+						"sync_hotWaterTable52MonFri": {
 							"type": "checkbox",
 							"label": "WW Tabelle Mo-Fr (5+2)",
 							"default": true,
 							"sm": 12,
 							"md": 6
 						},
-						"sync_hotWaterCircPumpTimerTable52SatSun": {
+						"sync_hotWaterTable52SatSun": {
 							"type": "checkbox",
 							"label": "WW Tabelle Sa-So (5+2)",
 							"default": true,
 							"sm": 12,
 							"md": 6
 						},
-						"sync_hotWaterCircPumpTimerTableDayFriday": {
+						"sync_hotWaterTableDayFriday": {
 							"type": "checkbox",
 							"label": "WW Tabelle Fr",
 							"default": true,
 							"sm": 12,
 							"md": 6
 						},
-						"sync_hotWaterCircPumpTimerTableDayMonday": {
+						"sync_hotWaterTableDayMonday": {
 							"type": "checkbox",
 							"label": "WW Tabelle Mo",
 							"default": true,
 							"sm": 12,
 							"md": 6
 						},
-						"sync_hotWaterCircPumpTimerTableDaySaturday": {
+						"sync_hotWaterTableDaySaturday": {
 							"type": "checkbox",
 							"label": "WW Tabelle Sa",
 							"default": true,
 							"sm": 12,
 							"md": 6
 						},
-						"sync_hotWaterCircPumpTimerTableDaySunday": {
+						"sync_hotWaterTableDaySunday": {
 							"type": "checkbox",
 							"label": "WW Tabelle So",
 							"default": true,
 							"sm": 12,
 							"md": 6
 						},
-						"sync_hotWaterCircPumpTimerTableDayThursday": {
+						"sync_hotWaterTableDayThursday": {
 							"type": "checkbox",
 							"label": "WW Tabelle Do",
 							"default": true,
 							"sm": 12,
 							"md": 6
 						},
-						"sync_hotWaterCircPumpTimerTableDayTuesday": {
+						"sync_hotWaterTableDayTuesday": {
 							"type": "checkbox",
 							"label": "WW Tabelle Di",
 							"default": true,
 							"sm": 12,
 							"md": 6
 						},
-						"sync_hotWaterCircPumpTimerTableDayWednesday": {
+						"sync_hotWaterTableDayWednesday": {
 							"type": "checkbox",
 							"label": "WW Tabelle Mi",
 							"default": true,
 							"sm": 12,
 							"md": 6
 						},
-						"sync_hotWaterCircPumpTimerTableWeek": {
+						"sync_hotWaterTableWeek": {
 							"type": "checkbox",
 							"label": "WW Tabelle Woche (Mo-So)",
+							"default": true,
+							"sm": 12,
+							"md": 6
+						},
+						"sync_hotWaterCircPumpTimerTable52MonFri": {
+							"type": "checkbox",
+							"label": "Zirkulations Tabelle Mo-Fr (5+2)",
+							"default": true,
+							"sm": 12,
+							"md": 6
+						},
+						"sync_hotWaterCircPumpTimerTable52SatSun": {
+							"type": "checkbox",
+							"label": "Zirkulations Tabelle Sa-So (5+2)",
+							"default": true,
+							"sm": 12,
+							"md": 6
+						},
+						"sync_hotWaterCircPumpTimerTableDayFriday": {
+							"type": "checkbox",
+							"label": "Zirkulations Tabelle Fr",
+							"default": true,
+							"sm": 12,
+							"md": 6
+						},
+						"sync_hotWaterCircPumpTimerTableDayMonday": {
+							"type": "checkbox",
+							"label": "Zirkulations Tabelle Mo",
+							"default": true,
+							"sm": 12,
+							"md": 6
+						},
+						"sync_hotWaterCircPumpTimerTableDaySaturday": {
+							"type": "checkbox",
+							"label": "Zirkulations Tabelle Sa",
+							"default": true,
+							"sm": 12,
+							"md": 6
+						},
+						"sync_hotWaterCircPumpTimerTableDaySunday": {
+							"type": "checkbox",
+							"label": "Zirkulations Tabelle So",
+							"default": true,
+							"sm": 12,
+							"md": 6
+						},
+						"sync_hotWaterCircPumpTimerTableDayThursday": {
+							"type": "checkbox",
+							"label": "Zirkulations Tabelle Do",
+							"default": true,
+							"sm": 12,
+							"md": 6
+						},
+						"sync_hotWaterCircPumpTimerTableDayTuesday": {
+							"type": "checkbox",
+							"label": "Zirkulations Tabelle Di",
+							"default": true,
+							"sm": 12,
+							"md": 6
+						},
+						"sync_hotWaterCircPumpTimerTableDayWednesday": {
+							"type": "checkbox",
+							"label": "Zirkulations Tabelle Mi",
+							"default": true,
+							"sm": 12,
+							"md": 6
+						},
+						"sync_hotWaterCircPumpTimerTableWeek": {
+							"type": "checkbox",
+							"label": "Zirkulations Tabelle Woche (Mo-So)",
 							"default": true,
 							"sm": 12,
 							"md": 6
@@ -1051,6 +1121,71 @@
 					"items": [
 						{ "type": "text", "attr": "name", "title": "Bezeichnung (z.B. Bad)", "width": "30%" },
 						{ "type": "objectId", "attr": "oid", "title": "Objekt-ID auswählen", "width": "70%" }
+					]
+				}
+			}
+		},
+		"customValuesTab": {
+			"type": "panel",
+			"label": "Eigene Werte",
+			"icon": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='currentColor' d='M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8a8 8 0 0 1-8 8zm4-9h-3V8a1 1 0 0 0-2 0v3H8a1 1 0 0 0 0 2h3v3a1 1 0 0 0 2 0v-3h3a1 1 0 0 0 0-2z'/%3E%3C/svg%3E",
+			"items": {
+				"custom_states": {
+					"type": "table",
+					"label": "Benutzerdefinierte Datenpunkte (Verzeichnis: Benutzer)",
+					"items": [
+						{
+							"type": "checkbox",
+							"attr": "active",
+							"title": "Aktiv",
+							"width": "50px"
+						},
+						{
+							"type": "number",
+							"attr": "luxId",
+							"title": "Luxtronik ID (Index)",
+							"width": "120px"
+						},
+						{
+							"type": "select",
+							"attr": "source",
+							"title": "Datenquelle",
+							"options": [
+								{ "label": "Messwert (rawValues)", "value": "value" },
+								{ "label": "Parameter (rawParams)", "value": "parameter" }
+							],
+							"width": "180px"
+						},
+						{
+							"type": "text",
+							"attr": "name",
+							"title": "Name (z.B. Meine Temperatur)",
+							"width": "200px"
+						},
+						{
+							"type": "select",
+							"attr": "type",
+							"title": "Datentyp",
+							"options": [
+								{ "label": "Zahl", "value": "number" },
+								{ "label": "Text", "value": "string" },
+								{ "label": "Wahr/Falsch", "value": "boolean" },
+								{ "label": "Datum/Uhrzeit (Unix)", "value": "datetime" }
+							],
+							"width": "120px"
+						},
+						{
+							"type": "number",
+							"attr": "factor",
+							"title": "Faktor (z.B. 0.1)",
+							"width": "120px"
+						},
+						{
+							"type": "text",
+							"attr": "unit",
+							"title": "Einheit (z.B. °C)",
+							"width": "100px"
+						}
 					]
 				}
 			}

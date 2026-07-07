@@ -134,3 +134,58 @@ export async function dumpAllRawToLog(adapter: AdapterInstance): Promise<void> {
 		writeLog(`Fehler beim Ausführen des Raw-Dumps: ${err.message}`, 'error');
 	}
 }
+
+/**
+ * Schreibt einen Parameter direkt über einen TCP-Socket in die Wärmepumpe.
+ *
+ * @param adapter Der ioBroker-Adapter.
+ * @param paramId Die ID des Parameters (luxWriteId).
+ * @param value Der zu setzende Wert.
+ */
+export function writeRawParameter(adapter: AdapterInstance, paramId: number, value: number): Promise<void> {
+	return new Promise((resolve, reject) => {
+		let finished = false;
+		const client = new net.Socket();
+		const host = adapter.config.host || '127.0.0.1';
+		const port = adapter.config.port ? Number(adapter.config.port) : 8889;
+
+		client.connect(port, host, () => {
+			const buffer = Buffer.alloc(12);
+			buffer.writeInt32BE(3002, 0); // Befehl 3002 = Parameter schreiben
+			buffer.writeInt32BE(paramId, 4); // Die ID des Parameters (z.B. 1 für Wunschtemperatur)
+			buffer.writeInt32BE(value, 8); // Der neue Wert
+			client.write(buffer);
+		});
+
+		client.on('data', (chunk: Buffer) => {
+			// Die Pumpe antwortet zur Bestätigung mit dem gesendeten Befehl (3002)
+			if (chunk.length >= 4) {
+				const responseCommand = chunk.readInt32BE(0);
+				if (responseCommand === 3002) {
+					client.destroy();
+					if (!finished) {
+						finished = true;
+						resolve();
+					}
+				}
+			}
+		});
+
+		client.on('error', (err: Error) => {
+			client.destroy();
+			if (!finished) {
+				finished = true;
+				reject(err);
+			}
+		});
+
+		client.setTimeout(5000);
+		client.on('timeout', () => {
+			client.destroy();
+			if (!finished) {
+				finished = true;
+				reject(new Error(`Timeout beim Schreiben von Parameter ${paramId}.`));
+			}
+		});
+	});
+}
