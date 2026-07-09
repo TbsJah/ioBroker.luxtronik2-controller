@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "luxtronik2-controller",
-    "version": "0.1.2",
+    "version": "0.1.3",
     "news": {
+      "0.1.3": {
+        "en": "Zip Prozess ausgelagert",
+        "de": "Zip Prozess ausgelagert",
+        "ru": "Zip Prozess ausgelagert",
+        "pt": "Zip Prozess ausgelagert",
+        "nl": "Zip Prozess ausgelagert",
+        "fr": "Zip Prozess ausgelagert",
+        "it": "Zip Prozess ausgelagert",
+        "es": "Zip Prozess ausgelagert",
+        "pl": "Zip Prozess ausgelagert",
+        "uk": "Видалено процесом Zip",
+        "zh-cn": "Zip Prozess ausgelagert"
+      },
       "0.1.2": {
         "en": "NPM Freigabe",
         "de": "NPM-Freigabe",
