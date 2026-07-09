@@ -139,7 +139,6 @@
 					"label": "ZIP Dauer an (s)",
 					"sm": 12,
 					"md": 4,
-					"disabled": "data.regelung_aktiv === false",
 					"default": 120
 				},
 				"zip_last_run_min": {
@@ -147,7 +146,6 @@
 					"label": "ZIP Dauer aus (s)",
 					"sm": 12,
 					"md": 4,
-					"disabled": "data.regelung_aktiv === false",
 					"default": 600
 				},
 				"zip_aktiv_ww": {
@@ -155,7 +153,6 @@
 					"label": "ZIP Dauer bei Warmwassererzeugung (s)",
 					"sm": 12,
 					"md": 4,
-					"disabled": "data.regelung_aktiv === false",
 					"default": 600
 				}
 			}

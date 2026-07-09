@@ -4,8 +4,6 @@
 
 [![NPM version](https://img.shields.io/npm/v/iobroker.luxtronik2-controller.svg)](https://www.npmjs.com/package/iobroker.luxtronik2-controller)
 [![Downloads](https://img.shields.io/npm/dm/iobroker.luxtronik2-controller.svg)](https://www.npmjs.com/package/iobroker.luxtronik2-controller)
-![Number of Installations](https://iobroker.live/badges/luxtronik2-controller-installed.svg)
-![Current version in stable repository](https://iobroker.live/badges/luxtronik2-controller-stable.svg)
 
 [![NPM](https://nodei.co/npm/iobroker.luxtronik2-controller.png?downloads=true)](https://nodei.co/npm/iobroker.luxtronik2-controller/)
 
@@ -19,10 +17,40 @@ Dieser ioBroker-Adapter ermöglicht die lokale Steuerung und Überwachung von W�
 
 Dieses Projekt baut auf den Vorarbeiten bestehender Open-Source-Projekte auf. Ein besonderer Dank geht an:
 
+[Bouni](https://github.com/bouni/luxtronik-2) Dessen Pionierarbeit und Code-Entwicklungen die wesentliche Grundlage für die Kommunikation mit Luxtronik-Steuerungen darstellen.
+
 [Coolchip:](https://github.com/coolchip/luxtronik2) Für das grundlegende Reverse-Engineering des Luxtronik-Netzwerkprotokolls.
+
 [UncleSamSwiss:](https://github.com/UncleSamSwiss/ioBroker.luxtronik2) Für den ursprünglichen ioBroker-Adapter.
 
 Neuerungen in dieser Version: Der luxtronik2-controller integriert die TCP-Kommunikation (Port 8888 / 8889) nativ und verzichtet auf externe Bibliotheken. Zusätzlich wurden steuernde Makros, eine Logik zur Verdichterschonung sowie ein automatisiertes Datenpunkt-Management implementiert.
+
+## Features
+
+- Native TCP-Kommunikation: Direkte Verbindung zur Wärmepumpe ohne zusätzlichen Overhead.
+
+- Verdichter-Schonung (Takt-Optimierung): Zusammenlegung von Heiz- und Warmwasserzyklen zur Reduzierung der Verdichterstarts.
+
+- Integrierte Aktionen (Makros): Vordefinierte Steuerungslogiken für Zwangsheizen, Warmwasseranforderung und die Zirkulationspumpe (ZIP) inkl. automatischem Rückfall auf Standardwerte.
+
+- Benutzerdefinierte Datenpunkte: Messwerte (Index 3004) und Parameter (Index 3003) können über die Adapter-Konfiguration hinzugefügt werden. Unix-Zeitstempel werden automatisch formatiert.
+
+- Automatisches Objekt-Management: Abgewählte oder gelöschte Datenpunkte und leere Ordnerstrukturen werden bei einem Adapter-Neustart automatisch aus ioBroker entfernt.
+
+- Benachrichtigungssystem: Fehlercodes der Wärmepumpe können direkt an Telegram oder das ioBroker-Benachrichtigungssystem gesendet werden.
+
+- Bewegungsmelder-Kopplung: Möglichkeit zur bedarfsgesteuerten Aktivierung der Zirkulationspumpe über vorhandene ioBroker-Bewegungssensoren.
+
+## ⚠️ Warnung
+
+Einige Einstellungen, die durch diese Integration bereitgestellt werden, können die Leistung deiner Wärmepumpe beeinträchtigen. Fehlkonfigurationen können dazu führen, dass der Regler in einen Fehlerzustand wechselt, was einen manuellen Reset vor Ort erfordert.
+
+Dieses Projekt zielt darauf ab, deine Wärmepumpe zu schützen, indem die Konfigurationsmöglichkeiten auf sichere Werte beschränkt werden. Es können jedoch keine Garantien übernommen werden. Bitte sei vorsichtig, ziehe dein Luxtronik-Handbuch zurate und ändere keine Einstellungen, die du nicht vollständig verstehst.
+
+## 🔧 Kompatibilität
+
+Die Integration ermöglicht es dir, Wärmepumpen mit einem Luxtronik2-Regler zu überwachen und zu steuern. Sie funktioniert **lokal ohne Internetzugang**.
+Getestet wurde und wird mit einer LWD50A (LD5) von Alpha Innotec.
 
 ## ⚠️ Disclaimer / Haftungsausschluss ⚠️
 
@@ -30,18 +58,29 @@ Dieses Projekt steht in keinerlei Verbindung zu Alpha Innotec, Novelan, ait-deut
 
 _This project is not affiliated with Alpha Innotec, Novelan, ait-deutschland GmbH, or any other company. It is a personal project that is maintained in spare time. Use at your own risk._
 
-## Developer manual
+## Fehler melden & Mitwirken
+
+Fehlerberichte, Kompatibilitätshinweise zu speziellen Firmware-Versionen oder Feature-Anfragen können über den Issue-Tracker im [GitHub-Repository](https://github.com/TbsJah/ioBroker.luxtronik2-controller/issues) eingereicht werden.
+
+## Information
+
+<img src="documentation/Bilder/Haupteinstellung.png" alt="Haupteinstellung" width="20%">
+<img src="documentation/Bilder/Objekte.png" alt="Objekte" width="20%">
+
+[Deutsch](documentation/readme_de.md)
+[English](documentation/readme_en.md)
 
 // ### **WORK IN PROGRESS**
 Readme - deutsch
 Readme - english
+
 ### 0.1.5 (2026-07-09)
 
-' Update Zip
+- Update Zip
 
 ### 0.1.4 (2026-07-09)
 
-- NPM
+- Eigene States
 
 ### 0.1.3 (2026-07-09)
 
@@ -49,7 +88,7 @@ Readme - english
 
 ### 0.1.2 (2026-07-09)
 
-NPM Freigabe
+- NPM Freigabe
 
 ### 0.1.1 (2026-07-09)
 
@@ -57,7 +96,7 @@ NPM Freigabe
 
 ### 0.1.0 (2026-07-09)
 
-- (TbsJah) initial release
+- initial release
 
 ## License
 
