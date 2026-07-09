@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "luxtronik2-controller",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "news": {
+      "0.1.1": {
+        "en": "<!--\n\tPlaceholder for the next version (at the beginning of the line):\n\t### **WORK IN PROGRESS**\n-->",
+        "de": "<!--\nPlatzhalter für die nächste Version (am Anfang der Zeile):\n### **IN BEARBEITUNG**\n-->",
+        "ru": "<!--\nЗаполнитель для следующей версии (в начале строки):\n### **РАБОТА В ПРОЦЕССЕ**\n-->",
+        "pt": "<!--\nEspaço reservado para a próxima versão (no início da linha):\n### **EM ANDAMENTO**\n-->",
+        "nl": "<!--\nPlaatsaanduiding voor de volgende versie (aan het begin van de regel):\n### **WERK IN ONTWIKKELING**\n-->",
+        "fr": "<!--\nTexte d'espace réservé pour la version suivante (en début de ligne) :\n### **TRAVAIL EN COURS**\n-->",
+        "it": "<!--\nSpazio riservato per la versione successiva (all'inizio della riga):\n\t### **LAVORI IN CORSO**\n-->",
+        "es": "<!--\nMarcador de posición para la siguiente versión (al principio de la línea):\n### **EN PROCESO**\n-->",
+        "pl": "<!--\nMiejsce zastępcze dla następnej wersji (na początku wiersza):\n### **W TRAKCIE PRACY**\n-->",
+        "uk": "<!--\nЗаповнювач для наступної версії (на початку рядка):\n### **РОБОТА В ПРОЦЕСІ**\n-->",
+        "zh-cn": "<!--\n下一版本占位符（位于行首）：\n### **正在进行中**\n-->"
+      },
       "0.1.0": {
         "en": "initial release",
         "de": "Erstveröffentlichung",
