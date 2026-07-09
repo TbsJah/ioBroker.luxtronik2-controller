@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "luxtronik2-controller",
-    "version": "0.1.5",
+    "version": "0.2.0",
     "news": {
+      "0.2.0": {
+        "en": "Readme - deutsch",
+        "de": "Readme - deutsch",
+        "ru": "Readme - немецкий",
+        "pt": "Leia-me - alemão",
+        "nl": "Readme - deutsch",
+        "fr": "Lisez-moi - allemand",
+        "it": "Leggimi - tedesco",
+        "es": "Léame - alemán",
+        "pl": "Readme - niemiecki",
+        "uk": "Readme - німецькою мовою",
+        "zh-cn": "自述文件 - 德语"
+      },
       "0.1.5": {
         "en": "' Update Zip",
         "de": "'Zip aktualisieren'",
@@ -80,19 +93,6 @@
         "pl": "wydanie początkowe",
         "uk": "початковий випуск",
         "zh-cn": "初始版本"
-      },
-      "0.0.1": {
-        "en": "initial release",
-        "de": "Erstveröffentlichung",
-        "ru": "Начальная версия",
-        "pt": "lançamento inicial",
-        "nl": "Eerste uitgave",
-        "fr": "Première version",
-        "it": "Versione iniziale",
-        "es": "Versión inicial",
-        "pl": "Pierwsze wydanie",
-        "uk": "Початкова версія",
-        "zh-cn": "首次出版"
       }
     },
     "titleLang": {
