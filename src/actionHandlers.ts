@@ -1,5 +1,5 @@
 import { writeLog } from './logger';
-import { getDpPath, STATE_MAPPING } from './stateMapping';
+import { getDpPath } from './stateMapping';
 
 /**
  * Handles the forced hot-water action for the heat pump.
@@ -60,95 +60,4 @@ export async function handleZwangsheizen(adapter: any, id: string): Promise<void
 	} else {
 		writeLog(`Zwangsheizen ignoriert: Anlage ist nicht im Leerlauf.`, 'info');
 	}
-}
-
-/**
- * Activates the hot-water circulation/venting action for a specified duration.
- *
- * @param adapter - The adapter instance used to access state and configuration APIs.
- * @param id - The state ID that should be acknowledged and toggled.
- * @param durationSeconds - The duration for the ZIP action in seconds.
- * @returns A promise that resolves once the ZIP action has been processed.
- */
-export async function handleActivateZip(adapter: any, id: string, durationSeconds: number): Promise<void> {
-	await adapter.setForeignStateAsync(id, { val: true, ack: true });
-
-	if (durationSeconds <= 0) {
-		await adapter.setForeignStateAsync(id, { val: false, ack: true });
-		return;
-	}
-
-	const bzState = await adapter.getStateAsync(getDpPath('WP_BZ_akt'));
-	const bzVal = bzState ? Number(bzState.val) : 5;
-
-	const [wwIstS, wwSollS, wwHystS, rLState, rSollState, hzHystState] = await Promise.all([
-		adapter.getStateAsync(getDpPath('Wamwassertemperatur_Ist')),
-		adapter.getStateAsync(getDpPath('Wamwassertemperatur_Soll')),
-		adapter.getStateAsync(getDpPath('hotWaterTemperatureHysteresis')),
-		adapter.getStateAsync(getDpPath('temperature_return')),
-		adapter.getStateAsync(getDpPath('temperature_target_return')),
-		adapter.getStateAsync(getDpPath('returnTemperatureHysteresis')),
-	]);
-
-	const useDeaeration =
-		bzVal === 5 &&
-		Number(wwIstS?.val) > Number(wwSollS?.val) - Number(wwHystS?.val) &&
-		Number(rLState?.val) > Number(rSollState?.val) - Number(hzHystState?.val);
-
-	if (adapter.zipTimer) {
-		clearTimeout(adapter.zipTimer);
-		adapter.zipTimer = undefined;
-	}
-
-	if (useDeaeration) {
-		await adapter.queueWrite(158, 1);
-		await new Promise(r => setTimeout(r, 100));
-		await adapter.queueWrite(684, 1);
-		await adapter.syncConfigValue('runDeaerate', 1);
-		await adapter.syncConfigValue('hotWaterCircPumpDeaerate', 1);
-	} else {
-		const onTimeMinutes = Math.ceil(durationSeconds / 60);
-		// Hinweis: originalZipConfig muss nun public im Adapter sein, oder über eine Setter-Methode gesetzt werden
-		if (!adapter.originalZipConfig) {
-			const keysToSave = [
-				'hotWaterCircPumpTimerTableSelected',
-				'WW_MoSo_Start1',
-				'WW_MoSo_End1',
-				'WW_MoSo_Start2',
-				'WW_MoSo_End2',
-				'WW_MoSo_Start3',
-				'WW_MoSo_End3',
-				'WW_MoSo_Start4',
-				'WW_MoSo_End4',
-				'WW_MoSo_Start5',
-				'WW_MoSo_End5',
-				'hotWaterCircPumpOnTime',
-				'hotWaterCircPumpOffTime',
-			] as const;
-			adapter.originalZipConfig = {};
-			for (const k of keysToSave) {
-				const s = await adapter.getStateAsync(getDpPath(k));
-				adapter.originalZipConfig[k] = s ? s.val : null;
-			}
-		}
-
-		const updates = [
-			{ key: 'hotWaterCircPumpTimerTableSelected', raw: 0 },
-			{ key: 'WW_MoSo_Start1', raw: 0 },
-			{ key: 'WW_MoSo_End1', raw: 86340 },
-			{ key: 'WW_MoSo_Start2', raw: 0 },
-			{ key: 'WW_MoSo_End2', raw: 0 },
-			{ key: 'hotWaterCircPumpOnTime', raw: onTimeMinutes },
-			{ key: 'hotWaterCircPumpOffTime', raw: 60 },
-		];
-
-		for (const u of updates) {
-			await adapter.queueWrite(parseInt(STATE_MAPPING[u.key].luxWriteId as string, 10), u.raw);
-			await new Promise(r => setTimeout(r, 100));
-		}
-	}
-
-	adapter.zipTimer = setTimeout(async () => {
-		await adapter.stopZipAndDeaeration();
-	}, durationSeconds * 1000);
 }

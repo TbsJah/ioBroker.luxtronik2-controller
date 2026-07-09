@@ -29,15 +29,16 @@ var import_objectManager = require("./objectManager");
 var import_rawFunctions = require("./rawFunctions");
 var import_stateMapping = require("./stateMapping");
 var import_virtualStates = require("./virtualStates");
+var import_zipManager = require("./zipManager");
 class Luxtronik2Controller extends utils.Adapter {
   createdStates = /* @__PURE__ */ new Set();
   zipTimer;
   originalZipConfig = null;
   lastKnownErrorTimestamp = null;
+  isDebugLogActive = false;
   pollingInterval;
   pump;
   lastBzVal = "";
-  isDebugLogActive = false;
   updateRunning = false;
   lastPumpOptimization = 0;
   writeQueue = [];
@@ -176,63 +177,6 @@ class Luxtronik2Controller extends utils.Adapter {
       await this.syncConfigValue("Heizen_nach_Wasser", (_i = config.Heating_after_warmwater) != null ? _i : false);
     } catch (err) {
       (0, import_logger.writeLog)(`Fehler beim Setzen der Leerlauf-Vorgabewerte: ${err.message}`, "error");
-    }
-  }
-  async restoreOriginalZipConfig() {
-    if (!this.originalZipConfig) {
-      return;
-    }
-    try {
-      for (const [key, val] of Object.entries(this.originalZipConfig)) {
-        if (val === null || val === void 0) {
-          continue;
-        }
-        const def = import_stateMapping.STATE_MAPPING[key];
-        let rawVal = val;
-        if (def.role === "value.datetime" && typeof val === "string") {
-          const timeMatch = val.match(/^(\d{1,2}):(\d{1,2})/);
-          if (timeMatch) {
-            rawVal = parseInt(timeMatch[1], 10) * 3600 + parseInt(timeMatch[2], 10) * 60;
-          } else {
-            rawVal = 0;
-          }
-        }
-        await this.setState((0, import_stateMapping.getDpPath)(key), { val, ack: true });
-        const luxId = parseInt(def.luxWriteId, 10);
-        await this.queueWrite(luxId, rawVal);
-        await new Promise((resolve) => setTimeout(resolve, 100));
-      }
-    } catch (err) {
-      (0, import_logger.writeLog)(`Fehler bei der Wiederherstellung der ZIP Konfiguration: ${err.message}`, "error");
-    } finally {
-      this.originalZipConfig = null;
-    }
-  }
-  async stopZipAndDeaeration() {
-    try {
-      const activateZipState = await this.getStateAsync((0, import_stateMapping.getDpPath)("Activate_Zip"));
-      const runDeaerateState = await this.getStateAsync((0, import_stateMapping.getDpPath)("runDeaerate"));
-      const isZipActive = (activateZipState == null ? void 0 : activateZipState.val) === true || this.zipTimer || this.originalZipConfig !== null;
-      const isDeaerateActive = (runDeaerateState == null ? void 0 : runDeaerateState.val) === 1 || (runDeaerateState == null ? void 0 : runDeaerateState.val) === true;
-      if (isZipActive || isDeaerateActive) {
-        if (this.isDebugLogActive) {
-          (0, import_logger.writeLog)("Bedingungen erf\xFCllt: Stoppe aktives ZIP Makro und Entl\xFCftungsprogramm...", "info");
-        }
-        if (this.zipTimer) {
-          clearTimeout(this.zipTimer);
-          this.zipTimer = void 0;
-        }
-        await this.restoreOriginalZipConfig();
-        await this.queueWrite(158, 0);
-        await new Promise((resolve) => setTimeout(resolve, 100));
-        await this.queueWrite(684, 0);
-        await new Promise((resolve) => setTimeout(resolve, 100));
-        await this.syncConfigValue("runDeaerate", 0);
-        await this.syncConfigValue("hotWaterCircPumpDeaerate", 0);
-        await this.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)("Activate_Zip"), false, true);
-      }
-    } catch (err) {
-      (0, import_logger.writeLog)(`Fehler beim Stoppen von ZIP/Entl\xFCftung: ${err.message}`, "error");
     }
   }
   async istBetriebszustandAelterAls10Min() {
@@ -378,7 +322,7 @@ class Luxtronik2Controller extends utils.Adapter {
       }
       if (istLeerlauf) {
         if (wwIst <= wwSoll - wwHysterese || ruecklauf <= ruecklaufSoll - heizenHysterese) {
-          await this.stopZipAndDeaeration();
+          await (0, import_zipManager.stopZipAndDeaeration)(this);
         }
         if (wwSoll - wwIst >= wwHysterese - 1.5 && ruecklauf <= ruecklaufSoll && betriebsart !== 4 && heatingStateStr !== "Heizgrenze") {
           await this.syncConfigValue("heating_curve_parallel_offset", 35);
@@ -709,10 +653,10 @@ class Luxtronik2Controller extends utils.Adapter {
         if (state.val === true) {
           const durationState = await this.getStateAsync((0, import_stateMapping.getDpPath)("zip_aktiv"));
           const durationSeconds = durationState && typeof durationState.val === "number" ? durationState.val : 120;
-          await (0, import_actionHandlers.handleActivateZip)(this, id, durationSeconds);
+          await (0, import_zipManager.handleActivateZip)(this, id, durationSeconds);
         } else {
           await this.setForeignStateAsync(id, { val: false, ack: true });
-          await this.stopZipAndDeaeration();
+          await (0, import_zipManager.stopZipAndDeaeration)(this);
         }
         return;
       }

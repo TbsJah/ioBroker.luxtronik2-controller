@@ -2,7 +2,7 @@
  * Created with @iobroker/create-adapter v3.1.5
  */
 import * as utils from '@iobroker/adapter-core';
-import { handleActivateZip, handleZwangsheizen, handleZwangswarmwasser } from './actionHandlers';
+import { handleZwangsheizen, handleZwangswarmwasser } from './actionHandlers';
 import { initLogger, setCustomDebug, writeLog } from './logger';
 import { checkAndSendErrorNotifications, handleTestMessage, sendTelegramNotification } from './notificationManager';
 import {
@@ -26,16 +26,17 @@ import {
 	updateSystemInfos,
 	updateTimerTables,
 } from './virtualStates';
+import { handleActivateZip, stopZipAndDeaeration } from './zipManager';
 
 class Luxtronik2Controller extends utils.Adapter {
 	public createdStates = new Set<string>();
 	public zipTimer?: NodeJS.Timeout;
 	public originalZipConfig: Record<string, any> | null = null;
 	public lastKnownErrorTimestamp: number | null = null;
+	public isDebugLogActive = false;
 	private pollingInterval?: NodeJS.Timeout;
 	private pump: any;
 	private lastBzVal = '';
-	private isDebugLogActive = false;
 	private updateRunning = false;
 	private lastPumpOptimization: number = 0;
 
@@ -158,7 +159,7 @@ class Luxtronik2Controller extends utils.Adapter {
 		}
 	}
 
-	private async setOwnStateIfDifferent(id: string, val: any, ack = false): Promise<void> {
+	public async setOwnStateIfDifferent(id: string, val: any, ack = false): Promise<void> {
 		try {
 			if (val === undefined) {
 				return;
@@ -199,76 +200,6 @@ class Luxtronik2Controller extends utils.Adapter {
 			await this.syncConfigValue('Heizen_nach_Wasser', config.Heating_after_warmwater ?? false);
 		} catch (err: any) {
 			writeLog(`Fehler beim Setzen der Leerlauf-Vorgabewerte: ${err.message}`, 'error');
-		}
-	}
-
-	private async restoreOriginalZipConfig(): Promise<void> {
-		if (!this.originalZipConfig) {
-			return;
-		}
-
-		try {
-			for (const [key, val] of Object.entries(this.originalZipConfig)) {
-				if (val === null || val === undefined) {
-					continue;
-				}
-
-				const def = STATE_MAPPING[key];
-				let rawVal = val;
-
-				if (def.role === 'value.datetime' && typeof val === 'string') {
-					const timeMatch = val.match(/^(\d{1,2}):(\d{1,2})/);
-					if (timeMatch) {
-						rawVal = parseInt(timeMatch[1], 10) * 3600 + parseInt(timeMatch[2], 10) * 60;
-					} else {
-						rawVal = 0;
-					}
-				}
-
-				await this.setState(getDpPath(key as any), { val: val, ack: true });
-
-				const luxId = parseInt(def.luxWriteId as string, 10);
-				await this.queueWrite(luxId, rawVal);
-				await new Promise(resolve => setTimeout(resolve, 100));
-			}
-		} catch (err: any) {
-			writeLog(`Fehler bei der Wiederherstellung der ZIP Konfiguration: ${err.message}`, 'error');
-		} finally {
-			this.originalZipConfig = null;
-		}
-	}
-
-	public async stopZipAndDeaeration(): Promise<void> {
-		try {
-			const activateZipState = await this.getStateAsync(getDpPath('Activate_Zip'));
-			const runDeaerateState = await this.getStateAsync(getDpPath('runDeaerate'));
-
-			const isZipActive = activateZipState?.val === true || this.zipTimer || this.originalZipConfig !== null;
-			const isDeaerateActive = runDeaerateState?.val === 1 || runDeaerateState?.val === true;
-
-			if (isZipActive || isDeaerateActive) {
-				if (this.isDebugLogActive) {
-					writeLog('Bedingungen erfüllt: Stoppe aktives ZIP Makro und Entlüftungsprogramm...', 'info');
-				}
-
-				if (this.zipTimer) {
-					clearTimeout(this.zipTimer);
-					this.zipTimer = undefined;
-				}
-
-				await this.restoreOriginalZipConfig();
-
-				await this.queueWrite(158, 0);
-				await new Promise(resolve => setTimeout(resolve, 100));
-				await this.queueWrite(684, 0);
-				await new Promise(resolve => setTimeout(resolve, 100));
-
-				await this.syncConfigValue('runDeaerate', 0);
-				await this.syncConfigValue('hotWaterCircPumpDeaerate', 0);
-				await this.setOwnStateIfDifferent(getDpPath('Activate_Zip'), false, true);
-			}
-		} catch (err: any) {
-			writeLog(`Fehler beim Stoppen von ZIP/Entlüftung: ${err.message}`, 'error');
 		}
 	}
 
@@ -430,7 +361,7 @@ class Luxtronik2Controller extends utils.Adapter {
 
 			if (istLeerlauf) {
 				if (wwIst <= wwSoll - wwHysterese || ruecklauf <= ruecklaufSoll - heizenHysterese) {
-					await this.stopZipAndDeaeration();
+					await stopZipAndDeaeration(this);
 				}
 				if (
 					wwSoll - wwIst >= wwHysterese - 1.5 &&
@@ -862,7 +793,7 @@ class Luxtronik2Controller extends utils.Adapter {
 					await handleActivateZip(this, id, durationSeconds);
 				} else {
 					await this.setForeignStateAsync(id, { val: false, ack: true });
-					await this.stopZipAndDeaeration();
+					await stopZipAndDeaeration(this);
 				}
 				return;
 			}
