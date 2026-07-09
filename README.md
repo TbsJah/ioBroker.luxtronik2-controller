@@ -71,10 +71,10 @@ Fehlerberichte, Kompatibilitätshinweise zu speziellen Firmware-Versionen oder F
 <img src="documentation/Bilder/Haupteinstellung.png" alt="Haupteinstellung" width="100%">
 <img src="documentation/Bilder/Objekte.png" alt="Objekte" width="100%">
 <img src="documentation/Bilder/Datenpunkte.png" alt="Datenpunkte" width="100%">
-<img src="documentation/Bilder/Benachrichtigung.png" alt="Benachrichtigung" width="100%"
-<img src="documentation/Bilder/EigeneWerte.png" alt="EigeneWerte" width="100%"
-<img src="documentation/Bilder/Fehlermeldung.png" alt="Fehlermeldung" width="100%"
-<img src="documentation/Bilder/Bewegungssensoren.png" alt="Bewegungssensoren" width="100%"
+<img src="documentation/Bilder/Benachrichtigung.png" alt="Benachrichtigung" width="100%">
+<img src="documentation/Bilder/EigeneWerte.png" alt="EigeneWerte" width="100%">
+<img src="documentation/Bilder/Fehlermeldung.png" alt="Fehlermeldung" width="100%">
+<img src="documentation/Bilder/Bewegungssensoren.png" alt="Bewegungssensoren" width="100%">
 
 // ### **WORK IN PROGRESS**
 Readme - deutsch
