@@ -64,8 +64,8 @@ Fehlerberichte, Kompatibilitätshinweise zu speziellen Firmware-Versionen oder F
 
 ## Information
 
-<img src="documentation/Bilder/Haupteinstellung.png" alt="Haupteinstellung" width="20%">
-<img src="documentation/Bilder/Objekte.png" alt="Objekte" width="20%">
+<img src="documentation/Bilder/Haupteinstellung.png" alt="Haupteinstellung" width="60%">
+<img src="documentation/Bilder/Objekte.png" alt="Objekte" width="60%">
 
 [Deutsch](documentation/readme_de.md)
 [English](documentation/readme_en.md)
