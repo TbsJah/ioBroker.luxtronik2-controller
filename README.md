@@ -43,6 +43,11 @@ dev-server watch
 The ioBroker.admin interface will then be available at http://localhost:undefined/
 
 Please refer to the [`dev-server` documentation](https://github.com/ioBroker/dev-server#command-line) for more details.
+
+### **WORK IN PROGRESS**
+
+- NPM
+
 ### 0.1.3 (2026-07-09)
 
 - Zip Prozess ausgelagert
