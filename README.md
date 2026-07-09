@@ -1,4 +1,4 @@
-![Logo](admin/luxtronik2-controller.png)
+<img src="admin/luxtronik2-controller.png" alt="Projekt Logo" width="20%">
 
 # ioBroker.luxtronik2-controller
 
