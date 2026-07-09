@@ -9,6 +9,7 @@ import {
 } from './codes';
 import { writeLog } from './logger';
 // Imports anpassen
+import { sanitizeName } from './objectManager';
 import { getDpPath, getLuxIdByKey } from './stateMapping';
 
 // ==========================================
@@ -485,18 +486,7 @@ export async function updateCustomStates(adapter: any, rawValues: number[], rawP
 				finalVal = String(rawVal);
 			}
 
-			// Gleiche Säuberungsfunktion für die ID wie in main.ts
-			const cleanId = custom.name
-				.replace(/ä/g, 'ae')
-				.replace(/ö/g, 'oe')
-				.replace(/ü/g, 'ue')
-				.replace(/Ä/g, 'Ae')
-				.replace(/Ö/g, 'Oe')
-				.replace(/Ü/g, 'Ue')
-				.replace(/ß/g, 'ss')
-				.replace(/[^a-zA-Z0-9_]/g, '_')
-				.replace(/_+/g, '_')
-				.replace(/^_|_$/g, '');
+			const cleanId = sanitizeName(custom.name);
 
 			const stateId = `${adapter.namespace}.Benutzer.${cleanId}`;
 

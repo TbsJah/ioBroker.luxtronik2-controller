@@ -113,7 +113,7 @@ class Luxtronik2Controller extends utils.Adapter {
 		}, intervalSeconds * 1000);
 	}
 
-	private async syncConfigValue(mappingKey: keyof typeof STATE_MAPPING, val: any): Promise<void> {
+	public async syncConfigValue(mappingKey: keyof typeof STATE_MAPPING, val: any): Promise<void> {
 		if (val === undefined || val === null) {
 			return;
 		}
@@ -179,8 +179,8 @@ class Luxtronik2Controller extends utils.Adapter {
 		try {
 			const config = this.config as Record<string, any>;
 			// Überall mit ?? (Nullish Coalescing) den sicheren Werks-Standard hinterlegen!
-			await this.syncConfigValue('heating_curve_end_point', config.endpunkt ?? 21.5);
-			await this.syncConfigValue('heating_curve_parallel_offset', config.fusspunkt ?? 23.7);
+			await this.syncConfigValue('heating_curve_end_point', config.endpunkt ?? 23);
+			await this.syncConfigValue('heating_curve_parallel_offset', config.fusspunkt ?? 21.7);
 			await this.syncConfigValue(
 				'heating_system_circ_pump_voltage_minimal',
 				config.sync_heating_system_circ_pump_voltage_minimal_heating ?? 3,
@@ -238,7 +238,7 @@ class Luxtronik2Controller extends utils.Adapter {
 		}
 	}
 
-	private async stopZipAndDeaeration(): Promise<void> {
+	public async stopZipAndDeaeration(): Promise<void> {
 		try {
 			const activateZipState = await this.getStateAsync(getDpPath('Activate_Zip'));
 			const runDeaerateState = await this.getStateAsync(getDpPath('runDeaerate'));
@@ -383,8 +383,8 @@ class Luxtronik2Controller extends utils.Adapter {
 				if (aelterAls10 && vd1) {
 					const fusspunkt = (await this.getStateAsync(getDpPath('heating_curve_parallel_offset')))?.val;
 					if (fusspunkt === 35) {
-						// FIX: Fallback auf 21.5°C Fusspunkt, falls in Config nichts eingetragen wurde!
-						const fallbackFusspunkt = config.fusspunkt ?? 21.5;
+						// FIX: Fallback auf 21.7°C Fusspunkt, falls in Config nichts eingetragen wurde!
+						const fallbackFusspunkt = config.fusspunkt ?? 21.7;
 						await this.syncConfigValue('heating_curve_parallel_offset', fallbackFusspunkt);
 					}
 				}
@@ -461,7 +461,7 @@ class Luxtronik2Controller extends utils.Adapter {
 		await writeRawParameter(this, paramId, value);
 	}
 
-	private async queueWrite(cmd: string | number, val: any): Promise<void> {
+	public async queueWrite(cmd: string | number, val: any): Promise<void> {
 		return new Promise((resolve, reject) => {
 			this.writeQueue.push(async () => {
 				try {
@@ -692,9 +692,7 @@ class Luxtronik2Controller extends utils.Adapter {
 				clearTimeout(this.zipTimer);
 			}
 
-			// Setze alle kritischen Status beim Beenden sicherheitshalber auf false
-			// Promise intentionally ignored
-			void this.setState('info.connection', false, true);
+			void this.setState('info.connection', { val: false, ack: true });
 
 			writeLog('Adapter wird beendet. Alle Timer und Verbindungen sauber gestoppt.', 'info');
 			callback();

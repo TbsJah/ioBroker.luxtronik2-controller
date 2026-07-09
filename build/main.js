@@ -156,8 +156,8 @@ class Luxtronik2Controller extends utils.Adapter {
     var _a, _b, _c, _d, _e, _f, _g, _h, _i;
     try {
       const config = this.config;
-      await this.syncConfigValue("heating_curve_end_point", (_a = config.endpunkt) != null ? _a : 21.5);
-      await this.syncConfigValue("heating_curve_parallel_offset", (_b = config.fusspunkt) != null ? _b : 23.7);
+      await this.syncConfigValue("heating_curve_end_point", (_a = config.endpunkt) != null ? _a : 23);
+      await this.syncConfigValue("heating_curve_parallel_offset", (_b = config.fusspunkt) != null ? _b : 21.7);
       await this.syncConfigValue(
         "heating_system_circ_pump_voltage_minimal",
         (_c = config.sync_heating_system_circ_pump_voltage_minimal_heating) != null ? _c : 3
@@ -339,7 +339,7 @@ class Luxtronik2Controller extends utils.Adapter {
         if (aelterAls10 && vd1) {
           const fusspunkt = (_r = await this.getStateAsync((0, import_stateMapping.getDpPath)("heating_curve_parallel_offset"))) == null ? void 0 : _r.val;
           if (fusspunkt === 35) {
-            const fallbackFusspunkt = (_s = config.fusspunkt) != null ? _s : 21.5;
+            const fallbackFusspunkt = (_s = config.fusspunkt) != null ? _s : 21.7;
             await this.syncConfigValue("heating_curve_parallel_offset", fallbackFusspunkt);
           }
         }
@@ -586,7 +586,7 @@ class Luxtronik2Controller extends utils.Adapter {
       if (this.zipTimer) {
         clearTimeout(this.zipTimer);
       }
-      void this.setState("info.connection", false, true);
+      void this.setState("info.connection", { val: false, ack: true });
       (0, import_logger.writeLog)("Adapter wird beendet. Alle Timer und Verbindungen sauber gestoppt.", "info");
       callback();
     } catch {

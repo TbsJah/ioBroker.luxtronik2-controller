@@ -31,6 +31,7 @@ __export(virtualStates_exports, {
 module.exports = __toCommonJS(virtualStates_exports);
 var import_codes = require("./codes");
 var import_logger = require("./logger");
+var import_objectManager = require("./objectManager");
 var import_stateMapping = require("./stateMapping");
 async function calculateSum(adapter, sourceId1, sourceId2, targetId, logName) {
   try {
@@ -348,7 +349,7 @@ async function updateCustomStates(adapter, rawValues, rawParams) {
       } else {
         finalVal = String(rawVal);
       }
-      const cleanId = custom.name.replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/Ä/g, "Ae").replace(/Ö/g, "Oe").replace(/Ü/g, "Ue").replace(/ß/g, "ss").replace(/[^a-zA-Z0-9_]/g, "_").replace(/_+/g, "_").replace(/^_|_$/g, "");
+      const cleanId = (0, import_objectManager.sanitizeName)(custom.name);
       const stateId = `${adapter.namespace}.Benutzer.${cleanId}`;
       const current = await adapter.getForeignStateAsync(stateId);
       if (!current || current.val !== finalVal) {
