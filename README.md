@@ -45,6 +45,11 @@ The ioBroker.admin interface will then be available at http://localhost:undefine
 Please refer to the [`dev-server` documentation](https://github.com/ioBroker/dev-server#command-line) for more details.
 
 ## Changelog
+
+### **WORK IN PROGRESS**
+
+NPM Freigabe
+
 ### 0.1.1 (2026-07-09)
 
 <!--
