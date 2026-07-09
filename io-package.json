@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "luxtronik2-controller",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "news": {
+      "0.1.2": {
+        "en": "NPM Freigabe",
+        "de": "NPM-Freigabe",
+        "ru": "NPM Freigabe",
+        "pt": "NPM Freigabe",
+        "nl": "NPM Freigabe",
+        "fr": "NPM Freigabe",
+        "it": "NPM Freigabe",
+        "es": "NPM Freigabe",
+        "pl": "NPM Freigabe",
+        "uk": "НПМ Фрайгабе",
+        "zh-cn": "NPM Freigabe"
+      },
       "0.1.1": {
         "en": "<!--\n\tPlaceholder for the next version (at the beginning of the line):\n\t### **WORK IN PROGRESS**\n-->",
         "de": "<!--\nPlatzhalter für die nächste Version (am Anfang der Zeile):\n### **IN BEARBEITUNG**\n-->",
