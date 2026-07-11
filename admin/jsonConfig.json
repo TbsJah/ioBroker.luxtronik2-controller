@@ -16,7 +16,18 @@
 					"md": 4,
 					"default": "192.168.178.81"
 				},
-				"port": { "type": "number", "label": "Port", "sm": 12, "md": 4, "default": 8889 },
+				"port": {
+					"type": "number",
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"lg": 3,
+					"label": "Wärmepumpen Port",
+					"help": "Standard TCP: 8889 | Firmware > 3.81 (WebSockets): 8214",
+					"min": 1,
+					"max": 65535,
+					"default": 8214
+				},
 				"interval": {
 					"type": "number",
 					"label": "Abfrageintervall (Sekunden)",
