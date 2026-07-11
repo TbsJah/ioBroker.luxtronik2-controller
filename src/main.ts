@@ -76,6 +76,8 @@ class Luxtronik2Controller extends utils.Adapter {
 		await cleanupEmptyFolders(this);
 		await ensureAllObjectsExist(this);
 		await ensureCustomObjectsExist(this);
+		// Synchronisiere das virtuelle Objekt mit der neuen Konfigurations-Checkbox
+		await this.setState(getDpPath('Regelung_Aktiv'), { val: config.regelung_aktiv !== false, ack: true });
 
 		const debugState = await this.getStateAsync(getDpPath('Schreibe_Debug_Log'));
 		this.isDebugLogActive = debugState?.val === true;
@@ -212,14 +214,9 @@ class Luxtronik2Controller extends utils.Adapter {
 			return false;
 		}
 	}
-
 	private async runOptimizationSchedule(): Promise<void> {
 		try {
-			const regelungAktiv = await this.getStateAsync(getDpPath('Regelung_Aktiv'));
-			if (regelungAktiv?.val === false) {
-				return;
-			}
-
+			const config = this.config as Record<string, any>;
 			const bzState = await this.getStateAsync(getDpPath('WP_BZ_akt'));
 			const bzVal = bzState && bzState.val !== null ? String(bzState.val).trim() : '';
 
@@ -228,47 +225,66 @@ class Luxtronik2Controller extends utils.Adapter {
 			const istAbtauen = bzVal === '4';
 			const istLeerlauf = bzVal === '5';
 
+			// Wenn kein relevanter Status aktiv ist, abbrechen
 			if (!istHeizen && !istWarmwasser && !istLeerlauf && !istAbtauen) {
 				return;
 			}
 
-			const config = this.config as Record<string, any>;
-
+			// =========================================================
+			// 1. DYNAMISCHE PARAMETER-ANPASSUNG BEI STATUSWECHSEL
+			// =========================================================
 			if (bzVal !== this.lastBzVal) {
 				if (istLeerlauf) {
-					await this.setIdleDefaults();
+					// Checkbox: Standardwerte im Leerlauf erzwingen
+					if (config.idle_defaults_aktiv !== false) {
+						await this.setIdleDefaults();
+					}
 				} else if (istHeizen) {
-					await this.syncConfigValue('zip_aktiv', config.zip_aktiv ?? 0);
-					await this.syncConfigValue(
-						'heating_system_circ_pump_voltage_minimal',
-						config.sync_heating_system_circ_pump_voltage_minimal_heating ?? 3,
-					);
-					await this.syncConfigValue(
-						'heating_system_circ_pump_voltage_nominal',
-						config.sync_heating_system_circ_pump_voltage_nominal_heating ?? 7,
-					);
-					await this.syncConfigValue('Heizen_nach_Wasser', config.Heating_after_warmwater ?? false);
+					// Checkbox: ZIP- & HUP-Spannungsoptimierung
+					if (config.zip_optimierung_aktiv !== false) {
+						await this.syncConfigValue('zip_aktiv', config.zip_aktiv ?? 0);
+						await this.syncConfigValue(
+							'heating_system_circ_pump_voltage_minimal',
+							config.sync_heating_system_circ_pump_voltage_minimal_heating ?? 3,
+						);
+						await this.syncConfigValue(
+							'heating_system_circ_pump_voltage_nominal',
+							config.sync_heating_system_circ_pump_voltage_nominal_heating ?? 7,
+						);
+					}
+					// Checkbox: Takt-Optimierung (Heizen nach Wasser zurücksetzen)
+					if (config.regelung_aktiv !== false) {
+						await this.syncConfigValue('Heizen_nach_Wasser', config.Heating_after_warmwater ?? false);
+					}
 				} else if (istWarmwasser) {
-					await this.syncConfigValue(
-						'hotWaterTemperatureHysteresis',
-						config.sync_hotwater_temperature_hysteresis ?? 2,
-					);
-					await this.syncConfigValue('zip_aktiv', config.zip_aktiv_ww ?? 0);
-					await this.syncConfigValue(
-						'heating_system_circ_pump_voltage_minimal',
-						config.sync_heating_system_circ_pump_voltage_minimal_water ?? 3,
-					);
-					await this.syncConfigValue(
-						'heating_system_circ_pump_voltage_nominal',
-						config.sync_heating_system_circ_pump_voltage_nominal_water ?? 10,
-					);
-					await this.setOwnStateIfDifferent(getDpPath('Activate_Zip'), true, false);
+					// Checkbox: ZIP- & HUP-Spannungsoptimierung
+					if (config.zip_optimierung_aktiv !== false) {
+						await this.syncConfigValue(
+							'hotWaterTemperatureHysteresis',
+							config.sync_hotwater_temperature_hysteresis ?? 2,
+						);
+						await this.syncConfigValue('zip_aktiv', config.zip_aktiv_ww ?? 0);
+						await this.setOwnStateIfDifferent(getDpPath('Activate_Zip'), true, false);
+
+						await this.syncConfigValue(
+							'heating_system_circ_pump_voltage_minimal',
+							config.sync_heating_system_circ_pump_voltage_minimal_water ?? 3,
+						);
+						await this.syncConfigValue(
+							'heating_system_circ_pump_voltage_nominal',
+							config.sync_heating_system_circ_pump_voltage_nominal_water ?? 10,
+						);
+					}
 				} else if (istAbtauen) {
-					await this.syncConfigValue('heating_system_circ_pump_voltage_nominal', 10);
+					// Checkbox: ZIP- & HUP-Spannungsoptimierung
+					if (config.zip_optimierung_aktiv !== false) {
+						await this.syncConfigValue('heating_system_circ_pump_voltage_nominal', 10);
+					}
 				}
 				this.lastBzVal = bzVal;
 			}
 
+			// Paralleler Abruf aller Telemetriedaten für die laufende Zyklus-Überwachung
 			const [
 				wwSollState,
 				wwIstState,
@@ -310,66 +326,83 @@ class Luxtronik2Controller extends utils.Adapter {
 			const nachWasser = nachWasserState?.val;
 			const betriebsart = (bzState?.val as number) ?? 0;
 
+			// =========================================================
+			// 2. KONTINUIERLICHE ÜBERWACHUNG WÄHREND DES BETRIEBS
+			// =========================================================
 			if (istHeizen) {
-				if (aelterAls10 && vd1) {
+				// Takt-Optimierung: Anhebung des Fußpunkts nach 10 min stabilisieren
+				if (config.regelung_aktiv !== false && aelterAls10 && vd1) {
 					const fusspunkt = (await this.getStateAsync(getDpPath('heating_curve_parallel_offset')))?.val;
 					if (fusspunkt === 35) {
-						// FIX: Fallback auf 21.7°C Fusspunkt, falls in Config nichts eingetragen wurde!
 						const fallbackFusspunkt = config.fusspunkt ?? 21.7;
 						await this.syncConfigValue('heating_curve_parallel_offset', fallbackFusspunkt);
 					}
 				}
 
-				const now = Date.now();
-				if (now - this.lastPumpOptimization > 300000) {
-					if (spreizung < 6.5 && hupAktiv > 5.5) {
-						await this.syncConfigValue('heating_system_circ_pump_voltage_nominal', hupAktiv - 0.25);
-						this.lastPumpOptimization = now;
-						writeLog(
-							`Spreizung zu gering (${spreizung}K). HUP-Spannung auf ${hupAktiv - 0.25}V gesenkt. Nächste Prüfung in 5 Min.`,
-							'info',
-						);
-					} else if (spreizung > 7.5 && hupAktiv < 10) {
-						// + Sicherheit gegen Überdrehen (>10V)
-						await this.syncConfigValue('heating_system_circ_pump_voltage_nominal', hupAktiv + 0.25);
-						this.lastPumpOptimization = now;
-						writeLog(
-							`Spreizung zu hoch (${spreizung}K). HUP-Spannung auf ${hupAktiv + 0.25}V erhöht. Nächste Prüfung in 5 Min.`,
-							'info',
-						);
+				// ZIP- & HUP-Spannungsoptimierung: Dynamische Spreizungsregelung der HUP
+				if (config.zip_optimierung_aktiv !== false) {
+					const now = Date.now();
+					if (now - this.lastPumpOptimization > 300000) {
+						if (spreizung < 6.5 && hupAktiv > 5.5) {
+							await this.syncConfigValue('heating_system_circ_pump_voltage_nominal', hupAktiv - 0.25);
+							this.lastPumpOptimization = now;
+							writeLog(
+								`Spreizung zu gering (${spreizung}K). HUP-Spannung auf ${hupAktiv - 0.25}V gesenkt.`,
+								'info',
+							);
+						} else if (spreizung > 7.5 && hupAktiv < 10) {
+							await this.syncConfigValue('heating_system_circ_pump_voltage_nominal', hupAktiv + 0.25);
+							this.lastPumpOptimization = now;
+							writeLog(
+								`Spreizung zu hoch (${spreizung}K). HUP-Spannung auf ${hupAktiv + 0.25}V erhöht.`,
+								'info',
+							);
+						}
 					}
 				}
 
-				if (ruecklauf >= ruecklaufSoll + heizenHysterese - 0.1) {
-					if (aelterAls10) {
-						await this.syncConfigValue('Heizen_nach_Wasser', false);
+				// Takt-Optimierung: "Heizen nach Wasser" und Hysteresen-Management
+				if (config.regelung_aktiv !== false) {
+					if (ruecklauf >= ruecklaufSoll + heizenHysterese - 0.1) {
+						if (aelterAls10) {
+							await this.syncConfigValue('Heizen_nach_Wasser', false);
+						}
+					} else if (!nachWasser && config.Heating_after_warmwater === true) {
+						await this.syncConfigValue('Heizen_nach_Wasser', true);
 					}
-				} else if (!nachWasser && config.Heating_after_warmwater === true) {
-					await this.syncConfigValue('Heizen_nach_Wasser', true);
-				}
 
-				if (wwSoll - wwIst > 2 && ruecklauf >= ruecklaufSoll + heizenHysterese - 0.1) {
-					// FIX: Auch hier den Fallback nutzen, anstatt hart "2" reinzuschreiben!
-					const fallbackHyst = config.sync_hotwater_temperature_hysteresis ?? 2;
-					await this.syncConfigValue('hotWaterTemperatureHysteresis', fallbackHyst);
+					if (wwSoll - wwIst > 2 && ruecklauf >= ruecklaufSoll + heizenHysterese - 0.1) {
+						const fallbackHyst = config.sync_hotwater_temperature_hysteresis ?? 2;
+						await this.syncConfigValue('hotWaterTemperatureHysteresis', fallbackHyst);
+					}
 				}
 			}
 
 			if (istWarmwasser && nachWasser) {
-				await this.syncConfigValue('heating_curve_parallel_offset', 35);
+				// Takt-Optimierung: Fußpunkt anheben bei Heizen nach Wasser
+				if (config.regelung_aktiv !== false) {
+					await this.syncConfigValue('heating_curve_parallel_offset', 35);
+				}
 			}
 
 			if (istLeerlauf) {
-				if (wwIst <= wwSoll - wwHysterese || ruecklauf <= ruecklaufSoll - heizenHysterese) {
-					await stopZipAndDeaeration(this);
+				// ZIP- & HUP-Spannungsoptimierung: ZIP bei erreichten Sollwerten beenden
+				if (config.zip_optimierung_aktiv !== false) {
+					if (wwIst <= wwSoll - wwHysterese || ruecklauf <= ruecklaufSoll - heizenHysterese) {
+						await stopZipAndDeaeration(this);
+					}
 				}
-				if (
-					wwSoll - wwIst >= wwHysterese - 1.5 &&
-					ruecklauf <= ruecklaufSoll &&
-					betriebsart !== 4 &&
-					heatingStateStr !== 'Heizgrenze'
-				) {
-					await this.syncConfigValue('heating_curve_parallel_offset', 35);
+
+				// Takt-Optimierung: Heiztakt vor einer nahenden Warmwasserladung vorziehen
+				if (config.regelung_aktiv !== false) {
+					if (
+						wwSoll - wwIst >= wwHysterese - 1.5 &&
+						ruecklauf <= ruecklaufSoll &&
+						betriebsart !== 4 &&
+						heatingStateStr !== 'Heizgrenze'
+					) {
+						await this.syncConfigValue('heating_curve_parallel_offset', 35);
+					}
 				}
 			}
 		} catch (err: any) {
