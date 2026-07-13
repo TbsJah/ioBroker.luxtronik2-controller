@@ -8,7 +8,12 @@
 			"label": "Haupteinstellungen",
 			"icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMjQgMjQiPjxwYXRoIGQ9Ik0wIDBoMjR2MjRIMHoiIGZpbGw9Im5vbmUiLz48cGF0aCBmaWxsPSJjdXJyZW50Q29sb3IiIGQ9Ik0xMC44MjUgMjJxLS42NzUgMC0xLjE2Mi0uNDV0LS41ODgtMS4xTDguODUgMTguOHEtLjMyNS0uMTI1LS42MTItLjN0LS41NjMtLjM3NWwtMS41NS42NXEtLjYyNS4yNzUtMS4yNS4wNXQtLjk3NS0uOGwtMS4xNzUtMi4wNXEtLjM1LS41NzUtLjItMS4yMjV0LjY3NS0xLjA3NWwxLjMyNS0xUTQuNSAxMi41IDQuNSAxMi4zMzd2LS42NzVxMC0uMTYyLjAyNS0uMzM3bC0xLjMyNS0xUTIuNjc1IDkuOSAyLjUyNSA5LjI1dC4yLTEuMjI1TDMuOSA1Ljk3NXEuMzUtLjU3NS45NzUtLjh0MS4yNS4wNWwxLjU1LjY1cS4yNzUtLjIuNTc1LS4zNzV0LjYtLjNsLjIyNS0xLjY1cS4xLS42NS41ODgtMS4xVDEwLjgyNSAyaDIuMzVxLjY3NSAwIDEuMTYzLjQ1dC41ODcgMS4xbC4yMjUgMS42NXEuMzI1LjEyNS42MTMuM3QuNTYyLjM3NWwxLjU1LS42NXEuNjI1LS4yNzUgMS4yNS0uMDV0Ljk3NS44bDEuMTc1IDIuMDVxLjM1LjU3NS4yIDEuMjI1dC0uNjc1IDEuMDc1bC0xLjMyNSAxcS4wMjUuMTc1LjAyNS4zMzh2LjY3NHEwIC4xNjMtLjA1LjMzOGwxLjMyNSAxcS41MjUuNDI1LjY3NSAxLjA3NXQtLjIgMS4yMjVsLTEuMiAyLjA1cS0uMzUuNTc1LS45NzUuOHQtMS4yNS0uMDVsLTEuNS0uNjVxLS4yNzUuMi0uNTc1LjM3NXQtLjYuM2wtLjIyNSAxLjY1cS0uMS42NS0uNTg3IDEuMXQtMS4xNjMuNDV6bTEuMjI1LTYuNXExLjQ1IDAgMi40NzUtMS4wMjVUMTUuNTUgMTJ0LTEuMDI1LTIuNDc1VDEyLjA1IDguNXEtMS40NzUgMC0yLjQ4OCAxLjAyNVQ4LjU1IDEydDEuMDEzIDIuNDc1VDEyLjA1IDE1LjUiLz48L3N2Zz4=",
 			"items": {
-				"headerConnection": { "type": "header", "text": "Verbindungseinstellungen", "size": 4, "sm": 12 },
+				"headerConnection": {
+					"type": "header",
+					"text": "Verbindungseinstellungen",
+					"size": 4,
+					"sm": 12
+				},
 				"host": {
 					"type": "text",
 					"label": "IP-Adresse (Host)",
@@ -16,7 +21,18 @@
 					"md": 4,
 					"default": "192.168.178.81"
 				},
-				"port": { "type": "number", "label": "Port", "sm": 12, "md": 4, "default": 8889 },
+				"port": {
+					"type": "number",
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"lg": 3,
+					"label": "Wärmepumpen Port",
+					"help": "Standard TCP: 8889 | Firmware > 3.81 (WebSockets): 8214",
+					"min": 1,
+					"max": 65535,
+					"default": 8214
+				},
 				"interval": {
 					"type": "number",
 					"label": "Abfrageintervall (Sekunden)",
@@ -39,25 +55,43 @@
 					"sm": 12,
 					"md": 12
 				},
-
 				"regelung_aktiv": {
-					"type": "select",
-					"label": "Status der automatischen Regelung",
-					"options": [
-						{ "label": "Aktiv", "value": true },
-						{ "label": "Inaktiv", "value": false }
-					],
-					"sm": 12,
-					"md": 12,
+					"type": "checkbox",
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"label": "Intelligente Takt-Optimierung aktivieren",
+					"help": "Kombiniert Heiz- und Warmwassertakte zur Minimierung der Verdichterstarts",
 					"default": true
 				},
-				"headerHeating": { "type": "header", "text": "Vorgabewerte Heizen", "size": 4, "sm": 12 },
+				"abstandRegelung3": {
+					"type": "staticText",
+					"text": "",
+					"style": { "height": "20px" },
+					"sm": 12,
+					"md": 12
+				},
+				"idle_defaults_aktiv": {
+					"type": "checkbox",
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"label": "Standardwerte im Leerlauf erzwingen",
+					"help": "Setzt veränderte Parameter (z.B. Fußpunkt, HUP-Spannung) im Leerlauf selbstständig zurück",
+					"default": true
+				},
+				"headerHeating": {
+					"type": "header",
+					"text": "Vorgabewerte Heizen",
+					"size": 4,
+					"sm": 12
+				},
 				"fusspunkt": {
 					"type": "number",
 					"label": "Fußpunkt (°C)",
 					"sm": 12,
 					"md": 4,
-					"disabled": "data.regelung_aktiv === false",
+					"disabled": "!data.idle_defaults_aktiv",
 					"default": 21.7
 				},
 				"endpunkt": {
@@ -65,7 +99,7 @@
 					"label": "Endpunkt (°C)",
 					"sm": 12,
 					"md": 4,
-					"disabled": "data.regelung_aktiv === false",
+					"disabled": "!data.idle_defaults_aktiv",
 					"default": 23
 				},
 				"sync_return_temperature_hysteresis": {
@@ -73,7 +107,7 @@
 					"label": "Heizen Hysterese (K)",
 					"sm": 12,
 					"md": 4,
-					"disabled": "data.regelung_aktiv === false",
+					"disabled": "!data.idle_defaults_aktiv",
 					"default": 1.5
 				},
 				"sync_heating_system_circ_pump_voltage_minimal_heating": {
@@ -81,7 +115,7 @@
 					"label": "HUP Min (V)",
 					"sm": 12,
 					"md": 6,
-					"disabled": "data.regelung_aktiv === false",
+					"disabled": "!data.idle_defaults_aktiv",
 					"default": 3
 				},
 				"sync_heating_system_circ_pump_voltage_nominal_heating": {
@@ -89,7 +123,7 @@
 					"label": "HUP Nom (V)",
 					"sm": 12,
 					"md": 6,
-					"disabled": "data.regelung_aktiv === false",
+					"disabled": "!data.idle_defaults_aktiv",
 					"default": 7
 				},
 				"Heating_after_warmwater": {
@@ -97,16 +131,21 @@
 					"label": "Heizen nach Warmwasser",
 					"sm": 12,
 					"md": 12,
-					"disabled": "data.regelung_aktiv === false",
+					"disabled": "!data.regelung_aktiv",
 					"default": true
 				},
-				"headerWater": { "type": "header", "text": "Vorgabewerte Warmwasser", "size": 4, "sm": 12 },
+				"headerWater": {
+					"type": "header",
+					"text": "Vorgabewerte Warmwasser",
+					"size": 4,
+					"sm": 12
+				},
 				"sync_warmwater_target_temperature": {
 					"type": "number",
 					"label": "WW Soll (°C)",
 					"sm": 12,
 					"md": 6,
-					"disabled": "data.regelung_aktiv === false",
+					"disabled": "!data.idle_defaults_aktiv",
 					"default": 54
 				},
 				"sync_hotwater_temperature_hysteresis": {
@@ -114,7 +153,7 @@
 					"label": "WW Hysterese (K)",
 					"sm": 12,
 					"md": 6,
-					"disabled": "data.regelung_aktiv === false",
+					"disabled": "!data.idle_defaults_aktiv",
 					"default": 10
 				},
 				"sync_heating_system_circ_pump_voltage_minimal_water": {
@@ -122,7 +161,7 @@
 					"label": "HUP Min (V)",
 					"sm": 12,
 					"md": 6,
-					"disabled": "data.regelung_aktiv === false",
+					"disabled": "!data.idle_defaults_aktiv",
 					"default": 3
 				},
 				"sync_heating_system_circ_pump_voltage_nominal_water": {
@@ -130,22 +169,38 @@
 					"label": "HUP Nom (V)",
 					"sm": 12,
 					"md": 6,
-					"disabled": "data.regelung_aktiv === false",
+					"disabled": "!data.idle_defaults_aktiv",
 					"default": 10
 				},
-				"headerZip": { "type": "header", "text": "Vorgabewerte Zirkulationspumpe", "size": 4, "sm": 12 },
+				"zip_optimierung_aktiv": {
+					"type": "checkbox",
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"label": "ZIP- & HUP-Spannungsoptimierung zulassen",
+					"help": "Erlaubt das dynamische Überschreiben der ZIP-Laufzeiten und HUP-Spannungen während aktiver Takte",
+					"default": true
+				},
+				"headerZip": {
+					"type": "header",
+					"text": "Vorgabewerte Zirkulationspumpe",
+					"size": 4,
+					"sm": 12
+				},
 				"zip_aktiv": {
 					"type": "number",
 					"label": "ZIP Dauer an (s)",
 					"sm": 12,
 					"md": 4,
-					"default": 120
+					"default": 120,
+					"disabled": "!data.zip_optimierung_aktiv"
 				},
 				"zip_last_run_min": {
 					"type": "number",
 					"label": "ZIP Dauer aus (s)",
 					"sm": 12,
 					"md": 4,
+					"disabled": "!data.zip_optimierung_aktiv",
 					"default": 600
 				},
 				"zip_aktiv_ww": {
@@ -153,6 +208,7 @@
 					"label": "ZIP Dauer bei Warmwassererzeugung (s)",
 					"sm": 12,
 					"md": 4,
+					"disabled": "!data.zip_optimierung_aktiv",
 					"default": 600
 				}
 			}
@@ -307,7 +363,13 @@
 							"sm": 12,
 							"md": 6
 						},
-						"sync_EVUin": { "type": "checkbox", "label": "EVU-Sperre", "default": true, "sm": 12, "md": 6 },
+						"sync_EVUin": {
+							"type": "checkbox",
+							"label": "EVU-Sperre",
+							"default": true,
+							"sm": 12,
+							"md": 6
+						},
 						"sync_HDin": {
 							"type": "checkbox",
 							"label": "Hochdruckwächter HD",
@@ -1044,6 +1106,57 @@
 							"md": 6
 						}
 					}
+				},
+				"panel_kuehlung": {
+					"type": "panel",
+					"label": "13. Kühlung",
+					"collapsable": true,
+					"sm": 12,
+					"md": 12,
+					"items": {
+						"sync_cooling_operation_mode": {
+							"type": "checkbox",
+							"label": "Kühlung Betriebsart",
+							"default": true,
+							"sm": 12,
+							"md": 6
+						},
+						"sync_cooling_release_temp": {
+							"type": "checkbox",
+							"label": "Kühlfreigabe Temperatur",
+							"default": true,
+							"sm": 12,
+							"md": 6
+						},
+						"sync_cooling_inlet_temp": {
+							"type": "checkbox",
+							"label": "Kühlmitteleinlasstemperatur",
+							"default": true,
+							"sm": 12,
+							"md": 6
+						},
+						"sync_cooling_start_after_hours": {
+							"type": "checkbox",
+							"label": "Kühlung Start nach Stunden",
+							"default": true,
+							"sm": 12,
+							"md": 6
+						},
+						"sync_cooling_end_after_hours": {
+							"type": "checkbox",
+							"label": "Kühlung End nach Stunden",
+							"default": true,
+							"sm": 12,
+							"md": 6
+						},
+						"sync_hours_cooling": {
+							"type": "checkbox",
+							"label": "Kühlung Stunden",
+							"default": true,
+							"sm": 12,
+							"md": 6
+						}
+					}
 				}
 			}
 		},
@@ -1055,8 +1168,12 @@
 				"telegram_warning": {
 					"type": "staticText",
 					"text": "⚠️ Kein Telegram-Adapter gefunden! Bitte installiere eine Telegram-Instanz, um diese Funktion zu nutzen.",
-					"style": { "color": "#d32f2f", "fontWeight": "bold", "marginBottom": "15px" },
-					"hidden": "data.telegram_instance  ? true : false",
+					"style": {
+						"color": "#d32f2f",
+						"fontWeight": "bold",
+						"marginBottom": "15px"
+					},
+					"hidden": "data.telegram_instance ? true : false",
 					"sm": 12
 				},
 				"telegram_enabled": {
@@ -1105,7 +1222,11 @@
 			"label": "Bewegungssensoren",
 			"icon": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='currentColor' d='M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2s-2 .9-2 2s.9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8l2.1 2v6h2v-7.5l-2.1-2l.6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1c-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7z'/%3E%3C/svg%3E",
 			"items": {
-				"motion_sensors_aktiv": { "type": "checkbox", "label": "Bewegungssensoren aktiv nutzen", "sm": 12 },
+				"motion_sensors_aktiv": {
+					"type": "checkbox",
+					"label": "Bewegungssensoren aktiv nutzen",
+					"sm": 12
+				},
 				"headerSensors": {
 					"type": "header",
 					"text": "Bewegungssensoren für Zirkulationspumpe (ZIP)",
@@ -1116,8 +1237,18 @@
 					"type": "table",
 					"sm": 12,
 					"items": [
-						{ "type": "text", "attr": "name", "title": "Bezeichnung (z.B. Bad)", "width": "30%" },
-						{ "type": "objectId", "attr": "oid", "title": "Objekt-ID auswählen", "width": "70%" }
+						{
+							"type": "text",
+							"attr": "name",
+							"title": "Bezeichnung (z.B. Bad)",
+							"width": "30%"
+						},
+						{
+							"type": "text",
+							"attr": "oid",
+							"title": "Objekt-ID auswählen",
+							"width": "70%"
+						}
 					]
 				}
 			}
@@ -1148,8 +1279,14 @@
 							"attr": "source",
 							"title": "Datenquelle",
 							"options": [
-								{ "label": "Messwert (rawValues)", "value": "value" },
-								{ "label": "Parameter (rawParams)", "value": "parameter" }
+								{
+									"label": "Messwert (rawValues)",
+									"value": "value"
+								},
+								{
+									"label": "Parameter (rawParams)",
+									"value": "parameter"
+								}
 							],
 							"width": "180px"
 						},
@@ -1164,10 +1301,22 @@
 							"attr": "type",
 							"title": "Datentyp",
 							"options": [
-								{ "label": "Zahl", "value": "number" },
-								{ "label": "Text", "value": "string" },
-								{ "label": "Wahr/Falsch", "value": "boolean" },
-								{ "label": "Datum/Uhrzeit (Unix)", "value": "datetime" }
+								{
+									"label": "Zahl",
+									"value": "number"
+								},
+								{
+									"label": "Text",
+									"value": "string"
+								},
+								{
+									"label": "Wahr/Falsch",
+									"value": "boolean"
+								},
+								{
+									"label": "Datum/Uhrzeit (Unix)",
+									"value": "datetime"
+								}
 							],
 							"width": "120px"
 						},

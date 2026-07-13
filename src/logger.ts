@@ -34,20 +34,20 @@ export function setCustomDebug(active: boolean): void {
  */
 export function writeLog(text: string, level: LogLevel = 'info'): void {
 	if (!adapter) {
-		// Fallback, falls der Logger (noch) nicht initialisiert wurde
 		console.log(`[${level.toUpperCase()}] ${text}`);
 		return;
 	}
 
-	// Wenn es ein Debug-Log ist, aber der manuelle Schalter aus ist, ignorieren wir es
+	// Wenn es ein Debug-Log ist, aber der manuelle Schalter aus ist -> ignorieren
 	if (level === 'debug' && !customDebugActive) {
 		return;
 	}
 
-	// Ruft dynamisch die passende ioBroker-Log-Funktion auf
-	if (adapter.log && typeof adapter.log[level] === 'function') {
-		adapter.log[level](text);
-	} else {
-		adapter.log.info(`[${level.toUpperCase()}] ${text}`);
+	// DER TRICK: Wenn der Schalter aktiv ist, machen wir aus 'debug' ein 'info',
+	// damit es im ioBroker für dich sofort lesbar in normaler Schrift auftaucht!
+	const targetLevel = level === 'debug' && customDebugActive ? 'info' : level;
+
+	if (adapter.log && typeof adapter.log[targetLevel] === 'function') {
+		adapter.log[targetLevel](text);
 	}
 }
