@@ -1024,6 +1024,72 @@ const STATE_MAPPING = {
     luxWriteId: "134"
   },
   // ==========================================
+  // KÜHLUNG (COOLING)
+  // ==========================================
+  cooling_operation_mode: {
+    folder: "Informationen.13_Kuehlung",
+    name: "Betriebsart K\xFChlung",
+    role: "value",
+    type: "number",
+    write: true,
+    luxWriteId: "108",
+    states: { 0: "Aus", 1: "Automatik" },
+    dataSource: "raw_parameter"
+  },
+  cooling_release_temp: {
+    folder: "Informationen.13_Kuehlung",
+    name: "K\xFChlfreigabe Temperatur",
+    role: "level.temperature",
+    type: "number",
+    unit: "\xB0C",
+    write: true,
+    luxWriteId: "110",
+    factor: 10,
+    dataSource: "raw_parameter"
+  },
+  cooling_inlet_temp: {
+    folder: "Informationen.13_Kuehlung",
+    name: "K\xFChlmitteleinlasstemperatur",
+    role: "level.temperature",
+    type: "number",
+    unit: "\xB0C",
+    write: false,
+    luxWriteId: "132",
+    factor: 10,
+    dataSource: "raw_parameter"
+  },
+  cooling_start_after_hours: {
+    folder: "Informationen.13_Kuehlung",
+    name: "cooling_start_after_hours",
+    role: "level.temperature",
+    type: "number",
+    unit: "h",
+    write: true,
+    luxWriteId: "850",
+    dataSource: "raw_parameter"
+  },
+  cooling_end_after_hours: {
+    folder: "Informationen.13_Kuehlung",
+    name: "cooling_end_after_hours",
+    role: "level.temperature",
+    type: "number",
+    unit: "h",
+    write: true,
+    luxWriteId: "851",
+    dataSource: "raw_parameter"
+  },
+  hours_cooling: {
+    folder: "Informationen.13_Kuehlung",
+    name: "hours_cooling",
+    role: "level.temperature",
+    type: "number",
+    unit: "h",
+    write: false,
+    luxWriteId: "66",
+    factor: 3600,
+    dataSource: "raw_parameter"
+  },
+  // ==========================================
   // EINSTELLUNGEN & PARAMETER (Beschreibbar)
   // ==========================================
   // Betriebsmodus
@@ -1152,20 +1218,20 @@ const STATE_MAPPING = {
     dataSource: "raw_parameter",
     required: true
   },
-  temperature_hot_water_target: {
-    folder: "Einstellungen.03_Warmwasser",
-    name: "Warmwasser Soll-Temperatur",
-    role: "value.temperature",
-    type: "number",
-    unit: "\xB0C",
-    write: true,
-    luxWriteId: "105",
-    factor: 10,
-    min: 30,
-    max: 65,
-    dataSource: "raw_parameter",
-    required: true
-  },
+  // temperature_hot_water_target: {
+  // 	folder: 'Einstellungen.03_Warmwasser',
+  // 	name: 'Warmwasser Soll-Temperatur',
+  // 	role: 'value.temperature',
+  // 	type: 'number',
+  // 	unit: '°C',
+  // 	write: true,
+  // 	luxWriteId: '105',
+  // 	factor: 10,
+  // 	min: 30,
+  // 	max: 65,
+  // 	dataSource: 'raw_parameter',
+  // 	required: true,
+  // },
   hotWaterTemperatureHysteresis: {
     folder: "Einstellungen.03_Warmwasser",
     name: "Warmwasser Hysterese",
