@@ -37,7 +37,6 @@ class Luxtronik2Controller extends utils.Adapter {
   lastKnownErrorTimestamp = null;
   isDebugLogActive = false;
   pollingInterval;
-  pump;
   lastBzVal = "";
   updateRunning = false;
   lastPumpOptimization = 0;
@@ -72,6 +71,7 @@ class Luxtronik2Controller extends utils.Adapter {
     await (0, import_objectManager.cleanupEmptyFolders)(this);
     await (0, import_objectManager.ensureAllObjectsExist)(this);
     await (0, import_objectManager.ensureCustomObjectsExist)(this);
+    await this.setState((0, import_stateMapping.getDpPath)("Regelung_Aktiv"), { val: config.regelung_aktiv !== false, ack: true });
     const debugState = await this.getStateAsync((0, import_stateMapping.getDpPath)("Schreibe_Debug_Log"));
     this.isDebugLogActive = (debugState == null ? void 0 : debugState.val) === true;
     (0, import_logger.setCustomDebug)(this.isDebugLogActive);
@@ -90,17 +90,24 @@ class Luxtronik2Controller extends utils.Adapter {
       }
     }
     this.subscribeStates("*");
-    await this.updateData();
-    let intervalSeconds = config.interval || 30;
+    try {
+      await this.updateData();
+    } catch (error) {
+      this.log.error(`Fehler bei der initialen Datenabfrage (Pumpe offline?): ${error.message}`);
+    }
+    let intervalSeconds = this.config.interval ? Number(this.config.interval) : 45;
     if (intervalSeconds < 10) {
       intervalSeconds = 10;
       (0, import_logger.writeLog)("Eingestelltes Intervall war zu kurz. Wurde zum Schutz auf 10 Sekunden korrigiert.", "warn");
     }
-    (0, import_logger.writeLog)(`Starte Polling-Intervall. Lese Daten und optimiere alle ${intervalSeconds} Sekunden.`, "info");
-    await this.setState("info.connection", true, true);
-    this.pollingInterval = setInterval(() => {
-      void this.updateData();
+    this.pollingInterval = this.setInterval(async () => {
+      try {
+        await this.updateData();
+      } catch (error) {
+        this.log.error(`Fehler w\xE4hrend des zyklischen Datenabrufs: ${error.message}`);
+      }
     }, intervalSeconds * 1e3);
+    await this.setState("info.connection", true, true);
   }
   async syncConfigValue(mappingKey, val) {
     if (val === void 0 || val === null) {
@@ -192,10 +199,7 @@ class Luxtronik2Controller extends utils.Adapter {
   async runOptimizationSchedule() {
     var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t;
     try {
-      const regelungAktiv = await this.getStateAsync((0, import_stateMapping.getDpPath)("Regelung_Aktiv"));
-      if ((regelungAktiv == null ? void 0 : regelungAktiv.val) === false) {
-        return;
-      }
+      const config = this.config;
       const bzState = await this.getStateAsync((0, import_stateMapping.getDpPath)("WP_BZ_akt"));
       const bzVal = bzState && bzState.val !== null ? String(bzState.val).trim() : "";
       const istHeizen = bzVal === "0";
@@ -205,38 +209,47 @@ class Luxtronik2Controller extends utils.Adapter {
       if (!istHeizen && !istWarmwasser && !istLeerlauf && !istAbtauen) {
         return;
       }
-      const config = this.config;
       if (bzVal !== this.lastBzVal) {
         if (istLeerlauf) {
-          await this.setIdleDefaults();
+          if (config.idle_defaults_aktiv !== false) {
+            await this.setIdleDefaults();
+          }
         } else if (istHeizen) {
-          await this.syncConfigValue("zip_aktiv", (_a = config.zip_aktiv) != null ? _a : 0);
-          await this.syncConfigValue(
-            "heating_system_circ_pump_voltage_minimal",
-            (_b = config.sync_heating_system_circ_pump_voltage_minimal_heating) != null ? _b : 3
-          );
-          await this.syncConfigValue(
-            "heating_system_circ_pump_voltage_nominal",
-            (_c = config.sync_heating_system_circ_pump_voltage_nominal_heating) != null ? _c : 7
-          );
-          await this.syncConfigValue("Heizen_nach_Wasser", (_d = config.Heating_after_warmwater) != null ? _d : false);
+          if (config.zip_optimierung_aktiv !== false) {
+            await this.syncConfigValue("zip_aktiv", (_a = config.zip_aktiv) != null ? _a : 0);
+            await this.syncConfigValue(
+              "heating_system_circ_pump_voltage_minimal",
+              (_b = config.sync_heating_system_circ_pump_voltage_minimal_heating) != null ? _b : 3
+            );
+            await this.syncConfigValue(
+              "heating_system_circ_pump_voltage_nominal",
+              (_c = config.sync_heating_system_circ_pump_voltage_nominal_heating) != null ? _c : 7
+            );
+          }
+          if (config.regelung_aktiv !== false) {
+            await this.syncConfigValue("Heizen_nach_Wasser", (_d = config.Heating_after_warmwater) != null ? _d : false);
+          }
         } else if (istWarmwasser) {
-          await this.syncConfigValue(
-            "hotWaterTemperatureHysteresis",
-            (_e = config.sync_hotwater_temperature_hysteresis) != null ? _e : 2
-          );
-          await this.syncConfigValue("zip_aktiv", (_f = config.zip_aktiv_ww) != null ? _f : 0);
-          await this.syncConfigValue(
-            "heating_system_circ_pump_voltage_minimal",
-            (_g = config.sync_heating_system_circ_pump_voltage_minimal_water) != null ? _g : 3
-          );
-          await this.syncConfigValue(
-            "heating_system_circ_pump_voltage_nominal",
-            (_h = config.sync_heating_system_circ_pump_voltage_nominal_water) != null ? _h : 10
-          );
-          await this.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)("Activate_Zip"), true, false);
+          if (config.zip_optimierung_aktiv !== false) {
+            await this.syncConfigValue(
+              "hotWaterTemperatureHysteresis",
+              (_e = config.sync_hotwater_temperature_hysteresis) != null ? _e : 2
+            );
+            await this.syncConfigValue("zip_aktiv", (_f = config.zip_aktiv_ww) != null ? _f : 0);
+            await this.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)("Activate_Zip"), true, false);
+            await this.syncConfigValue(
+              "heating_system_circ_pump_voltage_minimal",
+              (_g = config.sync_heating_system_circ_pump_voltage_minimal_water) != null ? _g : 3
+            );
+            await this.syncConfigValue(
+              "heating_system_circ_pump_voltage_nominal",
+              (_h = config.sync_heating_system_circ_pump_voltage_nominal_water) != null ? _h : 10
+            );
+          }
         } else if (istAbtauen) {
-          await this.syncConfigValue("heating_system_circ_pump_voltage_nominal", 10);
+          if (config.zip_optimierung_aktiv !== false) {
+            await this.syncConfigValue("heating_system_circ_pump_voltage_nominal", 10);
+          }
         }
         this.lastBzVal = bzVal;
       }
@@ -280,52 +293,62 @@ class Luxtronik2Controller extends utils.Adapter {
       const nachWasser = nachWasserState == null ? void 0 : nachWasserState.val;
       const betriebsart = (_q = bzState == null ? void 0 : bzState.val) != null ? _q : 0;
       if (istHeizen) {
-        if (aelterAls10 && vd1) {
+        if (config.regelung_aktiv !== false && aelterAls10 && vd1) {
           const fusspunkt = (_r = await this.getStateAsync((0, import_stateMapping.getDpPath)("heating_curve_parallel_offset"))) == null ? void 0 : _r.val;
           if (fusspunkt === 35) {
             const fallbackFusspunkt = (_s = config.fusspunkt) != null ? _s : 21.7;
             await this.syncConfigValue("heating_curve_parallel_offset", fallbackFusspunkt);
           }
         }
-        const now = Date.now();
-        if (now - this.lastPumpOptimization > 3e5) {
-          if (spreizung < 6.5 && hupAktiv > 5.5) {
-            await this.syncConfigValue("heating_system_circ_pump_voltage_nominal", hupAktiv - 0.25);
-            this.lastPumpOptimization = now;
-            (0, import_logger.writeLog)(
-              `Spreizung zu gering (${spreizung}K). HUP-Spannung auf ${hupAktiv - 0.25}V gesenkt. N\xE4chste Pr\xFCfung in 5 Min.`,
-              "info"
-            );
-          } else if (spreizung > 7.5 && hupAktiv < 10) {
-            await this.syncConfigValue("heating_system_circ_pump_voltage_nominal", hupAktiv + 0.25);
-            this.lastPumpOptimization = now;
-            (0, import_logger.writeLog)(
-              `Spreizung zu hoch (${spreizung}K). HUP-Spannung auf ${hupAktiv + 0.25}V erh\xF6ht. N\xE4chste Pr\xFCfung in 5 Min.`,
-              "info"
-            );
+        if (config.zip_optimierung_aktiv !== false) {
+          const now = Date.now();
+          if (now - this.lastPumpOptimization > 3e5) {
+            if (spreizung < 6.5 && hupAktiv > 5.5) {
+              await this.syncConfigValue("heating_system_circ_pump_voltage_nominal", hupAktiv - 0.25);
+              this.lastPumpOptimization = now;
+              (0, import_logger.writeLog)(
+                `Spreizung zu gering (${spreizung}K). HUP-Spannung auf ${hupAktiv - 0.25}V gesenkt.`,
+                "info"
+              );
+            } else if (spreizung > 7.5 && hupAktiv < 10) {
+              await this.syncConfigValue("heating_system_circ_pump_voltage_nominal", hupAktiv + 0.25);
+              this.lastPumpOptimization = now;
+              (0, import_logger.writeLog)(
+                `Spreizung zu hoch (${spreizung}K). HUP-Spannung auf ${hupAktiv + 0.25}V erh\xF6ht.`,
+                "info"
+              );
+            }
           }
         }
-        if (ruecklauf >= ruecklaufSoll + heizenHysterese - 0.1) {
-          if (aelterAls10) {
-            await this.syncConfigValue("Heizen_nach_Wasser", false);
+        if (config.regelung_aktiv !== false) {
+          if (ruecklauf >= ruecklaufSoll + heizenHysterese - 0.1) {
+            if (aelterAls10) {
+              await this.syncConfigValue("Heizen_nach_Wasser", false);
+            }
+          } else if (!nachWasser && config.Heating_after_warmwater === true) {
+            await this.syncConfigValue("Heizen_nach_Wasser", true);
           }
-        } else if (!nachWasser && config.Heating_after_warmwater === true) {
-          await this.syncConfigValue("Heizen_nach_Wasser", true);
-        }
-        if (wwSoll - wwIst > 2 && ruecklauf >= ruecklaufSoll + heizenHysterese - 0.1) {
-          const fallbackHyst = (_t = config.sync_hotwater_temperature_hysteresis) != null ? _t : 2;
-          await this.syncConfigValue("hotWaterTemperatureHysteresis", fallbackHyst);
+          if (wwSoll - wwIst > 2 && ruecklauf >= ruecklaufSoll + heizenHysterese - 0.1) {
+            const fallbackHyst = (_t = config.sync_hotwater_temperature_hysteresis) != null ? _t : 2;
+            await this.syncConfigValue("hotWaterTemperatureHysteresis", fallbackHyst);
+          }
         }
       }
       if (istWarmwasser && nachWasser) {
-        await this.syncConfigValue("heating_curve_parallel_offset", 35);
+        if (config.regelung_aktiv !== false) {
+          await this.syncConfigValue("heating_curve_parallel_offset", 35);
+        }
       }
       if (istLeerlauf) {
-        if (wwIst <= wwSoll - wwHysterese || ruecklauf <= ruecklaufSoll - heizenHysterese) {
-          await (0, import_zipManager.stopZipAndDeaeration)(this);
+        if (config.zip_optimierung_aktiv !== false) {
+          if (wwIst <= wwSoll - wwHysterese || ruecklauf <= ruecklaufSoll - heizenHysterese) {
+            await (0, import_zipManager.stopZipAndDeaeration)(this);
+          }
         }
-        if (wwSoll - wwIst >= wwHysterese - 1.5 && ruecklauf <= ruecklaufSoll && betriebsart !== 4 && heatingStateStr !== "Heizgrenze") {
-          await this.syncConfigValue("heating_curve_parallel_offset", 35);
+        if (config.regelung_aktiv !== false) {
+          if (wwSoll - wwIst >= wwHysterese - 1.5 && ruecklauf <= ruecklaufSoll && betriebsart !== 4 && heatingStateStr !== "Heizgrenze") {
+            await this.syncConfigValue("heating_curve_parallel_offset", 35);
+          }
         }
       }
     } catch (err) {
@@ -361,13 +384,24 @@ class Luxtronik2Controller extends utils.Adapter {
       return;
     }
     this.isWriting = true;
-    const task = this.writeQueue.shift();
-    if (task) {
-      await task();
-      await new Promise((resolve) => setTimeout(resolve, 300));
+    try {
+      while (this.writeQueue.length > 0) {
+        const task = this.writeQueue.shift();
+        if (task) {
+          try {
+            await task();
+            await new Promise((resolve) => setTimeout(resolve, 300));
+          } catch (taskError) {
+            (0, import_logger.writeLog)(
+              `Fehler beim Ausf\xFChren eines Schreibbefehls in der Queue: ${taskError.message}`,
+              "error"
+            );
+          }
+        }
+      }
+    } finally {
+      this.isWriting = false;
     }
-    this.isWriting = false;
-    void this.processQueue();
   }
   formatSecondsToHMS(totalSeconds) {
     if (totalSeconds < 0 || isNaN(totalSeconds)) {
