@@ -39,10 +39,9 @@ function writeLog(text, level = "info") {
   if (level === "debug" && !customDebugActive) {
     return;
   }
-  if (adapter.log && typeof adapter.log[level] === "function") {
-    adapter.log[level](text);
-  } else {
-    adapter.log.info(`[${level.toUpperCase()}] ${text}`);
+  const targetLevel = level === "debug" && customDebugActive ? "info" : level;
+  if (adapter.log && typeof adapter.log[targetLevel] === "function") {
+    adapter.log[targetLevel](text);
   }
 }
 // Annotate the CommonJS export names for ESM import in node:

@@ -77,6 +77,12 @@ Fehlerberichte, Kompatibilitätshinweise zu speziellen Firmware-Versionen oder F
 <img src="documentation/Bilder/Bewegungssensoren.png" alt="Bewegungssensoren" width="100%">
 
 // ### **WORK IN PROGRESS**
+
+### **WORK IN PROGRESS**
+
+- Websocketport hinzugefügt für Firmware >3.8
+- NPM Packet ws hinzugefügt
+
 ### 0.2.0 (2026-07-09)
 
 - Readme - deutsch
