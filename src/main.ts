@@ -34,8 +34,7 @@ class Luxtronik2Controller extends utils.Adapter {
 	public originalZipConfig: Record<string, any> | null = null;
 	public lastKnownErrorTimestamp: number | null = null;
 	public isDebugLogActive = false;
-	private pollingInterval?: NodeJS.Timeout;
-	private pump: any;
+	private pollingInterval: ioBroker.Interval | undefined;
 	private lastBzVal = '';
 	private updateRunning = false;
 	private lastPumpOptimization: number = 0;
@@ -101,19 +100,30 @@ class Luxtronik2Controller extends utils.Adapter {
 
 		this.subscribeStates('*');
 
-		await this.updateData();
+		try {
+			// Wir versuchen die Anlage einmalig beim Start auszulesen
+			await this.updateData();
+		} catch (error: any) {
+			// Wenn die Pumpe beim Start offline ist, stürzt der Adapter nicht mehr ab!
+			this.log.error(`Fehler bei der initialen Datenabfrage (Pumpe offline?): ${error.message}`);
+		}
 
-		let intervalSeconds = config.interval || 30;
+		let intervalSeconds = this.config.interval ? Number(this.config.interval) : 45;
 		if (intervalSeconds < 10) {
 			intervalSeconds = 10;
 			writeLog('Eingestelltes Intervall war zu kurz. Wurde zum Schutz auf 10 Sekunden korrigiert.', 'warn');
 		}
 
-		writeLog(`Starte Polling-Intervall. Lese Daten und optimiere alle ${intervalSeconds} Sekunden.`, 'info');
-		await this.setState('info.connection', true, true);
-		this.pollingInterval = setInterval(() => {
-			void this.updateData();
+		this.pollingInterval = this.setInterval(async () => {
+			// Auch im Intervall selbst fangen wir Fehler ab, damit ein Timeout den ioBroker nicht crasht
+			try {
+				await this.updateData();
+			} catch (error: any) {
+				this.log.error(`Fehler während des zyklischen Datenabrufs: ${error.message}`);
+			}
 		}, intervalSeconds * 1000);
+
+		await this.setState('info.connection', true, true);
 	}
 
 	public async syncConfigValue(mappingKey: keyof typeof STATE_MAPPING, val: any): Promise<void> {
@@ -440,18 +450,43 @@ class Luxtronik2Controller extends utils.Adapter {
 	}
 
 	private async processQueue(): Promise<void> {
+		// Wenn die Queue bereits abgearbeitet wird oder leer ist, brechen wir ab
 		if (this.isWriting || this.writeQueue.length === 0) {
 			return;
 		}
+
+		// Warteschlange wird jetzt blockiert, damit keine parallelen Schreibzugriffe stattfinden
 		this.isWriting = true;
-		const task = this.writeQueue.shift();
-		if (task) {
-			await task();
-			// NEU: Die "Bremse" für die Luxtronik-Netzwerkkarte (300ms)
-			await new Promise(resolve => setTimeout(resolve, 300));
+
+		try {
+			// Solange noch Aufträge in der Liste sind, arbeiten wir sie der Reihe nach ab
+			while (this.writeQueue.length > 0) {
+				const task = this.writeQueue.shift(); // Nimmt den ältesten Auftrag aus der Liste
+
+				if (task) {
+					try {
+						// Versuche, den Schreibbefehl an die Luxtronik zu senden
+						await task();
+
+						// Hardware-Schutz: Zwingende Pause (z.B. 300ms) nach jedem Schreibbefehl,
+						// damit sich der Controller der Wärmepumpe nicht verschluckt.
+						await new Promise(resolve => setTimeout(resolve, 300));
+					} catch (taskError: any) {
+						// Wenn ein einzelner Schreibbefehl fehlschlägt, fangen wir das HIER ab.
+						// Dadurch stürzt die Schleife nicht ab, sondern macht einfach mit dem
+						// nächsten Befehl in der Warteschlange weiter!
+						writeLog(
+							`Fehler beim Ausführen eines Schreibbefehls in der Queue: ${taskError.message}`,
+							'error',
+						);
+					}
+				}
+			}
+		} finally {
+			// oder mit einem schweren Fehler (Exception) abgebrochen ist.
+			// So ist garantiert, dass die Warteschlange immer wieder für neue Befehle freigegeben wird!
+			this.isWriting = false;
 		}
-		this.isWriting = false;
-		void this.processQueue();
 	}
 
 	private formatSecondsToHMS(totalSeconds: number): string {

@@ -37,7 +37,7 @@ var net = __toESM(require("net"));
 var import_ws = __toESM(require("ws"));
 var import_logger = require("./logger");
 function shouldUseWs(adapter) {
-  const port = Number(adapter.config.port);
+  const port = adapter.config.port ? Number(adapter.config.port) : 8889;
   return port !== 8888 && port !== 8889;
 }
 function readAllRaw(adapter, command) {

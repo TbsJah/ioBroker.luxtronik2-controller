@@ -11,9 +11,8 @@ import { writeLog } from './logger';
  * @param adapter The adapter instance
  */
 function shouldUseWs(adapter: AdapterInstance): boolean {
-	const port = Number(adapter.config.port);
-
-	// Falls der Port nicht 8888 und nicht 8889 ist, nutzen wir WebSockets
+	// Wenn das Feld leer ist, gehen wir vom alten TCP Standard 8889 aus
+	const port = adapter.config.port ? Number(adapter.config.port) : 8889;
 	return port !== 8888 && port !== 8889;
 }
 

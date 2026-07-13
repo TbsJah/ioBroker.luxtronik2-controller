@@ -1031,7 +1031,7 @@ const STATE_MAPPING = {
     name: "Betriebsart K\xFChlung",
     role: "value",
     type: "number",
-    write: false,
+    write: true,
     luxWriteId: "108",
     states: { 0: "Aus", 1: "Automatik" },
     dataSource: "raw_parameter"
@@ -1042,7 +1042,7 @@ const STATE_MAPPING = {
     role: "level.temperature",
     type: "number",
     unit: "\xB0C",
-    write: false,
+    write: true,
     luxWriteId: "110",
     factor: 10,
     dataSource: "raw_parameter"
@@ -1064,7 +1064,7 @@ const STATE_MAPPING = {
     role: "level.temperature",
     type: "number",
     unit: "h",
-    write: false,
+    write: true,
     luxWriteId: "850",
     dataSource: "raw_parameter"
   },
@@ -1074,7 +1074,7 @@ const STATE_MAPPING = {
     role: "level.temperature",
     type: "number",
     unit: "h",
-    write: false,
+    write: true,
     luxWriteId: "851",
     dataSource: "raw_parameter"
   },

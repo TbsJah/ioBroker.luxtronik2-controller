@@ -37,7 +37,6 @@ class Luxtronik2Controller extends utils.Adapter {
   lastKnownErrorTimestamp = null;
   isDebugLogActive = false;
   pollingInterval;
-  pump;
   lastBzVal = "";
   updateRunning = false;
   lastPumpOptimization = 0;
@@ -91,17 +90,24 @@ class Luxtronik2Controller extends utils.Adapter {
       }
     }
     this.subscribeStates("*");
-    await this.updateData();
-    let intervalSeconds = config.interval || 30;
+    try {
+      await this.updateData();
+    } catch (error) {
+      this.log.error(`Fehler bei der initialen Datenabfrage (Pumpe offline?): ${error.message}`);
+    }
+    let intervalSeconds = this.config.interval ? Number(this.config.interval) : 45;
     if (intervalSeconds < 10) {
       intervalSeconds = 10;
       (0, import_logger.writeLog)("Eingestelltes Intervall war zu kurz. Wurde zum Schutz auf 10 Sekunden korrigiert.", "warn");
     }
-    (0, import_logger.writeLog)(`Starte Polling-Intervall. Lese Daten und optimiere alle ${intervalSeconds} Sekunden.`, "info");
-    await this.setState("info.connection", true, true);
-    this.pollingInterval = setInterval(() => {
-      void this.updateData();
+    this.pollingInterval = this.setInterval(async () => {
+      try {
+        await this.updateData();
+      } catch (error) {
+        this.log.error(`Fehler w\xE4hrend des zyklischen Datenabrufs: ${error.message}`);
+      }
     }, intervalSeconds * 1e3);
+    await this.setState("info.connection", true, true);
   }
   async syncConfigValue(mappingKey, val) {
     if (val === void 0 || val === null) {
@@ -378,13 +384,24 @@ class Luxtronik2Controller extends utils.Adapter {
       return;
     }
     this.isWriting = true;
-    const task = this.writeQueue.shift();
-    if (task) {
-      await task();
-      await new Promise((resolve) => setTimeout(resolve, 300));
+    try {
+      while (this.writeQueue.length > 0) {
+        const task = this.writeQueue.shift();
+        if (task) {
+          try {
+            await task();
+            await new Promise((resolve) => setTimeout(resolve, 300));
+          } catch (taskError) {
+            (0, import_logger.writeLog)(
+              `Fehler beim Ausf\xFChren eines Schreibbefehls in der Queue: ${taskError.message}`,
+              "error"
+            );
+          }
+        }
+      }
+    } finally {
+      this.isWriting = false;
     }
-    this.isWriting = false;
-    void this.processQueue();
   }
   formatSecondsToHMS(totalSeconds) {
     if (totalSeconds < 0 || isNaN(totalSeconds)) {
