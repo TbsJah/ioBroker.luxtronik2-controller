@@ -241,12 +241,15 @@ function writeRawParameterWs(adapter: AdapterInstance, paramId: number, value: n
 		let finished = false;
 		const host = adapter.config.host;
 		const port = adapter.config.port ? Number(adapter.config.port) : 8214;
-		// Ein expliziter Slash am Ende der URL hilft bei einigen Firmware-Versionen
-		const url = `ws://${host}:${port}/`;
+
+		// WICHTIG: Den Slash (/) am Ende zwingend weglassen! Das behebt den Fehler 400.
+		const url = `ws://${host}:${port}`;
 
 		const ws = new WebSocket(url, 'luxnet');
-		ws.binaryType = 'nodebuffer'; // Zwingt den WebSocket zur Ausgabe von Buffer-Objekten
-		const timeout = setTimeout(() => {
+		ws.binaryType = 'nodebuffer';
+
+		// Linter-konformes adapter.setTimeout verwenden (verhindert [E5005])
+		const timeout = adapter.setTimeout(() => {
 			if (!finished) {
 				finished = true;
 				ws.terminate();
@@ -256,7 +259,7 @@ function writeRawParameterWs(adapter: AdapterInstance, paramId: number, value: n
 
 		ws.on('open', () => {
 			const buffer = Buffer.alloc(12);
-			buffer.writeInt32BE(3002, 0); // Befehl 3002 = Parameter schreiben
+			buffer.writeInt32BE(3002, 0); // Befehl 3002 = Parameter schreiben (Richtig!)
 			buffer.writeInt32BE(paramId, 4);
 			buffer.writeInt32BE(value, 8);
 
@@ -268,7 +271,7 @@ function writeRawParameterWs(adapter: AdapterInstance, paramId: number, value: n
 			// Optimierung: Jede Antwort der Luxtronik gilt als erfolgreicher Schreib-Empfang
 			if (!finished) {
 				finished = true;
-				clearTimeout(timeout);
+				adapter.clearTimeout(timeout); // Linter-konformes clearTimeout
 				ws.terminate();
 				resolve();
 			}
@@ -277,7 +280,7 @@ function writeRawParameterWs(adapter: AdapterInstance, paramId: number, value: n
 		ws.on('error', (err: Error) => {
 			if (!finished) {
 				finished = true;
-				clearTimeout(timeout);
+				adapter.clearTimeout(timeout);
 				ws.terminate();
 				reject(err);
 			}
