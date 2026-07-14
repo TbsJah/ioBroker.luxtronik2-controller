@@ -32,17 +32,15 @@ function setCustomDebug(active) {
   customDebugActive = active;
 }
 function writeLog(text, level = "info") {
+  var _a, _b;
   if (!adapter) {
-    console.log(`[${level.toUpperCase()}] ${text}`);
     return;
   }
   if (level === "debug" && !customDebugActive) {
     return;
   }
-  const targetLevel = level === "debug" && customDebugActive ? "info" : level;
-  if (adapter.log && typeof adapter.log[targetLevel] === "function") {
-    adapter.log[targetLevel](text);
-  }
+  const targetLevel = level === "debug" ? "info" : level;
+  (_b = (_a = adapter.log)[targetLevel]) == null ? void 0 : _b.call(_a, text);
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {

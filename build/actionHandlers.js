@@ -24,43 +24,75 @@ __export(actionHandlers_exports, {
 module.exports = __toCommonJS(actionHandlers_exports);
 var import_logger = require("./logger");
 var import_stateMapping = require("./stateMapping");
+const CONSTANTS = {
+  /** Status-Code für den Ruhezustand der Anlage */
+  STATE_IDLE: 5,
+  /** Befehlswert für den Fußpunkt beim Zwangsheizen */
+  FORCE_HEATING_OFFSET: 35,
+  /** Temporäre Hysterese für die Zwangswarmwasserbereitung */
+  FORCE_WW_HYSTERESIS: 1
+};
+function getNumber(state, fallback = 0) {
+  return typeof (state == null ? void 0 : state.val) === "number" ? state.val : fallback;
+}
 async function handleZwangswarmwasser(adapter, id) {
-  await adapter.setForeignStateAsync(id, { val: false, ack: true });
-  const wwIstState = await adapter.getStateAsync((0, import_stateMapping.getDpPath)("Wamwassertemperatur_Ist"));
-  const wwSollState = await adapter.getStateAsync((0, import_stateMapping.getDpPath)("Wamwassertemperatur_Soll"));
-  const wwIst = typeof (wwIstState == null ? void 0 : wwIstState.val) === "number" ? wwIstState.val : 0;
-  const wwSoll = typeof (wwSollState == null ? void 0 : wwSollState.val) === "number" ? wwSollState.val : 0;
-  if (wwIst < wwSoll - 1) {
-    await adapter.syncConfigValue("hotWaterTemperatureHysteresis", 1);
+  try {
+    await adapter.setForeignStateAsync(id, { val: false, ack: true });
+    const [wwIstState, wwSollState] = await Promise.all([
+      adapter.getStateAsync((0, import_stateMapping.getDpPath)("Wamwassertemperatur_Ist")),
+      adapter.getStateAsync((0, import_stateMapping.getDpPath)("Wamwassertemperatur_Soll"))
+    ]);
+    const wwIst = getNumber(wwIstState);
+    const wwSoll = getNumber(wwSollState);
+    if (wwIst >= wwSoll - 1) {
+      (0, import_logger.writeLog)(
+        `Zwangswarmwasser: Ignoriert \u2013 Ist (${wwIst}\xB0C) ist bereits ausreichend (Soll: ${wwSoll}\xB0C).`,
+        "info"
+      );
+      return;
+    }
+    await adapter.syncConfigValue("hotWaterTemperatureHysteresis", CONSTANTS.FORCE_WW_HYSTERESIS);
     (0, import_logger.writeLog)(
-      `Zwangswarmwasser ausgel\xF6st: Ist (${wwIst}\xB0C) < Soll-1 (${wwSoll - 1}\xB0C). Hysterese auf 1K gesetzt.`,
+      `Zwangswarmwasser: Ausgel\xF6st \u2013 Ist (${wwIst}\xB0C) < Soll-1 (${wwSoll - 1}\xB0C). Hysterese tempor\xE4r auf ${CONSTANTS.FORCE_WW_HYSTERESIS}K gesetzt.`,
       "info"
     );
-  } else {
-    (0, import_logger.writeLog)(`Zwangswarmwasser ignoriert: Ist (${wwIst}\xB0C) ist bereits ausreichend (Soll: ${wwSoll}\xB0C).`, "info");
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    (0, import_logger.writeLog)(`Zwangswarmwasser: Fehler bei der Ausf\xFChrung - ${msg}`, "error");
   }
 }
 async function handleZwangsheizen(adapter, id) {
-  await adapter.setForeignStateAsync(id, { val: false, ack: true });
-  const [bzState, ruecklaufState, ruecklaufSollState, hystereseState] = await Promise.all([
-    adapter.getStateAsync((0, import_stateMapping.getDpPath)("WP_BZ_akt")),
-    adapter.getStateAsync((0, import_stateMapping.getDpPath)("temperature_return")),
-    adapter.getStateAsync((0, import_stateMapping.getDpPath)("temperature_target_return")),
-    adapter.getStateAsync((0, import_stateMapping.getDpPath)("returnTemperatureHysteresis"))
-  ]);
-  const bzVal = bzState && bzState.val !== null ? Number(bzState.val) : -1;
-  const ruecklauf = typeof (ruecklaufState == null ? void 0 : ruecklaufState.val) === "number" ? ruecklaufState.val : 0;
-  const ruecklaufSoll = typeof (ruecklaufSollState == null ? void 0 : ruecklaufSollState.val) === "number" ? ruecklaufSollState.val : 0;
-  const hysterese = typeof (hystereseState == null ? void 0 : hystereseState.val) === "number" ? hystereseState.val : 0;
-  if (bzVal === 5) {
-    if (ruecklauf < ruecklaufSoll + hysterese) {
-      await adapter.syncConfigValue("heating_curve_parallel_offset", 35);
-      (0, import_logger.writeLog)(`Zwangsheizen ausgel\xF6st. Fusspunkt tempor\xE4r auf 35\xB0C gesetzt.`, "info");
-    } else {
-      (0, import_logger.writeLog)(`Zwangsheizen ignoriert: R\xFCcklauf hoch genug.`, "info");
+  try {
+    await adapter.setForeignStateAsync(id, { val: false, ack: true });
+    const [bzState, ruecklaufState, ruecklaufSollState, hystereseState] = await Promise.all([
+      adapter.getStateAsync((0, import_stateMapping.getDpPath)("WP_BZ_akt")),
+      adapter.getStateAsync((0, import_stateMapping.getDpPath)("temperature_return")),
+      adapter.getStateAsync((0, import_stateMapping.getDpPath)("temperature_target_return")),
+      adapter.getStateAsync((0, import_stateMapping.getDpPath)("returnTemperatureHysteresis"))
+    ]);
+    const bzVal = getNumber(bzState, -1);
+    const ruecklauf = getNumber(ruecklaufState);
+    const ruecklaufSoll = getNumber(ruecklaufSollState);
+    const hysterese = getNumber(hystereseState);
+    if (bzVal !== CONSTANTS.STATE_IDLE) {
+      (0, import_logger.writeLog)(`Zwangsheizen: Ignoriert \u2013 Anlage ist nicht im Leerlauf (Status: ${bzVal}).`, "info");
+      return;
     }
-  } else {
-    (0, import_logger.writeLog)(`Zwangsheizen ignoriert: Anlage ist nicht im Leerlauf.`, "info");
+    if (ruecklauf >= ruecklaufSoll + hysterese) {
+      (0, import_logger.writeLog)(
+        `Zwangsheizen: Ignoriert \u2013 R\xFCcklauf hoch genug (${ruecklauf}\xB0C >= ${ruecklaufSoll + hysterese}\xB0C).`,
+        "info"
+      );
+      return;
+    }
+    await adapter.syncConfigValue("heating_curve_parallel_offset", CONSTANTS.FORCE_HEATING_OFFSET);
+    (0, import_logger.writeLog)(
+      `Zwangsheizen: Ausgel\xF6st \u2013 Fusspunkt tempor\xE4r auf ${CONSTANTS.FORCE_HEATING_OFFSET}\xB0C gesetzt.`,
+      "info"
+    );
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    (0, import_logger.writeLog)(`Zwangsheizen: Fehler bei der Ausf\xFChrung - ${msg}`, "error");
   }
 }
 // Annotate the CommonJS export names for ESM import in node:

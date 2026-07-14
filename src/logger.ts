@@ -1,53 +1,68 @@
 import type { AdapterInstance } from '@iobroker/adapter-core';
 
-// Speichert die Adapter-Instanz global für diese Laufzeit
-let adapter: AdapterInstance | null = null;
-// Speichert den Status der Debug-Checkbox aus ioBroker
-let customDebugActive = false;
-
-export type LogLevel = 'info' | 'warn' | 'error' | 'debug' | 'silly';
+// =========================================================
+// TYPEN & INTERNER ZUSTAND
+// =========================================================
 
 /**
- * Initialisiert den Logger einmalig beim Start des Adapters.
+ * Leitet die verfügbaren Log-Level automatisch aus der ioBroker Adapter-API ab.
+ * (Enthält info, warn, error, debug, silly)
+ */
+export type LogLevel = keyof AdapterInstance['log'];
+
+/** Die globale ioBroker Adapter-Instanz für das Logging */
+let adapter: AdapterInstance | null = null;
+/** Bestimmt, ob detaillierte Debug-Ausgaben erzwungen werden sollen */
+let customDebugActive = false;
+
+// =========================================================
+// INITIALISIERUNG
+// =========================================================
+
+/**
+ * Initialisiert den Logger mit der aktuellen ioBroker Adapter-Instanz.
+ * MUSS beim Start des Adapters zwingend aufgerufen werden.
  *
- * @param adapterInstance Die Adapter-Instanz, die für das Logging verwendet wird.
+ * @param adapterInstance Die Instanz des ioBroker-Adapters
  */
 export function initLogger(adapterInstance: AdapterInstance): void {
 	adapter = adapterInstance;
 }
 
 /**
- * Aktiviert oder deaktiviert die benutzerdefinierten Debug-Logs via Datenpunkt.
+ * Aktiviert oder deaktiviert den benutzerdefinierten Debug-Modus.
  *
- * @param active Gibt an, ob benutzerdefinierte Debug-Logs aktiviert werden sollen.
+ * @param active True, wenn Debug-Meldungen im ioBroker Log angezeigt werden sollen
  */
 export function setCustomDebug(active: boolean): void {
 	customDebugActive = active;
 }
 
+// =========================================================
+// LOG-FUNKTION
+// =========================================================
+
 /**
- * Globale Funktion zum Schreiben von Logs.
- * Aus jedem TS-File aufrufbar!
+ * Schreibt eine formatierte Log-Nachricht in das ioBroker Log.
  *
- * @param text Der Log-Text
- * @param level Das Loglevel (Standard: "info")
+ * @param text Der zu protokollierende Nachrichtentext
+ * @param level Das ioBroker Log-Level (Standard: 'info')
  */
 export function writeLog(text: string, level: LogLevel = 'info'): void {
+	// Abbruch, falls der Logger (noch) nicht initialisiert wurde
 	if (!adapter) {
-		console.log(`[${level.toUpperCase()}] ${text}`);
 		return;
 	}
 
-	// Wenn es ein Debug-Log ist, aber der manuelle Schalter aus ist -> ignorieren
+	// Wenn es eine Debug-Meldung ist, der Modus aber aus ist, lautlos abbrechen
 	if (level === 'debug' && !customDebugActive) {
 		return;
 	}
 
-	// DER TRICK: Wenn der Schalter aktiv ist, machen wir aus 'debug' ein 'info',
-	// damit es im ioBroker für dich sofort lesbar in normaler Schrift auftaucht!
-	const targetLevel = level === 'debug' && customDebugActive ? 'info' : level;
+	// Debug-Meldungen werden bei aktivierter Option als "info"
+	// ausgegeben, damit sie im Standard-Log des Nutzers direkt sichtbar sind.
+	const targetLevel: LogLevel = level === 'debug' ? 'info' : level;
 
-	if (adapter.log && typeof adapter.log[targetLevel] === 'function') {
-		adapter.log[targetLevel](text);
-	}
+	// Moderner TypeScript Aufruf: Führt die Log-Funktion nur aus, wenn sie existiert
+	(adapter.log[targetLevel] as (msg: string) => void)?.(text);
 }

@@ -43,7 +43,8 @@ async function calculateSum(adapter, sourceId1, sourceId2, targetId, logName) {
     const val2 = state2 && typeof state2.val === "number" ? state2.val : 0;
     await adapter.setStateChangedAsync(targetId, val1 + val2, true);
   } catch (err) {
-    (0, import_logger.writeLog)(`Fehler bei der Berechnung der ${logName}: ${err.message}`, "error");
+    const msg = err instanceof Error ? err.message : String(err);
+    (0, import_logger.writeLog)(`Fehler bei der Berechnung der ${logName}: ${msg}`, "error");
   }
 }
 async function calculateTotalThermalEnergy(adapter) {
@@ -64,7 +65,7 @@ async function calculateTotalEnergy(adapter) {
     "Gesamt-Energie"
   );
 }
-async function updateHistory(adapter, rawValues, timeStartIndex, codeStartIndex, targetStateId, _keys, fallbackPrefix, codeMap) {
+async function updateHistory(adapter, rawValues, timeStartIndex, codeStartIndex, targetStateId, fallbackPrefix, codeMap) {
   try {
     const historyList = [];
     for (let i = 0; i < 5; i++) {
@@ -80,29 +81,28 @@ async function updateHistory(adapter, rawValues, timeStartIndex, codeStartIndex,
         historyList.push({
           code,
           beschreibung,
-          datum: formattedDate
-          //timestamp: timestamp,
+          datum: formattedDate,
+          timestamp
+          // Behoben: Timestamp ist wieder enthalten!
         });
       }
     }
     historyList.sort((a, b) => b.timestamp - a.timestamp);
-    const cleanList = historyList.map((entry, idx) => {
-      return {
-        index: idx + 1,
-        code: entry.code,
-        beschreibung: entry.beschreibung,
-        datum: entry.datum,
-        timestamp: entry.timestamp
-      };
-    });
+    const cleanList = historyList.map((entry, idx) => ({
+      index: idx + 1,
+      code: entry.code,
+      beschreibung: entry.beschreibung,
+      datum: entry.datum,
+      timestamp: entry.timestamp
+    }));
     const jsonStr = JSON.stringify(cleanList);
-    const currentState = await adapter.getStateAsync(targetStateId);
-    if (!currentState || currentState.val !== jsonStr) {
-      await adapter.setStateAsync(targetStateId, { val: jsonStr, ack: true });
+    const result = await adapter.setStateChangedAsync(targetStateId, { val: jsonStr, ack: true });
+    if (result && result.numChanges > 0) {
       (0, import_logger.writeLog)(`Historie f\xFCr ${targetStateId} aus Rohdaten aktualisiert.`, "info");
     }
   } catch (err) {
-    (0, import_logger.writeLog)(`Fehler beim Aktualisieren der Historie: ${err.message}`, "error");
+    const msg = err instanceof Error ? err.message : String(err);
+    (0, import_logger.writeLog)(`Fehler beim Aktualisieren der Historie: ${msg}`, "error");
   }
 }
 async function updateErrorHistory(adapter, rawValues) {
@@ -110,14 +110,10 @@ async function updateErrorHistory(adapter, rawValues) {
     adapter,
     rawValues,
     95,
-    // Start-Index für Zeitstempel
     100,
-    // Start-Index für Codes
     "Informationen.06_Fehlerspeicher.Fehlerspeicher",
-    [],
     "Unbekannter Fehler",
     import_codes.ERROR_CODES
-    // <--- Gibt das Fehler-Wörterbuch mit
   );
 }
 async function updateOutageHistory(adapter, rawValues) {
@@ -125,28 +121,33 @@ async function updateOutageHistory(adapter, rawValues) {
     adapter,
     rawValues,
     111,
-    // Start-Index für Zeitstempel
     106,
-    // Start-Index für Codes
     "Informationen.07_Abschaltungen.Abschaltungen",
-    [],
     "Unbekannter Abschaltgrund",
     import_codes.OUTAGE_CODES
-    // <--- Gibt das Abschalt-Wörterbuch mit
   );
 }
 async function calculateTemperatureSpread(adapter) {
   try {
+    const vorlaufPath = (0, import_stateMapping.getDpPath)("temperature_supply");
+    const ruecklaufPath = (0, import_stateMapping.getDpPath)("temperature_return");
+    if (!vorlaufPath || !ruecklaufPath) {
+      return;
+    }
     const [vorlaufState, ruecklaufState] = await Promise.all([
-      adapter.getStateAsync((0, import_stateMapping.getDpPath)("temperature_supply")),
-      adapter.getStateAsync((0, import_stateMapping.getDpPath)("temperature_return"))
+      adapter.getStateAsync(vorlaufPath),
+      adapter.getStateAsync(ruecklaufPath)
     ]);
     if (vorlaufState && ruecklaufState && vorlaufState.val !== null && ruecklaufState.val !== null) {
       const spreizung = parseFloat((Number(vorlaufState.val) - Number(ruecklaufState.val)).toFixed(2));
-      await adapter.setStateChangedAsync((0, import_stateMapping.getDpPath)("spreizung_vorlauf_ruecklauf"), spreizung, true);
+      const targetSpreadPath = (0, import_stateMapping.getDpPath)("spreizung_vorlauf_ruecklauf");
+      if (targetSpreadPath) {
+        await adapter.setStateChangedAsync(targetSpreadPath, spreizung, true);
+      }
     }
   } catch (err) {
-    (0, import_logger.writeLog)(`Fehler bei der Berechnung der Temperatur-Spreizung: ${err.message}`, "error");
+    const msg = err instanceof Error ? err.message : String(err);
+    (0, import_logger.writeLog)(`Fehler bei der Berechnung der Temperatur-Spreizung: ${msg}`, "error");
   }
 }
 async function updateStatusStrings(adapter, rawValues, rawParams) {
@@ -170,7 +171,7 @@ async function updateStatusStrings(adapter, rawValues, rawParams) {
     }
     const dpHeating = (0, import_stateMapping.getDpPath)("opStateHeatingString");
     if (dpHeating) {
-      await adapter.setStateAsync(dpHeating, { val: heatingStr, ack: true });
+      await adapter.setStateChangedAsync(dpHeating, heatingStr, true);
     }
     const codeZ1 = rawValues[117];
     const codeZ2 = rawValues[118];
@@ -185,7 +186,7 @@ async function updateStatusStrings(adapter, rawValues, rawParams) {
     const stateStr = import_codes.STATE_ZEILE_3[codeZ3] || "Unbekannt";
     const dpExtState = (0, import_stateMapping.getDpPath)("heatpump_extendet_state_string");
     if (dpExtState) {
-      await adapter.setStateAsync(dpExtState, { val: stateStr, ack: true });
+      await adapter.setStateChangedAsync(dpExtState, stateStr, true);
     }
     let extStateStr = "Unbekannt";
     if (import_codes.STATE_ZEILE_1[codeZ1]) {
@@ -194,7 +195,7 @@ async function updateStatusStrings(adapter, rawValues, rawParams) {
     }
     const dpState = (0, import_stateMapping.getDpPath)("heatpump_state_string");
     if (dpState) {
-      await adapter.setStateAsync(dpState, { val: extStateStr, ack: true });
+      await adapter.setStateChangedAsync(dpState, extStateStr, true);
     }
     let hotWaterStr = "Unbekannt";
     if (opStateHotWaterOriginal === 0) {
@@ -210,15 +211,20 @@ async function updateStatusStrings(adapter, rawValues, rawParams) {
     }
     const dpHotWater = (0, import_stateMapping.getDpPath)("opStateHotWaterString");
     if (dpHotWater) {
-      await adapter.setStateAsync(dpHotWater, { val: hotWaterStr, ack: true });
+      await adapter.setStateChangedAsync(dpHotWater, hotWaterStr, true);
     }
   } catch (err) {
-    (0, import_logger.writeLog)(`Fehler beim Aktualisieren der Status-Strings: ${err.message}`, "error");
+    const msg = err instanceof Error ? err.message : String(err);
+    (0, import_logger.writeLog)(`Fehler beim Aktualisieren der Status-Strings: ${msg}`, "error");
   }
 }
 async function updateTimerTables(adapter) {
   try {
+    const timeCache = /* @__PURE__ */ new Map();
     const getTime = async (key) => {
+      if (timeCache.has(key)) {
+        return timeCache.get(key) || "00:00";
+      }
       try {
         const dpPath = (0, import_stateMapping.getDpPath)(key);
         if (!dpPath) {
@@ -228,7 +234,9 @@ async function updateTimerTables(adapter) {
         if (state && typeof state.val === "string") {
           const match = state.val.match(/^(\d{1,2}):(\d{1,2})/);
           if (match) {
-            return `${match[1].padStart(2, "0")}:${match[2].padStart(2, "0")}`;
+            const formatted = `${match[1].padStart(2, "0")}:${match[2].padStart(2, "0")}`;
+            timeCache.set(key, formatted);
+            return formatted;
           }
         }
         return "00:00";
@@ -249,10 +257,7 @@ async function updateTimerTables(adapter) {
         const targetPath = (0, import_stateMapping.getDpPath)(targetKey);
         if (targetPath) {
           const jsonStr = JSON.stringify(table, null, 2);
-          const current = await adapter.getStateAsync(targetPath);
-          if (!current || current.val !== jsonStr) {
-            await adapter.setStateAsync(targetPath, { val: jsonStr, ack: true });
-          }
+          await adapter.setStateChangedAsync(targetPath, jsonStr, true);
         }
       } catch {
       }
@@ -281,7 +286,6 @@ async function updateTimerTables(adapter) {
       { target: "hotWaterTableDaySaturday", prefix: "WW_Samstag_", end: "Ende", slots: 5 },
       { target: "hotWaterTableDaySunday", prefix: "WW_Sonntag_", end: "Ende", slots: 5 },
       // === ZIRKULATION (5 Slots) ===
-      // Hypothetische Ziel-Keys (Sobald du diese ins Mapping einträgst, läuft es automatisch mit)
       { target: "hotWaterCircPumpTimerTableWeek", prefix: "Zirkulation_MoSo_", end: "End", slots: 5 },
       { target: "hotWaterCircPumpTimerTable52MonFri", prefix: "Zirkulation_MoFr_", end: "Ende", slots: 5 },
       { target: "hotWaterCircPumpTimerTable52SatSun", prefix: "Zirkulation_SaSo_", end: "Ende", slots: 5 },
@@ -303,11 +307,10 @@ async function updateTimerTables(adapter) {
       { target: "hotWaterCircPumpTimerTableDaySaturday", prefix: "Zirkulation_Samstag_", end: "Ende", slots: 5 },
       { target: "hotWaterCircPumpTimerTableDaySunday", prefix: "Zirkulation_Sonntag_", end: "Ende", slots: 5 }
     ];
-    for (const cfg of configs) {
-      await processTable(cfg.target, cfg.prefix, cfg.end, cfg.slots);
-    }
+    await Promise.all(configs.map((cfg) => processTable(cfg.target, cfg.prefix, cfg.end, cfg.slots)));
   } catch (err) {
-    (0, import_logger.writeLog)(`Fehler beim Erstellen der JSON-Timer-Tabellen: ${err.message}`, "error");
+    const msg = err instanceof Error ? err.message : String(err);
+    (0, import_logger.writeLog)(`Fehler beim Erstellen der JSON-Timer-Tabellen: ${msg}`, "error");
   }
 }
 async function updateCustomStates(adapter, rawValues, rawParams) {
@@ -322,7 +325,7 @@ async function updateCustomStates(adapter, rawValues, rawParams) {
       if (rawVal === void 0) {
         continue;
       }
-      let finalVal = rawVal;
+      let finalVal;
       if (custom.type === "number") {
         finalVal = Number(rawVal);
         if (custom.factor !== void 0 && custom.factor !== null) {
@@ -351,82 +354,45 @@ async function updateCustomStates(adapter, rawValues, rawParams) {
       }
       const cleanId = (0, import_objectManager.sanitizeName)(custom.name);
       const stateId = `${adapter.namespace}.Benutzer.${cleanId}`;
-      const current = await adapter.getForeignStateAsync(stateId);
-      if (!current || current.val !== finalVal) {
-        await adapter.setForeignStateAsync(stateId, { val: finalVal, ack: true });
-      }
+      await adapter.setForeignStateChangedAsync(stateId, finalVal, true);
     }
   } catch (err) {
-    (0, import_logger.writeLog)(`Fehler beim Aktualisieren der benutzerdefinierten Werte: ${err.message}`, "error");
+    const msg = err instanceof Error ? err.message : String(err);
+    (0, import_logger.writeLog)(`Fehler beim Aktualisieren der benutzerdefinierten Werte: ${msg}`, "error");
+  }
+}
+async function setChangedSystemState(adapter, key, value) {
+  const dp = (0, import_stateMapping.getDpPath)(key);
+  if (dp) {
+    await adapter.setStateChangedAsync(dp, value, true);
   }
 }
 async function updateSystemInfos(adapter, rawValues) {
   try {
     const firmwareBuf = rawValues.slice(81, 91);
     const firmwareString = createFirmwareString(firmwareBuf);
-    const dpFirmware = (0, import_stateMapping.getDpPath)("firmware");
-    if (dpFirmware) {
-      const currentFw = await adapter.getStateAsync(dpFirmware);
-      if (!currentFw || currentFw.val !== firmwareString) {
-        await adapter.setStateAsync(dpFirmware, { val: firmwareString, ack: true });
-      }
-    }
+    await setChangedSystemState(adapter, "firmware", firmwareString);
     const ipAddress = int2ipAddress(rawValues[91]);
-    const dpIp = (0, import_stateMapping.getDpPath)("ip_address");
-    if (dpIp) {
-      const currentIp = await adapter.getStateAsync(dpIp);
-      if (!currentIp || currentIp.val !== ipAddress) {
-        await adapter.setStateAsync(dpIp, { val: ipAddress, ack: true });
-      }
-    }
+    await setChangedSystemState(adapter, "ip_address", ipAddress);
     const subnet = int2ipAddress(rawValues[92]);
-    const dpSubnet = (0, import_stateMapping.getDpPath)("subnet");
-    if (dpSubnet) {
-      const currentSubnet = await adapter.getStateAsync(dpSubnet);
-      if (!currentSubnet || currentSubnet.val !== subnet) {
-        await adapter.setStateAsync(dpSubnet, { val: subnet, ack: true });
-      }
-    }
+    await setChangedSystemState(adapter, "subnet", subnet);
     const broadcastAddress = int2ipAddress(rawValues[93]);
-    const dpBroadcast = (0, import_stateMapping.getDpPath)("broadcast_address");
-    if (dpBroadcast) {
-      const currentBroadcast = await adapter.getStateAsync(dpBroadcast);
-      if (!currentBroadcast || currentBroadcast.val !== broadcastAddress) {
-        await adapter.setStateAsync(dpBroadcast, { val: broadcastAddress, ack: true });
-      }
-    }
+    await setChangedSystemState(adapter, "broadcast_address", broadcastAddress);
     const gateway = int2ipAddress(rawValues[94]);
-    const dpGateway = (0, import_stateMapping.getDpPath)("standard_gateway");
-    if (dpGateway) {
-      const currentGateway = await adapter.getStateAsync(dpGateway);
-      if (!currentGateway || currentGateway.val !== gateway) {
-        await adapter.setStateAsync(dpGateway, { val: gateway, ack: true });
-      }
-    }
+    await setChangedSystemState(adapter, "standard_gateway", gateway);
     const hpTypeIndex = rawValues[78];
     const hpTypeString = createHeatPumpTypeString(hpTypeIndex);
-    const dpHpType = (0, import_stateMapping.getDpPath)("heatpump_type");
-    if (dpHpType) {
-      const currentHpType = await adapter.getStateAsync(dpHpType);
-      if (!currentHpType || currentHpType.val !== hpTypeString) {
-        await adapter.setStateAsync(dpHpType, { val: hpTypeString, ack: true });
-      }
-    }
+    await setChangedSystemState(adapter, "heatpump_type", hpTypeString);
   } catch (err) {
-    (0, import_logger.writeLog)(`Fehler beim Aktualisieren der System-Infos: ${err.message}`, "error");
+    const msg = err instanceof Error ? err.message : String(err);
+    (0, import_logger.writeLog)(`Fehler beim Aktualisieren der System-Infos: ${msg}`, "error");
   }
 }
 function createFirmwareString(buf) {
   if (!buf || !Array.isArray(buf)) {
     return "Unbekannt";
   }
-  let firmware = "";
-  for (const val of buf) {
-    if (val !== 0) {
-      firmware += String.fromCharCode(val);
-    }
-  }
-  return firmware.trim();
+  return buf.filter((v) => v !== 0).map((v) => String.fromCharCode(v)).join("").trim();
 }
 function int2ipAddress(value) {
   if (value === void 0 || value === null || isNaN(value)) {

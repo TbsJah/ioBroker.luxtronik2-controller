@@ -418,20 +418,20 @@ class Luxtronik2Controller extends utils.Adapter {
     }
     this.updateRunning = true;
     try {
+      const delay = (ms) => new Promise((resolve) => this.setTimeout(resolve, ms));
       let rawParams = [];
       let rawValues = [];
       try {
         rawParams = await (0, import_rawFunctions.readAllRaw)(this, 3003);
       } catch (err) {
-        (0, import_logger.writeLog)(`Raw 3003 Fehler: ${err.message}`, "debug");
+        this.log.debug(`Raw 3003 Fehler: ${err instanceof Error ? err.message : String(err)}`);
       }
-      await new Promise((r) => global.setTimeout(r, 3500));
+      await delay(200);
       try {
         rawValues = await (0, import_rawFunctions.readAllRaw)(this, 3004);
       } catch (err) {
-        (0, import_logger.writeLog)(`Raw 3004 Fehler: ${err.message}`, "debug");
+        this.log.debug(`Raw 3004 Fehler: ${err instanceof Error ? err.message : String(err)}`);
       }
-      await new Promise((r) => global.setTimeout(r, 3500));
       this.errorCount = 0;
       await this.setState("info.connection", { val: true, ack: true });
       const statePromises = [];

@@ -4,40 +4,90 @@ import { WebSocket, type RawData } from 'ws';
 import { writeLog } from './logger';
 
 // =========================================================
-// KONSTANTEN (Magic Numbers eliminiert)
+// KONSTANTEN
 // =========================================================
+
+/**
+ * Enthält alle festen Befehlsnummern, Ports und Timeouts für die Kommunikation.
+ */
 const CONSTANTS = {
+	/** Schreib-Befehl für einen Parameter */
 	CMD_WRITE: 3002,
+	/** Lese-Befehl für die Parameterliste */
 	CMD_READ_PARAM: 3003,
+	/** Lese-Befehl für die Messwerteliste */
 	CMD_READ_VALUE: 3004,
+	/** Standard-TCP-Port der Luxtronik */
 	PORT_TCP: 8889,
+	/** Standard-WebSocket-Port neuerer Firmwares */
 	PORT_WS: 8214,
+	/** Maximales Timeout für Lese-Vorgänge in ms */
 	TIMEOUT_READ: 8000,
+	/** Maximales Timeout für Schreib-Vorgänge in ms */
 	TIMEOUT_WRITE: 5000,
+	/** Wartezeit in ms zwischen Neuverbindungen (z.B. beim Raw-Dump) */
 	DELAY_RECONNECT: 1000,
 };
+
+/**
+ * Liste der bekannten klassischen TCP-Ports der Luxtronik-Steuerung.
+ */
+const TCP_PORTS = new Set([8888, 8889]);
 
 // =========================================================
 // HILFSFUNKTIONEN
 // =========================================================
 
-function shouldUseWs(adapter: AdapterInstance): boolean {
-	const port = adapter.config.port ? Number(adapter.config.port) : CONSTANTS.PORT_TCP;
-	return port !== 8888 && port !== CONSTANTS.PORT_TCP;
+/**
+ * Erzeugt eine asynchrone Pause (Delay) unter Berücksichtigung des ioBroker Timeouts.
+ * Verhindert das Blockieren der Node.js Event-Loop.
+ *
+ * @param adapter Die Instanz des ioBroker-Adapters.
+ * @param ms Die Wartezeit in Millisekunden.
+ * @returns Ein Promise, das nach Ablauf der Zeit aufgelöst wird.
+ */
+export function delay(adapter: AdapterInstance, ms: number): Promise<void> {
+	return new Promise(resolve => adapter.setTimeout(resolve, ms));
 }
 
 /**
- * Gemeinsame Logik zum Parsen der rohen Binärdaten der Wärmepumpe (Vermeidet doppelten Code).
- * Gibt das Array zurück, wenn vollständig gelesen, null wenn noch Daten fehlen, oder wirft einen Fehler.
+ * Ermittelt anhand des konfigurierten Ports, ob die WebSocket- oder TCP-Verbindung genutzt werden soll.
  *
- * @param responseData - The raw response buffer from the heat pump
- * @param command - The command that was executed
+ * @param adapter Die Instanz des ioBroker-Adapters.
+ * @returns True, wenn WebSocket genutzt werden soll (Port ungleich 8888/8889).
+ */
+function shouldUseWs(adapter: AdapterInstance): boolean {
+	const port = adapter.config.port ? Number(adapter.config.port) : CONSTANTS.PORT_TCP;
+	return !TCP_PORTS.has(port);
+}
+
+/**
+ * Baut einen Buffer für den Versand von Befehlen an die Luxtronik effizient zusammen.
+ *
+ * @param values Eine variable Anzahl an 32-Bit Integer-Werten, die in den Buffer geschrieben werden sollen.
+ * @returns Der fertige, sendebereite Buffer.
+ */
+function createCommandBuffer(...values: number[]): Buffer {
+	const buffer = Buffer.alloc(values.length * 4);
+	for (let i = 0; i < values.length; i++) {
+		buffer.writeInt32BE(values[i], i * 4);
+	}
+	return buffer;
+}
+
+/**
+ * Gemeinsame Logik zum Parsen der rohen Binärdaten der Wärmepumpe.
+ * Überprüft Header, Befehls-ID und Elementanzahl auf Gültigkeit.
+ *
+ * @param responseData Der vollständige Buffer mit den empfangenen Daten.
+ * @param command Der erwartete Befehlscode (z.B. 3003 oder 3004).
+ * @returns Ein Array mit den ausgelesenen Zahlenwerten oder null, falls noch Datenpakete (Chunks) fehlen.
  */
 function parseRawResponse(responseData: Buffer, command: number): number[] | null {
-	const is3004 = command === CONSTANTS.CMD_READ_VALUE;
-	const headerSize = is3004 ? 12 : 8;
-	const lengthOffset = is3004 ? 8 : 4;
+	const headerSize = command === CONSTANTS.CMD_READ_VALUE ? 12 : 8;
+	const lengthOffset = command === CONSTANTS.CMD_READ_VALUE ? 8 : 4;
 
+	// Warten, bis zumindest der Header vollständig übertragen wurde
 	if (responseData.length < headerSize) {
 		return null;
 	}
@@ -53,16 +103,89 @@ function parseRawResponse(responseData: Buffer, command: number): number[] | nul
 	}
 
 	const totalRequiredLength = headerSize + totalItems * 4;
+	// Warten, bis alle angekündigten Datenpakete angekommen sind
 	if (responseData.length < totalRequiredLength) {
 		return null;
 	}
 
-	const allValues: number[] = [];
+	// O(1) Speicherallokation: Array in exakt der benötigten Größe erstellen
+	const allValues = new Array<number>(totalItems);
 	for (let i = 0; i < totalItems; i++) {
-		const valueOffset = headerSize + i * 4;
-		allValues.push(responseData.readInt32BE(valueOffset));
+		allValues[i] = responseData.readInt32BE(headerSize + i * 4);
 	}
 	return allValues;
+}
+
+// =========================================================
+// ZENTRALER VERBINDUNGS-HANDLER (DRY-Prinzip)
+// =========================================================
+
+/**
+ * Kontext-Objekt zur Verwaltung einer aktiven Verbindung (TCP oder WebSocket).
+ *
+ * @template T Der Datentyp, der beim erfolgreichen Auflösen des Promises erwartet wird (z.B. number[] oder void).
+ */
+interface ConnectionContext<T> {
+	/** Die Instanz des ioBroker-Adapters */
+	adapter: AdapterInstance;
+	/** Das aktive Socket-Objekt (Node TCP oder ws) */
+	socket: net.Socket | WebSocket;
+	/** Ein optionaler Timeout-Timer des Adapters */
+	timeout?: ioBroker.Timeout;
+	/** Die Resolve-Funktion des Promises */
+	resolve: (val: T | PromiseLike<T>) => void;
+	/** Die Reject-Funktion des Promises für Fehlerfälle */
+	reject: (err: Error) => void;
+}
+
+/**
+ * Erstellt eine standardisierte Finish-Funktion, die eine Verbindung sauber trennt,
+ * Timeouts löscht und das Promise (Resolve oder Reject) bedient.
+ *
+ * @template T Der Rückgabetyp der Resolve-Funktion.
+ * @param ctx Das Kontext-Objekt der aktuellen Verbindung.
+ * @returns Eine Callback-Funktion, die bei Erfolg oder Fehler aufgerufen wird.
+ */
+function createFinisher<T>(ctx: ConnectionContext<T>): (err?: Error, data?: T) => void {
+	let finished = false;
+	return (err?: Error, data?: T): void => {
+		if (finished) {
+			return;
+		}
+		finished = true;
+
+		if (ctx.timeout) {
+			ctx.adapter.clearTimeout(ctx.timeout);
+		}
+
+		if ('destroy' in ctx.socket) {
+			// net.Socket (TCP) Logik
+			ctx.socket.setTimeout(0);
+			ctx.socket.destroy();
+			if (err) {
+				ctx.reject(err);
+			} else {
+				ctx.resolve(data as T);
+			}
+		} else {
+			// WebSocket Logik (Warten auf bestätigtes close-Event)
+			const ws = ctx.socket;
+			const isWsActive = ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING;
+			if (err) {
+				if (isWsActive) {
+					ws.close();
+				}
+				ctx.reject(err);
+			} else {
+				if (isWsActive) {
+					ws.once('close', () => ctx.resolve(data as T));
+					ws.close();
+				} else {
+					ctx.resolve(data as T);
+				}
+			}
+		}
+	};
 }
 
 // =========================================================
@@ -70,11 +193,12 @@ function parseRawResponse(responseData: Buffer, command: number): number[] | nul
 // =========================================================
 
 /**
- * Reads all raw values from the device
+ * Liest eine komplette Datenliste (Parameter oder Messwerte) aus der Luxtronik aus.
+ * Entscheidet automatisch, ob TCP oder WebSocket genutzt wird.
  *
- * @param adapter - The adapter instance
- * @param command - The command to execute
- * @returns Promise with array of values
+ * @param adapter Die Instanz des ioBroker-Adapters.
+ * @param command Der Lese-Befehl (z.B. 3003 oder 3004).
+ * @returns Ein Promise, das ein Array mit den ausgelesenen Werten zurückgibt.
  */
 export function readAllRaw(adapter: AdapterInstance, command: number): Promise<number[]> {
 	if (shouldUseWs(adapter)) {
@@ -83,59 +207,37 @@ export function readAllRaw(adapter: AdapterInstance, command: number): Promise<n
 	return readAllRawTcp(adapter, command);
 }
 
+/**
+ * Interne Funktion: Liest Daten über eine WebSocket-Verbindung.
+ *
+ * @param adapter Die Instanz des ioBroker-Adapters.
+ * @param command Der Lese-Befehl (3003/3004).
+ * @returns Ein Promise mit den ausgelesenen Werten.
+ */
 function readAllRawWs(adapter: AdapterInstance, command: number): Promise<number[]> {
 	return new Promise<number[]>((resolve, reject) => {
-		let finished = false;
-		let timeout: ioBroker.Timeout | undefined = undefined;
-
-		const host = adapter.config.host;
+		const host = adapter.config.host || '127.0.0.1';
 		const port = adapter.config.port ? Number(adapter.config.port) : CONSTANTS.PORT_WS;
 		const ws = new WebSocket(`ws://${host}:${port}`, 'luxnet');
 		ws.binaryType = 'nodebuffer';
 
-		let responseData = Buffer.alloc(0);
+		const ctx: ConnectionContext<number[]> = { adapter, socket: ws, resolve, reject };
+		const finish = createFinisher(ctx);
 
-		const finish = (err?: Error, data?: number[]): void => {
-			if (finished) {
-				return;
-			}
-			finished = true;
-			if (timeout) {
-				adapter.clearTimeout(timeout);
-			}
-
-			const isWsActive = ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING;
-
-			if (err) {
-				if (isWsActive) {
-					ws.close();
-				}
-				reject(err);
-			} else if (data) {
-				if (isWsActive) {
-					ws.once('close', () => resolve(data));
-					ws.close();
-				} else {
-					resolve(data);
-				}
-			}
-		};
-
-		timeout = adapter.setTimeout(
+		ctx.timeout = adapter.setTimeout(
 			() => finish(new Error(`WebSocket Timeout beim Auslesen der Liste ${command}.`)),
 			CONSTANTS.TIMEOUT_READ,
 		);
 
+		const chunks: Buffer[] = [];
+		let totalLength = 0;
+
 		ws.on('open', () => {
-			const buffer = Buffer.alloc(8);
-			buffer.writeInt32BE(command, 0);
-			buffer.writeInt32BE(0, 4);
-			ws.send(buffer, { binary: true });
+			ws.send(createCommandBuffer(command, 0), { binary: true });
 		});
 
 		ws.on('message', (data: RawData) => {
 			let chunk: Buffer;
-
 			if (Buffer.isBuffer(data)) {
 				chunk = data;
 			} else if (Array.isArray(data)) {
@@ -144,11 +246,11 @@ function readAllRawWs(adapter: AdapterInstance, command: number): Promise<number
 				chunk = Buffer.from(data);
 			}
 
-			// Nur den neuen Chunk anhängen
-			responseData = Buffer.concat([responseData, chunk]);
+			chunks.push(chunk);
+			totalLength += chunk.length;
 
 			try {
-				const values = parseRawResponse(responseData, command);
+				const values = parseRawResponse(Buffer.concat(chunks, totalLength), command);
 				if (values !== null) {
 					finish(undefined, values);
 				}
@@ -161,43 +263,40 @@ function readAllRawWs(adapter: AdapterInstance, command: number): Promise<number
 	});
 }
 
+/**
+ * Interne Funktion: Liest Daten über eine klassische TCP-Verbindung.
+ *
+ * @param adapter Die Instanz des ioBroker-Adapters.
+ * @param command Der Lese-Befehl (3003/3004).
+ * @returns Ein Promise mit den ausgelesenen Werten.
+ */
 function readAllRawTcp(adapter: AdapterInstance, command: number): Promise<number[]> {
 	return new Promise<number[]>((resolve, reject) => {
-		let finished = false;
-		const client = new net.Socket();
-		const host = adapter.config.host;
+		const host = adapter.config.host || '127.0.0.1';
 		const port = adapter.config.port ? Number(adapter.config.port) : CONSTANTS.PORT_TCP;
+		const client = new net.Socket();
 
-		let responseData = Buffer.alloc(0);
+		const ctx: ConnectionContext<number[]> = { adapter, socket: client, resolve, reject };
+		const finish = createFinisher(ctx);
 
-		const finish = (err?: Error, data?: number[]): void => {
-			if (finished) {
-				return;
-			}
-			finished = true;
-			client.setTimeout(0);
-			client.destroy();
+		ctx.timeout = adapter.setTimeout(
+			() => finish(new Error(`Timeout beim Auslesen der TCP Liste ${command}.`)),
+			CONSTANTS.TIMEOUT_READ,
+		);
 
-			if (err) {
-				reject(err);
-			} else if (data) {
-				resolve(data);
-			}
-		};
+		const chunks: Buffer[] = [];
+		let totalLength = 0;
 
 		client.connect(port, host, () => {
-			const buffer = Buffer.alloc(8);
-			buffer.writeInt32BE(command, 0);
-			buffer.writeInt32BE(0, 4);
-			client.write(buffer);
+			client.write(createCommandBuffer(command, 0));
 		});
 
 		client.on('data', (chunk: Buffer) => {
-			// Bei TCP kommt immer direkt ein Buffer an, hier reicht das simple Concat
-			responseData = Buffer.concat([responseData, chunk]);
+			chunks.push(chunk);
+			totalLength += chunk.length;
 
 			try {
-				const values = parseRawResponse(responseData, command);
+				const values = parseRawResponse(Buffer.concat(chunks, totalLength), command);
 				if (values !== null) {
 					finish(undefined, values);
 				}
@@ -207,23 +306,21 @@ function readAllRawTcp(adapter: AdapterInstance, command: number): Promise<numbe
 		});
 
 		client.on('error', (err: Error) => finish(err));
-
-		client.setTimeout(CONSTANTS.TIMEOUT_READ);
-		client.on('timeout', () => finish(new Error(`Timeout beim Auslesen der TCP Liste ${command}.`)));
 	});
 }
 
 // =========================================================
-// SCHREIB-FUNKTIONEN (3002)
+// SCHREIB-FUNKTIONEN
 // =========================================================
 
 /**
- * Writes a raw parameter to the device.
+ * Schreibt einen einzelnen Parameter (Befehl 3002) in die Luxtronik-Steuerung.
+ * Wählt automatisch zwischen TCP und WebSocket.
  *
- * @param adapter - The adapter instance
- * @param paramId - The parameter ID to write
- * @param value - The value to set for the parameter
- * @returns Promise that resolves when write is complete
+ * @param adapter Die Instanz des ioBroker-Adapters.
+ * @param paramId Die ID/Index des zu schreibenden Parameters.
+ * @param value Der zu setzende numerische Wert.
+ * @returns Ein Promise, das nach erfolgreichem Schreibvorgang aufgelöst wird.
  */
 export function writeRawParameter(adapter: AdapterInstance, paramId: number, value: number): Promise<void> {
 	if (shouldUseWs(adapter)) {
@@ -232,53 +329,31 @@ export function writeRawParameter(adapter: AdapterInstance, paramId: number, val
 	return writeRawParameterTcp(adapter, paramId, value);
 }
 
+/**
+ * Interne Funktion: Schreibt einen Parameter via WebSocket.
+ *
+ * @param adapter Die Instanz des ioBroker-Adapters.
+ * @param paramId Die Parameter-ID.
+ * @param value Der Wert.
+ * @returns Promise (Void).
+ */
 function writeRawParameterWs(adapter: AdapterInstance, paramId: number, value: number): Promise<void> {
 	return new Promise<void>((resolve, reject) => {
-		let finished = false;
-		let timeout: ioBroker.Timeout | undefined = undefined;
-
-		const host = adapter.config.host;
+		const host = adapter.config.host || '127.0.0.1';
 		const port = adapter.config.port ? Number(adapter.config.port) : CONSTANTS.PORT_WS;
 		const ws = new WebSocket(`ws://${host}:${port}`, 'luxnet');
 		ws.binaryType = 'nodebuffer';
 
-		const finish = (err?: Error): void => {
-			if (finished) {
-				return;
-			}
-			finished = true;
-			if (timeout) {
-				adapter.clearTimeout(timeout);
-			}
+		const ctx: ConnectionContext<void> = { adapter, socket: ws, resolve, reject };
+		const finish = createFinisher(ctx);
 
-			const isWsActive = ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING;
-
-			if (err) {
-				if (isWsActive) {
-					ws.close();
-				}
-				reject(err);
-			} else {
-				if (isWsActive) {
-					ws.once('close', () => resolve(undefined));
-					ws.close();
-				} else {
-					resolve(undefined);
-				}
-			}
-		};
-
-		timeout = adapter.setTimeout(
+		ctx.timeout = adapter.setTimeout(
 			() => finish(new Error(`WebSocket Timeout beim Schreiben von Parameter ${paramId}.`)),
 			CONSTANTS.TIMEOUT_WRITE,
 		);
 
 		ws.on('open', () => {
-			const buffer = Buffer.alloc(12);
-			buffer.writeInt32BE(CONSTANTS.CMD_WRITE, 0);
-			buffer.writeInt32BE(paramId, 4);
-			buffer.writeInt32BE(value, 8);
-			ws.send(buffer, { binary: true });
+			ws.send(createCommandBuffer(CONSTANTS.CMD_WRITE, paramId, value), { binary: true });
 		});
 
 		ws.on('message', () => finish());
@@ -286,48 +361,39 @@ function writeRawParameterWs(adapter: AdapterInstance, paramId: number, value: n
 	});
 }
 
+/**
+ * Interne Funktion: Schreibt einen Parameter via TCP.
+ *
+ * @param adapter Die Instanz des ioBroker-Adapters.
+ * @param paramId Die Parameter-ID.
+ * @param value Der Wert.
+ * @returns Promise (Void).
+ */
 function writeRawParameterTcp(adapter: AdapterInstance, paramId: number, value: number): Promise<void> {
 	return new Promise<void>((resolve, reject) => {
-		let finished = false;
-		const client = new net.Socket();
 		const host = adapter.config.host || '127.0.0.1';
 		const port = adapter.config.port ? Number(adapter.config.port) : CONSTANTS.PORT_TCP;
+		const client = new net.Socket();
 
-		const finish = (err?: Error): void => {
-			if (finished) {
-				return;
-			}
-			finished = true;
-			client.setTimeout(0);
-			client.destroy();
+		const ctx: ConnectionContext<void> = { adapter, socket: client, resolve, reject };
+		const finish = createFinisher(ctx);
 
-			if (err) {
-				reject(err);
-			} else {
-				resolve();
-			}
-		};
+		ctx.timeout = adapter.setTimeout(
+			() => finish(new Error(`Timeout beim Schreiben von Parameter TCP ${paramId}.`)),
+			CONSTANTS.TIMEOUT_WRITE,
+		);
 
 		client.connect(port, host, () => {
-			const buffer = Buffer.alloc(12);
-			buffer.writeInt32BE(CONSTANTS.CMD_WRITE, 0);
-			buffer.writeInt32BE(paramId, 4);
-			buffer.writeInt32BE(value, 8);
-			client.write(buffer);
+			client.write(createCommandBuffer(CONSTANTS.CMD_WRITE, paramId, value));
 		});
 
 		client.on('data', (chunk: Buffer) => {
-			if (chunk.length >= 4) {
-				if (chunk.readInt32BE(0) === CONSTANTS.CMD_WRITE) {
-					finish();
-				}
+			if (chunk.length >= 4 && chunk.readInt32BE(0) === CONSTANTS.CMD_WRITE) {
+				finish();
 			}
 		});
 
 		client.on('error', (err: Error) => finish(err));
-
-		client.setTimeout(CONSTANTS.TIMEOUT_WRITE);
-		client.on('timeout', () => finish(new Error(`Timeout beim Schreiben von Parameter TCP ${paramId}.`)));
 	});
 }
 
@@ -336,17 +402,17 @@ function writeRawParameterTcp(adapter: AdapterInstance, paramId: number, value: 
 // =========================================================
 
 /**
- * Dumps all raw data to log
+ * Liest die kompletten Parameter- und Messwert-Listen aus und schreibt diese für Debug-Zwecke formatiert ins ioBroker Log.
  *
- * @param adapter The adapter instance
+ * @param adapter Die Instanz des ioBroker-Adapters.
+ * @returns Ein Promise, das nach Abschluss des Log-Vorgangs aufgelöst wird.
  */
 export async function dumpAllRawToLog(adapter: AdapterInstance): Promise<void> {
-	const delay = (ms: number): Promise<void> => new Promise(resolve => adapter.setTimeout(resolve, ms));
 	const useWs = shouldUseWs(adapter);
 
 	try {
 		const dumpList = async (command: number, title: string): Promise<void> => {
-			await delay(CONSTANTS.DELAY_RECONNECT);
+			await delay(adapter, CONSTANTS.DELAY_RECONNECT);
 
 			writeLog('=======================================================', 'info');
 			writeLog(`START COMPACT RAW DUMP: LISTE ${command} (${title}) via ${useWs ? 'WebSocket' : 'TCP'}`, 'info');
@@ -360,7 +426,7 @@ export async function dumpAllRawToLog(adapter: AdapterInstance): Promise<void> {
 			writeLog('=======================================================', 'info');
 		};
 
-		await delay(CONSTANTS.DELAY_RECONNECT);
+		await delay(adapter, CONSTANTS.DELAY_RECONNECT);
 		await dumpList(CONSTANTS.CMD_READ_PARAM, 'PARAMETER');
 		await dumpList(CONSTANTS.CMD_READ_VALUE, 'MESSWERTE');
 	} catch (err: unknown) {

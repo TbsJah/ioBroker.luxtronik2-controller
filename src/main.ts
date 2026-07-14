@@ -30,7 +30,7 @@ import { handleActivateZip, stopZipAndDeaeration } from './zipManager';
 
 class Luxtronik2Controller extends utils.Adapter {
 	public createdStates = new Set<string>();
-	public zipTimer?: NodeJS.Timeout;
+	public zipTimer?: ioBroker.Timeout;
 	public originalZipConfig: Record<string, any> | null = null;
 	public lastKnownErrorTimestamp: number | null = null;
 	public isDebugLogActive = false;
@@ -505,22 +505,27 @@ class Luxtronik2Controller extends utils.Adapter {
 		}
 		this.updateRunning = true;
 		try {
+			const delay = (ms: number): Promise<void> => new Promise(resolve => this.setTimeout(resolve, ms));
+
 			let rawParams: number[] = [];
 			let rawValues: number[] = [];
 
+			// 1. Parameter (3003) auslesen
 			try {
 				rawParams = await readAllRaw(this, 3003);
-			} catch (err: any) {
-				writeLog(`Raw 3003 Fehler: ${err.message}`, 'debug');
+			} catch (err: unknown) {
+				this.log.debug(`Raw 3003 Fehler: ${err instanceof Error ? err.message : String(err)}`);
 			}
-			await new Promise(r => global.setTimeout(r, 3500));
 
+			// Kurze Atempause für die CPU der Wärmepumpe (statt 3,5 Sekunden!)
+			await delay(200);
+
+			// 2. Messwerte (3004) auslesen
 			try {
 				rawValues = await readAllRaw(this, 3004);
-			} catch (err: any) {
-				writeLog(`Raw 3004 Fehler: ${err.message}`, 'debug');
+			} catch (err: unknown) {
+				this.log.debug(`Raw 3004 Fehler: ${err instanceof Error ? err.message : String(err)}`);
 			}
-			await new Promise(r => global.setTimeout(r, 3500));
 
 			this.errorCount = 0;
 			await this.setState('info.connection', { val: true, ack: true });

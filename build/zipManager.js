@@ -25,6 +25,21 @@ __export(zipManager_exports, {
 module.exports = __toCommonJS(zipManager_exports);
 var import_logger = require("./logger");
 var import_stateMapping = require("./stateMapping");
+const CONSTANTS = {
+  CMD_DEAERATE: 158,
+  CMD_ZIP: 684,
+  END_OF_DAY: 86340,
+  // 23:59:00 in Sekunden
+  WRITE_DELAY: 100
+  // 100ms Pause zwischen Schreibvorgängen
+};
+function clearZipTimer(adapter) {
+  if (!adapter.zipTimer) {
+    return;
+  }
+  adapter.clearTimeout(adapter.zipTimer);
+  adapter.zipTimer = void 0;
+}
 async function restoreOriginalZipConfig(adapter) {
   if (!adapter.originalZipConfig) {
     return;
@@ -35,6 +50,9 @@ async function restoreOriginalZipConfig(adapter) {
         continue;
       }
       const def = import_stateMapping.STATE_MAPPING[key];
+      if (!def || !def.luxWriteId) {
+        continue;
+      }
       let rawVal = val;
       if (def.role === "value.datetime" && typeof val === "string") {
         const timeMatch = val.match(/^(\d{1,2}):(\d{1,2})/);
@@ -44,13 +62,19 @@ async function restoreOriginalZipConfig(adapter) {
           rawVal = 0;
         }
       }
-      await adapter.setState((0, import_stateMapping.getDpPath)(key), { val, ack: true });
-      const luxId = parseInt(def.luxWriteId, 10);
-      await adapter.queueWrite(luxId, rawVal);
-      await new Promise((resolve) => adapter.setTimeout(resolve, 100));
+      const targetPath = (0, import_stateMapping.getDpPath)(key);
+      if (targetPath) {
+        await adapter.setState(targetPath, { val, ack: true });
+      }
+      const luxId = Number(def.luxWriteId);
+      if (!isNaN(luxId)) {
+        await adapter.queueWrite(luxId, Number(rawVal));
+        await new Promise((resolve) => adapter.setTimeout(() => resolve(), CONSTANTS.WRITE_DELAY));
+      }
     }
   } catch (err) {
-    (0, import_logger.writeLog)(`Fehler bei der Wiederherstellung der ZIP Konfiguration: ${err.message}`, "error");
+    const msg = err instanceof Error ? err.message : String(err);
+    (0, import_logger.writeLog)(`Fehler bei der Wiederherstellung der ZIP Konfiguration: ${msg}`, "error");
   } finally {
     adapter.originalZipConfig = null;
   }
@@ -65,21 +89,22 @@ async function stopZipAndDeaeration(adapter) {
       if (adapter.isDebugLogActive) {
         (0, import_logger.writeLog)("Bedingungen erf\xFCllt: Stoppe aktives ZIP Makro und Entl\xFCftungsprogramm...", "info");
       }
-      if (adapter.zipTimer) {
-        clearTimeout(adapter.zipTimer);
-        adapter.zipTimer = void 0;
-      }
+      clearZipTimer(adapter);
       await restoreOriginalZipConfig(adapter);
-      await adapter.queueWrite(158, 0);
-      await new Promise((resolve) => adapter.setTimeout(resolve, 100));
-      await adapter.queueWrite(684, 0);
-      await new Promise((resolve) => adapter.setTimeout(resolve, 100));
+      await adapter.queueWrite(CONSTANTS.CMD_DEAERATE, 0);
+      await new Promise((resolve) => adapter.setTimeout(() => resolve(), CONSTANTS.WRITE_DELAY));
+      await adapter.queueWrite(CONSTANTS.CMD_ZIP, 0);
+      await new Promise((resolve) => adapter.setTimeout(() => resolve(), CONSTANTS.WRITE_DELAY));
       await adapter.syncConfigValue("runDeaerate", 0);
       await adapter.syncConfigValue("hotWaterCircPumpDeaerate", 0);
-      await adapter.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)("Activate_Zip"), false, true);
+      const dpZip = (0, import_stateMapping.getDpPath)("Activate_Zip");
+      if (dpZip) {
+        await adapter.setOwnStateIfDifferent(dpZip, false, true);
+      }
     }
   } catch (err) {
-    (0, import_logger.writeLog)(`Fehler beim Stoppen von ZIP/Entl\xFCftung: ${err.message}`, "error");
+    const msg = err instanceof Error ? err.message : String(err);
+    (0, import_logger.writeLog)(`Fehler beim Stoppen von ZIP/Entl\xFCftung: ${msg}`, "error");
   }
 }
 async function handleActivateZip(adapter, id, durationSeconds) {
@@ -88,6 +113,7 @@ async function handleActivateZip(adapter, id, durationSeconds) {
     await adapter.setForeignStateAsync(id, { val: false, ack: true });
     return;
   }
+  const safeDurationSeconds = Math.max(1, isNaN(durationSeconds) ? 60 : durationSeconds);
   const bzState = await adapter.getStateAsync((0, import_stateMapping.getDpPath)("WP_BZ_akt"));
   const bzVal = bzState ? Number(bzState.val) : 5;
   const [wwIstS, wwSollS, wwHystS, rLState, rSollState, hzHystState] = await Promise.all([
@@ -99,18 +125,15 @@ async function handleActivateZip(adapter, id, durationSeconds) {
     adapter.getStateAsync((0, import_stateMapping.getDpPath)("returnTemperatureHysteresis"))
   ]);
   const useDeaeration = bzVal === 5 && Number(wwIstS == null ? void 0 : wwIstS.val) > Number(wwSollS == null ? void 0 : wwSollS.val) - Number(wwHystS == null ? void 0 : wwHystS.val) && Number(rLState == null ? void 0 : rLState.val) > Number(rSollState == null ? void 0 : rSollState.val) - Number(hzHystState == null ? void 0 : hzHystState.val);
-  if (adapter.zipTimer) {
-    clearTimeout(adapter.zipTimer);
-    adapter.zipTimer = void 0;
-  }
+  clearZipTimer(adapter);
   if (useDeaeration) {
-    await adapter.queueWrite(158, 1);
-    await new Promise((r) => adapter.setTimeout(r, 100));
-    await adapter.queueWrite(684, 1);
+    await adapter.queueWrite(CONSTANTS.CMD_DEAERATE, 1);
+    await new Promise((resolve) => adapter.setTimeout(() => resolve(), CONSTANTS.WRITE_DELAY));
+    await adapter.queueWrite(CONSTANTS.CMD_ZIP, 1);
     await adapter.syncConfigValue("runDeaerate", 1);
     await adapter.syncConfigValue("hotWaterCircPumpDeaerate", 1);
   } else {
-    const onTimeMinutes = Math.ceil(durationSeconds / 60);
+    const onTimeMinutes = Math.ceil(safeDurationSeconds / 60);
     if (!adapter.originalZipConfig) {
       const keysToSave = [
         "hotWaterCircPumpTimerTableSelected",
@@ -127,29 +150,34 @@ async function handleActivateZip(adapter, id, durationSeconds) {
         "hotWaterCircPumpOnTime",
         "hotWaterCircPumpOffTime"
       ];
+      const states = await Promise.all(keysToSave.map((key) => adapter.getStateAsync((0, import_stateMapping.getDpPath)(key))));
       adapter.originalZipConfig = {};
-      for (const k of keysToSave) {
-        const s = await adapter.getStateAsync((0, import_stateMapping.getDpPath)(k));
-        adapter.originalZipConfig[k] = s ? s.val : null;
-      }
+      keysToSave.forEach((key, index) => {
+        if (adapter.originalZipConfig) {
+          adapter.originalZipConfig[key] = states[index] ? states[index].val : null;
+        }
+      });
     }
     const updates = [
       { key: "hotWaterCircPumpTimerTableSelected", raw: 0 },
       { key: "WW_MoSo_Start1", raw: 0 },
-      { key: "WW_MoSo_End1", raw: 86340 },
+      { key: "WW_MoSo_End1", raw: CONSTANTS.END_OF_DAY },
       { key: "WW_MoSo_Start2", raw: 0 },
       { key: "WW_MoSo_End2", raw: 0 },
       { key: "hotWaterCircPumpOnTime", raw: onTimeMinutes },
       { key: "hotWaterCircPumpOffTime", raw: 60 }
     ];
     for (const u of updates) {
-      await adapter.queueWrite(parseInt(import_stateMapping.STATE_MAPPING[u.key].luxWriteId, 10), u.raw);
-      await new Promise((r) => adapter.setTimeout(r, 100));
+      const def = import_stateMapping.STATE_MAPPING[u.key];
+      if (def && def.luxWriteId) {
+        await adapter.queueWrite(parseInt(def.luxWriteId, 10), u.raw);
+        await new Promise((resolve) => adapter.setTimeout(() => resolve(), CONSTANTS.WRITE_DELAY));
+      }
     }
   }
   adapter.zipTimer = adapter.setTimeout(async () => {
     await stopZipAndDeaeration(adapter);
-  }, durationSeconds * 1e3);
+  }, safeDurationSeconds * 1e3);
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {

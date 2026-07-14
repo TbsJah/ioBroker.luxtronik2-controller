@@ -28,6 +28,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 var rawFunctions_exports = {};
 __export(rawFunctions_exports, {
+  delay: () => delay,
   dumpAllRawToLog: () => dumpAllRawToLog,
   readAllRaw: () => readAllRaw,
   writeRawParameter: () => writeRawParameter
@@ -37,23 +38,41 @@ var net = __toESM(require("node:net"));
 var import_ws = require("ws");
 var import_logger = require("./logger");
 const CONSTANTS = {
+  /** Schreib-Befehl für einen Parameter */
   CMD_WRITE: 3002,
+  /** Lese-Befehl für die Parameterliste */
   CMD_READ_PARAM: 3003,
+  /** Lese-Befehl für die Messwerteliste */
   CMD_READ_VALUE: 3004,
+  /** Standard-TCP-Port der Luxtronik */
   PORT_TCP: 8889,
+  /** Standard-WebSocket-Port neuerer Firmwares */
   PORT_WS: 8214,
+  /** Maximales Timeout für Lese-Vorgänge in ms */
   TIMEOUT_READ: 8e3,
+  /** Maximales Timeout für Schreib-Vorgänge in ms */
   TIMEOUT_WRITE: 5e3,
+  /** Wartezeit in ms zwischen Neuverbindungen (z.B. beim Raw-Dump) */
   DELAY_RECONNECT: 1e3
 };
+const TCP_PORTS = /* @__PURE__ */ new Set([8888, 8889]);
+function delay(adapter, ms) {
+  return new Promise((resolve) => adapter.setTimeout(resolve, ms));
+}
 function shouldUseWs(adapter) {
   const port = adapter.config.port ? Number(adapter.config.port) : CONSTANTS.PORT_TCP;
-  return port !== 8888 && port !== CONSTANTS.PORT_TCP;
+  return !TCP_PORTS.has(port);
+}
+function createCommandBuffer(...values) {
+  const buffer = Buffer.alloc(values.length * 4);
+  for (let i = 0; i < values.length; i++) {
+    buffer.writeInt32BE(values[i], i * 4);
+  }
+  return buffer;
 }
 function parseRawResponse(responseData, command) {
-  const is3004 = command === CONSTANTS.CMD_READ_VALUE;
-  const headerSize = is3004 ? 12 : 8;
-  const lengthOffset = is3004 ? 8 : 4;
+  const headerSize = command === CONSTANTS.CMD_READ_VALUE ? 12 : 8;
+  const lengthOffset = command === CONSTANTS.CMD_READ_VALUE ? 8 : 4;
   if (responseData.length < headerSize) {
     return null;
   }
@@ -69,12 +88,48 @@ function parseRawResponse(responseData, command) {
   if (responseData.length < totalRequiredLength) {
     return null;
   }
-  const allValues = [];
+  const allValues = new Array(totalItems);
   for (let i = 0; i < totalItems; i++) {
-    const valueOffset = headerSize + i * 4;
-    allValues.push(responseData.readInt32BE(valueOffset));
+    allValues[i] = responseData.readInt32BE(headerSize + i * 4);
   }
   return allValues;
+}
+function createFinisher(ctx) {
+  let finished = false;
+  return (err, data) => {
+    if (finished) {
+      return;
+    }
+    finished = true;
+    if (ctx.timeout) {
+      ctx.adapter.clearTimeout(ctx.timeout);
+    }
+    if ("destroy" in ctx.socket) {
+      ctx.socket.setTimeout(0);
+      ctx.socket.destroy();
+      if (err) {
+        ctx.reject(err);
+      } else {
+        ctx.resolve(data);
+      }
+    } else {
+      const ws = ctx.socket;
+      const isWsActive = ws.readyState === import_ws.WebSocket.OPEN || ws.readyState === import_ws.WebSocket.CONNECTING;
+      if (err) {
+        if (isWsActive) {
+          ws.close();
+        }
+        ctx.reject(err);
+      } else {
+        if (isWsActive) {
+          ws.once("close", () => ctx.resolve(data));
+          ws.close();
+        } else {
+          ctx.resolve(data);
+        }
+      }
+    }
+  };
 }
 function readAllRaw(adapter, command) {
   if (shouldUseWs(adapter)) {
@@ -84,45 +139,20 @@ function readAllRaw(adapter, command) {
 }
 function readAllRawWs(adapter, command) {
   return new Promise((resolve, reject) => {
-    let finished = false;
-    let timeout = void 0;
-    const host = adapter.config.host;
+    const host = adapter.config.host || "127.0.0.1";
     const port = adapter.config.port ? Number(adapter.config.port) : CONSTANTS.PORT_WS;
     const ws = new import_ws.WebSocket(`ws://${host}:${port}`, "luxnet");
     ws.binaryType = "nodebuffer";
-    let responseData = Buffer.alloc(0);
-    const finish = (err, data) => {
-      if (finished) {
-        return;
-      }
-      finished = true;
-      if (timeout) {
-        adapter.clearTimeout(timeout);
-      }
-      const isWsActive = ws.readyState === import_ws.WebSocket.OPEN || ws.readyState === import_ws.WebSocket.CONNECTING;
-      if (err) {
-        if (isWsActive) {
-          ws.close();
-        }
-        reject(err);
-      } else if (data) {
-        if (isWsActive) {
-          ws.once("close", () => resolve(data));
-          ws.close();
-        } else {
-          resolve(data);
-        }
-      }
-    };
-    timeout = adapter.setTimeout(
+    const ctx = { adapter, socket: ws, resolve, reject };
+    const finish = createFinisher(ctx);
+    ctx.timeout = adapter.setTimeout(
       () => finish(new Error(`WebSocket Timeout beim Auslesen der Liste ${command}.`)),
       CONSTANTS.TIMEOUT_READ
     );
+    const chunks = [];
+    let totalLength = 0;
     ws.on("open", () => {
-      const buffer = Buffer.alloc(8);
-      buffer.writeInt32BE(command, 0);
-      buffer.writeInt32BE(0, 4);
-      ws.send(buffer, { binary: true });
+      ws.send(createCommandBuffer(command, 0), { binary: true });
     });
     ws.on("message", (data) => {
       let chunk;
@@ -133,9 +163,10 @@ function readAllRawWs(adapter, command) {
       } else {
         chunk = Buffer.from(data);
       }
-      responseData = Buffer.concat([responseData, chunk]);
+      chunks.push(chunk);
+      totalLength += chunk.length;
       try {
-        const values = parseRawResponse(responseData, command);
+        const values = parseRawResponse(Buffer.concat(chunks, totalLength), command);
         if (values !== null) {
           finish(void 0, values);
         }
@@ -148,34 +179,25 @@ function readAllRawWs(adapter, command) {
 }
 function readAllRawTcp(adapter, command) {
   return new Promise((resolve, reject) => {
-    let finished = false;
-    const client = new net.Socket();
-    const host = adapter.config.host;
+    const host = adapter.config.host || "127.0.0.1";
     const port = adapter.config.port ? Number(adapter.config.port) : CONSTANTS.PORT_TCP;
-    let responseData = Buffer.alloc(0);
-    const finish = (err, data) => {
-      if (finished) {
-        return;
-      }
-      finished = true;
-      client.setTimeout(0);
-      client.destroy();
-      if (err) {
-        reject(err);
-      } else if (data) {
-        resolve(data);
-      }
-    };
+    const client = new net.Socket();
+    const ctx = { adapter, socket: client, resolve, reject };
+    const finish = createFinisher(ctx);
+    ctx.timeout = adapter.setTimeout(
+      () => finish(new Error(`Timeout beim Auslesen der TCP Liste ${command}.`)),
+      CONSTANTS.TIMEOUT_READ
+    );
+    const chunks = [];
+    let totalLength = 0;
     client.connect(port, host, () => {
-      const buffer = Buffer.alloc(8);
-      buffer.writeInt32BE(command, 0);
-      buffer.writeInt32BE(0, 4);
-      client.write(buffer);
+      client.write(createCommandBuffer(command, 0));
     });
     client.on("data", (chunk) => {
-      responseData = Buffer.concat([responseData, chunk]);
+      chunks.push(chunk);
+      totalLength += chunk.length;
       try {
-        const values = parseRawResponse(responseData, command);
+        const values = parseRawResponse(Buffer.concat(chunks, totalLength), command);
         if (values !== null) {
           finish(void 0, values);
         }
@@ -184,8 +206,6 @@ function readAllRawTcp(adapter, command) {
       }
     });
     client.on("error", (err) => finish(err));
-    client.setTimeout(CONSTANTS.TIMEOUT_READ);
-    client.on("timeout", () => finish(new Error(`Timeout beim Auslesen der TCP Liste ${command}.`)));
   });
 }
 function writeRawParameter(adapter, paramId, value) {
@@ -196,45 +216,18 @@ function writeRawParameter(adapter, paramId, value) {
 }
 function writeRawParameterWs(adapter, paramId, value) {
   return new Promise((resolve, reject) => {
-    let finished = false;
-    let timeout = void 0;
-    const host = adapter.config.host;
+    const host = adapter.config.host || "127.0.0.1";
     const port = adapter.config.port ? Number(adapter.config.port) : CONSTANTS.PORT_WS;
     const ws = new import_ws.WebSocket(`ws://${host}:${port}`, "luxnet");
     ws.binaryType = "nodebuffer";
-    const finish = (err) => {
-      if (finished) {
-        return;
-      }
-      finished = true;
-      if (timeout) {
-        adapter.clearTimeout(timeout);
-      }
-      const isWsActive = ws.readyState === import_ws.WebSocket.OPEN || ws.readyState === import_ws.WebSocket.CONNECTING;
-      if (err) {
-        if (isWsActive) {
-          ws.close();
-        }
-        reject(err);
-      } else {
-        if (isWsActive) {
-          ws.once("close", () => resolve(void 0));
-          ws.close();
-        } else {
-          resolve(void 0);
-        }
-      }
-    };
-    timeout = adapter.setTimeout(
+    const ctx = { adapter, socket: ws, resolve, reject };
+    const finish = createFinisher(ctx);
+    ctx.timeout = adapter.setTimeout(
       () => finish(new Error(`WebSocket Timeout beim Schreiben von Parameter ${paramId}.`)),
       CONSTANTS.TIMEOUT_WRITE
     );
     ws.on("open", () => {
-      const buffer = Buffer.alloc(12);
-      buffer.writeInt32BE(CONSTANTS.CMD_WRITE, 0);
-      buffer.writeInt32BE(paramId, 4);
-      buffer.writeInt32BE(value, 8);
-      ws.send(buffer, { binary: true });
+      ws.send(createCommandBuffer(CONSTANTS.CMD_WRITE, paramId, value), { binary: true });
     });
     ws.on("message", () => finish());
     ws.on("error", (err) => finish(err));
@@ -242,48 +235,31 @@ function writeRawParameterWs(adapter, paramId, value) {
 }
 function writeRawParameterTcp(adapter, paramId, value) {
   return new Promise((resolve, reject) => {
-    let finished = false;
-    const client = new net.Socket();
     const host = adapter.config.host || "127.0.0.1";
     const port = adapter.config.port ? Number(adapter.config.port) : CONSTANTS.PORT_TCP;
-    const finish = (err) => {
-      if (finished) {
-        return;
-      }
-      finished = true;
-      client.setTimeout(0);
-      client.destroy();
-      if (err) {
-        reject(err);
-      } else {
-        resolve();
-      }
-    };
+    const client = new net.Socket();
+    const ctx = { adapter, socket: client, resolve, reject };
+    const finish = createFinisher(ctx);
+    ctx.timeout = adapter.setTimeout(
+      () => finish(new Error(`Timeout beim Schreiben von Parameter TCP ${paramId}.`)),
+      CONSTANTS.TIMEOUT_WRITE
+    );
     client.connect(port, host, () => {
-      const buffer = Buffer.alloc(12);
-      buffer.writeInt32BE(CONSTANTS.CMD_WRITE, 0);
-      buffer.writeInt32BE(paramId, 4);
-      buffer.writeInt32BE(value, 8);
-      client.write(buffer);
+      client.write(createCommandBuffer(CONSTANTS.CMD_WRITE, paramId, value));
     });
     client.on("data", (chunk) => {
-      if (chunk.length >= 4) {
-        if (chunk.readInt32BE(0) === CONSTANTS.CMD_WRITE) {
-          finish();
-        }
+      if (chunk.length >= 4 && chunk.readInt32BE(0) === CONSTANTS.CMD_WRITE) {
+        finish();
       }
     });
     client.on("error", (err) => finish(err));
-    client.setTimeout(CONSTANTS.TIMEOUT_WRITE);
-    client.on("timeout", () => finish(new Error(`Timeout beim Schreiben von Parameter TCP ${paramId}.`)));
   });
 }
 async function dumpAllRawToLog(adapter) {
-  const delay = (ms) => new Promise((resolve) => adapter.setTimeout(resolve, ms));
   const useWs = shouldUseWs(adapter);
   try {
     const dumpList = async (command, title) => {
-      await delay(CONSTANTS.DELAY_RECONNECT);
+      await delay(adapter, CONSTANTS.DELAY_RECONNECT);
       (0, import_logger.writeLog)("=======================================================", "info");
       (0, import_logger.writeLog)(`START COMPACT RAW DUMP: LISTE ${command} (${title}) via ${useWs ? "WebSocket" : "TCP"}`, "info");
       (0, import_logger.writeLog)("=======================================================", "info");
@@ -294,7 +270,7 @@ async function dumpAllRawToLog(adapter) {
       (0, import_logger.writeLog)(`--- ENDE LISTE ${command} (Insgesamt ${data.length} Indizes geloggt) ---`, "info");
       (0, import_logger.writeLog)("=======================================================", "info");
     };
-    await delay(CONSTANTS.DELAY_RECONNECT);
+    await delay(adapter, CONSTANTS.DELAY_RECONNECT);
     await dumpList(CONSTANTS.CMD_READ_PARAM, "PARAMETER");
     await dumpList(CONSTANTS.CMD_READ_VALUE, "MESSWERTE");
   } catch (err) {
@@ -304,6 +280,7 @@ async function dumpAllRawToLog(adapter) {
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
+  delay,
   dumpAllRawToLog,
   readAllRaw,
   writeRawParameter
