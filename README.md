@@ -79,6 +79,11 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
+
+### **WORK IN PROGRESS**
+
+- Fehler Websocket Abruf behoben
+
 ### 0.3.0 (2026-07-14)
 
 - Websocket port added for firmware >3.8
