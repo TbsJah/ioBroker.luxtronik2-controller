@@ -82,7 +82,9 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 
 ### **WORK IN PROGRESS**
 
-- nothing reported
+- Update StateMapping Items
+- Fixed Websocket write error
+- Fix the issues reported by RepositoryChecker
 
 ### 0.3.5 (2026-07-14)
 

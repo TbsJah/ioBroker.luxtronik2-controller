@@ -40,7 +40,7 @@ function readAllRawWs(adapter: AdapterInstance, command: number): Promise<number
 		const host = adapter.config.host;
 		const port = adapter.config.port ? Number(adapter.config.port) : 8214;
 		// Ein expliziter Slash am Ende der URL hilft bei einigen Firmware-Versionen
-		const url = `ws://${host}:${port}/`;
+		const url = `ws://${host}:${port}`;
 
 		const ws = new WebSocket(url, 'luxnet');
 		ws.binaryType = 'nodebuffer'; // Zwingt den WebSocket zur Ausgabe von Buffer-Objekten
@@ -242,7 +242,6 @@ function writeRawParameterWs(adapter: AdapterInstance, paramId: number, value: n
 		const host = adapter.config.host;
 		const port = adapter.config.port ? Number(adapter.config.port) : 8214;
 
-		// WICHTIG: Den Slash (/) am Ende zwingend weglassen! Das behebt den Fehler 400.
 		const url = `ws://${host}:${port}`;
 
 		const ws = new WebSocket(url, 'luxnet');

@@ -74,8 +74,8 @@ const STATE_MAPPING = {
     name: "Externe R\xFCcklauftemperatur",
     role: "value.temperature",
     type: "number",
-    unit: "K",
-    write: true,
+    unit: "\xB0C",
+    write: false,
     factor: 10,
     luxWriteId: "13",
     dataSource: "raw_value"

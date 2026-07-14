@@ -51,7 +51,7 @@ function readAllRawWs(adapter, command) {
     let finished = false;
     const host = adapter.config.host;
     const port = adapter.config.port ? Number(adapter.config.port) : 8214;
-    const url = `ws://${host}:${port}/`;
+    const url = `ws://${host}:${port}`;
     const ws = new import_ws.WebSocket(url, "luxnet");
     ws.binaryType = "nodebuffer";
     let responseData = Buffer.alloc(0);
