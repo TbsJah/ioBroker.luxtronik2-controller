@@ -283,8 +283,10 @@ function writeRawParameterTcp(adapter, paramId, value) {
   });
 }
 async function dumpAllRawToLog(adapter) {
+  const delay = (ms) => new Promise((resolve) => adapter.setTimeout(resolve, ms));
   try {
     const dumpList = async (command, title) => {
+      await delay(1e3);
       (0, import_logger.writeLog)("=======================================================", "info");
       (0, import_logger.writeLog)(
         `START COMPACT RAW DUMP: LISTE ${command} (${title}) via ${shouldUseWs(adapter) ? "WebSocket" : "TCP"}`,
@@ -298,6 +300,7 @@ async function dumpAllRawToLog(adapter) {
       (0, import_logger.writeLog)(`--- ENDE LISTE ${command} (Insgesamt ${data.length} Indizes geloggt) ---`, "info");
       (0, import_logger.writeLog)("=======================================================", "info");
     };
+    await delay(1e3);
     await dumpList(3003, "PARAMETER");
     await dumpList(3004, "MESSWERTE");
   } catch (err) {

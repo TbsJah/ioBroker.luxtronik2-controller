@@ -341,15 +341,30 @@ function writeRawParameterTcp(adapter: AdapterInstance, paramId: number, value: 
  *
  * @param adapter - Die Adapter-Instanz
  */
+// =========================================================
+// LOGGING-FUNKTION (DUMP)
+// =========================================================
+/**
+ * Führt einen kompakten Raw-Dump aller relevanten Listen durch und schreibt die Ergebnisse ins Log.
+ *
+ * @param adapter - Die Adapter-Instanz
+ */
 export async function dumpAllRawToLog(adapter: AdapterInstance): Promise<void> {
+	// Kleine Hilfsfunktion für eine Atempause (Pause in Millisekunden)
+	const delay = (ms: number): Promise<void> => new Promise(resolve => adapter.setTimeout(resolve, ms));
+
 	try {
 		const dumpList = async (command: number, title: string): Promise<void> => {
+			// Vor jedem neuen Verbindungsaufbau 1 Sekunde warten, damit der Port der Pumpe frei wird
+			await delay(1000);
+
 			writeLog('=======================================================', 'info');
 			writeLog(
 				`START COMPACT RAW DUMP: LISTE ${command} (${title}) via ${shouldUseWs(adapter) ? 'WebSocket' : 'TCP'}`,
 				'info',
 			);
 			writeLog('=======================================================', 'info');
+
 			const data = await readAllRaw(adapter, command);
 			for (let i = 0; i < data.length; i++) {
 				writeLog(`[RAW ${command}] Index ${i.toString().padStart(3, ' ')} = ${data[i]}`, 'info');
@@ -357,6 +372,9 @@ export async function dumpAllRawToLog(adapter: AdapterInstance): Promise<void> {
 			writeLog(`--- ENDE LISTE ${command} (Insgesamt ${data.length} Indizes geloggt) ---`, 'info');
 			writeLog('=======================================================', 'info');
 		};
+
+		// Erst dem normalen Zyklus Zeit geben, sich zu schließen
+		await delay(1000);
 
 		await dumpList(3003, 'PARAMETER');
 		await dumpList(3004, 'MESSWERTE');
