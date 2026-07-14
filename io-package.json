@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "luxtronik2-controller",
-    "version": "0.3.5",
+    "version": "0.3.6",
     "news": {
+      "0.3.6": {
+        "en": "Update StateMapping Items\nFixed Websocket write error\nFix the issues reported by RepositoryChecker",
+        "de": "Statuszuordnungselemente aktualisieren\nWebsocket-Schreibfehler behoben\nBeheben Sie die von RepositoryChecker gemeldeten Probleme.",
+        "ru": "Обновить элементы сопоставления состояний\nИсправлена ошибка записи в WebSocket.\nИсправьте ошибки, о которых сообщила программа RepositoryChecker.",
+        "pt": "Atualizar itens de mapeamento de estado\nErro de gravação no Websocket corrigido\nCorrija os problemas relatados pelo RepositoryChecker.",
+        "nl": "Statusmapping-items bijwerken\nSchrijffout via WebSocket opgelost\nLos de problemen op die door RepositoryChecker zijn gemeld.",
+        "fr": "Mise à jour des éléments de mappage d'état\nCorrection d'une erreur d'écriture WebSocket\nCorrigez les problèmes signalés par RepositoryChecker",
+        "it": "Aggiorna gli elementi di StateMapping\nRisolto l'errore di scrittura WebSocket.\nRisolvi i problemi segnalati da RepositoryChecker",
+        "es": "Actualizar elementos de StateMapping\nSe corrigió el error de escritura de Websocket.\nSolucione los problemas reportados por RepositoryChecker.",
+        "pl": "Aktualizuj elementy StateMapping\nNaprawiono błąd zapisu Websocket\nNapraw problemy zgłoszone przez RepositoryChecker",
+        "uk": "Оновлення елементів зіставлення станів\nВиправлена помилка запису в Websocket\nВиправлення проблем, про які повідомляє RepositoryChecker",
+        "zh-cn": "更新状态映射项\n修复了 WebSocket 写入错误\n修复 RepositoryChecker 报告的问题"
+      },
       "0.3.5": {
         "en": "Config Checkbox issue resolved Temperature",
         "de": "Problem mit dem Konfigurations-Kontrollkästchen behoben Temperatur",
@@ -80,19 +93,6 @@
         "pl": "Dodano port Websocket dla oprogramowania układowego >3.8\nDodano pakiet NPM",
         "uk": "Додано порт Websocket для прошивки >3.8\nДодано пакет NPM",
         "zh-cn": "固件版本 3.8 及更高版本新增 WebSocket 端口\nNPM 包 ws 已添加"
-      },
-      "0.2.0": {
-        "en": "Readme - deutsch",
-        "de": "Readme - deutsch",
-        "ru": "Readme - немецкий",
-        "pt": "Leia-me - alemão",
-        "nl": "Readme - deutsch",
-        "fr": "Lisez-moi - allemand",
-        "it": "Leggimi - tedesco",
-        "es": "Léame - alemán",
-        "pl": "Readme - niemiecki",
-        "uk": "Readme - німецькою мовою",
-        "zh-cn": "自述文件 - 德语"
       }
     },
     "titleLang": {

@@ -23,6 +23,10 @@
 ### 0.1.0 (2026-07-09)
 
 - initial release
+## 0.3.1 (2026-07-14)
+
+- Fixed WebSocket retrieval error
+
 ## 0.3.0 (2026-07-14)
 
 - Websocket port added for firmware >3.8
