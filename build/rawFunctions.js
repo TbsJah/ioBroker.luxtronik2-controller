@@ -52,7 +52,8 @@ function readAllRawWs(adapter, command) {
     const host = adapter.config.host;
     const port = adapter.config.port ? Number(adapter.config.port) : 8214;
     const url = `ws://${host}:${port}/`;
-    const ws = new import_ws.WebSocket(url, "Lux_WS");
+    const ws = new import_ws.WebSocket(url, "luxnet");
+    ws.binaryType = "nodebuffer";
     let responseData = Buffer.alloc(0);
     const timeout = setTimeout(() => {
       if (!finished) {
@@ -205,7 +206,8 @@ function writeRawParameterWs(adapter, paramId, value) {
     const host = adapter.config.host;
     const port = adapter.config.port ? Number(adapter.config.port) : 8214;
     const url = `ws://${host}:${port}/`;
-    const ws = new import_ws.WebSocket(url, "Lux_WS");
+    const ws = new import_ws.WebSocket(url, "luxnet");
+    ws.binaryType = "nodebuffer";
     const timeout = setTimeout(() => {
       if (!finished) {
         finished = true;

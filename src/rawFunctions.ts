@@ -42,7 +42,9 @@ function readAllRawWs(adapter: AdapterInstance, command: number): Promise<number
 		// Ein expliziter Slash am Ende der URL hilft bei einigen Firmware-Versionen
 		const url = `ws://${host}:${port}/`;
 
-		const ws = new WebSocket(url, 'Lux_WS');
+		const ws = new WebSocket(url, 'luxnet');
+		ws.binaryType = 'nodebuffer'; // Zwingt den WebSocket zur Ausgabe von Buffer-Objekten
+
 		let responseData = Buffer.alloc(0);
 
 		const timeout = setTimeout(() => {
@@ -242,8 +244,8 @@ function writeRawParameterWs(adapter: AdapterInstance, paramId: number, value: n
 		// Ein expliziter Slash am Ende der URL hilft bei einigen Firmware-Versionen
 		const url = `ws://${host}:${port}/`;
 
-		const ws = new WebSocket(url, 'Lux_WS');
-
+		const ws = new WebSocket(url, 'luxnet');
+		ws.binaryType = 'nodebuffer'; // Zwingt den WebSocket zur Ausgabe von Buffer-Objekten
 		const timeout = setTimeout(() => {
 			if (!finished) {
 				finished = true;
