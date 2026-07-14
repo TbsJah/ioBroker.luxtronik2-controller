@@ -10,6 +10,7 @@
   "homepage": "https://github.com/TbsJah/ioBroker.luxtronik2-controller",
   "license": "MIT",
   "keywords": [
+    "ioBroker",
     "Luxtronik2",
     "LWD50",
     "Luft Wärme Pumpe",
@@ -27,7 +28,7 @@
     "node": ">= 22"
   },
   "dependencies": {
-    "@iobroker/adapter-core": "^3.4.1",
+    "@iobroker/adapter-core": "^3.4.2",
     "ws": "^8.21.0"
   },
   "devDependencies": {
@@ -38,14 +39,14 @@
     "@iobroker/adapter-dev": "^1.5.0",
     "@iobroker/dev-server": "^0.8.0",
     "@iobroker/eslint-config": "^2.3.4",
-    "@iobroker/testing": "^5.2.2",
+    "@iobroker/testing": "^5.3.0",
     "@tsconfig/node22": "^22.0.5",
     "@types/iobroker": "npm:@iobroker/types@^7.2.2",
-    "@types/node": "^22.20.0",
+    "@types/node": "^26.1.1",
     "rimraf": "^6.1.3",
     "source-map-support": "^0.5.21",
     "ts-node": "^10.9.2",
-    "typescript": "~5.9.3"
+    "typescript": "~6.0.3"
   },
   "main": "build/main.js",
   "files": [
