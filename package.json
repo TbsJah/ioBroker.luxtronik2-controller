@@ -1,6 +1,6 @@
 {
   "name": "iobroker.luxtronik2-controller",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Zugriff und Steuerung von Wärmepumpen mit einer Luxtronik 2.x Steuereinheit",
   "author": {
     "name": "TbsJah",

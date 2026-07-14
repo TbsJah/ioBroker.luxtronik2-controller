@@ -82,7 +82,11 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 
 ### **WORK IN PROGRESS**
 
-- Fehler Websocket Abruf behoben
+- Add Visualization
+
+### 0.3.1 (2026-07-14)
+
+- Fixed WebSocket retrieval error
 
 ### 0.3.0 (2026-07-14)
 

@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "luxtronik2-controller",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "news": {
+      "0.3.1": {
+        "en": "Fehler Websocket Abruf behoben",
+        "de": "Fehler Websocket Abruf behoben",
+        "ru": "Fehler Websocket Abruf behoben",
+        "pt": "Fehler Websocket Abruf behoben",
+        "nl": "Fehler Websocket Abruf behoben",
+        "fr": "Fehler Websocket Abruf disponible",
+        "it": "Fehler Websocket Abruf behoben",
+        "es": "Fehler Websocket Abruf behoben",
+        "pl": "Fehler Websocket Abruf behoben",
+        "uk": "Fehler Websocket Abruf behoben",
+        "zh-cn": "Fehler Websocket Abruf behoben"
+      },
       "0.3.0": {
         "en": "Websocket port added for firmware >3.8\nNPM package ws added",
         "de": "Websocket-Port für Firmware >3.8 hinzugefügt\nNPM-Paket ws hinzugefügt",
