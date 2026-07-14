@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "luxtronik2-controller",
-    "version": "0.3.6",
+    "version": "0.3.7",
     "news": {
+      "0.3.7": {
+        "en": "[E5507] missing size attributes\n[E6001] No README.md found",
+        "de": "[E5507] Fehlende Größenattribute\n[E6001] Keine README.md-Datei gefunden",
+        "ru": "[E5507] отсутствуют атрибуты размера\n[E6001] Файл README.md не найден",
+        "pt": "[E5507] atributos de tamanho ausentes\n[E6001] Nenhum arquivo README.md encontrado",
+        "nl": "[E5507] ontbrekende grootte-attributen\n[E6001] Geen README.md gevonden",
+        "fr": "[E5507] attributs de taille manquants\n[E6001] Aucun fichier README.md trouvé",
+        "it": "[E5507] attributi di dimensione mancanti\n[E6001] Nessun file README.md trovato",
+        "es": "[E5507] Faltan atributos de tamaño\n[E6001] No se encontró el archivo README.md",
+        "pl": "[E5507] brak atrybutów rozmiaru\n[E6001] Nie znaleziono pliku README.md",
+        "uk": "[E5507] відсутні атрибути розміру\n[E6001] Файл README.md не знайдено",
+        "zh-cn": "[E5507] 缺少尺寸属性\n[E6001] 未找到 README.md 文件"
+      },
       "0.3.6": {
         "en": "Update StateMapping Items\nFixed Websocket write error\nFix the issues reported by RepositoryChecker",
         "de": "Statuszuordnungselemente aktualisieren\nWebsocket-Schreibfehler behoben\nBeheben Sie die von RepositoryChecker gemeldeten Probleme.",
@@ -80,19 +93,6 @@
         "pl": "Fehler Websocket Abruf behoben",
         "uk": "Fehler Websocket Abruf behoben",
         "zh-cn": "Fehler Websocket Abruf behoben"
-      },
-      "0.3.0": {
-        "en": "Websocket port added for firmware >3.8\nNPM package ws added",
-        "de": "Websocket-Port für Firmware >3.8 hinzugefügt\nNPM-Paket ws hinzugefügt",
-        "ru": "Для прошивки версии >3.8 добавлен порт WebSocket.\nДобавлен пакет NPM",
-        "pt": "Porta WebSocket adicionada para firmware >3.8\nPacote NPM ws adicionado",
-        "nl": "WebSocket-poort toegevoegd voor firmware >3.8\nNPM-pakket ws toegevoegd",
-        "fr": "Ajout d'un port WebSocket pour les firmwares > 3.8\nLe package NPM a été ajouté.",
-        "it": "Porta WebSocket aggiunta per firmware >3.8\nPacchetto NPM ws aggiunto",
-        "es": "Se agregó el puerto Websocket para firmware >3.8\nSe agregó el paquete NPM",
-        "pl": "Dodano port Websocket dla oprogramowania układowego >3.8\nDodano pakiet NPM",
-        "uk": "Додано порт Websocket для прошивки >3.8\nДодано пакет NPM",
-        "zh-cn": "固件版本 3.8 及更高版本新增 WebSocket 端口\nNPM 包 ws 已添加"
       }
     },
     "titleLang": {

@@ -23,6 +23,11 @@
 ### 0.1.0 (2026-07-09)
 
 - initial release
+## 0.3.2 (2026-07-14)
+
+- Fixed Websocket write error
+- Extend stateMappings
+
 ## 0.3.1 (2026-07-14)
 
 - Fixed WebSocket retrieval error
