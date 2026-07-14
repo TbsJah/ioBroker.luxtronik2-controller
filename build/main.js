@@ -137,7 +137,7 @@ class Luxtronik2Controller extends utils.Adapter {
           const targetWriteId = definition.luxWriteId;
           const writeId = isRawWrite ? parseInt(targetWriteId, 10) : targetWriteId;
           await this.queueWrite(writeId, valueToWrite);
-          await new Promise((r) => setTimeout(r, 200));
+          await new Promise((r) => global.setTimeout(r, 200));
         } catch (err) {
           (0, import_logger.writeLog)(`Fehler beim Schreiben von ${mappingKey} an die Pumpe: ${err.message}`, "error");
         }
@@ -390,7 +390,7 @@ class Luxtronik2Controller extends utils.Adapter {
         if (task) {
           try {
             await task();
-            await new Promise((resolve) => setTimeout(resolve, 300));
+            await new Promise((resolve) => global.setTimeout(resolve, 300));
           } catch (taskError) {
             (0, import_logger.writeLog)(
               `Fehler beim Ausf\xFChren eines Schreibbefehls in der Queue: ${taskError.message}`,
@@ -425,13 +425,13 @@ class Luxtronik2Controller extends utils.Adapter {
       } catch (err) {
         (0, import_logger.writeLog)(`Raw 3003 Fehler: ${err.message}`, "debug");
       }
-      await new Promise((r) => setTimeout(r, 3500));
+      await new Promise((r) => global.setTimeout(r, 3500));
       try {
         rawValues = await (0, import_rawFunctions.readAllRaw)(this, 3004);
       } catch (err) {
         (0, import_logger.writeLog)(`Raw 3004 Fehler: ${err.message}`, "debug");
       }
-      await new Promise((r) => setTimeout(r, 3500));
+      await new Promise((r) => global.setTimeout(r, 3500));
       this.errorCount = 0;
       await this.setState("info.connection", { val: true, ack: true });
       const statePromises = [];

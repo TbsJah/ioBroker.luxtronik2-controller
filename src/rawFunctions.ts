@@ -1,6 +1,6 @@
 import type { AdapterInstance } from '@iobroker/adapter-core';
 import * as net from 'node:net';
-import WebSocket from 'ws';
+import { WebSocket } from 'ws';
 import { writeLog } from './logger';
 
 /**

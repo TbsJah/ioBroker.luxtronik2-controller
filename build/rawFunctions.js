@@ -33,8 +33,8 @@ __export(rawFunctions_exports, {
   writeRawParameter: () => writeRawParameter
 });
 module.exports = __toCommonJS(rawFunctions_exports);
-var net = __toESM(require("net"));
-var import_ws = __toESM(require("ws"));
+var net = __toESM(require("node:net"));
+var import_ws = require("ws");
 var import_logger = require("./logger");
 function shouldUseWs(adapter) {
   const port = adapter.config.port ? Number(adapter.config.port) : 8889;
@@ -52,7 +52,7 @@ function readAllRawWs(adapter, command) {
     const host = adapter.config.host;
     const port = adapter.config.port ? Number(adapter.config.port) : 8214;
     const url = `ws://${host}:${port}/`;
-    const ws = new import_ws.default(url, "Lux_WS");
+    const ws = new import_ws.WebSocket(url, "Lux_WS");
     let responseData = Buffer.alloc(0);
     const timeout = setTimeout(() => {
       if (!finished) {
@@ -205,7 +205,7 @@ function writeRawParameterWs(adapter, paramId, value) {
     const host = adapter.config.host;
     const port = adapter.config.port ? Number(adapter.config.port) : 8214;
     const url = `ws://${host}:${port}/`;
-    const ws = new import_ws.default(url, "Lux_WS");
+    const ws = new import_ws.WebSocket(url, "Lux_WS");
     const timeout = setTimeout(() => {
       if (!finished) {
         finished = true;

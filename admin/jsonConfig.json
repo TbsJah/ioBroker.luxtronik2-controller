@@ -6,210 +6,287 @@
 		"mainSettings": {
 			"type": "panel",
 			"label": "Haupteinstellungen",
-			"icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMjQgMjQiPjxwYXRoIGQ9Ik0wIDBoMjR2MjRIMHoiIGZpbGw9Im5vbmUiLz48cGF0aCBmaWxsPSJjdXJyZW50Q29sb3IiIGQ9Ik0xMC44MjUgMjJxLS42NzUgMC0xLjE2Mi0uNDV0LS41ODgtMS4xTDguODUgMTguOHEtLjMyNS0uMTI1LS42MTItLjN0LS41NjMtLjM3NWwtMS41NS42NXEtLjYyNS4yNzUtMS4yNS4wNXQtLjk3NS0uOGwtMS4xNzUtMi4wNXEtLjM1LS41NzUtLjItMS4yMjV0LjY3NS0xLjA3NWwxLjMyNS0xUTQuNSAxMi41IDQuNSAxMi4zMzd2LS42NzVxMC0uMTYyLjAyNS0uMzM3bC0xLjMyNS0xUTIuNjc1IDkuOSAyLjUyNSA5LjI1dC4yLTEuMjI1TDMuOSA1Ljk3NXEuMzUtLjU3NS45NzUtLjh0MS4yNS4wNWwxLjU1LjY1cS4yNzUtLjIuNTc1LS4zNzV0LjYtLjNsLjIyNS0xLjY1cS4xLS42NS41ODgtMS4xVDEwLjgyNSAyaDIuMzVxLjY3NSAwIDEuMTYzLjQ1dC41ODcgMS4xbC4yMjUgMS42NXEuMzI1LjEyNS42MTMuM3QuNTYyLjM3NWwxLjU1LS42NXEuNjI1LS4yNzUgMS4yNS0uMDV0Ljk3NS44bDEuMTc1IDIuMDVxLjM1LjU3NS4yIDEuMjI1dC0uNjc1IDEuMDc1bC0xLjMyNSAxcS4wMjUuMTc1LjAyNS4zMzh2LjY3NHEwIC4xNjMtLjA1LjMzOGwxLjMyNSAxcS41MjUuNDI1LjY3NSAxLjA3NXQtLjIgMS4yMjVsLTEuMiAyLjA1cS0uMzUuNTc1LS45NzUuOHQtMS4yNS0uMDVsLTEuNS0uNjVxLS4yNzUuMi0uNTc1LjM3NXQtLjYuM2wtLjIyNSAxLjY1cS0uMS42NS0uNTg3IDEuMXQtMS4xNjMuNDV6bTEuMjI1LTYuNXExLjQ1IDAgMi40NzUtMS4wMjVUMTUuNTUgMTJ0LTEuMDI1LTIuNDc1VDEyLjA1IDguNXEtMS40NzUgMC0yLjQ4OCAxLjAyNVQ4LjU1IDEydDEuMDEzIDIuNDc1VDEyLjA1IDE1LjUiLz48L3N2Zz4=",
+			"icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMjQgMjQiPjxwYXRoIGQ9Ik0wIDBoMjR2MjRIMHoiIGZpbGw9Im5vbmUiLz48cGF0aCBmaWxsPSJjdXJyZW50Q29sb3IiIGQ9Ik0xMC44MjUgMjJxLS42NzUgMC0xLjE2Mi0uNDV0LS41ODgtMS4xTDguODUgMTguOHEtLjMyNS0uMTI1LS42MTItLjN0LS41NjMtLj3bMS41NS42NXEtLjYyNS4yNzUtMS4yNS4wNXQtLjk3NS0uOGwtMS4xNzUtMi4wNXEtLjM1LS41NzUtLjItMS4yMjV0LjY3NS0xLjA3NWwxLjMyNS0xUTQuNSAxMi41IDQuNSAxMi4zMzd2LS42NzVxMC0uMTYyLjAyNS0uMzM3bC0xLjMyNS0xUTIuNjc1IDkuOSAyLjUyNSA5LjI1dC4yLTEuMjI1TDMuOSA1Ljk3NXEuMzUtLjU3NS45NzUtLjh0MS4yNS4wNWwxLjU1LjY1cS4yNzUtLjIuNTc1LS4zNzV0LjYtLjNsLjIyNS0xLjY1cS4xLS42NS41ODgtMS4xVDEwLjgyNSAyaDIuMzVxLjY3NSAwIDEuMTYzLjQ1dC41ODcgMS4xbC4yMjUgMS42NXEuMzI1LjEyNS42MTMuM3QuNTYyLjM3NWwxLjU1LS42NXEuNjI1LS4yNzUgMS4yNS0uMDV0Ljk3NS44bDEuMTc1IDIuMDVxLjM1LjU3NS4yIDEuMjI1dC0uNjc1IDEuMDc1bC0xLjMyNSAxcS4wMjUuMTc1LjAyNS4zMzh2LjY3NHEwIC4xNjMtLjA1LjMzOGwxLjMyNSAxcS41MjUuNDI1LjY3NSAxLjA3NXQtLjIgMS4yMjVsLTEuMiAyLjA1cS0uMzUuNTc1LS45NzUuOHQtMS4yNS0uMDVsLTEuNS0uNjVxLS4yNzUuMi0uNTc1LjM3NXQtLjYuM2wtLjIyNSAxLjY1cS0uMS42NS0uNTg3IDEuMXQtMS4xNjMuNDV6bTEuMjI1LTYuNXExLjQ1IDAgMi40NzUtMS4wMjVUMTUuNTUgMTJ0LTEuMDI1LTIuNDc1VDEyLjA1IDguNXEtMS40NzUgMC0yLjQ4OCAxLjAyNVQ4LjU1IDEydDEuMDEzIDIuNDc1VDEyLjA1IDE1LjUiLz48L3N2Zz4=",
 			"items": {
 				"headerConnection": {
 					"type": "header",
 					"text": "Verbindungseinstellungen",
 					"size": 4,
-					"sm": 12
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
 				},
 				"host": {
 					"type": "text",
 					"label": "IP-Adresse (Host)",
+					"default": "192.168.178.81",
+					"xs": 12,
 					"sm": 12,
 					"md": 4,
-					"default": "192.168.178.81"
+					"lg": 4,
+					"xl": 4
 				},
 				"port": {
 					"type": "number",
-					"xs": 12,
-					"sm": 6,
-					"md": 4,
-					"lg": 3,
 					"label": "Wärmepumpen Port",
 					"help": "Standard TCP: 8889 | Firmware > 3.81 (WebSockets): 8214",
 					"min": 1,
 					"max": 65535,
-					"default": 8214
+					"default": 8214,
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"lg": 4,
+					"xl": 4
 				},
 				"interval": {
 					"type": "number",
 					"label": "Abfrageintervall (Sekunden)",
 					"min": 10,
-					"sm": 12,
+					"default": 45,
+					"xs": 12,
+					"sm": 6,
 					"md": 4,
-					"default": 45
+					"lg": 4,
+					"xl": 4
 				},
 				"abstandRegelung1": {
 					"type": "staticText",
 					"text": "",
 					"style": { "height": "20px" },
+					"xs": 12,
 					"sm": 12,
-					"md": 12
+					"md": 12,
+					"lg": 12,
+					"xl": 12
 				},
 				"abstandRegelung2": {
 					"type": "staticText",
 					"text": "",
 					"style": { "height": "20px" },
+					"xs": 12,
 					"sm": 12,
-					"md": 12
+					"md": 12,
+					"lg": 12,
+					"xl": 12
 				},
 				"regelung_aktiv": {
 					"type": "checkbox",
+					"label": "Intelligente Takt-Optimierung aktivieren",
+					"help": "Kombiniert Heiz- und Warmwassertakte zur Minimierung der Verdichterstarts",
+					"default": true,
 					"xs": 12,
 					"sm": 6,
 					"md": 4,
-					"label": "Intelligente Takt-Optimierung aktivieren",
-					"help": "Kombiniert Heiz- und Warmwassertakte zur Minimierung der Verdichterstarts",
-					"default": true
+					"lg": 4,
+					"xl": 4
 				},
 				"abstandRegelung3": {
 					"type": "staticText",
 					"text": "",
 					"style": { "height": "20px" },
+					"xs": 12,
 					"sm": 12,
-					"md": 12
+					"md": 12,
+					"lg": 12,
+					"xl": 12
 				},
 				"idle_defaults_aktiv": {
 					"type": "checkbox",
+					"label": "Standardwerte im Leerlauf erzwingen",
+					"help": "Setzt veränderte Parameter (z.B. Fußpunkt, HUP-Spannung) im Leerlauf selbstständig zurück",
+					"default": true,
 					"xs": 12,
 					"sm": 6,
 					"md": 4,
-					"label": "Standardwerte im Leerlauf erzwingen",
-					"help": "Setzt veränderte Parameter (z.B. Fußpunkt, HUP-Spannung) im Leerlauf selbstständig zurück",
-					"default": true
+					"lg": 4,
+					"xl": 4
 				},
 				"headerHeating": {
 					"type": "header",
 					"text": "Vorgabewerte Heizen",
 					"size": 4,
-					"sm": 12
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
 				},
 				"fusspunkt": {
 					"type": "number",
 					"label": "Fußpunkt (°C)",
+					"disabled": "!data.idle_defaults_aktiv",
+					"default": 21.7,
+					"xs": 12,
 					"sm": 12,
 					"md": 4,
-					"disabled": "!data.idle_defaults_aktiv",
-					"default": 21.7
+					"lg": 4,
+					"xl": 4
 				},
 				"endpunkt": {
 					"type": "number",
 					"label": "Endpunkt (°C)",
+					"disabled": "!data.idle_defaults_aktiv",
+					"default": 23,
+					"xs": 12,
 					"sm": 12,
 					"md": 4,
-					"disabled": "!data.idle_defaults_aktiv",
-					"default": 23
+					"lg": 4,
+					"xl": 4
 				},
 				"sync_return_temperature_hysteresis": {
 					"type": "number",
 					"label": "Heizen Hysterese (K)",
+					"disabled": "!data.idle_defaults_aktiv",
+					"default": 1.5,
+					"xs": 12,
 					"sm": 12,
 					"md": 4,
-					"disabled": "!data.idle_defaults_aktiv",
-					"default": 1.5
+					"lg": 4,
+					"xl": 4
 				},
 				"sync_heating_system_circ_pump_voltage_minimal_heating": {
 					"type": "number",
 					"label": "HUP Min (V)",
+					"disabled": "!data.idle_defaults_aktiv",
+					"default": 3,
+					"xs": 12,
 					"sm": 12,
 					"md": 6,
-					"disabled": "!data.idle_defaults_aktiv",
-					"default": 3
+					"lg": 6,
+					"xl": 6
 				},
 				"sync_heating_system_circ_pump_voltage_nominal_heating": {
 					"type": "number",
 					"label": "HUP Nom (V)",
+					"disabled": "!data.idle_defaults_aktiv",
+					"default": 7,
+					"xs": 12,
 					"sm": 12,
 					"md": 6,
-					"disabled": "!data.idle_defaults_aktiv",
-					"default": 7
+					"lg": 6,
+					"xl": 6
 				},
 				"Heating_after_warmwater": {
 					"type": "checkbox",
 					"label": "Heizen nach Warmwasser",
+					"disabled": "!data.regelung_aktiv",
+					"default": true,
+					"xs": 12,
 					"sm": 12,
 					"md": 12,
-					"disabled": "!data.regelung_aktiv",
-					"default": true
+					"lg": 12,
+					"xl": 12
 				},
 				"headerWater": {
 					"type": "header",
 					"text": "Vorgabewerte Warmwasser",
 					"size": 4,
-					"sm": 12
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
 				},
 				"sync_warmwater_target_temperature": {
 					"type": "number",
 					"label": "WW Soll (°C)",
+					"disabled": "!data.idle_defaults_aktiv",
+					"default": 54,
+					"xs": 12,
 					"sm": 12,
 					"md": 6,
-					"disabled": "!data.idle_defaults_aktiv",
-					"default": 54
+					"lg": 6,
+					"xl": 6
 				},
 				"sync_hotwater_temperature_hysteresis": {
 					"type": "number",
 					"label": "WW Hysterese (K)",
+					"disabled": "!data.idle_defaults_aktiv",
+					"default": 10,
+					"xs": 12,
 					"sm": 12,
 					"md": 6,
-					"disabled": "!data.idle_defaults_aktiv",
-					"default": 10
+					"lg": 6,
+					"xl": 6
 				},
 				"sync_heating_system_circ_pump_voltage_minimal_water": {
 					"type": "number",
 					"label": "HUP Min (V)",
+					"disabled": "!data.idle_defaults_aktiv",
+					"default": 3,
+					"xs": 12,
 					"sm": 12,
 					"md": 6,
-					"disabled": "!data.idle_defaults_aktiv",
-					"default": 3
+					"lg": 6,
+					"xl": 6
 				},
 				"sync_heating_system_circ_pump_voltage_nominal_water": {
 					"type": "number",
 					"label": "HUP Nom (V)",
+					"disabled": "!data.idle_defaults_aktiv",
+					"default": 10,
+					"xs": 12,
 					"sm": 12,
 					"md": 6,
-					"disabled": "!data.idle_defaults_aktiv",
-					"default": 10
+					"lg": 6,
+					"xl": 6
 				},
 				"zip_optimierung_aktiv": {
 					"type": "checkbox",
+					"label": "ZIP- & HUP-Spannungsoptimierung zulassen",
+					"help": "Erlaubt das dynamische Überschreiben der ZIP-Laufzeiten und HUP-Spannungen während aktiver Takte",
+					"default": true,
 					"xs": 12,
 					"sm": 6,
 					"md": 4,
-					"label": "ZIP- & HUP-Spannungsoptimierung zulassen",
-					"help": "Erlaubt das dynamische Überschreiben der ZIP-Laufzeiten und HUP-Spannungen während aktiver Takte",
-					"default": true
+					"lg": 4,
+					"xl": 4
 				},
 				"headerZip": {
 					"type": "header",
 					"text": "Vorgabewerte Zirkulationspumpe",
 					"size": 4,
-					"sm": 12
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
 				},
 				"zip_aktiv": {
 					"type": "number",
 					"label": "ZIP Dauer an (s)",
+					"default": 120,
+					"disabled": "!data.zip_optimierung_aktiv",
+					"xs": 12,
 					"sm": 12,
 					"md": 4,
-					"default": 120,
-					"disabled": "!data.zip_optimierung_aktiv"
+					"lg": 4,
+					"xl": 4
 				},
 				"zip_last_run_min": {
 					"type": "number",
 					"label": "ZIP Dauer aus (s)",
+					"disabled": "!data.zip_optimierung_aktiv",
+					"default": 600,
+					"xs": 12,
 					"sm": 12,
 					"md": 4,
-					"disabled": "!data.zip_optimierung_aktiv",
-					"default": 600
+					"lg": 4,
+					"xl": 4
 				},
 				"zip_aktiv_ww": {
 					"type": "number",
 					"label": "ZIP Dauer bei Warmwassererzeugung (s)",
+					"disabled": "!data.zip_optimierung_aktiv",
+					"default": 600,
+					"xs": 12,
 					"sm": 12,
 					"md": 4,
-					"disabled": "!data.zip_optimierung_aktiv",
-					"default": 600
+					"lg": 4,
+					"xl": 4
 				}
 			}
 		},
@@ -226,126 +303,177 @@
 					"type": "panel",
 					"label": "01. Temperaturen",
 					"collapsable": true,
+					"xs": 12,
 					"sm": 12,
 					"md": 12,
+					"lg": 12,
+					"xl": 12,
 					"items": {
 						"sync_temperature_outside": {
 							"type": "checkbox",
 							"label": "Außentemperatur (Systemrelevant)",
 							"default": true,
 							"disabled": "true",
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_temperature_return": {
 							"type": "checkbox",
 							"label": "Rücklauftemperatur (Systemrelevant)",
 							"default": true,
 							"disabled": "true",
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_spreizung_vorlauf_ruecklauf": {
 							"type": "checkbox",
 							"label": "Spreizung Vorlauf - Rücklauf (Systemrelevant)",
 							"default": true,
 							"disabled": "true",
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_temperature_target_return": {
 							"type": "checkbox",
 							"label": "Rückl.-Soll-Temperatur (Systemrelevant)",
 							"default": true,
 							"disabled": "true",
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_Wamwassertemperatur_Ist": {
 							"type": "checkbox",
 							"label": "Warmwassertemperatur Ist (Systemrelevant)",
 							"default": true,
 							"disabled": "true",
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_Wamwassertemperatur_Soll": {
 							"type": "checkbox",
 							"label": "Warmwassertemperatur Soll (Systemrelevant)",
 							"default": true,
 							"disabled": "true",
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_temperature_supply": {
 							"type": "checkbox",
 							"label": "Vorlauftemperatur",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_temperature_hot_gas": {
 							"type": "checkbox",
 							"label": "Heissgas-Temperatur",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_Mitteltemperatur": {
 							"type": "checkbox",
 							"label": "Mitteltemperatur",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_temperature_hot_water": {
 							"type": "checkbox",
 							"label": "Warmwassertemperatur",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_temperature_heat_source_in": {
 							"type": "checkbox",
 							"label": "Wärmequelle Eintritt",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_temperature_overheating_target": {
 							"type": "checkbox",
 							"label": "Überhitzung Soll",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_temperature_compressor1_heating": {
 							"type": "checkbox",
 							"label": "Heißgas Kompressor 1",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_temperature_overheating": {
 							"type": "checkbox",
 							"label": "Überhitzung Ist",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_temperature_intake_compressor1": {
 							"type": "checkbox",
 							"label": "Saugstatus Kompressor 1",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_temperature_intake_evaporation": {
 							"type": "checkbox",
 							"label": "Saugstatus Verdampfer",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						}
 					}
 				},
@@ -353,71 +481,101 @@
 					"type": "panel",
 					"label": "02. Eingänge",
 					"collapsable": true,
+					"xs": 12,
 					"sm": 12,
 					"md": 12,
+					"lg": 12,
+					"xl": 12,
 					"items": {
 						"sync_ASDin": {
 							"type": "checkbox",
 							"label": "Abtau-Endeschalter ASD",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_EVUin": {
 							"type": "checkbox",
 							"label": "EVU-Sperre",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_HDin": {
 							"type": "checkbox",
 							"label": "Hochdruckwächter HD",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_MOTin": {
 							"type": "checkbox",
 							"label": "Motorschutz MOT",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_NDin": {
 							"type": "checkbox",
 							"label": "Niederdruckwächter ND",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_AnalogIn": {
 							"type": "checkbox",
 							"label": "Analoger Eingang 1",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_NDin_pressure": {
 							"type": "checkbox",
 							"label": "Niederdruck-Sensorwert",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_HDin_pressure": {
 							"type": "checkbox",
 							"label": "Hochdruck-Sensorwert",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_BWTin": {
 							"type": "checkbox",
 							"label": "Brauchwasserthermostat BWT",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						}
 					}
 				},
@@ -425,123 +583,174 @@
 					"type": "panel",
 					"label": "03. Ausgänge",
 					"collapsable": true,
+					"xs": 12,
 					"sm": 12,
 					"md": 12,
+					"lg": 12,
+					"xl": 12,
 					"items": {
 						"sync_HUPout": {
 							"type": "checkbox",
 							"label": "Heizungsumwälzpumpe HUP (Systemrelevant)",
 							"default": true,
 							"disabled": "true",
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_VD1out": {
 							"type": "checkbox",
 							"label": "Verdichter 1 VD1 (Systemrelevant)",
 							"default": true,
 							"disabled": "true",
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_ZIPout": {
 							"type": "checkbox",
 							"label": "Zirkulationspumpe ZIP (Systemrelevant)",
 							"default": true,
 							"disabled": "true",
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_AVout": {
 							"type": "checkbox",
 							"label": "Abtauventil AV",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_BUPout": {
 							"type": "checkbox",
 							"label": "Warmwasser-Umwälzpumpe BUP",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_VENout": {
 							"type": "checkbox",
 							"label": "Ventilator VEN",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_ZUPout": {
 							"type": "checkbox",
 							"label": "Zusatzumwälzpumpe ZUP",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_ZW1out": {
 							"type": "checkbox",
 							"label": "Zweiter Wärmeerzeuger 1 ZW1",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_analogOut1": {
 							"type": "checkbox",
 							"label": "Analoger Ausgang 1",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_analogOut2": {
 							"type": "checkbox",
 							"label": "Analoger Ausgang 2",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_defrostValve": {
 							"type": "checkbox",
 							"label": "Status Abtauventil",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_hotWaterBoilerValve": {
 							"type": "checkbox",
 							"label": "Status Umschaltventil Warmwasser",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_heatingSystemCircPump": {
 							"type": "checkbox",
 							"label": "Heizungssystem Zirkulationspumpe Indikator",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_heatSourceMotor": {
 							"type": "checkbox",
 							"label": "Motor Wärmequelle",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_compressor1": {
 							"type": "checkbox",
 							"label": "Status Kompressor 1 Laufrückmeldung",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_hotWaterCircPumpExtern": {
 							"type": "checkbox",
 							"label": "Warmwasser Zirkulationspumpe Extern",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						}
 					}
 				},
@@ -549,120 +758,171 @@
 					"type": "panel",
 					"label": "04. Timer & 05. Betriebsstunden",
 					"collapsable": true,
+					"xs": 12,
 					"sm": 12,
 					"md": 12,
+					"lg": 12,
+					"xl": 12,
 					"items": {
 						"sync_Time_WPein_akt": {
 							"type": "checkbox",
 							"label": "Aktuelle Einschaltzeit Wärmepumpe",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_Time_ZWE1_akt": {
 							"type": "checkbox",
 							"label": "Aktuelle Laufzeit ZWE1",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_Timer_EinschVerz": {
 							"type": "checkbox",
 							"label": "Einschaltverzögerung Restzeit",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_Time_SSPAUS_akt": {
 							"type": "checkbox",
 							"label": "Aktuelle Sperrzeit AUS",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_Time_SSPEIN_akt": {
 							"type": "checkbox",
 							"label": "Aktuelle Sperrzeit EIN",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_Time_VDStd_akt": {
 							"type": "checkbox",
 							"label": "Aktuelle Standzeit Verdichter",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_Time_HRM_akt": {
 							"type": "checkbox",
 							"label": "Aktuelle Zeit HRM",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_Time_HRW_akt": {
 							"type": "checkbox",
 							"label": "Aktuelle Zeit HRW",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_Time_Heissgas": {
 							"type": "checkbox",
 							"label": "Zeit Heißgasüberwachung",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_ahp_Zeit": {
 							"type": "checkbox",
 							"label": "Zeit ahp-Stufe",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_hours_compressor1": {
 							"type": "checkbox",
 							"label": "Betriebsstunden Kompressor 1",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_starts_compressor1": {
 							"type": "checkbox",
 							"label": "Schaltspiele Kompressor 1",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_hours_2nd_heat_source1": {
 							"type": "checkbox",
 							"label": "Betriebsstunden Heizstab",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_hours_heatpump": {
 							"type": "checkbox",
 							"label": "Betriebsstunden Wärmepumpe Gesamt",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_hours_heating": {
 							"type": "checkbox",
 							"label": "Betriebsstunden Heizbetrieb",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_hours_warmwater": {
 							"type": "checkbox",
 							"label": "Betriebsstunden Warmwassererzeugung",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						}
 					}
 				},
@@ -670,82 +930,115 @@
 					"type": "panel",
 					"label": "06. & 07. Historien, 08. Betriebszustand",
 					"collapsable": true,
+					"xs": 12,
 					"sm": 12,
 					"md": 12,
+					"lg": 12,
+					"xl": 12,
 					"items": {
 						"sync_Fehlerspeicher": {
 							"type": "checkbox",
 							"label": "Fehlerhistorie (Systemrelevant)",
 							"default": true,
 							"disabled": "true",
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_Abschaltungen": {
 							"type": "checkbox",
 							"label": "Abschalthistorie (Systemrelevant)",
 							"default": true,
 							"disabled": "true",
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_WP_BZ_akt": {
 							"type": "checkbox",
 							"label": "Betriebszustand Code (Systemrelevant)",
 							"default": true,
 							"disabled": "true",
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_opStateHeatingString": {
 							"type": "checkbox",
 							"label": "Betriebszustand Heizung Text (Systemrelevant)",
 							"default": true,
 							"disabled": "true",
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_heatpump_extendet_state_string": {
 							"type": "checkbox",
 							"label": "Erweiterter Status Text",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_opStateHeating": {
 							"type": "checkbox",
 							"label": "Betriebszustand Heizung",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_opStateHotWaterString": {
 							"type": "checkbox",
 							"label": "Betriebszustand Warmwasser Text",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_bivalentLevel": {
 							"type": "checkbox",
 							"label": "Bivalenzstufe",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_heatpump_duration": {
 							"type": "checkbox",
 							"label": "Dauer aktueller Zustand",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_heatpump_state_string": {
 							"type": "checkbox",
 							"label": "Wärmepumpen Status Text",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						}
 					}
 				},
@@ -753,36 +1046,51 @@
 					"type": "panel",
 					"label": "09. Wärmemenge",
 					"collapsable": true,
+					"xs": 12,
 					"sm": 12,
 					"md": 12,
+					"lg": 12,
+					"xl": 12,
 					"items": {
 						"sync_thermalenergy_heating": {
 							"type": "checkbox",
 							"label": "Wärmemenge Heizung Erzeugt",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_thermalenergy_warmwater": {
 							"type": "checkbox",
 							"label": "Wärmemenge Warmwasser Erzeugt",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_thermalenergy_ZWE1": {
 							"type": "checkbox",
 							"label": "Wärmemenge Heizstab Erzeugt",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_thermalenergy_total": {
 							"type": "checkbox",
 							"label": "Wärmemenge Gesamt Erzeugt",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						}
 					}
 				},
@@ -790,36 +1098,51 @@
 					"type": "panel",
 					"label": "10. Energie",
 					"collapsable": true,
+					"xs": 12,
 					"sm": 12,
 					"md": 12,
+					"lg": 12,
+					"xl": 12,
 					"items": {
 						"sync_energy_heating": {
 							"type": "checkbox",
 							"label": "Energie Heizung Erzeugt",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_energy_warmwater": {
 							"type": "checkbox",
 							"label": "Energie Warmwasser Erzeugt",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_energy_ZWE1": {
 							"type": "checkbox",
 							"label": "Energie Heizstab Erzeugt",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_energy_total": {
 							"type": "checkbox",
 							"label": "Energie Gesamt Erzeugt",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						}
 					}
 				},
@@ -827,218 +1150,311 @@
 					"type": "panel",
 					"label": "11. Tabellen (Informationen)",
 					"collapsable": true,
+					"xs": 12,
 					"sm": 12,
 					"md": 12,
+					"lg": 12,
+					"xl": 12,
 					"items": {
 						"sync_heatingOperationTimerTable52MonFri": {
 							"type": "checkbox",
 							"label": "Heizen Tabelle Mo-Fr (5+2)",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_heatingOperationTimerTable52SatSun": {
 							"type": "checkbox",
 							"label": "Heizen Tabelle Sa-So (5+2)",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_heatingOperationTimerTableDayFriday": {
 							"type": "checkbox",
 							"label": "Heizen Tabelle Fr",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_heatingOperationTimerTableDayMonday": {
 							"type": "checkbox",
 							"label": "Heizen Tabelle Mo",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_heatingOperationTimerTableDaySaturday": {
 							"type": "checkbox",
 							"label": "Heizen Tabelle Sa",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_heatingOperationTimerTableDaySunday": {
 							"type": "checkbox",
 							"label": "Heizen Tabelle So",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_heatingOperationTimerTableDayThursday": {
 							"type": "checkbox",
 							"label": "Heizen Tabelle Do",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_heatingOperationTimerTableDayTuesday": {
 							"type": "checkbox",
 							"label": "Heizen Tabelle Di",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_heatingOperationTimerTableDayWednesday": {
 							"type": "checkbox",
 							"label": "Heizen Tabelle Mi",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_heatingOperationTimerTableWeek": {
 							"type": "checkbox",
 							"label": "Heizen Tabelle Woche (Mo-So)",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_hotWaterTable52MonFri": {
 							"type": "checkbox",
 							"label": "WW Tabelle Mo-Fr (5+2)",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_hotWaterTable52SatSun": {
 							"type": "checkbox",
 							"label": "WW Tabelle Sa-So (5+2)",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_hotWaterTableDayFriday": {
 							"type": "checkbox",
 							"label": "WW Tabelle Fr",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_hotWaterTableDayMonday": {
 							"type": "checkbox",
 							"label": "WW Tabelle Mo",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_hotWaterTableDaySaturday": {
 							"type": "checkbox",
 							"label": "WW Tabelle Sa",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_hotWaterTableDaySunday": {
 							"type": "checkbox",
 							"label": "WW Tabelle So",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_hotWaterTableDayThursday": {
 							"type": "checkbox",
 							"label": "WW Tabelle Do",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_hotWaterTableDayTuesday": {
 							"type": "checkbox",
 							"label": "WW Tabelle Di",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_hotWaterTableDayWednesday": {
 							"type": "checkbox",
 							"label": "WW Tabelle Mi",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_hotWaterTableWeek": {
 							"type": "checkbox",
 							"label": "WW Tabelle Woche (Mo-So)",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_hotWaterCircPumpTimerTable52MonFri": {
 							"type": "checkbox",
 							"label": "Zirkulations Tabelle Mo-Fr (5+2)",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_hotWaterCircPumpTimerTable52SatSun": {
 							"type": "checkbox",
 							"label": "Zirkulations Tabelle Sa-So (5+2)",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_hotWaterCircPumpTimerTableDayFriday": {
 							"type": "checkbox",
 							"label": "Zirkulations Tabelle Fr",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_hotWaterCircPumpTimerTableDayMonday": {
 							"type": "checkbox",
 							"label": "Zirkulations Tabelle Mo",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_hotWaterCircPumpTimerTableDaySaturday": {
 							"type": "checkbox",
 							"label": "Zirkulations Tabelle Sa",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_hotWaterCircPumpTimerTableDaySunday": {
 							"type": "checkbox",
 							"label": "Zirkulations Tabelle So",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_hotWaterCircPumpTimerTableDayThursday": {
 							"type": "checkbox",
 							"label": "Zirkulations Tabelle Do",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_hotWaterCircPumpTimerTableDayTuesday": {
 							"type": "checkbox",
 							"label": "Zirkulations Tabelle Di",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_hotWaterCircPumpTimerTableDayWednesday": {
 							"type": "checkbox",
 							"label": "Zirkulations Tabelle Mi",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_hotWaterCircPumpTimerTableWeek": {
 							"type": "checkbox",
 							"label": "Zirkulations Tabelle Woche (Mo-So)",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						}
 					}
 				},
@@ -1046,64 +1462,91 @@
 					"type": "panel",
 					"label": "12. Systeminfo",
 					"collapsable": true,
+					"xs": 12,
 					"sm": 12,
 					"md": 12,
+					"lg": 12,
+					"xl": 12,
 					"items": {
 						"sync_heatpump_type": {
 							"type": "checkbox",
 							"label": "Wärmepumpen-Typ",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_firmware": {
 							"type": "checkbox",
 							"label": "Firmware-Version",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_ip_address": {
 							"type": "checkbox",
 							"label": "Aktuelle IP-Adresse",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_subnet": {
 							"type": "checkbox",
 							"label": "Subnetzmaske",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_broadcast_address": {
 							"type": "checkbox",
 							"label": "Broadcast-Adresse",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_standard_gateway": {
 							"type": "checkbox",
 							"label": "Standard-Gateway",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_LIN_exists": {
 							"type": "checkbox",
 							"label": "LIN-Bus vorhanden",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_Gerätezeit": {
 							"type": "checkbox",
 							"label": "Gerätezeit",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						}
 					}
 				},
@@ -1111,50 +1554,71 @@
 					"type": "panel",
 					"label": "13. Kühlung",
 					"collapsable": true,
+					"xs": 12,
 					"sm": 12,
 					"md": 12,
+					"lg": 12,
+					"xl": 12,
 					"items": {
 						"sync_cooling_operation_mode": {
 							"type": "checkbox",
 							"label": "Kühlung Betriebsart",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_cooling_release_temp": {
 							"type": "checkbox",
 							"label": "Kühlfreigabe Temperatur",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_cooling_inlet_temp": {
 							"type": "checkbox",
 							"label": "Kühlmitteleinlasstemperatur",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_cooling_start_after_hours": {
 							"type": "checkbox",
 							"label": "Kühlung Start nach Stunden",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_cooling_end_after_hours": {
 							"type": "checkbox",
 							"label": "Kühlung End nach Stunden",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						},
 						"sync_hours_cooling": {
 							"type": "checkbox",
 							"label": "Kühlung Stunden",
 							"default": true,
+							"xs": 12,
 							"sm": 12,
-							"md": 6
+							"md": 6,
+							"lg": 6,
+							"xl": 6
 						}
 					}
 				}
@@ -1174,37 +1638,53 @@
 						"marginBottom": "15px"
 					},
 					"hidden": "data.telegram_instance ? true : false",
-					"sm": 12
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
 				},
 				"telegram_enabled": {
 					"type": "checkbox",
 					"label": "Fehlermeldungen per Telegram senden",
 					"disabled": "!data.telegram_instance || data.telegram_instance === 'none'",
+					"default": false,
+					"xs": 12,
 					"sm": 12,
 					"md": 6,
-					"default": false
+					"lg": 6,
+					"xl": 6
 				},
 				"notification_bell": {
 					"type": "checkbox",
 					"label": "Fehler auch als Benachrichtigung (Glocke) zeigen",
+					"default": false,
+					"xs": 12,
 					"sm": 12,
 					"md": 6,
-					"default": false
+					"lg": 6,
+					"xl": 6
 				},
 				"telegram_instance": {
 					"type": "instance",
 					"adapter": "telegram",
 					"label": "Telegram-Instanz",
+					"xs": 12,
 					"sm": 12,
-					"md": 6
+					"md": 6,
+					"lg": 6,
+					"xl": 6
 				},
 				"telegram_receiver": {
 					"type": "text",
 					"label": "Empfänger (Name / Chat-ID - Optional)",
 					"help": "Leer lassen, um die Nachricht an alle bekannten Telegram-Benutzer zu senden.",
 					"disabled": "!data.telegram_instance || data.telegram_instance === 'none' || !data.telegram_enabled",
+					"xs": 12,
 					"sm": 12,
-					"md": 6
+					"md": 6,
+					"lg": 6,
+					"xl": 6
 				},
 				"telegram_test_btn": {
 					"type": "sendTo",
@@ -1212,8 +1692,11 @@
 					"command": "testTelegram",
 					"color": "primary",
 					"icon": "send",
+					"xs": 12,
 					"sm": 12,
-					"md": 6
+					"md": 6,
+					"lg": 6,
+					"xl": 6
 				}
 			}
 		},
@@ -1225,17 +1708,29 @@
 				"motion_sensors_aktiv": {
 					"type": "checkbox",
 					"label": "Bewegungssensoren aktiv nutzen",
-					"sm": 12
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
 				},
 				"headerSensors": {
 					"type": "header",
 					"text": "Bewegungssensoren für Zirkulationspumpe (ZIP)",
 					"size": 4,
-					"sm": 12
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
 				},
 				"motionSensors": {
 					"type": "table",
+					"xs": 12,
 					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12,
 					"items": [
 						{
 							"type": "text",
@@ -1261,6 +1756,11 @@
 				"custom_states": {
 					"type": "table",
 					"label": "Benutzerdefinierte Datenpunkte (Verzeichnis: Benutzer)",
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12,
 					"items": [
 						{
 							"type": "checkbox",

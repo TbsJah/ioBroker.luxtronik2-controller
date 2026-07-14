@@ -11,46 +11,46 @@
 
 ## luxtronik2-controller adapter for ioBroker
 
-Dieser ioBroker-Adapter ermöglicht die lokale Steuerung und Überwachung von Wärmepumpen mit Luxtronik 2.x Steuerung (z. B. Alpha Innotec, Novelan). Der Adapter ist vollständig in TypeScript geschrieben.
+This ioBroker adapter enables the local control and monitoring of heat pumps with Luxtronik 2.x controllers (e.g., Alpha Innotec, Novelan). The adapter is written entirely in TypeScript.
 
-## Danksagung & Historie
+## Acknowledgements & History
 
-Dieses Projekt baut auf den Vorarbeiten bestehender Open-Source-Projekte auf. Ein besonderer Dank geht an:
+This project builds upon the preliminary work of existing open-source projects. Special thanks go to:
 
-[Bouni](https://github.com/bouni/luxtronik-2) Dessen Pionierarbeit und Code-Entwicklungen die wesentliche Grundlage für die Kommunikation mit Luxtronik-Steuerungen darstellen.
+[Bouni](https://github.com/bouni/luxtronik-2) Whose pioneering work and code developments form the essential foundation for communication with Luxtronik controllers.
 
-[Coolchip:](https://github.com/coolchip/luxtronik2) Für das grundlegende Reverse-Engineering des Luxtronik-Netzwerkprotokolls.
+[Coolchip:](https://github.com/coolchip/luxtronik2) For the fundamental reverse engineering of the Luxtronik network protocol.
 
-[UncleSamSwiss:](https://github.com/UncleSamSwiss/ioBroker.luxtronik2) Für den ursprünglichen ioBroker-Adapter.
+[UncleSamSwiss:](https://github.com/UncleSamSwiss/ioBroker.luxtronik2) For the original ioBroker adapter.
 
-Neuerungen in dieser Version: Der luxtronik2-controller integriert die TCP-Kommunikation (Port 8888 / 8889) nativ und verzichtet auf externe Bibliotheken. Zusätzlich wurden steuernde Makros, eine Logik zur Verdichterschonung sowie ein automatisiertes Datenpunkt-Management implementiert.
+Innovations in this version: The luxtronik2-controller natively integrates TCP communication (Port 8888 / 8889) and does not rely on external libraries. Additionally, controlling macros, a logic for compressor protection, and automated datapoint management were implemented.
 
 ## Features
 
-- Native TCP-Kommunikation: Direkte Verbindung zur Wärmepumpe ohne zusätzlichen Overhead.
+- Native TCP communication: Direct connection to the heat pump without additional overhead.
 
-- Verdichter-Schonung (Takt-Optimierung): Zusammenlegung von Heiz- und Warmwasserzyklen zur Reduzierung der Verdichterstarts.
+- Compressor protection (Cycle optimization): Combining heating and domestic hot water cycles to reduce compressor starts.
 
-- Integrierte Aktionen (Makros): Vordefinierte Steuerungslogiken für Zwangsheizen, Warmwasseranforderung und die Zirkulationspumpe (ZIP) inkl. automatischem Rückfall auf Standardwerte.
+- Integrated actions (Macros): Predefined control logics for forced heating, hot water requests, and the circulation pump (ZIP) incl. automatic fallback to default values.
 
-- Benutzerdefinierte Datenpunkte: Messwerte (Index 3004) und Parameter (Index 3003) können über die Adapter-Konfiguration hinzugefügt werden. Unix-Zeitstempel werden automatisch formatiert.
+- Custom datapoints: Measured values (Index 3004) and parameters (Index 3003) can be added via the adapter configuration. Unix timestamps are formatted automatically.
 
-- Automatisches Objekt-Management: Abgewählte oder gelöschte Datenpunkte und leere Ordnerstrukturen werden bei einem Adapter-Neustart automatisch aus ioBroker entfernt.
+- Automatic object management: Deselected or deleted datapoints and empty folder structures are automatically removed from ioBroker upon an adapter restart.
 
-- Benachrichtigungssystem: Fehlercodes der Wärmepumpe können direkt an Telegram oder das ioBroker-Benachrichtigungssystem gesendet werden.
+- Notification system: Heat pump error codes can be sent directly to Telegram or the ioBroker notification system.
 
-- Bewegungsmelder-Kopplung: Möglichkeit zur bedarfsgesteuerten Aktivierung der Zirkulationspumpe über vorhandene ioBroker-Bewegungssensoren.
+- Motion detector coupling: Option for demand-driven activation of the circulation pump via existing ioBroker motion sensors.
 
-## ⚠️ Warnung
+## ⚠️ Warning
 
-Einige Einstellungen, die durch diese Integration bereitgestellt werden, können die Leistung deiner Wärmepumpe beeinträchtigen. Fehlkonfigurationen können dazu führen, dass der Regler in einen Fehlerzustand wechselt, was einen manuellen Reset vor Ort erfordert.
+Some settings provided by this integration can affect the performance of your heat pump. Misconfigurations can cause the controller to enter a fault state, which requires a manual on-site reset.
 
-Dieses Projekt zielt darauf ab, deine Wärmepumpe zu schützen, indem die Konfigurationsmöglichkeiten auf sichere Werte beschränkt werden. Es können jedoch keine Garantien übernommen werden. Bitte sei vorsichtig, ziehe dein Luxtronik-Handbuch zurate und ändere keine Einstellungen, die du nicht vollständig verstehst.
+This project aims to protect your heat pump by restricting the configuration options to safe values. However, no guarantees can be made. Please be careful, consult your Luxtronik manual, and do not change any settings that you do not fully understand.
 
-## 🔧 Kompatibilität
+## 🔧 Compatibility
 
-Die Integration ermöglicht es dir, Wärmepumpen mit einem Luxtronik2-Regler zu überwachen und zu steuern. Sie funktioniert **lokal ohne Internetzugang**.
-Getestet wurde und wird mit einer LWD50A (LD5) von Alpha Innotec.
+The integration allows you to monitor and control heat pumps with a Luxtronik2 controller. It works locally without internet access.
+It was and is being tested with an LWD50A (LD5) from Alpha Innotec.
 
 ## ⚠️ Disclaimer / Haftungsausschluss ⚠️
 
@@ -58,9 +58,9 @@ Dieses Projekt steht in keinerlei Verbindung zu Alpha Innotec, Novelan, ait-deut
 
 _This project is not affiliated with Alpha Innotec, Novelan, ait-deutschland GmbH, or any other company. It is a personal project that is maintained in spare time. Use at your own risk._
 
-## Fehler melden & Mitwirken
+## Reporting Bugs & Contributing
 
-Fehlerberichte, Kompatibilitätshinweise zu speziellen Firmware-Versionen oder Feature-Anfragen können über den Issue-Tracker im [GitHub-Repository](https://github.com/TbsJah/ioBroker.luxtronik2-controller/issues) eingereicht werden.
+Bug reports, compatibility notes for specific firmware versions, or feature requests can be submitted via the issue tracker in the [GitHub-Repository](https://github.com/TbsJah/ioBroker.luxtronik2-controller/issues).
 
 ## Information
 
@@ -76,40 +76,18 @@ Fehlerberichte, Kompatibilitätshinweise zu speziellen Firmware-Versionen oder F
 <img src="documentation/Bilder/Fehlermeldung.png" alt="Fehlermeldung" width="100%">
 <img src="documentation/Bilder/Bewegungssensoren.png" alt="Bewegungssensoren" width="100%">
 
+## Changelog
+
 // ### **WORK IN PROGRESS**
 
 ### **WORK IN PROGRESS**
 
-- Websocketport hinzugefügt für Firmware >3.8
-- NPM Packet ws hinzugefügt
+- Websocket port added for firmware >3.8
+- NPM package ws added
 
 ### 0.2.0 (2026-07-09)
 
-- Readme - deutsch
-
-### 0.1.5 (2026-07-09)
-
-- Update Zip
-
-### 0.1.4 (2026-07-09)
-
-- Eigene States
-
-### 0.1.3 (2026-07-09)
-
-- Zip Prozess ausgelagert
-
-### 0.1.2 (2026-07-09)
-
-- NPM Freigabe
-
-### 0.1.1 (2026-07-09)
-
-- Readme
-
-### 0.1.0 (2026-07-09)
-
-- initial release
+- Readme - German
 
 ## License
 

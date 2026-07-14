@@ -47,7 +47,7 @@ async function restoreOriginalZipConfig(adapter) {
       await adapter.setState((0, import_stateMapping.getDpPath)(key), { val, ack: true });
       const luxId = parseInt(def.luxWriteId, 10);
       await adapter.queueWrite(luxId, rawVal);
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise((resolve) => adapter.setTimeout(resolve, 100));
     }
   } catch (err) {
     (0, import_logger.writeLog)(`Fehler bei der Wiederherstellung der ZIP Konfiguration: ${err.message}`, "error");
@@ -71,9 +71,9 @@ async function stopZipAndDeaeration(adapter) {
       }
       await restoreOriginalZipConfig(adapter);
       await adapter.queueWrite(158, 0);
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise((resolve) => adapter.setTimeout(resolve, 100));
       await adapter.queueWrite(684, 0);
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise((resolve) => adapter.setTimeout(resolve, 100));
       await adapter.syncConfigValue("runDeaerate", 0);
       await adapter.syncConfigValue("hotWaterCircPumpDeaerate", 0);
       await adapter.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)("Activate_Zip"), false, true);
@@ -105,7 +105,7 @@ async function handleActivateZip(adapter, id, durationSeconds) {
   }
   if (useDeaeration) {
     await adapter.queueWrite(158, 1);
-    await new Promise((r) => setTimeout(r, 100));
+    await new Promise((r) => adapter.setTimeout(r, 100));
     await adapter.queueWrite(684, 1);
     await adapter.syncConfigValue("runDeaerate", 1);
     await adapter.syncConfigValue("hotWaterCircPumpDeaerate", 1);
@@ -144,10 +144,10 @@ async function handleActivateZip(adapter, id, durationSeconds) {
     ];
     for (const u of updates) {
       await adapter.queueWrite(parseInt(import_stateMapping.STATE_MAPPING[u.key].luxWriteId, 10), u.raw);
-      await new Promise((r) => setTimeout(r, 100));
+      await new Promise((r) => adapter.setTimeout(r, 100));
     }
   }
-  adapter.zipTimer = setTimeout(async () => {
+  adapter.zipTimer = adapter.setTimeout(async () => {
     await stopZipAndDeaeration(adapter);
   }, durationSeconds * 1e3);
 }
