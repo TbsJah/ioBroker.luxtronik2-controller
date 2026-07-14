@@ -79,6 +79,12 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
+
+### **WORK IN PROGRESS**
+
+- [E5507] missing size attributes
+- [E6001] No README.md found
+
 ### 0.3.6 (2026-07-14)
 
 - Update StateMapping Items
