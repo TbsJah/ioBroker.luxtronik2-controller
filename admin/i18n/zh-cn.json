@@ -182,9 +182,6 @@
 	"Zirkulationspumpe ZIP (Systemrelevant)": "循环泵 ZIP（系统相关）",
 	"Zusatzumwälzpumpe ZUP": "辅助循环泵 ZUP",
 	"Zweiter Wärmeerzeuger 1 ZW1": "第二热发生器 1 ZW1",
-	"luxtronik2-controller adapter settings": "luxtronik2-controller的适配器设置",
-	"option1": "选项1",
-	"option2": "选项2",
 	"Überhitzung Ist": "实际过热度",
 	"Überhitzung Soll": "过热度目标",
 	"⚠️ Kein Telegram-Adapter gefunden! Bitte installiere eine Telegram-Instanz, um diese Funktion zu nutzen.": "⚠️ 未找到 Telegram 适配器！请安装 Telegram 实例才能使用此功能。"

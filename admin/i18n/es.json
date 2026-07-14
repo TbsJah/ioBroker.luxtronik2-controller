@@ -182,9 +182,6 @@
 	"Zirkulationspumpe ZIP (Systemrelevant)": "Bomba de circulación ZIP (relevante para el sistema)",
 	"Zusatzumwälzpumpe ZUP": "Bomba de circulación auxiliar ZUP",
 	"Zweiter Wärmeerzeuger 1 ZW1": "Segundo generador de calor 1 ZW1",
-	"luxtronik2-controller adapter settings": "Ajustes del adaptador para luxtronik2-controller",
-	"option1": "opción1",
-	"option2": "opción2",
 	"Überhitzung Ist": "Sobrecalentamiento real",
 	"Überhitzung Soll": "Objetivo de sobrecalentamiento",
 	"⚠️ Kein Telegram-Adapter gefunden! Bitte installiere eine Telegram-Instanz, um diese Funktion zu nutzen.": "⚠️ ¡No se encontró ningún adaptador de Telegram! Instale una instancia de Telegram para utilizar esta función."

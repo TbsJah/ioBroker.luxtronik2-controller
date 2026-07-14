@@ -182,9 +182,6 @@
 	"Zirkulationspumpe ZIP (Systemrelevant)": "Циркуляційний насос ZIP (відповідає системі)",
 	"Zusatzumwälzpumpe ZUP": "Допоміжний циркуляційний насос ЗУП",
 	"Zweiter Wärmeerzeuger 1 ZW1": "Другий теплогенератор 1 ZW1",
-	"luxtronik2-controller adapter settings": "Налаштування адаптера для luxtronik2-controller",
-	"option1": "варіант1",
-	"option2": "варіант2",
 	"Überhitzung Ist": "Фактичний перегрів",
 	"Überhitzung Soll": "Мета перегріву",
 	"⚠️ Kein Telegram-Adapter gefunden! Bitte installiere eine Telegram-Instanz, um diese Funktion zu nutzen.": "⚠️ Адаптер Telegram не знайдено! Щоб скористатися цією функцією, установіть екземпляр Telegram."
