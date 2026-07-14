@@ -82,7 +82,11 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 
 ### **WORK IN PROGRESS**
 
-- Visualization
+- no open topics
+
+### 0.3.3 (2026-07-14)
+
+- Package update
 
 ### 0.3.2 (2026-07-14)
 

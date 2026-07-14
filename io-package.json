@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "luxtronik2-controller",
-    "version": "0.3.2",
+    "version": "0.3.3",
     "news": {
+      "0.3.3": {
+        "en": "Visualization",
+        "de": "Visualisierung",
+        "ru": "Визуализация",
+        "pt": "Visualização",
+        "nl": "Visualisatie",
+        "fr": "Visualisation",
+        "it": "Visualizzazione",
+        "es": "Visualización",
+        "pl": "Wyobrażanie sobie",
+        "uk": "Візуалізація",
+        "zh-cn": "可视化"
+      },
       "0.3.2": {
         "en": "Fixed Websocket write error\nExtend stateMappings",
         "de": "Websocket-Schreibfehler behoben\nZustandszuordnungen erweitern",
