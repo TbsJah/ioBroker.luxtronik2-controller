@@ -58,7 +58,9 @@ function readAllRawWs(adapter, command) {
     const timeout = adapter.setTimeout(() => {
       if (!finished) {
         finished = true;
-        ws.terminate();
+        if (ws.readyState === import_ws.WebSocket.OPEN || ws.readyState === import_ws.WebSocket.CONNECTING) {
+          ws.close();
+        }
         reject(new Error(`WebSocket Timeout beim Auslesen der Liste ${command}.`));
       }
     }, 8e3);
@@ -82,7 +84,9 @@ function readAllRawWs(adapter, command) {
         if (!finished) {
           finished = true;
           adapter.clearTimeout(timeout);
-          ws.terminate();
+          if (ws.readyState === import_ws.WebSocket.OPEN || ws.readyState === import_ws.WebSocket.CONNECTING) {
+            ws.close();
+          }
           reject(new Error(`Unerwartete Antwort. Erwartet: ${command}, erhalten: ${responseCommand}`));
         }
         return;
@@ -92,7 +96,9 @@ function readAllRawWs(adapter, command) {
         if (!finished) {
           finished = true;
           adapter.clearTimeout(timeout);
-          ws.terminate();
+          if (ws.readyState === import_ws.WebSocket.OPEN || ws.readyState === import_ws.WebSocket.CONNECTING) {
+            ws.close();
+          }
           reject(new Error(`Ung\xFCltige Elementanzahl (${totalItems}) in WS Antwort ${command}`));
         }
         return;
@@ -109,15 +115,23 @@ function readAllRawWs(adapter, command) {
       if (!finished) {
         finished = true;
         adapter.clearTimeout(timeout);
-        ws.terminate();
-        resolve(allValues);
+        if (ws.readyState === import_ws.WebSocket.OPEN || ws.readyState === import_ws.WebSocket.CONNECTING) {
+          ws.once("close", () => {
+            resolve(allValues);
+          });
+          ws.close();
+        } else {
+          resolve(allValues);
+        }
       }
     });
     ws.on("error", (err) => {
       if (!finished) {
         finished = true;
         adapter.clearTimeout(timeout);
-        ws.terminate();
+        if (ws.readyState === import_ws.WebSocket.OPEN || ws.readyState === import_ws.WebSocket.CONNECTING) {
+          ws.close();
+        }
         reject(err);
       }
     });
@@ -211,7 +225,9 @@ function writeRawParameterWs(adapter, paramId, value) {
     const timeout = adapter.setTimeout(() => {
       if (!finished) {
         finished = true;
-        ws.terminate();
+        if (ws.readyState === import_ws.WebSocket.OPEN || ws.readyState === import_ws.WebSocket.CONNECTING) {
+          ws.close();
+        }
         reject(new Error(`WebSocket Timeout beim Schreiben von Parameter ${paramId}.`));
       }
     }, 5e3);
@@ -226,15 +242,23 @@ function writeRawParameterWs(adapter, paramId, value) {
       if (!finished) {
         finished = true;
         adapter.clearTimeout(timeout);
-        ws.terminate();
-        resolve();
+        if (ws.readyState === import_ws.WebSocket.OPEN || ws.readyState === import_ws.WebSocket.CONNECTING) {
+          ws.once("close", () => {
+            resolve(void 0);
+          });
+          ws.close();
+        } else {
+          resolve(void 0);
+        }
       }
     });
     ws.on("error", (err) => {
       if (!finished) {
         finished = true;
         adapter.clearTimeout(timeout);
-        ws.terminate();
+        if (ws.readyState === import_ws.WebSocket.OPEN || ws.readyState === import_ws.WebSocket.CONNECTING) {
+          ws.close();
+        }
         reject(err);
       }
     });

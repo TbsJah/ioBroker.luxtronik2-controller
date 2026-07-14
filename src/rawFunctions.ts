@@ -11,7 +11,6 @@ import { writeLog } from './logger';
  * @param adapter The adapter instance
  */
 function shouldUseWs(adapter: AdapterInstance): boolean {
-	// Wenn das Feld leer ist, gehen wir vom alten TCP Standard 8889 aus
 	const port = adapter.config.port ? Number(adapter.config.port) : 8889;
 	return port !== 8888 && port !== 8889;
 }
@@ -39,18 +38,19 @@ function readAllRawWs(adapter: AdapterInstance, command: number): Promise<number
 		let finished = false;
 		const host = adapter.config.host;
 		const port = adapter.config.port ? Number(adapter.config.port) : 8214;
-		// Ein expliziter Slash am Ende der URL hilft bei einigen Firmware-Versionen
 		const url = `ws://${host}:${port}`;
 
 		const ws = new WebSocket(url, 'luxnet');
-		ws.binaryType = 'nodebuffer'; // Zwingt den WebSocket zur Ausgabe von Buffer-Objekten
+		ws.binaryType = 'nodebuffer';
 
 		let responseData = Buffer.alloc(0);
 
 		const timeout = adapter.setTimeout(() => {
 			if (!finished) {
 				finished = true;
-				ws.terminate();
+				if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
+					ws.close();
+				}
 				reject(new Error(`WebSocket Timeout beim Auslesen der Liste ${command}.`));
 			}
 		}, 8000);
@@ -59,12 +59,10 @@ function readAllRawWs(adapter: AdapterInstance, command: number): Promise<number
 			const buffer = Buffer.alloc(8);
 			buffer.writeInt32BE(command, 0);
 			buffer.writeInt32BE(0, 4);
-			// ZWINGEND ALS BINÄRDATEN SENDEN:
 			ws.send(buffer, { binary: true });
 		});
 
 		ws.on('message', (data: any) => {
-			// Sicherstellen, dass die empfangenen Daten immer als Buffer behandelt werden
 			const chunk = Buffer.isBuffer(data) ? data : Buffer.from(data);
 			responseData = Buffer.concat([responseData, chunk]);
 
@@ -82,7 +80,9 @@ function readAllRawWs(adapter: AdapterInstance, command: number): Promise<number
 				if (!finished) {
 					finished = true;
 					adapter.clearTimeout(timeout);
-					ws.terminate();
+					if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
+						ws.close();
+					}
 					reject(new Error(`Unerwartete Antwort. Erwartet: ${command}, erhalten: ${responseCommand}`));
 				}
 				return;
@@ -94,7 +94,9 @@ function readAllRawWs(adapter: AdapterInstance, command: number): Promise<number
 				if (!finished) {
 					finished = true;
 					adapter.clearTimeout(timeout);
-					ws.terminate();
+					if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
+						ws.close();
+					}
 					reject(new Error(`Ungültige Elementanzahl (${totalItems}) in WS Antwort ${command}`));
 				}
 				return;
@@ -114,8 +116,16 @@ function readAllRawWs(adapter: AdapterInstance, command: number): Promise<number
 			if (!finished) {
 				finished = true;
 				adapter.clearTimeout(timeout);
-				ws.terminate();
-				resolve(allValues);
+
+				// HIER PASSIERT DIE MAGIE: Warten, bis WebSocket WIRKLICH zu ist!
+				if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
+					ws.once('close', () => {
+						resolve(allValues);
+					});
+					ws.close();
+				} else {
+					resolve(allValues);
+				}
 			}
 		});
 
@@ -123,7 +133,9 @@ function readAllRawWs(adapter: AdapterInstance, command: number): Promise<number
 			if (!finished) {
 				finished = true;
 				adapter.clearTimeout(timeout);
-				ws.terminate();
+				if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
+					ws.close();
+				}
 				reject(err);
 			}
 		});
@@ -222,11 +234,10 @@ function readAllRawTcp(adapter: AdapterInstance, command: number): Promise<numbe
 
 /**
  * Write a raw parameter to the Luxtronik controller.
- * Uses WebSocket or TCP depending on adapter configuration.
  *
- * @param adapter - The adapter instance
- * @param paramId - The parameter id to write
- * @param value - The value to write
+ * @param adapter - Adapter instance
+ * @param paramId - Parameter ID to write
+ * @param value - Value to set for the parameter
  * @returns Promise that resolves when the write is complete
  */
 export function writeRawParameter(adapter: AdapterInstance, paramId: number, value: number): Promise<void> {
@@ -237,7 +248,7 @@ export function writeRawParameter(adapter: AdapterInstance, paramId: number, val
 }
 
 function writeRawParameterWs(adapter: AdapterInstance, paramId: number, value: number): Promise<void> {
-	return new Promise((resolve, reject) => {
+	return new Promise<void>((resolve, reject) => {
 		let finished = false;
 		const host = adapter.config.host;
 		const port = adapter.config.port ? Number(adapter.config.port) : 8214;
@@ -250,28 +261,35 @@ function writeRawParameterWs(adapter: AdapterInstance, paramId: number, value: n
 		const timeout = adapter.setTimeout(() => {
 			if (!finished) {
 				finished = true;
-				ws.terminate();
+				if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
+					ws.close();
+				}
 				reject(new Error(`WebSocket Timeout beim Schreiben von Parameter ${paramId}.`));
 			}
 		}, 5000);
 
 		ws.on('open', () => {
 			const buffer = Buffer.alloc(12);
-			buffer.writeInt32BE(3002, 0); // Befehl 3002 = Parameter schreiben (Richtig!)
+			buffer.writeInt32BE(3002, 0);
 			buffer.writeInt32BE(paramId, 4);
 			buffer.writeInt32BE(value, 8);
-
-			// ZWINGEND ALS BINÄRDATEN SENDEN:
 			ws.send(buffer, { binary: true });
 		});
 
 		ws.on('message', () => {
-			// Optimierung: Jede Antwort der Luxtronik gilt als erfolgreicher Schreib-Empfang
 			if (!finished) {
 				finished = true;
 				adapter.clearTimeout(timeout);
-				ws.terminate();
-				resolve();
+
+				// HIER PASSIERT DIE MAGIE: Warten, bis WebSocket WIRKLICH zu ist!
+				if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
+					ws.once('close', () => {
+						resolve(undefined);
+					});
+					ws.close();
+				} else {
+					resolve(undefined);
+				}
 			}
 		});
 
@@ -279,7 +297,9 @@ function writeRawParameterWs(adapter: AdapterInstance, paramId: number, value: n
 			if (!finished) {
 				finished = true;
 				adapter.clearTimeout(timeout);
-				ws.terminate();
+				if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
+					ws.close();
+				}
 				reject(err);
 			}
 		});
@@ -333,14 +353,6 @@ function writeRawParameterTcp(adapter: AdapterInstance, paramId: number, value: 
 	});
 }
 
-// =========================================================
-// LOGGING-FUNKTION (DUMP)
-// =========================================================
-/**
- * Führt einen kompakten Raw-Dump aller relevanten Listen durch und schreibt die Ergebnisse ins Log.
- *
- * @param adapter - Die Adapter-Instanz
- */
 // =========================================================
 // LOGGING-FUNKTION (DUMP)
 // =========================================================
