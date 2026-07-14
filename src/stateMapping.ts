@@ -84,6 +84,17 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_value',
 		required: true,
 	},
+	temperature_extern_return: {
+		folder: 'Einstellungen.02_Heizung',
+		name: 'Externe Rücklauftemperatur',
+		role: 'value.temperature',
+		type: 'number',
+		unit: 'K',
+		write: true,
+		factor: 10,
+		luxWriteId: '13',
+		dataSource: 'raw_value',
+	},
 	temperature_hot_gas: {
 		folder: 'Informationen.01_Temperaturen',
 		name: 'Heissgas-Temperatur',
