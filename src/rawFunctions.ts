@@ -117,7 +117,7 @@ function readAllRawWs(adapter: AdapterInstance, command: number): Promise<number
 				finished = true;
 				adapter.clearTimeout(timeout);
 
-				// HIER PASSIERT DIE MAGIE: Warten, bis WebSocket WIRKLICH zu ist!
+				// Warten, bis WebSocket WIRKLICH zu ist!
 				if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
 					ws.once('close', () => {
 						resolve(allValues);
@@ -281,7 +281,7 @@ function writeRawParameterWs(adapter: AdapterInstance, paramId: number, value: n
 				finished = true;
 				adapter.clearTimeout(timeout);
 
-				// HIER PASSIERT DIE MAGIE: Warten, bis WebSocket WIRKLICH zu ist!
+				// Warten, bis WebSocket WIRKLICH zu ist!
 				if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
 					ws.once('close', () => {
 						resolve(undefined);
