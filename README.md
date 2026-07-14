@@ -82,7 +82,12 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 
 ### **WORK IN PROGRESS**
 
+- nothing reported
+
+### 0.3.5 (2026-07-14)
+
 - Config Checkbox issue resolved Temperature
+- Fix the issues reported by RepositoryChecker
 
 ### 0.3.4 (2026-07-14)
 
@@ -100,11 +105,6 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ### 0.3.1 (2026-07-14)
 
 - Fixed WebSocket retrieval error
-
-### 0.3.0 (2026-07-14)
-
-- Websocket port added for firmware >3.8
-- NPM package ws added
 
 ## License
 

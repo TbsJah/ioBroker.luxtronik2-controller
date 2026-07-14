@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "luxtronik2-controller",
-    "version": "0.3.4",
+    "version": "0.3.5",
     "news": {
+      "0.3.5": {
+        "en": "Config Checkbox issue resolved Temperature",
+        "de": "Problem mit dem Konfigurations-Kontrollkästchen behoben Temperatur",
+        "ru": "Проблема с флажком конфигурации решена. Температура",
+        "pt": "Problema com a caixa de seleção de configuração resolvido. Temperatura",
+        "nl": "Probleem met configuratie-selectievakje opgelost. Temperatuur",
+        "fr": "Problème de case à cocher de configuration résolu. Température",
+        "it": "Problema della casella di controllo di configurazione risolto Temperatura",
+        "es": "Problema de la casilla de verificación de configuración resuelto Temperatura",
+        "pl": "Rozwiązano problem z polem wyboru konfiguracji Temperatura",
+        "uk": "Проблема з прапорцем конфігурації вирішена. Температура",
+        "zh-cn": "配置复选框问题已解决 温度"
+      },
       "0.3.4": {
         "en": "Update StateMapping Items",
         "de": "Statuszuordnungselemente aktualisieren",
@@ -80,19 +93,6 @@
         "pl": "Readme - niemiecki",
         "uk": "Readme - німецькою мовою",
         "zh-cn": "自述文件 - 德语"
-      },
-      "0.1.5": {
-        "en": "' Update Zip",
-        "de": "'Zip aktualisieren'",
-        "ru": "«Обновить ZIP-архив»",
-        "pt": "'Atualizar Zip'",
-        "nl": "Zip bijwerken",
-        "fr": "' Mettre à jour le fichier zip",
-        "it": "' Aggiorna il file ZIP",
-        "es": "Actualizar Zip",
-        "pl": "'Aktualizuj kod pocztowy",
-        "uk": "Оновити поштовий індекс",
-        "zh-cn": "更新压缩包"
       }
     },
     "titleLang": {

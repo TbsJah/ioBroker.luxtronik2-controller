@@ -55,7 +55,7 @@ function readAllRawWs(adapter, command) {
     const ws = new import_ws.WebSocket(url, "luxnet");
     ws.binaryType = "nodebuffer";
     let responseData = Buffer.alloc(0);
-    const timeout = setTimeout(() => {
+    const timeout = adapter.setTimeout(() => {
       if (!finished) {
         finished = true;
         ws.terminate();
@@ -81,7 +81,7 @@ function readAllRawWs(adapter, command) {
       if (responseCommand !== command) {
         if (!finished) {
           finished = true;
-          clearTimeout(timeout);
+          adapter.clearTimeout(timeout);
           ws.terminate();
           reject(new Error(`Unerwartete Antwort. Erwartet: ${command}, erhalten: ${responseCommand}`));
         }
@@ -91,7 +91,7 @@ function readAllRawWs(adapter, command) {
       if (totalItems < 0 || totalItems > 1e4) {
         if (!finished) {
           finished = true;
-          clearTimeout(timeout);
+          adapter.clearTimeout(timeout);
           ws.terminate();
           reject(new Error(`Ung\xFCltige Elementanzahl (${totalItems}) in WS Antwort ${command}`));
         }
@@ -108,7 +108,7 @@ function readAllRawWs(adapter, command) {
       }
       if (!finished) {
         finished = true;
-        clearTimeout(timeout);
+        adapter.clearTimeout(timeout);
         ws.terminate();
         resolve(allValues);
       }
@@ -116,7 +116,7 @@ function readAllRawWs(adapter, command) {
     ws.on("error", (err) => {
       if (!finished) {
         finished = true;
-        clearTimeout(timeout);
+        adapter.clearTimeout(timeout);
         ws.terminate();
         reject(err);
       }
