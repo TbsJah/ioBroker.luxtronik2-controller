@@ -78,15 +78,18 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 
 ## Changelog
 
-// ### **WORK IN PROGRESS**
+### **WORK IN PROGRESS**
+
+- prepare add latest repo
+
 ### 0.3.8 (2026-07-14)
 
 - Fix issues reported by RepositoryChecker
 
 ### 0.3.7 (2026-07-14)
 
-- [E5507] missing size attributes
-- [E6001] No README.md found
+- E5507 missing size attributes
+- E6001 No README.md found
 
 ### 0.3.6 (2026-07-14)
 
