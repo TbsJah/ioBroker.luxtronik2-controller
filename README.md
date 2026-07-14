@@ -82,7 +82,8 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 
 ### **WORK IN PROGRESS**
 
-- Add Visualization
+- Fixed Websocket write error
+- Extend stateMappings
 
 ### 0.3.1 (2026-07-14)
 

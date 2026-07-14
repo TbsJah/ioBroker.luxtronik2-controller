@@ -1066,6 +1066,7 @@ const STATE_MAPPING = {
     unit: "h",
     write: true,
     luxWriteId: "850",
+    factor: 10,
     dataSource: "raw_parameter"
   },
   cooling_end_after_hours: {
@@ -1076,6 +1077,7 @@ const STATE_MAPPING = {
     unit: "h",
     write: true,
     luxWriteId: "851",
+    factor: 10,
     dataSource: "raw_parameter"
   },
   hours_cooling: {
@@ -1218,20 +1220,20 @@ const STATE_MAPPING = {
     dataSource: "raw_parameter",
     required: true
   },
-  // temperature_hot_water_target: {
-  // 	folder: 'Einstellungen.03_Warmwasser',
-  // 	name: 'Warmwasser Soll-Temperatur',
-  // 	role: 'value.temperature',
-  // 	type: 'number',
-  // 	unit: '°C',
-  // 	write: true,
-  // 	luxWriteId: '105',
-  // 	factor: 10,
-  // 	min: 30,
-  // 	max: 75,
-  // 	dataSource: 'raw_parameter',
-  // 	required: true,
-  // },
+  temperature_hot_water_target: {
+    folder: "Einstellungen.03_Warmwasser",
+    name: "Warmwasser Soll-Temperatur",
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C",
+    write: true,
+    luxWriteId: "105",
+    factor: 10,
+    min: 30,
+    max: 75,
+    dataSource: "raw_parameter",
+    required: true
+  },
   hotWaterTemperatureHysteresis: {
     folder: "Einstellungen.03_Warmwasser",
     name: "Warmwasser Hysterese",

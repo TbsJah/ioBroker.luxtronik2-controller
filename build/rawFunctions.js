@@ -205,10 +205,10 @@ function writeRawParameterWs(adapter, paramId, value) {
     let finished = false;
     const host = adapter.config.host;
     const port = adapter.config.port ? Number(adapter.config.port) : 8214;
-    const url = `ws://${host}:${port}/`;
+    const url = `ws://${host}:${port}`;
     const ws = new import_ws.WebSocket(url, "luxnet");
     ws.binaryType = "nodebuffer";
-    const timeout = setTimeout(() => {
+    const timeout = adapter.setTimeout(() => {
       if (!finished) {
         finished = true;
         ws.terminate();
@@ -225,7 +225,7 @@ function writeRawParameterWs(adapter, paramId, value) {
     ws.on("message", () => {
       if (!finished) {
         finished = true;
-        clearTimeout(timeout);
+        adapter.clearTimeout(timeout);
         ws.terminate();
         resolve();
       }
@@ -233,7 +233,7 @@ function writeRawParameterWs(adapter, paramId, value) {
     ws.on("error", (err) => {
       if (!finished) {
         finished = true;
-        clearTimeout(timeout);
+        adapter.clearTimeout(timeout);
         ws.terminate();
         reject(err);
       }
