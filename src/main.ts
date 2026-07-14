@@ -163,7 +163,7 @@ class Luxtronik2Controller extends utils.Adapter {
 					const targetWriteId = definition.luxWriteId;
 					const writeId = isRawWrite ? parseInt(targetWriteId, 10) : targetWriteId;
 					await this.queueWrite(writeId, valueToWrite);
-					await new Promise(r => setTimeout(r, 200));
+					await new Promise(r => global.setTimeout(r, 200));
 				} catch (err: any) {
 					writeLog(`Fehler beim Schreiben von ${mappingKey} an die Pumpe: ${err.message}`, 'error');
 				}
@@ -470,7 +470,7 @@ class Luxtronik2Controller extends utils.Adapter {
 
 						// Hardware-Schutz: Zwingende Pause (z.B. 300ms) nach jedem Schreibbefehl,
 						// damit sich der Controller der Wärmepumpe nicht verschluckt.
-						await new Promise(resolve => setTimeout(resolve, 300));
+						await new Promise(resolve => global.setTimeout(resolve, 300));
 					} catch (taskError: any) {
 						// Wenn ein einzelner Schreibbefehl fehlschlägt, fangen wir das HIER ab.
 						// Dadurch stürzt die Schleife nicht ab, sondern macht einfach mit dem
@@ -513,14 +513,14 @@ class Luxtronik2Controller extends utils.Adapter {
 			} catch (err: any) {
 				writeLog(`Raw 3003 Fehler: ${err.message}`, 'debug');
 			}
-			await new Promise(r => setTimeout(r, 3500));
+			await new Promise(r => global.setTimeout(r, 3500));
 
 			try {
 				rawValues = await readAllRaw(this, 3004);
 			} catch (err: any) {
 				writeLog(`Raw 3004 Fehler: ${err.message}`, 'debug');
 			}
-			await new Promise(r => setTimeout(r, 3500));
+			await new Promise(r => global.setTimeout(r, 3500));
 
 			this.errorCount = 0;
 			await this.setState('info.connection', { val: true, ack: true });
