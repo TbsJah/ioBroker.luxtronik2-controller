@@ -1,30 +1,80 @@
 import type { AdapterInstance } from '@iobroker/adapter-core';
 import * as net from 'node:net';
-import { WebSocket } from 'ws';
+import { WebSocket, type RawData } from 'ws';
 import { writeLog } from './logger';
 
-/**
- * Hilfsfunktion: Prüft anhand des konfigurierten Ports, ob WebSockets genutzt werden sollen.
- * Die klassischen TCP-Ports der Luxtronik sind 8888 und 8889.
- * Jeder andere Port (Standard bei neuen FW: 8214) triggert automatisch die WebSocket-Verbindung.
- *
- * @param adapter The adapter instance
- */
+// =========================================================
+// KONSTANTEN (Magic Numbers eliminiert)
+// =========================================================
+const CONSTANTS = {
+	CMD_WRITE: 3002,
+	CMD_READ_PARAM: 3003,
+	CMD_READ_VALUE: 3004,
+	PORT_TCP: 8889,
+	PORT_WS: 8214,
+	TIMEOUT_READ: 8000,
+	TIMEOUT_WRITE: 5000,
+	DELAY_RECONNECT: 1000,
+};
+
+// =========================================================
+// HILFSFUNKTIONEN
+// =========================================================
+
 function shouldUseWs(adapter: AdapterInstance): boolean {
-	const port = adapter.config.port ? Number(adapter.config.port) : 8889;
-	return port !== 8888 && port !== 8889;
+	const port = adapter.config.port ? Number(adapter.config.port) : CONSTANTS.PORT_TCP;
+	return port !== 8888 && port !== CONSTANTS.PORT_TCP;
+}
+
+/**
+ * Gemeinsame Logik zum Parsen der rohen Binärdaten der Wärmepumpe (Vermeidet doppelten Code).
+ * Gibt das Array zurück, wenn vollständig gelesen, null wenn noch Daten fehlen, oder wirft einen Fehler.
+ *
+ * @param responseData - The raw response buffer from the heat pump
+ * @param command - The command that was executed
+ */
+function parseRawResponse(responseData: Buffer, command: number): number[] | null {
+	const is3004 = command === CONSTANTS.CMD_READ_VALUE;
+	const headerSize = is3004 ? 12 : 8;
+	const lengthOffset = is3004 ? 8 : 4;
+
+	if (responseData.length < headerSize) {
+		return null;
+	}
+
+	const responseCommand = responseData.readInt32BE(0);
+	if (responseCommand !== command) {
+		throw new Error(`Unerwartete Antwort. Erwartet: ${command}, erhalten: ${responseCommand}`);
+	}
+
+	const totalItems = responseData.readInt32BE(lengthOffset);
+	if (totalItems < 0 || totalItems > 10000) {
+		throw new Error(`Ungültige Elementanzahl (${totalItems}) in Antwort ${command}`);
+	}
+
+	const totalRequiredLength = headerSize + totalItems * 4;
+	if (responseData.length < totalRequiredLength) {
+		return null;
+	}
+
+	const allValues: number[] = [];
+	for (let i = 0; i < totalItems; i++) {
+		const valueOffset = headerSize + i * 4;
+		allValues.push(responseData.readInt32BE(valueOffset));
+	}
+	return allValues;
 }
 
 // =========================================================
-// LESE-FUNKTIONEN (3003 / 3004)
+// LESE-FUNKTIONEN
 // =========================================================
 
 /**
- * Reads all raw data from the Luxtronik device.
+ * Reads all raw values from the device
  *
- * @param adapter The adapter instance
- * @param command The command number to read
- * @returns Promise resolving to an array of numbers
+ * @param adapter - The adapter instance
+ * @param command - The command to execute
+ * @returns Promise with array of values
  */
 export function readAllRaw(adapter: AdapterInstance, command: number): Promise<number[]> {
 	if (shouldUseWs(adapter)) {
@@ -34,26 +84,47 @@ export function readAllRaw(adapter: AdapterInstance, command: number): Promise<n
 }
 
 function readAllRawWs(adapter: AdapterInstance, command: number): Promise<number[]> {
-	return new Promise((resolve, reject) => {
+	return new Promise<number[]>((resolve, reject) => {
 		let finished = false;
-		const host = adapter.config.host;
-		const port = adapter.config.port ? Number(adapter.config.port) : 8214;
-		const url = `ws://${host}:${port}`;
+		let timeout: ioBroker.Timeout | undefined = undefined;
 
-		const ws = new WebSocket(url, 'luxnet');
+		const host = adapter.config.host;
+		const port = adapter.config.port ? Number(adapter.config.port) : CONSTANTS.PORT_WS;
+		const ws = new WebSocket(`ws://${host}:${port}`, 'luxnet');
 		ws.binaryType = 'nodebuffer';
 
 		let responseData = Buffer.alloc(0);
 
-		const timeout = adapter.setTimeout(() => {
-			if (!finished) {
-				finished = true;
-				if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
+		const finish = (err?: Error, data?: number[]): void => {
+			if (finished) {
+				return;
+			}
+			finished = true;
+			if (timeout) {
+				adapter.clearTimeout(timeout);
+			}
+
+			const isWsActive = ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING;
+
+			if (err) {
+				if (isWsActive) {
 					ws.close();
 				}
-				reject(new Error(`WebSocket Timeout beim Auslesen der Liste ${command}.`));
+				reject(err);
+			} else if (data) {
+				if (isWsActive) {
+					ws.once('close', () => resolve(data));
+					ws.close();
+				} else {
+					resolve(data);
+				}
 			}
-		}, 8000);
+		};
+
+		timeout = adapter.setTimeout(
+			() => finish(new Error(`WebSocket Timeout beim Auslesen der Liste ${command}.`)),
+			CONSTANTS.TIMEOUT_READ,
+		);
 
 		ws.on('open', () => {
 			const buffer = Buffer.alloc(8);
@@ -62,94 +133,57 @@ function readAllRawWs(adapter: AdapterInstance, command: number): Promise<number
 			ws.send(buffer, { binary: true });
 		});
 
-		ws.on('message', (data: any) => {
-			const chunk = Buffer.isBuffer(data) ? data : Buffer.from(data);
+		ws.on('message', (data: RawData) => {
+			let chunk: Buffer;
+
+			if (Buffer.isBuffer(data)) {
+				chunk = data;
+			} else if (Array.isArray(data)) {
+				chunk = Buffer.concat(data);
+			} else {
+				chunk = Buffer.from(data);
+			}
+
+			// Nur den neuen Chunk anhängen
 			responseData = Buffer.concat([responseData, chunk]);
 
-			const is3004 = command === 3004;
-			const headerSize = is3004 ? 12 : 8;
-			const lengthOffset = is3004 ? 8 : 4;
-
-			if (responseData.length < headerSize) {
-				return;
-			}
-
-			const responseCommand = responseData.readInt32BE(0);
-
-			if (responseCommand !== command) {
-				if (!finished) {
-					finished = true;
-					adapter.clearTimeout(timeout);
-					if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
-						ws.close();
-					}
-					reject(new Error(`Unerwartete Antwort. Erwartet: ${command}, erhalten: ${responseCommand}`));
+			try {
+				const values = parseRawResponse(responseData, command);
+				if (values !== null) {
+					finish(undefined, values);
 				}
-				return;
-			}
-
-			const totalItems = responseData.readInt32BE(lengthOffset);
-
-			if (totalItems < 0 || totalItems > 10000) {
-				if (!finished) {
-					finished = true;
-					adapter.clearTimeout(timeout);
-					if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
-						ws.close();
-					}
-					reject(new Error(`Ungültige Elementanzahl (${totalItems}) in WS Antwort ${command}`));
-				}
-				return;
-			}
-
-			const totalRequiredLength = headerSize + totalItems * 4;
-			if (responseData.length < totalRequiredLength) {
-				return;
-			}
-
-			const allValues: number[] = [];
-			for (let i = 0; i < totalItems; i++) {
-				const valueOffset = headerSize + i * 4;
-				allValues.push(responseData.readInt32BE(valueOffset));
-			}
-
-			if (!finished) {
-				finished = true;
-				adapter.clearTimeout(timeout);
-
-				// Warten, bis WebSocket WIRKLICH zu ist!
-				if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
-					ws.once('close', () => {
-						resolve(allValues);
-					});
-					ws.close();
-				} else {
-					resolve(allValues);
-				}
+			} catch (err: unknown) {
+				finish(err instanceof Error ? err : new Error(String(err)));
 			}
 		});
 
-		ws.on('error', (err: Error) => {
-			if (!finished) {
-				finished = true;
-				adapter.clearTimeout(timeout);
-				if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
-					ws.close();
-				}
-				reject(err);
-			}
-		});
+		ws.on('error', (err: Error) => finish(err));
 	});
 }
 
 function readAllRawTcp(adapter: AdapterInstance, command: number): Promise<number[]> {
-	return new Promise((resolve, reject) => {
+	return new Promise<number[]>((resolve, reject) => {
 		let finished = false;
 		const client = new net.Socket();
 		const host = adapter.config.host;
-		const port = adapter.config.port ? Number(adapter.config.port) : 8889;
+		const port = adapter.config.port ? Number(adapter.config.port) : CONSTANTS.PORT_TCP;
 
 		let responseData = Buffer.alloc(0);
+
+		const finish = (err?: Error, data?: number[]): void => {
+			if (finished) {
+				return;
+			}
+			finished = true;
+			client.setTimeout(0);
+			client.destroy();
+
+			if (err) {
+				reject(err);
+			} else if (data) {
+				resolve(data);
+			}
+		};
 
 		client.connect(port, host, () => {
 			const buffer = Buffer.alloc(8);
@@ -159,72 +193,23 @@ function readAllRawTcp(adapter: AdapterInstance, command: number): Promise<numbe
 		});
 
 		client.on('data', (chunk: Buffer) => {
+			// Bei TCP kommt immer direkt ein Buffer an, hier reicht das simple Concat
 			responseData = Buffer.concat([responseData, chunk]);
 
-			const is3004 = command === 3004;
-			const headerSize = is3004 ? 12 : 8;
-			const lengthOffset = is3004 ? 8 : 4;
-
-			if (responseData.length < headerSize) {
-				return;
-			}
-
-			const responseCommand = responseData.readInt32BE(0);
-
-			if (responseCommand !== command) {
-				client.destroy();
-				if (!finished) {
-					finished = true;
-					reject(new Error(`Unerwartete Antwort. Erwartet: ${command}, erhalten: ${responseCommand}`));
+			try {
+				const values = parseRawResponse(responseData, command);
+				if (values !== null) {
+					finish(undefined, values);
 				}
-				return;
-			}
-
-			const totalItems = responseData.readInt32BE(lengthOffset);
-
-			if (totalItems < 0 || totalItems > 10000) {
-				client.destroy();
-				if (!finished) {
-					finished = true;
-					reject(new Error(`Ungültige Elementanzahl (${totalItems}) in TCP Antwort ${command}`));
-				}
-				return;
-			}
-
-			const totalRequiredLength = headerSize + totalItems * 4;
-			if (responseData.length < totalRequiredLength) {
-				return;
-			}
-
-			const allValues: number[] = [];
-			for (let i = 0; i < totalItems; i++) {
-				const valueOffset = headerSize + i * 4;
-				allValues.push(responseData.readInt32BE(valueOffset));
-			}
-
-			client.destroy();
-			if (!finished) {
-				finished = true;
-				resolve(allValues);
+			} catch (err: unknown) {
+				finish(err instanceof Error ? err : new Error(String(err)));
 			}
 		});
 
-		client.on('error', (err: Error) => {
-			client.destroy();
-			if (!finished) {
-				finished = true;
-				reject(err);
-			}
-		});
+		client.on('error', (err: Error) => finish(err));
 
-		client.setTimeout(8000);
-		client.on('timeout', () => {
-			client.destroy();
-			if (!finished) {
-				finished = true;
-				reject(new Error(`Timeout beim Auslesen der TCP Liste ${command}.`));
-			}
-		});
+		client.setTimeout(CONSTANTS.TIMEOUT_READ);
+		client.on('timeout', () => finish(new Error(`Timeout beim Auslesen der TCP Liste ${command}.`)));
 	});
 }
 
@@ -233,12 +218,12 @@ function readAllRawTcp(adapter: AdapterInstance, command: number): Promise<numbe
 // =========================================================
 
 /**
- * Write a raw parameter to the Luxtronik controller.
+ * Writes a raw parameter to the device.
  *
- * @param adapter - Adapter instance
- * @param paramId - Parameter ID to write
- * @param value - Value to set for the parameter
- * @returns Promise that resolves when the write is complete
+ * @param adapter - The adapter instance
+ * @param paramId - The parameter ID to write
+ * @param value - The value to set for the parameter
+ * @returns Promise that resolves when write is complete
  */
 export function writeRawParameter(adapter: AdapterInstance, paramId: number, value: number): Promise<void> {
 	if (shouldUseWs(adapter)) {
@@ -250,72 +235,82 @@ export function writeRawParameter(adapter: AdapterInstance, paramId: number, val
 function writeRawParameterWs(adapter: AdapterInstance, paramId: number, value: number): Promise<void> {
 	return new Promise<void>((resolve, reject) => {
 		let finished = false;
+		let timeout: ioBroker.Timeout | undefined = undefined;
+
 		const host = adapter.config.host;
-		const port = adapter.config.port ? Number(adapter.config.port) : 8214;
-
-		const url = `ws://${host}:${port}`;
-
-		const ws = new WebSocket(url, 'luxnet');
+		const port = adapter.config.port ? Number(adapter.config.port) : CONSTANTS.PORT_WS;
+		const ws = new WebSocket(`ws://${host}:${port}`, 'luxnet');
 		ws.binaryType = 'nodebuffer';
 
-		const timeout = adapter.setTimeout(() => {
-			if (!finished) {
-				finished = true;
-				if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
+		const finish = (err?: Error): void => {
+			if (finished) {
+				return;
+			}
+			finished = true;
+			if (timeout) {
+				adapter.clearTimeout(timeout);
+			}
+
+			const isWsActive = ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING;
+
+			if (err) {
+				if (isWsActive) {
 					ws.close();
 				}
-				reject(new Error(`WebSocket Timeout beim Schreiben von Parameter ${paramId}.`));
-			}
-		}, 5000);
-
-		ws.on('open', () => {
-			const buffer = Buffer.alloc(12);
-			buffer.writeInt32BE(3002, 0);
-			buffer.writeInt32BE(paramId, 4);
-			buffer.writeInt32BE(value, 8);
-			ws.send(buffer, { binary: true });
-		});
-
-		ws.on('message', () => {
-			if (!finished) {
-				finished = true;
-				adapter.clearTimeout(timeout);
-
-				// Warten, bis WebSocket WIRKLICH zu ist!
-				if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
-					ws.once('close', () => {
-						resolve(undefined);
-					});
+				reject(err);
+			} else {
+				if (isWsActive) {
+					ws.once('close', () => resolve(undefined));
 					ws.close();
 				} else {
 					resolve(undefined);
 				}
 			}
+		};
+
+		timeout = adapter.setTimeout(
+			() => finish(new Error(`WebSocket Timeout beim Schreiben von Parameter ${paramId}.`)),
+			CONSTANTS.TIMEOUT_WRITE,
+		);
+
+		ws.on('open', () => {
+			const buffer = Buffer.alloc(12);
+			buffer.writeInt32BE(CONSTANTS.CMD_WRITE, 0);
+			buffer.writeInt32BE(paramId, 4);
+			buffer.writeInt32BE(value, 8);
+			ws.send(buffer, { binary: true });
 		});
 
-		ws.on('error', (err: Error) => {
-			if (!finished) {
-				finished = true;
-				adapter.clearTimeout(timeout);
-				if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
-					ws.close();
-				}
-				reject(err);
-			}
-		});
+		ws.on('message', () => finish());
+		ws.on('error', (err: Error) => finish(err));
 	});
 }
 
 function writeRawParameterTcp(adapter: AdapterInstance, paramId: number, value: number): Promise<void> {
-	return new Promise((resolve, reject) => {
+	return new Promise<void>((resolve, reject) => {
 		let finished = false;
 		const client = new net.Socket();
 		const host = adapter.config.host || '127.0.0.1';
-		const port = adapter.config.port ? Number(adapter.config.port) : 8889;
+		const port = adapter.config.port ? Number(adapter.config.port) : CONSTANTS.PORT_TCP;
+
+		const finish = (err?: Error): void => {
+			if (finished) {
+				return;
+			}
+			finished = true;
+			client.setTimeout(0);
+			client.destroy();
+
+			if (err) {
+				reject(err);
+			} else {
+				resolve();
+			}
+		};
 
 		client.connect(port, host, () => {
 			const buffer = Buffer.alloc(12);
-			buffer.writeInt32BE(3002, 0);
+			buffer.writeInt32BE(CONSTANTS.CMD_WRITE, 0);
 			buffer.writeInt32BE(paramId, 4);
 			buffer.writeInt32BE(value, 8);
 			client.write(buffer);
@@ -323,58 +318,38 @@ function writeRawParameterTcp(adapter: AdapterInstance, paramId: number, value: 
 
 		client.on('data', (chunk: Buffer) => {
 			if (chunk.length >= 4) {
-				const responseCommand = chunk.readInt32BE(0);
-				if (responseCommand === 3002) {
-					client.destroy();
-					if (!finished) {
-						finished = true;
-						resolve();
-					}
+				if (chunk.readInt32BE(0) === CONSTANTS.CMD_WRITE) {
+					finish();
 				}
 			}
 		});
 
-		client.on('error', (err: Error) => {
-			client.destroy();
-			if (!finished) {
-				finished = true;
-				reject(err);
-			}
-		});
+		client.on('error', (err: Error) => finish(err));
 
-		client.setTimeout(5000);
-		client.on('timeout', () => {
-			client.destroy();
-			if (!finished) {
-				finished = true;
-				reject(new Error(`Timeout beim Schreiben von Parameter TCP ${paramId}.`));
-			}
-		});
+		client.setTimeout(CONSTANTS.TIMEOUT_WRITE);
+		client.on('timeout', () => finish(new Error(`Timeout beim Schreiben von Parameter TCP ${paramId}.`)));
 	});
 }
 
 // =========================================================
 // LOGGING-FUNKTION (DUMP)
 // =========================================================
+
 /**
- * Führt einen kompakten Raw-Dump aller relevanten Listen durch und schreibt die Ergebnisse ins Log.
+ * Dumps all raw data to log
  *
- * @param adapter - Die Adapter-Instanz
+ * @param adapter The adapter instance
  */
 export async function dumpAllRawToLog(adapter: AdapterInstance): Promise<void> {
-	// Kleine Hilfsfunktion für eine Atempause (Pause in Millisekunden)
 	const delay = (ms: number): Promise<void> => new Promise(resolve => adapter.setTimeout(resolve, ms));
+	const useWs = shouldUseWs(adapter);
 
 	try {
 		const dumpList = async (command: number, title: string): Promise<void> => {
-			// Vor jedem neuen Verbindungsaufbau 1 Sekunde warten, damit der Port der Pumpe frei wird
-			await delay(1000);
+			await delay(CONSTANTS.DELAY_RECONNECT);
 
 			writeLog('=======================================================', 'info');
-			writeLog(
-				`START COMPACT RAW DUMP: LISTE ${command} (${title}) via ${shouldUseWs(adapter) ? 'WebSocket' : 'TCP'}`,
-				'info',
-			);
+			writeLog(`START COMPACT RAW DUMP: LISTE ${command} (${title}) via ${useWs ? 'WebSocket' : 'TCP'}`, 'info');
 			writeLog('=======================================================', 'info');
 
 			const data = await readAllRaw(adapter, command);
@@ -385,12 +360,11 @@ export async function dumpAllRawToLog(adapter: AdapterInstance): Promise<void> {
 			writeLog('=======================================================', 'info');
 		};
 
-		// Erst dem normalen Zyklus Zeit geben, sich zu schließen
-		await delay(1000);
-
-		await dumpList(3003, 'PARAMETER');
-		await dumpList(3004, 'MESSWERTE');
-	} catch (err: any) {
-		writeLog(`Fehler beim Ausführen des Raw-Dumps: ${err.message}`, 'error');
+		await delay(CONSTANTS.DELAY_RECONNECT);
+		await dumpList(CONSTANTS.CMD_READ_PARAM, 'PARAMETER');
+		await dumpList(CONSTANTS.CMD_READ_VALUE, 'MESSWERTE');
+	} catch (err: unknown) {
+		const msg = err instanceof Error ? err.message : String(err);
+		writeLog(`Fehler beim Ausführen des Raw-Dumps: ${msg}`, 'error');
 	}
 }
