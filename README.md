@@ -79,8 +79,7 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
-
-### **WORK IN PROGRESS**
+### 0.3.4 (2026-07-14)
 
 - Update StateMapping Items
 
@@ -101,10 +100,6 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 
 - Websocket port added for firmware >3.8
 - NPM package ws added
-
-### 0.2.0 (2026-07-09)
-
-- Readme - German
 
 ## License
 

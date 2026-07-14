@@ -23,3 +23,6 @@
 ### 0.1.0 (2026-07-09)
 
 - initial release
+## 0.2.0 (2026-07-09)
+
+- Readme - German
