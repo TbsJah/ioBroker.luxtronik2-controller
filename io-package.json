@@ -1,8 +1,34 @@
 {
   "common": {
     "name": "luxtronik2-controller",
-    "version": "0.2.0",
+    "version": "0.3.1",
     "news": {
+      "0.3.1": {
+        "en": "Fehler Websocket Abruf behoben",
+        "de": "Fehler Websocket Abruf behoben",
+        "ru": "Fehler Websocket Abruf behoben",
+        "pt": "Fehler Websocket Abruf behoben",
+        "nl": "Fehler Websocket Abruf behoben",
+        "fr": "Fehler Websocket Abruf disponible",
+        "it": "Fehler Websocket Abruf behoben",
+        "es": "Fehler Websocket Abruf behoben",
+        "pl": "Fehler Websocket Abruf behoben",
+        "uk": "Fehler Websocket Abruf behoben",
+        "zh-cn": "Fehler Websocket Abruf behoben"
+      },
+      "0.3.0": {
+        "en": "Websocket port added for firmware >3.8\nNPM package ws added",
+        "de": "Websocket-Port für Firmware >3.8 hinzugefügt\nNPM-Paket ws hinzugefügt",
+        "ru": "Для прошивки версии >3.8 добавлен порт WebSocket.\nДобавлен пакет NPM",
+        "pt": "Porta WebSocket adicionada para firmware >3.8\nPacote NPM ws adicionado",
+        "nl": "WebSocket-poort toegevoegd voor firmware >3.8\nNPM-pakket ws toegevoegd",
+        "fr": "Ajout d'un port WebSocket pour les firmwares > 3.8\nLe package NPM a été ajouté.",
+        "it": "Porta WebSocket aggiunta per firmware >3.8\nPacchetto NPM ws aggiunto",
+        "es": "Se agregó el puerto Websocket para firmware >3.8\nSe agregó el paquete NPM",
+        "pl": "Dodano port Websocket dla oprogramowania układowego >3.8\nDodano pakiet NPM",
+        "uk": "Додано порт Websocket для прошивки >3.8\nДодано пакет NPM",
+        "zh-cn": "固件版本 3.8 及更高版本新增 WebSocket 端口\nNPM 包 ws 已添加"
+      },
       "0.2.0": {
         "en": "Readme - deutsch",
         "de": "Readme - deutsch",
@@ -41,58 +67,6 @@
         "pl": "NPM",
         "uk": "НПМ",
         "zh-cn": "NPM"
-      },
-      "0.1.3": {
-        "en": "Zip Prozess ausgelagert",
-        "de": "Zip Prozess ausgelagert",
-        "ru": "Zip Prozess ausgelagert",
-        "pt": "Zip Prozess ausgelagert",
-        "nl": "Zip Prozess ausgelagert",
-        "fr": "Zip Prozess ausgelagert",
-        "it": "Zip Prozess ausgelagert",
-        "es": "Zip Prozess ausgelagert",
-        "pl": "Zip Prozess ausgelagert",
-        "uk": "Видалено процесом Zip",
-        "zh-cn": "Zip Prozess ausgelagert"
-      },
-      "0.1.2": {
-        "en": "NPM Freigabe",
-        "de": "NPM-Freigabe",
-        "ru": "NPM Freigabe",
-        "pt": "NPM Freigabe",
-        "nl": "NPM Freigabe",
-        "fr": "NPM Freigabe",
-        "it": "NPM Freigabe",
-        "es": "NPM Freigabe",
-        "pl": "NPM Freigabe",
-        "uk": "НПМ Фрайгабе",
-        "zh-cn": "NPM Freigabe"
-      },
-      "0.1.1": {
-        "en": "<!--\n\tPlaceholder for the next version (at the beginning of the line):\n\t### **WORK IN PROGRESS**\n-->",
-        "de": "<!--\nPlatzhalter für die nächste Version (am Anfang der Zeile):\n### **IN BEARBEITUNG**\n-->",
-        "ru": "<!--\nЗаполнитель для следующей версии (в начале строки):\n### **РАБОТА В ПРОЦЕССЕ**\n-->",
-        "pt": "<!--\nEspaço reservado para a próxima versão (no início da linha):\n### **EM ANDAMENTO**\n-->",
-        "nl": "<!--\nPlaatsaanduiding voor de volgende versie (aan het begin van de regel):\n### **WERK IN ONTWIKKELING**\n-->",
-        "fr": "<!--\nTexte d'espace réservé pour la version suivante (en début de ligne) :\n### **TRAVAIL EN COURS**\n-->",
-        "it": "<!--\nSpazio riservato per la versione successiva (all'inizio della riga):\n\t### **LAVORI IN CORSO**\n-->",
-        "es": "<!--\nMarcador de posición para la siguiente versión (al principio de la línea):\n### **EN PROCESO**\n-->",
-        "pl": "<!--\nMiejsce zastępcze dla następnej wersji (na początku wiersza):\n### **W TRAKCIE PRACY**\n-->",
-        "uk": "<!--\nЗаповнювач для наступної версії (на початку рядка):\n### **РОБОТА В ПРОЦЕСІ**\n-->",
-        "zh-cn": "<!--\n下一版本占位符（位于行首）：\n### **正在进行中**\n-->"
-      },
-      "0.1.0": {
-        "en": "initial release",
-        "de": "Erstveröffentlichung",
-        "ru": "первоначальный релиз",
-        "pt": "lançamento inicial",
-        "nl": "eerste release",
-        "fr": "version initiale",
-        "it": "rilascio iniziale",
-        "es": "lanzamiento inicial",
-        "pl": "wydanie początkowe",
-        "uk": "початковий випуск",
-        "zh-cn": "初始版本"
       }
     },
     "titleLang": {
@@ -194,24 +168,60 @@
     {
       "scope": "luxtronik2-controller",
       "name": {
+        "en": "Luxtronik2-Controller",
         "de": "Luxtronik2-Controller",
-        "en": "Luxtronik2-Controller"
+        "ru": "Контроллер Luxtronik2",
+        "pt": "Controlador Luxtronik2",
+        "nl": "Luxtronik2-controller",
+        "fr": "Contrôleur Luxtronik2",
+        "it": "Controllore Luxtronik2",
+        "es": "Controlador Luxtronik2",
+        "pl": "Kontroler Luxtronik2",
+        "uk": "Контролер Luxtronik2",
+        "zh-cn": "Luxtronik2控制器"
       },
       "description": {
+        "en": "Notifications from the Luxtronik2-Controller adapter",
         "de": "Benachrichtigungen vom Luxtronik2-Controller Adapter",
-        "en": "Notifications from the Luxtronik2-Controller adapter"
+        "ru": "Уведомления от адаптера Luxtronik2-Controller",
+        "pt": "Notificações do adaptador Luxtronik2-Controller",
+        "nl": "Meldingen van de Luxtronik2-Controller adapter",
+        "fr": "Notifications de l'adaptateur Luxtronik2-Controller",
+        "it": "Notifiche dall'adattatore Luxtronik2-Controller",
+        "es": "Notificaciones del adaptador Luxtronik2-Controller",
+        "pl": "Powiadomienia z adaptera Luxtronik2-Controller",
+        "uk": "Сповіщення від адаптера Luxtronik2-Controller",
+        "zh-cn": "来自 Luxtronik2-Controller 适配器的通知"
       },
       "categories": [
         {
           "category": "lwpError",
           "name": {
+            "en": "Heat Pump Errors",
             "de": "Wärmepumpen-Fehler",
-            "en": "Heat Pump Errors"
+            "ru": "Ошибки теплового насоса",
+            "pt": "Erros da bomba de calor",
+            "nl": "Fouten warmtepomp",
+            "fr": "Erreurs de la pompe à chaleur",
+            "it": "Errori della pompa di calore",
+            "es": "Errores de la bomba de calor",
+            "pl": "Błędy pompy ciepła",
+            "uk": "Помилки теплового насоса",
+            "zh-cn": "热泵错误"
           },
           "severity": "alert",
           "description": {
+            "en": "Error messages from the heating system",
             "de": "Fehlermeldungen aus der Heizungsanlage",
-            "en": "Error messages from the heating system"
+            "ru": "Сообщения об ошибках от системы отопления",
+            "pt": "Mensagens de erro do sistema de aquecimento",
+            "nl": "Foutmeldingen van het verwarmingssysteem",
+            "fr": "Messages d'erreur du système de chauffage",
+            "it": "Messaggi di errore dal sistema di riscaldamento",
+            "es": "Mensajes de error del sistema de calefacción",
+            "pl": "Komunikaty o błędach z systemu grzewczego",
+            "uk": "Повідомлення про помилки від системи опалення",
+            "zh-cn": "来自供暖系统的错误消息"
           },
           "regex": [],
           "limit": 10

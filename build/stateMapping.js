@@ -1214,7 +1214,7 @@ const STATE_MAPPING = {
     luxWriteId: "2",
     factor: 10,
     min: 30,
-    max: 65,
+    max: 75,
     dataSource: "raw_parameter",
     required: true
   },
@@ -1228,7 +1228,7 @@ const STATE_MAPPING = {
   // 	luxWriteId: '105',
   // 	factor: 10,
   // 	min: 30,
-  // 	max: 65,
+  // 	max: 75,
   // 	dataSource: 'raw_parameter',
   // 	required: true,
   // },

@@ -33,7 +33,7 @@ export async function restoreOriginalZipConfig(adapter: any): Promise<void> {
 
 			const luxId = parseInt(def.luxWriteId as string, 10);
 			await adapter.queueWrite(luxId, rawVal);
-			await new Promise(resolve => setTimeout(resolve, 100));
+			await new Promise(resolve => adapter.setTimeout(resolve, 100));
 		}
 	} catch (err: any) {
 		writeLog(`Fehler bei der Wiederherstellung der ZIP Konfiguration: ${err.message}`, 'error');
@@ -68,9 +68,9 @@ export async function stopZipAndDeaeration(adapter: any): Promise<void> {
 			await restoreOriginalZipConfig(adapter);
 
 			await adapter.queueWrite(158, 0);
-			await new Promise(resolve => setTimeout(resolve, 100));
+			await new Promise(resolve => adapter.setTimeout(resolve, 100));
 			await adapter.queueWrite(684, 0);
-			await new Promise(resolve => setTimeout(resolve, 100));
+			await new Promise(resolve => adapter.setTimeout(resolve, 100));
 
 			await adapter.syncConfigValue('runDeaerate', 0);
 			await adapter.syncConfigValue('hotWaterCircPumpDeaerate', 0);
@@ -120,7 +120,7 @@ export async function handleActivateZip(adapter: any, id: string, durationSecond
 
 	if (useDeaeration) {
 		await adapter.queueWrite(158, 1);
-		await new Promise(r => setTimeout(r, 100));
+		await new Promise(r => adapter.setTimeout(r, 100));
 		await adapter.queueWrite(684, 1);
 		await adapter.syncConfigValue('runDeaerate', 1);
 		await adapter.syncConfigValue('hotWaterCircPumpDeaerate', 1);
@@ -161,11 +161,11 @@ export async function handleActivateZip(adapter: any, id: string, durationSecond
 
 		for (const u of updates) {
 			await adapter.queueWrite(parseInt(STATE_MAPPING[u.key].luxWriteId as string, 10), u.raw);
-			await new Promise(r => setTimeout(r, 100));
+			await new Promise(r => adapter.setTimeout(r, 100));
 		}
 	}
 
-	adapter.zipTimer = setTimeout(async () => {
+	adapter.zipTimer = adapter.setTimeout(async () => {
 		await stopZipAndDeaeration(adapter);
 	}, durationSeconds * 1000);
 }
