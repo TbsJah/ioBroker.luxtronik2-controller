@@ -144,12 +144,12 @@ async function checkAndSendErrorNotifications(adapter, oldFehlerVal, newFehlerVa
   if (currentErrorTimestamp === void 0 || currentErrorCode === 0) {
     return;
   }
-  const oldList = oldFehlerVal ? safeParse(oldFehlerVal) : [];
-  const oldNewestError = oldList && oldList.length > 0 ? oldList[0] : null;
-  if (oldNewestError && currentErrorTimestamp === oldNewestError.timestamp) {
+  if (adapter.lastKnownErrorTimestamp === void 0 || adapter.lastKnownErrorTimestamp === null) {
+    adapter.lastKnownErrorTimestamp = currentErrorTimestamp;
+    (0, import_logger.writeLog)("Fehler-\xDCberwachung initialisiert. Letzter bekannter Fehler-Timestamp stumm gesetzt.", "debug");
     return;
   }
-  if (adapter.lastKnownErrorTimestamp !== null && adapter.lastKnownErrorTimestamp !== void 0 && currentErrorTimestamp <= adapter.lastKnownErrorTimestamp) {
+  if (currentErrorTimestamp <= adapter.lastKnownErrorTimestamp) {
     return;
   }
   adapter.lastKnownErrorTimestamp = currentErrorTimestamp;

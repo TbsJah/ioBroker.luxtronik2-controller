@@ -230,24 +230,20 @@ export async function checkAndSendErrorNotifications(
 		return;
 	}
 
-	const oldList = oldFehlerVal ? safeParse<ErrorHistoryEntry[]>(oldFehlerVal) : [];
-	const oldNewestError = oldList && oldList.length > 0 ? oldList[0] : null;
-
-	// Guard Clause: Fehler ist identisch mit dem vorherigen (gleicher Timestamp)
-	if (oldNewestError && currentErrorTimestamp === oldNewestError.timestamp) {
+	// DER FIX: Stille Initialisierung beim Adapter-Neustart!
+	// Wenn der Adapter gerade frisch gebootet hat, merken wir uns den letzten Fehler stumm und brechen ab.
+	if (adapter.lastKnownErrorTimestamp === undefined || adapter.lastKnownErrorTimestamp === null) {
+		adapter.lastKnownErrorTimestamp = currentErrorTimestamp;
+		writeLog('Fehler-Überwachung initialisiert. Letzter bekannter Fehler-Timestamp stumm gesetzt.', 'debug');
 		return;
 	}
 
 	// Guard Clause: Fehler ist älter oder gleich dem zuletzt gemeldeten (Schutz vor Endlosschleifen)
-	if (
-		adapter.lastKnownErrorTimestamp !== null &&
-		adapter.lastKnownErrorTimestamp !== undefined &&
-		currentErrorTimestamp <= adapter.lastKnownErrorTimestamp
-	) {
+	if (currentErrorTimestamp <= adapter.lastKnownErrorTimestamp) {
 		return;
 	}
 
-	// Timestamp speichern, um mehrfache Benachrichtigungen für denselben Fehler zu verhindern
+	// Timestamp aktualisieren, um mehrfache Benachrichtigungen für denselben Fehler zu verhindern
 	adapter.lastKnownErrorTimestamp = currentErrorTimestamp;
 
 	const msg = `🚨 *Störung Wärmepumpe!*\nEin Fehler an der Wärmepumpe wurde registriert:\n\n*Code:* ${currentErrorCode}\n*Fehler:* ${newestError.beschreibung}\n*Datum:* ${newestError.datum}`;
