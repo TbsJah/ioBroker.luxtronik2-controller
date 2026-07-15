@@ -23,6 +23,11 @@
 ### 0.1.0 (2026-07-09)
 
 - initial release
+## 0.3.7 (2026-07-14)
+
+- E5507 missing size attributes
+- E6001 No README.md found
+
 ## 0.3.6 (2026-07-14)
 
 - Update StateMapping Items

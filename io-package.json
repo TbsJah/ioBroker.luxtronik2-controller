@@ -1,282 +1,282 @@
 {
-	"common": {
-		"name": "luxtronik2-controller",
-		"version": "0.5.1",
-		"news": {
-			"0.5.1": {
-				"en": "Fix issue notify last error after instance restart",
-				"de": "Problem behoben: Benachrichtigung über letzten Fehler nach Neustart der Instanz.",
-				"ru": "Исправлена ошибка, из-за которой после перезапуска экземпляра отображалось уведомление о последней ошибке.",
-				"pt": "Corrigido o problema que impedia a notificação do último erro após a reinicialização da instância.",
-				"nl": "Probleem opgelost: melding van laatste foutmelding na herstart van instantie",
-				"fr": "Correction d'un problème de notification de la dernière erreur après le redémarrage de l'instance",
-				"it": "Risolvi il problema notificando l'ultimo errore dopo il riavvio dell'istanza",
-				"es": "Solucionar el problema de notificación del último error tras el reinicio de la instancia",
-				"pl": "Naprawiono problem z powiadomieniem o ostatnim błędzie po ponownym uruchomieniu instancji",
-				"uk": "Виправлено помилку, що повідомляє про останню помилку після перезапуску екземпляра",
-				"zh-cn": "修复实例重启后通知最后错误的问题"
-			},
-			"0.5.0": {
-				"en": "Code-Refactoring",
-				"de": "Code-Refactoring",
-				"ru": "Рефакторинг кода",
-				"pt": "Refatoração de código",
-				"nl": "Code-refactoring",
-				"fr": "Refactorisation de code",
-				"it": "Refactoring del codice",
-				"es": "Refactorización de código",
-				"pl": "Refaktoryzacja kodu",
-				"uk": "Рефакторинг коду",
-				"zh-cn": "代码重构"
-			},
-			"0.4.0": {
-				"en": "prepare add latest repo",
-				"de": "Bereiten Sie das Hinzufügen des neuesten Repos vor.",
-				"ru": "подготовиться и добавить последний репозиторий",
-				"pt": "prepare add latest repo",
-				"nl": "Voeg de nieuwste repository toe",
-				"fr": "préparer l'ajout du dernier dépôt",
-				"it": "preparare l'aggiunta del repository più recente",
-				"es": "preparar agregar el repositorio más reciente",
-				"pl": "przygotuj dodaj najnowsze repozytorium",
-				"uk": "підготувати додавання останнього репозиторію",
-				"zh-cn": "准备添加最新仓库"
-			},
-			"0.3.8": {
-				"en": "Fix issues reported by RepositoryChecker",
-				"de": "Behebung der von RepositoryChecker gemeldeten Probleme",
-				"ru": "Исправлены ошибки, о которых сообщила служба RepositoryChecker.",
-				"pt": "Corrigir problemas relatados pelo RepositoryChecker",
-				"nl": "Los problemen op die door RepositoryChecker zijn gemeld.",
-				"fr": "Correction des problèmes signalés par RepositoryChecker",
-				"it": "Risolvi i problemi segnalati da RepositoryChecker",
-				"es": "Solucionar los problemas reportados por RepositoryChecker.",
-				"pl": "Napraw problemy zgłoszone przez RepositoryChecker",
-				"uk": "Виправлення проблем, про які повідомляв RepositoryChecker",
-				"zh-cn": "修复 RepositoryChecker 报告的问题"
-			},
-			"0.3.7": {
-				"en": "[E5507] missing size attributes\n[E6001] No README.md found",
-				"de": "[E5507] Fehlende Größenattribute\n[E6001] Keine README.md-Datei gefunden",
-				"ru": "[E5507] отсутствуют атрибуты размера\n[E6001] Файл README.md не найден",
-				"pt": "[E5507] atributos de tamanho ausentes\n[E6001] Nenhum arquivo README.md encontrado",
-				"nl": "[E5507] ontbrekende grootte-attributen\n[E6001] Geen README.md gevonden",
-				"fr": "[E5507] attributs de taille manquants\n[E6001] Aucun fichier README.md trouvé",
-				"it": "[E5507] attributi di dimensione mancanti\n[E6001] Nessun file README.md trovato",
-				"es": "[E5507] Faltan atributos de tamaño\n[E6001] No se encontró el archivo README.md",
-				"pl": "[E5507] brak atrybutów rozmiaru\n[E6001] Nie znaleziono pliku README.md",
-				"uk": "[E5507] відсутні атрибути розміру\n[E6001] Файл README.md не знайдено",
-				"zh-cn": "[E5507] 缺少尺寸属性\n[E6001] 未找到 README.md 文件"
-			},
-			"0.3.6": {
-				"en": "Update StateMapping Items\nFixed Websocket write error\nFix the issues reported by RepositoryChecker",
-				"de": "Statuszuordnungselemente aktualisieren\nWebsocket-Schreibfehler behoben\nBeheben Sie die von RepositoryChecker gemeldeten Probleme.",
-				"ru": "Обновить элементы сопоставления состояний\nИсправлена ошибка записи в WebSocket.\nИсправьте ошибки, о которых сообщила программа RepositoryChecker.",
-				"pt": "Atualizar itens de mapeamento de estado\nErro de gravação no Websocket corrigido\nCorrija os problemas relatados pelo RepositoryChecker.",
-				"nl": "Statusmapping-items bijwerken\nSchrijffout via WebSocket opgelost\nLos de problemen op die door RepositoryChecker zijn gemeld.",
-				"fr": "Mise à jour des éléments de mappage d'état\nCorrection d'une erreur d'écriture WebSocket\nCorrigez les problèmes signalés par RepositoryChecker",
-				"it": "Aggiorna gli elementi di StateMapping\nRisolto l'errore di scrittura WebSocket.\nRisolvi i problemi segnalati da RepositoryChecker",
-				"es": "Actualizar elementos de StateMapping\nSe corrigió el error de escritura de Websocket.\nSolucione los problemas reportados por RepositoryChecker.",
-				"pl": "Aktualizuj elementy StateMapping\nNaprawiono błąd zapisu Websocket\nNapraw problemy zgłoszone przez RepositoryChecker",
-				"uk": "Оновлення елементів зіставлення станів\nВиправлена помилка запису в Websocket\nВиправлення проблем, про які повідомляє RepositoryChecker",
-				"zh-cn": "更新状态映射项\n修复了 WebSocket 写入错误\n修复 RepositoryChecker 报告的问题"
-			},
-			"0.3.5": {
-				"en": "Config Checkbox issue resolved Temperature",
-				"de": "Problem mit dem Konfigurations-Kontrollkästchen behoben Temperatur",
-				"ru": "Проблема с флажком конфигурации решена. Температура",
-				"pt": "Problema com a caixa de seleção de configuração resolvido. Temperatura",
-				"nl": "Probleem met configuratie-selectievakje opgelost. Temperatuur",
-				"fr": "Problème de case à cocher de configuration résolu. Température",
-				"it": "Problema della casella di controllo di configurazione risolto Temperatura",
-				"es": "Problema de la casilla de verificación de configuración resuelto Temperatura",
-				"pl": "Rozwiązano problem z polem wyboru konfiguracji Temperatura",
-				"uk": "Проблема з прапорцем конфігурації вирішена. Температура",
-				"zh-cn": "配置复选框问题已解决 温度"
-			}
-		},
-		"titleLang": {
-			"en": "Luxtronik2 Controller",
-			"de": "Luxtronik2-Controller",
-			"ru": "Контроллер Luxtronik2",
-			"pt": "Controlador Luxtronik2",
-			"nl": "Luxtronik2-controller",
-			"fr": "Contrôleur Luxtronik2",
-			"it": "Controllore Luxtronik2",
-			"es": "Controlador Luxtronik2",
-			"pl": "Kontroler Luxtronik2",
-			"uk": "Контролер Luxtronik2",
-			"zh-cn": "Luxtronik2控制器"
-		},
-		"desc": {
-			"en": "Access and control of heat pumps with a Luxtronik 2.x controller",
-			"de": "Zugriff und Steuerung von Wärmepumpen mit einer Luxtronik 2.x Steuereinheit",
-			"ru": "Zugriff und Steuerung von Wärmepumpen mit einer Luxtronik 2.x Steuereinheit",
-			"pt": "Zugriff e Steuerung von Wärmepumpen mit einer Luxtronik 2.x Steuereinheit",
-			"nl": "Zugriff en Steuerung van Wärmepompen met een Luxtronik 2.x Steuereinheit",
-			"fr": "Installation et installation de pompes à chaleur avec une installation de chauffage Luxtronik 2.x",
-			"it": "Zugriff and Steuerung of Wärmepumpen mit einer Luxtronik 2.x Steuereinheit",
-			"es": "Zugriff und Steuerung von Wärmepumpen con un Luxtronik 2.x Steuereinheit",
-			"pl": "Zugriff und Steuerung von Wärmepumpen mit einer Luxtronik 2.x Steuereinheit",
-			"uk": "Zugriff und Steuerung von Wärmepumpen mit einer Luxtronik 2.x Steuereinheit",
-			"zh-cn": "Luxtronik 2.x Steuereinheit 的 Zugriff 和 Steuerung von Wärmepumpen"
-		},
-		"authors": [
-			"TbsJah <github.tbsjah@googlemail.com>"
-		],
-		"keywords": [
-			"Luxtronik2",
-			"LWD50",
-			"Luft Wärme Pumpe",
-			"Heizung",
-			"LWP",
-			"Alpha InnoTec AIT",
-			"Buderus",
-			"Novelan"
-		],
-		"licenseInformation": {
-			"type": "free",
-			"license": "MIT"
-		},
-		"platform": "Javascript/Node.js",
-		"icon": "luxtronik2-controller.png",
-		"enabled": true,
-		"extIcon": "https://raw.githubusercontent.com/TbsJah/ioBroker.luxtronik2-controller/main/admin/luxtronik2-controller.png",
-		"readme": "https://github.com/TbsJah/ioBroker.luxtronik2-controller/blob/main/README.md",
-		"loglevel": "info",
-		"tier": 3,
-		"mode": "daemon",
-		"type": "climate-control",
-		"compact": true,
-		"messagebox": true,
-		"connectionType": "local",
-		"dataSource": "poll",
-		"adminUI": {
-			"config": "json"
-		},
-		"dependencies": [
-			{
-				"js-controller": ">=6.0.11"
-			}
-		],
-		"globalDependencies": [
-			{
-				"admin": ">=7.8.23"
-			}
-		]
-	},
-	"native": {
-		"host": "192.168.178.81",
-		"port": 8889,
-		"interval": 30,
-		"fusspunkt": 21.7,
-		"endpunkt": 23,
-		"zip_aktiv_ww": 600,
-		"zip_aktiv": 120,
-		"sync_warmwater_target_temperature": 54,
-		"sync_hotwater_temperature_hysteresis": 10,
-		"sync_heating_system_circ_pump_voltage_minimal_heating": 3,
-		"sync_heating_system_circ_pump_voltage_nominal_heating": 7,
-		"sync_heating_system_circ_pump_voltage_minimal_water": 3,
-		"sync_heating_system_circ_pump_voltage_nominal_water": 10,
-		"sync_return_temperature_hysteresis": 1.5,
-		"zip_last_run_min": 600,
-		"regelung_aktiv": false,
-		"Heating_after_warmwater": true,
-		"telegram_enabled": false,
-		"notification_bell": false,
-		"telegram_receiver": "",
-		"telegram_instance": "",
-		"motionSensors": [],
-		"motion_sensors_aktiv": false
-	},
-	"notifications": [
-		{
-			"scope": "luxtronik2-controller",
-			"name": {
-				"en": "Luxtronik2-Controller",
-				"de": "Luxtronik2-Controller",
-				"ru": "Контроллер Luxtronik2",
-				"pt": "Controlador Luxtronik2",
-				"nl": "Luxtronik2-controller",
-				"fr": "Contrôleur Luxtronik2",
-				"it": "Controllore Luxtronik2",
-				"es": "Controlador Luxtronik2",
-				"pl": "Kontroler Luxtronik2",
-				"uk": "Контролер Luxtronik2",
-				"zh-cn": "Luxtronik2控制器"
-			},
-			"description": {
-				"en": "Notifications from the Luxtronik2-Controller adapter",
-				"de": "Benachrichtigungen vom Luxtronik2-Controller Adapter",
-				"ru": "Уведомления от адаптера Luxtronik2-Controller",
-				"pt": "Notificações do adaptador Luxtronik2-Controller",
-				"nl": "Meldingen van de Luxtronik2-Controller adapter",
-				"fr": "Notifications de l'adaptateur Luxtronik2-Controller",
-				"it": "Notifiche dall'adattatore Luxtronik2-Controller",
-				"es": "Notificaciones del adaptador Luxtronik2-Controller",
-				"pl": "Powiadomienia z adaptera Luxtronik2-Controller",
-				"uk": "Сповіщення від адаптера Luxtronik2-Controller",
-				"zh-cn": "来自 Luxtronik2-Controller 适配器的通知"
-			},
-			"categories": [
-				{
-					"category": "lwpError",
-					"name": {
-						"en": "Heat Pump Errors",
-						"de": "Wärmepumpen-Fehler",
-						"ru": "Ошибки теплового насоса",
-						"pt": "Erros da bomba de calor",
-						"nl": "Fouten warmtepomp",
-						"fr": "Erreurs de la pompe à chaleur",
-						"it": "Errori della pompa di calore",
-						"es": "Errores de la bomba de calor",
-						"pl": "Błędy pompy ciepła",
-						"uk": "Помилки теплового насоса",
-						"zh-cn": "热泵错误"
-					},
-					"severity": "alert",
-					"description": {
-						"en": "Error messages from the heating system",
-						"de": "Fehlermeldungen aus der Heizungsanlage",
-						"ru": "Сообщения об ошибках от системы отопления",
-						"pt": "Mensagens de erro do sistema de aquecimento",
-						"nl": "Foutmeldingen van het verwarmingssysteem",
-						"fr": "Messages d'erreur du système de chauffage",
-						"it": "Messaggi di errore dal sistema di riscaldamento",
-						"es": "Mensajes de error del sistema de calefacción",
-						"pl": "Komunikaty o błędach z systemu grzewczego",
-						"uk": "Повідомлення про помилки від системи опалення",
-						"zh-cn": "来自供暖系统的错误消息"
-					},
-					"regex": [],
-					"limit": 10
-				}
-			]
-		}
-	],
-	"objects": [],
-	"instanceObjects": [
-		{
-			"_id": "info",
-			"type": "channel",
-			"common": {
-				"name": "Information"
-			},
-			"native": {}
-		},
-		{
-			"_id": "info.connection",
-			"type": "state",
-			"common": {
-				"role": "indicator.connected",
-				"name": "Device or service connected",
-				"type": "boolean",
-				"read": true,
-				"write": false,
-				"def": false
-			},
-			"native": {}
-		}
-	]
+  "common": {
+    "name": "luxtronik2-controller",
+    "version": "0.5.2",
+    "news": {
+      "0.5.2": {
+        "en": "Resolve issues which are reported by repository checker",
+        "de": "Beheben Sie die vom Repository-Prüfer gemeldeten Probleme.",
+        "ru": "Устранить проблемы, о которых сообщает средство проверки репозитория.",
+        "pt": "Resolver problemas relatados pelo verificador de repositório.",
+        "nl": "Los problemen op die door de repositorychecker worden gemeld.",
+        "fr": "Résoudre les problèmes signalés par le vérificateur de dépôt",
+        "it": "Risolvere i problemi segnalati dal controllore del repository.",
+        "es": "Resuelva los problemas que reporte el verificador del repositorio.",
+        "pl": "Rozwiąż problemy zgłoszone przez moduł sprawdzający repozytorium",
+        "uk": "Вирішення проблем, про які повідомляє перевірник репозиторію",
+        "zh-cn": "解决存储库检查器报告的问题"
+      },
+      "0.5.1": {
+        "en": "Fix issue notify last error after instance restart",
+        "de": "Problem behoben: Benachrichtigung über letzten Fehler nach Neustart der Instanz.",
+        "ru": "Исправлена ошибка, из-за которой после перезапуска экземпляра отображалось уведомление о последней ошибке.",
+        "pt": "Corrigido o problema que impedia a notificação do último erro após a reinicialização da instância.",
+        "nl": "Probleem opgelost: melding van laatste foutmelding na herstart van instantie",
+        "fr": "Correction d'un problème de notification de la dernière erreur après le redémarrage de l'instance",
+        "it": "Risolvi il problema notificando l'ultimo errore dopo il riavvio dell'istanza",
+        "es": "Solucionar el problema de notificación del último error tras el reinicio de la instancia",
+        "pl": "Naprawiono problem z powiadomieniem o ostatnim błędzie po ponownym uruchomieniu instancji",
+        "uk": "Виправлено помилку, що повідомляє про останню помилку після перезапуску екземпляра",
+        "zh-cn": "修复实例重启后通知最后错误的问题"
+      },
+      "0.5.0": {
+        "en": "Code-Refactoring",
+        "de": "Code-Refactoring",
+        "ru": "Рефакторинг кода",
+        "pt": "Refatoração de código",
+        "nl": "Code-refactoring",
+        "fr": "Refactorisation de code",
+        "it": "Refactoring del codice",
+        "es": "Refactorización de código",
+        "pl": "Refaktoryzacja kodu",
+        "uk": "Рефакторинг коду",
+        "zh-cn": "代码重构"
+      },
+      "0.4.0": {
+        "en": "prepare add latest repo",
+        "de": "Bereiten Sie das Hinzufügen des neuesten Repos vor.",
+        "ru": "подготовиться и добавить последний репозиторий",
+        "pt": "prepare add latest repo",
+        "nl": "Voeg de nieuwste repository toe",
+        "fr": "préparer l'ajout du dernier dépôt",
+        "it": "preparare l'aggiunta del repository più recente",
+        "es": "preparar agregar el repositorio más reciente",
+        "pl": "przygotuj dodaj najnowsze repozytorium",
+        "uk": "підготувати додавання останнього репозиторію",
+        "zh-cn": "准备添加最新仓库"
+      },
+      "0.3.8": {
+        "en": "Fix issues reported by RepositoryChecker",
+        "de": "Behebung der von RepositoryChecker gemeldeten Probleme",
+        "ru": "Исправлены ошибки, о которых сообщила служба RepositoryChecker.",
+        "pt": "Corrigir problemas relatados pelo RepositoryChecker",
+        "nl": "Los problemen op die door RepositoryChecker zijn gemeld.",
+        "fr": "Correction des problèmes signalés par RepositoryChecker",
+        "it": "Risolvi i problemi segnalati da RepositoryChecker",
+        "es": "Solucionar los problemas reportados por RepositoryChecker.",
+        "pl": "Napraw problemy zgłoszone przez RepositoryChecker",
+        "uk": "Виправлення проблем, про які повідомляв RepositoryChecker",
+        "zh-cn": "修复 RepositoryChecker 报告的问题"
+      },
+      "0.3.7": {
+        "en": "[E5507] missing size attributes\n[E6001] No README.md found",
+        "de": "[E5507] Fehlende Größenattribute\n[E6001] Keine README.md-Datei gefunden",
+        "ru": "[E5507] отсутствуют атрибуты размера\n[E6001] Файл README.md не найден",
+        "pt": "[E5507] atributos de tamanho ausentes\n[E6001] Nenhum arquivo README.md encontrado",
+        "nl": "[E5507] ontbrekende grootte-attributen\n[E6001] Geen README.md gevonden",
+        "fr": "[E5507] attributs de taille manquants\n[E6001] Aucun fichier README.md trouvé",
+        "it": "[E5507] attributi di dimensione mancanti\n[E6001] Nessun file README.md trovato",
+        "es": "[E5507] Faltan atributos de tamaño\n[E6001] No se encontró el archivo README.md",
+        "pl": "[E5507] brak atrybutów rozmiaru\n[E6001] Nie znaleziono pliku README.md",
+        "uk": "[E5507] відсутні атрибути розміру\n[E6001] Файл README.md не знайдено",
+        "zh-cn": "[E5507] 缺少尺寸属性\n[E6001] 未找到 README.md 文件"
+      },
+      "0.3.6": {
+        "en": "Update StateMapping Items\nFixed Websocket write error\nFix the issues reported by RepositoryChecker",
+        "de": "Statuszuordnungselemente aktualisieren\nWebsocket-Schreibfehler behoben\nBeheben Sie die von RepositoryChecker gemeldeten Probleme.",
+        "ru": "Обновить элементы сопоставления состояний\nИсправлена ошибка записи в WebSocket.\nИсправьте ошибки, о которых сообщила программа RepositoryChecker.",
+        "pt": "Atualizar itens de mapeamento de estado\nErro de gravação no Websocket corrigido\nCorrija os problemas relatados pelo RepositoryChecker.",
+        "nl": "Statusmapping-items bijwerken\nSchrijffout via WebSocket opgelost\nLos de problemen op die door RepositoryChecker zijn gemeld.",
+        "fr": "Mise à jour des éléments de mappage d'état\nCorrection d'une erreur d'écriture WebSocket\nCorrigez les problèmes signalés par RepositoryChecker",
+        "it": "Aggiorna gli elementi di StateMapping\nRisolto l'errore di scrittura WebSocket.\nRisolvi i problemi segnalati da RepositoryChecker",
+        "es": "Actualizar elementos de StateMapping\nSe corrigió el error de escritura de Websocket.\nSolucione los problemas reportados por RepositoryChecker.",
+        "pl": "Aktualizuj elementy StateMapping\nNaprawiono błąd zapisu Websocket\nNapraw problemy zgłoszone przez RepositoryChecker",
+        "uk": "Оновлення елементів зіставлення станів\nВиправлена помилка запису в Websocket\nВиправлення проблем, про які повідомляє RepositoryChecker",
+        "zh-cn": "更新状态映射项\n修复了 WebSocket 写入错误\n修复 RepositoryChecker 报告的问题"
+      }
+    },
+    "titleLang": {
+      "en": "Luxtronik2 Controller",
+      "de": "Luxtronik2-Controller",
+      "ru": "Контроллер Luxtronik2",
+      "pt": "Controlador Luxtronik2",
+      "nl": "Luxtronik2-controller",
+      "fr": "Contrôleur Luxtronik2",
+      "it": "Controllore Luxtronik2",
+      "es": "Controlador Luxtronik2",
+      "pl": "Kontroler Luxtronik2",
+      "uk": "Контролер Luxtronik2",
+      "zh-cn": "Luxtronik2控制器"
+    },
+    "desc": {
+      "en": "Access and control of heat pumps with a Luxtronik 2.x controller",
+      "de": "Zugriff und Steuerung von Wärmepumpen mit einer Luxtronik 2.x Steuereinheit",
+      "ru": "Zugriff und Steuerung von Wärmepumpen mit einer Luxtronik 2.x Steuereinheit",
+      "pt": "Zugriff e Steuerung von Wärmepumpen mit einer Luxtronik 2.x Steuereinheit",
+      "nl": "Zugriff en Steuerung van Wärmepompen met een Luxtronik 2.x Steuereinheit",
+      "fr": "Installation et installation de pompes à chaleur avec une installation de chauffage Luxtronik 2.x",
+      "it": "Zugriff and Steuerung of Wärmepumpen mit einer Luxtronik 2.x Steuereinheit",
+      "es": "Zugriff und Steuerung von Wärmepumpen con un Luxtronik 2.x Steuereinheit",
+      "pl": "Zugriff und Steuerung von Wärmepumpen mit einer Luxtronik 2.x Steuereinheit",
+      "uk": "Zugriff und Steuerung von Wärmepumpen mit einer Luxtronik 2.x Steuereinheit",
+      "zh-cn": "Luxtronik 2.x Steuereinheit 的 Zugriff 和 Steuerung von Wärmepumpen"
+    },
+    "authors": [
+      "TbsJah <github.tbsjah@googlemail.com>"
+    ],
+    "keywords": [
+      "Luxtronik2",
+      "LWD50",
+      "Luft Wärme Pumpe",
+      "Heizung",
+      "LWP",
+      "Alpha InnoTec AIT",
+      "Buderus",
+      "Novelan"
+    ],
+    "licenseInformation": {
+      "type": "free",
+      "license": "MIT"
+    },
+    "platform": "Javascript/Node.js",
+    "icon": "luxtronik2-controller.png",
+    "enabled": true,
+    "extIcon": "https://raw.githubusercontent.com/TbsJah/ioBroker.luxtronik2-controller/main/admin/luxtronik2-controller.png",
+    "readme": "https://github.com/TbsJah/ioBroker.luxtronik2-controller/blob/main/README.md",
+    "loglevel": "info",
+    "tier": 3,
+    "mode": "daemon",
+    "type": "climate-control",
+    "compact": true,
+    "messagebox": true,
+    "connectionType": "local",
+    "dataSource": "poll",
+    "adminUI": {
+      "config": "json"
+    },
+    "dependencies": [
+      {
+        "js-controller": ">=6.0.11"
+      }
+    ],
+    "globalDependencies": [
+      {
+        "admin": ">=7.8.23"
+      }
+    ]
+  },
+  "native": {
+    "host": "192.168.178.81",
+    "port": 8889,
+    "interval": 30,
+    "fusspunkt": 21.7,
+    "endpunkt": 23,
+    "zip_aktiv_ww": 600,
+    "zip_aktiv": 120,
+    "sync_warmwater_target_temperature": 54,
+    "sync_hotwater_temperature_hysteresis": 10,
+    "sync_heating_system_circ_pump_voltage_minimal_heating": 3,
+    "sync_heating_system_circ_pump_voltage_nominal_heating": 7,
+    "sync_heating_system_circ_pump_voltage_minimal_water": 3,
+    "sync_heating_system_circ_pump_voltage_nominal_water": 10,
+    "sync_return_temperature_hysteresis": 1.5,
+    "zip_last_run_min": 600,
+    "regelung_aktiv": false,
+    "Heating_after_warmwater": true,
+    "telegram_enabled": false,
+    "notification_bell": false,
+    "telegram_receiver": "",
+    "telegram_instance": "",
+    "motionSensors": [],
+    "motion_sensors_aktiv": false
+  },
+  "notifications": [
+    {
+      "scope": "luxtronik2-controller",
+      "name": {
+        "en": "Luxtronik2-Controller",
+        "de": "Luxtronik2-Controller",
+        "ru": "Контроллер Luxtronik2",
+        "pt": "Controlador Luxtronik2",
+        "nl": "Luxtronik2-controller",
+        "fr": "Contrôleur Luxtronik2",
+        "it": "Controllore Luxtronik2",
+        "es": "Controlador Luxtronik2",
+        "pl": "Kontroler Luxtronik2",
+        "uk": "Контролер Luxtronik2",
+        "zh-cn": "Luxtronik2控制器"
+      },
+      "description": {
+        "en": "Notifications from the Luxtronik2-Controller adapter",
+        "de": "Benachrichtigungen vom Luxtronik2-Controller Adapter",
+        "ru": "Уведомления от адаптера Luxtronik2-Controller",
+        "pt": "Notificações do adaptador Luxtronik2-Controller",
+        "nl": "Meldingen van de Luxtronik2-Controller adapter",
+        "fr": "Notifications de l'adaptateur Luxtronik2-Controller",
+        "it": "Notifiche dall'adattatore Luxtronik2-Controller",
+        "es": "Notificaciones del adaptador Luxtronik2-Controller",
+        "pl": "Powiadomienia z adaptera Luxtronik2-Controller",
+        "uk": "Сповіщення від адаптера Luxtronik2-Controller",
+        "zh-cn": "来自 Luxtronik2-Controller 适配器的通知"
+      },
+      "categories": [
+        {
+          "category": "lwpError",
+          "name": {
+            "en": "Heat Pump Errors",
+            "de": "Wärmepumpen-Fehler",
+            "ru": "Ошибки теплового насоса",
+            "pt": "Erros da bomba de calor",
+            "nl": "Fouten warmtepomp",
+            "fr": "Erreurs de la pompe à chaleur",
+            "it": "Errori della pompa di calore",
+            "es": "Errores de la bomba de calor",
+            "pl": "Błędy pompy ciepła",
+            "uk": "Помилки теплового насоса",
+            "zh-cn": "热泵错误"
+          },
+          "severity": "alert",
+          "description": {
+            "en": "Error messages from the heating system",
+            "de": "Fehlermeldungen aus der Heizungsanlage",
+            "ru": "Сообщения об ошибках от системы отопления",
+            "pt": "Mensagens de erro do sistema de aquecimento",
+            "nl": "Foutmeldingen van het verwarmingssysteem",
+            "fr": "Messages d'erreur du système de chauffage",
+            "it": "Messaggi di errore dal sistema di riscaldamento",
+            "es": "Mensajes de error del sistema de calefacción",
+            "pl": "Komunikaty o błędach z systemu grzewczego",
+            "uk": "Повідомлення про помилки від системи опалення",
+            "zh-cn": "来自供暖系统的错误消息"
+          },
+          "regex": [],
+          "limit": 10
+        }
+      ]
+    }
+  ],
+  "objects": [],
+  "instanceObjects": [
+    {
+      "_id": "info",
+      "type": "channel",
+      "common": {
+        "name": "Information"
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.connection",
+      "type": "state",
+      "common": {
+        "role": "indicator.connected",
+        "name": "Device or service connected",
+        "type": "boolean",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {}
+    }
+  ]
 }
