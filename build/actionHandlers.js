@@ -25,8 +25,11 @@ module.exports = __toCommonJS(actionHandlers_exports);
 var import_logger = require("./logger");
 var import_stateMapping = require("./stateMapping");
 const CONSTANTS = {
+  /** Status-Code für den Ruhezustand der Anlage */
   STATE_IDLE: 5,
+  /** Befehlswert für den Fußpunkt beim Zwangsheizen */
   FORCE_HEATING_OFFSET: 35,
+  /** Temporäre Hysterese für die Zwangswarmwasserbereitung */
   FORCE_WW_HYSTERESIS: 1
 };
 function getNumber(state, fallback = 0) {
@@ -35,7 +38,7 @@ function getNumber(state, fallback = 0) {
 async function handleZwangswarmwasser(adapter, id) {
   try {
     const localId = id.replace(`${adapter.namespace}.`, "");
-    await adapter.setState(localId, { val: false, ack: true });
+    await adapter.setStateAsync(localId, { val: false, ack: true });
     const [wwIstState, wwSollState] = await Promise.all([
       adapter.getStateAsync((0, import_stateMapping.getDpPath)("Wamwassertemperatur_Ist")),
       adapter.getStateAsync((0, import_stateMapping.getDpPath)("Wamwassertemperatur_Soll"))
@@ -62,7 +65,7 @@ async function handleZwangswarmwasser(adapter, id) {
 async function handleZwangsheizen(adapter, id) {
   try {
     const localId = id.replace(`${adapter.namespace}.`, "");
-    await adapter.setState(localId, { val: false, ack: true });
+    await adapter.setStateAsync(localId, { val: false, ack: true });
     const [bzState, ruecklaufState, ruecklaufSollState, hystereseState] = await Promise.all([
       adapter.getStateAsync((0, import_stateMapping.getDpPath)("WP_BZ_akt")),
       adapter.getStateAsync((0, import_stateMapping.getDpPath)("temperature_return")),

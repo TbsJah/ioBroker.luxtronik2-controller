@@ -109,8 +109,8 @@ async function stopZipAndDeaeration(adapter) {
           resolve();
         }, CONSTANTS.WRITE_DELAY);
       });
-      await adapter.syncConfigValue("runDeaerate", 0);
-      await adapter.syncConfigValue("hotWaterCircPumpDeaerate", 0);
+      await adapter.syncConfigValue("runDeaerate", false);
+      await adapter.syncConfigValue("hotWaterCircPumpDeaerate", false);
       const dpZip = (0, import_stateMapping.getDpPath)("Activate_Zip");
       if (dpZip) {
         await adapter.setOwnStateIfDifferent(dpZip, false, true);
@@ -123,9 +123,9 @@ async function stopZipAndDeaeration(adapter) {
 }
 async function handleActivateZip(adapter, id, durationSeconds) {
   const localId = id.replace(`${adapter.namespace}.`, "");
-  await adapter.setState(localId, { val: true, ack: true });
+  await adapter.setStateAsync(localId, { val: true, ack: true });
   if (durationSeconds <= 0) {
-    await adapter.setState(localId, { val: false, ack: true });
+    await adapter.setStateAsync(localId, { val: false, ack: true });
     return;
   }
   const safeDurationSeconds = Math.max(1, isNaN(durationSeconds) ? 60 : durationSeconds);
@@ -149,8 +149,8 @@ async function handleActivateZip(adapter, id, durationSeconds) {
       }, CONSTANTS.WRITE_DELAY);
     });
     await adapter.queueWrite(CONSTANTS.CMD_ZIP, 1);
-    await adapter.syncConfigValue("runDeaerate", 1);
-    await adapter.syncConfigValue("hotWaterCircPumpDeaerate", 1);
+    await adapter.syncConfigValue("runDeaerate", true);
+    await adapter.syncConfigValue("hotWaterCircPumpDeaerate", true);
   } else {
     const onTimeMinutes = Math.ceil(safeDurationSeconds / 60);
     if (!adapter.originalZipConfig) {

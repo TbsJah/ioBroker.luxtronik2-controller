@@ -54,7 +54,7 @@ interface ExtendedAdapter extends AdapterInstance {
 	 * @param value - The raw or parsed value to apply
 	 * @returns A promise resolving when the synchronization finishes
 	 */
-	syncConfigValue: (key: string, value: number) => Promise<void>;
+	syncConfigValue: (key: string, value: any) => Promise<void>;
 	/**
 	 * Function to safely update an internal state if the value differs.
 	 *
@@ -179,8 +179,8 @@ export async function stopZipAndDeaeration(adapter: ExtendedAdapter): Promise<vo
 				}, CONSTANTS.WRITE_DELAY);
 			});
 
-			await adapter.syncConfigValue('runDeaerate', 0);
-			await adapter.syncConfigValue('hotWaterCircPumpDeaerate', 0);
+			await adapter.syncConfigValue('runDeaerate', false);
+			await adapter.syncConfigValue('hotWaterCircPumpDeaerate', false);
 
 			const dpZip = getDpPath('Activate_Zip');
 			if (dpZip) {
@@ -203,10 +203,10 @@ export async function stopZipAndDeaeration(adapter: ExtendedAdapter): Promise<vo
  */
 export async function handleActivateZip(adapter: ExtendedAdapter, id: string, durationSeconds: number): Promise<void> {
 	const localId = id.replace(`${adapter.namespace}.`, '');
-	await adapter.setState(localId, { val: true, ack: true });
+	await adapter.setStateAsync(localId, { val: true, ack: true });
 
 	if (durationSeconds <= 0) {
-		await adapter.setState(localId, { val: false, ack: true });
+		await adapter.setStateAsync(localId, { val: false, ack: true });
 		return;
 	}
 
@@ -239,8 +239,8 @@ export async function handleActivateZip(adapter: ExtendedAdapter, id: string, du
 		});
 
 		await adapter.queueWrite(CONSTANTS.CMD_ZIP, 1);
-		await adapter.syncConfigValue('runDeaerate', 1);
-		await adapter.syncConfigValue('hotWaterCircPumpDeaerate', 1);
+		await adapter.syncConfigValue('runDeaerate', true);
+		await adapter.syncConfigValue('hotWaterCircPumpDeaerate', true);
 	} else {
 		const onTimeMinutes = Math.ceil(safeDurationSeconds / 60);
 		if (!adapter.originalZipConfig) {

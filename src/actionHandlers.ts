@@ -2,39 +2,56 @@ import type { AdapterInstance } from '@iobroker/adapter-core';
 import { writeLog } from './logger';
 import { getDpPath } from './stateMapping';
 
+// =========================================================
+// TYPEN & KONSTANTEN
+// =========================================================
+
 /**
- * Extended adapter interface with configuration sync capability.
+ * Erweitert die ioBroker Adapter-Instanz um die spezifischen Methoden für Aktionen.
  */
 export interface ActionAdapter extends AdapterInstance {
-	/**
-	 * Synchronize an adapter configuration value.
-	 *
-	 * @param key - Configuration key to update
-	 * @param value - Numeric value to set
-	 */
-	syncConfigValue: (key: string, value: number) => Promise<void>;
+	/** Synchronisiert einen Wert mit der Wärmepumpe */
+	syncConfigValue: (key: string, value: any) => Promise<void>;
 }
 
 const CONSTANTS = {
+	/** Status-Code für den Ruhezustand der Anlage */
 	STATE_IDLE: 5,
+	/** Befehlswert für den Fußpunkt beim Zwangsheizen */
 	FORCE_HEATING_OFFSET: 35,
+	/** Temporäre Hysterese für die Zwangswarmwasserbereitung */
 	FORCE_WW_HYSTERESIS: 1,
 };
 
+// =========================================================
+// HILFSFUNKTIONEN
+// =========================================================
+
+/**
+ * Extrahiert typsicher einen numerischen Wert aus einem ioBroker-State.
+ *
+ * @param state Der abgerufene ioBroker-State.
+ * @param fallback Der Fallback-Wert, falls der State ungültig oder keine Zahl ist (Standard: 0).
+ * @returns Die ausgelesene Zahl oder der Fallback-Wert.
+ */
 function getNumber(state: ioBroker.State | null | undefined, fallback = 0): number {
 	return typeof state?.val === 'number' ? state.val : fallback;
 }
 
+// =========================================================
+// AKTIONEN
+// =========================================================
+
 /**
- * Handles forced hot water action by adjusting hysteresis if water temperature is below target.
+ * Erzwingt die Warmwasserbereitung durch temporäre Manipulation der Hysterese.
  *
- * @param adapter - The action adapter instance
- * @param id - The state ID that triggered the action
+ * @param adapter Die Instanz des ioBroker-Adapters.
+ * @param id Die ID des auslösenden Datenpunkts.
  */
 export async function handleZwangswarmwasser(adapter: ActionAdapter, id: string): Promise<void> {
 	try {
 		const localId = id.replace(`${adapter.namespace}.`, '');
-		await adapter.setState(localId, { val: false, ack: true });
+		await adapter.setStateAsync(localId, { val: false, ack: true });
 
 		const [wwIstState, wwSollState] = await Promise.all([
 			adapter.getStateAsync(getDpPath('Wamwassertemperatur_Ist')),
@@ -64,15 +81,15 @@ export async function handleZwangswarmwasser(adapter: ActionAdapter, id: string)
 }
 
 /**
- * Handles forced heating action by adjusting the heating curve offset when the system is idle and the return temperature is too low.
+ * Erzwingt den Heizbetrieb durch temporäre Erhöhung des Fußpunktes.
  *
- * @param adapter - The action adapter instance
- * @param id - The state ID that triggered the action
+ * @param adapter Die Instanz des ioBroker-Adapters.
+ * @param id Die ID des auslösenden Datenpunkts.
  */
 export async function handleZwangsheizen(adapter: ActionAdapter, id: string): Promise<void> {
 	try {
 		const localId = id.replace(`${adapter.namespace}.`, '');
-		await adapter.setState(localId, { val: false, ack: true });
+		await adapter.setStateAsync(localId, { val: false, ack: true });
 
 		const [bzState, ruecklaufState, ruecklaufSollState, hystereseState] = await Promise.all([
 			adapter.getStateAsync(getDpPath('WP_BZ_akt')),

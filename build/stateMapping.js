@@ -1018,10 +1018,10 @@ const STATE_MAPPING = {
     luxWriteId: "174",
     dataSource: "raw_value"
   },
-  Ger\u00E4tezeit: {
+  deviceTime: {
     folder: "Information.12_SystemInfo",
     name: "Device time",
-    role: "value.time",
+    role: "date",
     type: "string",
     dataSource: "raw_value",
     luxWriteId: "134"
@@ -1202,10 +1202,9 @@ const STATE_MAPPING = {
     folder: "Settings.02_Heating",
     name: "Heating limit active (Parameter 699)",
     write: true,
-    role: "sensor.switch",
-    type: "number",
+    role: "switch",
+    type: "boolean",
     luxWriteId: "699",
-    states: { 0: "Off", 1: "On" },
     dataSource: "raw_parameter"
   },
   Heizen_nach_Wasser: {
@@ -1293,9 +1292,8 @@ const STATE_MAPPING = {
     folder: "Settings.05_ZIP",
     name: "Start deaeration program",
     role: "switch",
-    type: "number",
+    type: "boolean",
     write: true,
-    states: { 0: "Off", 1: "On" },
     luxWriteId: "158",
     dataSource: "raw_parameter",
     required: true
@@ -1304,8 +1302,7 @@ const STATE_MAPPING = {
     folder: "Settings.05_ZIP",
     name: "Deaerate circulation pump",
     role: "switch",
-    type: "number",
-    states: { 0: "Off", 1: "On" },
+    type: "boolean",
     write: true,
     luxWriteId: "684",
     dataSource: "raw_parameter",
@@ -1361,11 +1358,10 @@ const STATE_MAPPING = {
     folder: "Settings.06_SystemSettings",
     name: "Pump optimization (Parameter 49)",
     role: "switch",
-    type: "number",
+    type: "boolean",
     write: true,
     luxWriteId: "49",
-    dataSource: "raw_parameter",
-    states: { 0: "Off", 1: "On" }
+    dataSource: "raw_parameter"
   },
   Pumpen_Nachlauf: {
     folder: "Settings.06_SystemSettings",
@@ -1488,7 +1484,7 @@ const STATE_MAPPING = {
   heatingOperationTimerTableSelected: {
     folder: "Settings.07_Tables",
     name: "Currently selected heating timer table",
-    role: "level.mode",
+    role: "level",
     type: "number",
     luxWriteId: "222",
     dataSource: "raw_parameter",
@@ -1497,7 +1493,7 @@ const STATE_MAPPING = {
   hotWaterCircPumpTimerTableSelected: {
     folder: "Settings.07_Tables",
     name: "Currently selected circulation timer table",
-    role: "level.mode",
+    role: "level",
     type: "number",
     luxWriteId: "506",
     dataSource: "raw_parameter",
@@ -1507,7 +1503,7 @@ const STATE_MAPPING = {
   hotWaterOperationTimerTableSelected: {
     folder: "Settings.07_Tables",
     name: "Currently selected hot water timer table",
-    role: "level.mode",
+    role: "level",
     type: "number",
     luxWriteId: "405",
     dataSource: "raw_parameter",

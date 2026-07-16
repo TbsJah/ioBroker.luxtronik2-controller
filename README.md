@@ -79,6 +79,11 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
+
+### **WORK IN PROGRESS**
+
+- Resolve issues which are reported by repository checker
+
 ### 0.5.2 (2026-07-15)
 
 - Resolve issues which are reported by repository checker
