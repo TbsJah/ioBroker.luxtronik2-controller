@@ -33,6 +33,8 @@ export interface StateDefinition {
 	luxWriteId?: string | number;
 	/** Gibt an, ob dieser Datenpunkt systemrelevant und zwingend erforderlich ist */
 	required?: boolean;
+	/** Steuert die interne Formatierung von rohen Sekunden zu HH:MM:SS */
+	isDurationFormat?: boolean;
 }
 
 /**
@@ -353,12 +355,9 @@ export async function ensureAllObjectsExist(adapter: ExtendedAdapter): Promise<v
 			const fullId = `${adapter.namespace}.${stateId}`;
 
 			let targetType: ioBroker.CommonType = definition.type === 'json' ? 'string' : definition.type;
-			if (
-				definition.unit === 's' &&
-				definition.type === 'number' &&
-				definition.role &&
-				['value.datetime', 'value.time', 'date'].includes(definition.role)
-			) {
+
+			// HIER IST DER ZWEITE FIX: ioBroker-Typen-Überschreibung sauberer gestaltet!
+			if (definition.role && ['value.datetime', 'value.time', 'date'].includes(definition.role)) {
 				targetType = 'string';
 			}
 
@@ -421,13 +420,13 @@ export async function ensureAllObjectsExist(adapter: ExtendedAdapter): Promise<v
 			if (definition.folder === 'Actions') {
 				const currentState = await adapter.getStateAsync(stateId);
 				if (!currentState) {
-					await adapter.setState(stateId, {
+					await adapter.setStateAsync(stateId, {
 						val: definition.def !== undefined ? definition.def : false,
 						ack: true,
 					});
 				} else if (currentState.ack === false) {
 					const valToSet = definition.role === 'button' ? false : currentState.val;
-					await adapter.setState(stateId, { val: valToSet, ack: true });
+					await adapter.setStateAsync(stateId, { val: valToSet, ack: true });
 				}
 			}
 		}

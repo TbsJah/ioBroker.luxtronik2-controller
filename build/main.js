@@ -593,8 +593,8 @@ class Luxtronik2Controller extends utils.Adapter {
           } else if (definition.type === "json" && typeof value === "object") {
             value = JSON.stringify(value);
           }
-          if (definition.unit === "s" && definition.type === "number") {
-            value = this.formatSecondsToHMS(value);
+          if (definition.isDurationFormat) {
+            value = this.formatSecondsToHMS(Number(value));
           } else if (definition.role && ["value.datetime", "value.time", "date"].includes(definition.role)) {
             const totalSeconds = typeof value === "number" ? value : parseInt(value, 10);
             if (!isNaN(totalSeconds) && totalSeconds >= 0) {
@@ -608,9 +608,6 @@ class Luxtronik2Controller extends utils.Adapter {
             }
           }
           let targetIoBrokerType = definition.type === "json" ? "string" : definition.type;
-          if (definition.unit === "s" && definition.type === "number") {
-            targetIoBrokerType = "string";
-          }
           if (definition.role && ["value.datetime", "value.time", "date"].includes(definition.role)) {
             targetIoBrokerType = "string";
           }

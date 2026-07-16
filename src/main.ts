@@ -671,8 +671,9 @@ class Luxtronik2Controller extends utils.Adapter {
 						value = JSON.stringify(value);
 					}
 
-					if (definition.unit === 's' && definition.type === 'number') {
-						value = this.formatSecondsToHMS(value);
+					// FIX FÜR DAS HH:MM:SS FORMAT (Löst die Formatierung über das neue Flag aus!)
+					if (definition.isDurationFormat) {
+						value = this.formatSecondsToHMS(Number(value));
 					} else if (definition.role && ['value.datetime', 'value.time', 'date'].includes(definition.role)) {
 						const totalSeconds = typeof value === 'number' ? value : parseInt(value as string, 10);
 						if (!isNaN(totalSeconds) && totalSeconds >= 0) {
@@ -691,9 +692,6 @@ class Luxtronik2Controller extends utils.Adapter {
 					}
 
 					let targetIoBrokerType = definition.type === 'json' ? 'string' : definition.type;
-					if (definition.unit === 's' && definition.type === 'number') {
-						targetIoBrokerType = 'string';
-					}
 
 					if (definition.role && ['value.datetime', 'value.time', 'date'].includes(definition.role)) {
 						targetIoBrokerType = 'string';
@@ -706,6 +704,7 @@ class Luxtronik2Controller extends utils.Adapter {
 					} else if (targetIoBrokerType === 'boolean' && typeof value !== 'boolean') {
 						value = Boolean(value);
 					}
+
 					const stateId = `${definition.folder}.${key}`;
 					statePromises.push(this.setState(stateId, { val: value, ack: true }));
 				}

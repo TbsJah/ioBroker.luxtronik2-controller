@@ -437,7 +437,7 @@ const STATE_MAPPING = {
     name: "Current switch-on time heat pump",
     role: "text",
     type: "string",
-    unit: "s",
+    isDurationFormat: true,
     luxWriteId: "67",
     dataSource: "raw_value"
   },
@@ -446,7 +446,7 @@ const STATE_MAPPING = {
     name: "Current runtime ZWE1",
     role: "text",
     type: "string",
-    unit: "s",
+    isDurationFormat: true,
     luxWriteId: "68",
     dataSource: "raw_value"
   },
@@ -455,7 +455,7 @@ const STATE_MAPPING = {
     name: "Switch-on delay remaining time",
     role: "text",
     type: "string",
-    unit: "s",
+    isDurationFormat: true,
     luxWriteId: "70",
     dataSource: "raw_value"
   },
@@ -464,7 +464,7 @@ const STATE_MAPPING = {
     name: "Current lock time OFF",
     role: "text",
     type: "string",
-    unit: "s",
+    isDurationFormat: true,
     luxWriteId: "71",
     dataSource: "raw_value"
   },
@@ -473,7 +473,7 @@ const STATE_MAPPING = {
     name: "Current lock time ON",
     role: "text",
     type: "string",
-    unit: "s",
+    isDurationFormat: true,
     luxWriteId: "72",
     dataSource: "raw_value"
   },
@@ -482,7 +482,7 @@ const STATE_MAPPING = {
     name: "Current downtime compressor",
     role: "text",
     type: "string",
-    unit: "s",
+    isDurationFormat: true,
     luxWriteId: "73",
     dataSource: "raw_value"
   },
@@ -491,7 +491,7 @@ const STATE_MAPPING = {
     name: "Current time HRM",
     role: "text",
     type: "string",
-    unit: "s",
+    isDurationFormat: true,
     luxWriteId: "74",
     dataSource: "raw_value"
   },
@@ -500,7 +500,7 @@ const STATE_MAPPING = {
     name: "Current time HRW",
     role: "text",
     type: "string",
-    unit: "s",
+    isDurationFormat: true,
     luxWriteId: "75",
     dataSource: "raw_value"
   },
@@ -509,7 +509,7 @@ const STATE_MAPPING = {
     name: "Time hot gas monitoring",
     role: "text",
     type: "string",
-    unit: "s",
+    isDurationFormat: true,
     luxWriteId: "158",
     dataSource: "raw_value"
   },
@@ -518,7 +518,7 @@ const STATE_MAPPING = {
     name: "Time ahp stage",
     role: "text",
     type: "string",
-    unit: "s",
+    isDurationFormat: true,
     luxWriteId: "123",
     dataSource: "raw_value"
   },
@@ -667,7 +667,7 @@ const STATE_MAPPING = {
     name: "Duration of current state",
     role: "text",
     type: "string",
-    unit: "s",
+    isDurationFormat: true,
     luxWriteId: "120",
     dataSource: "raw_value"
   },
