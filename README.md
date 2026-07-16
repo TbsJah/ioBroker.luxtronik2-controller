@@ -79,6 +79,11 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
+
+### **WORK IN PROGRESS**
+
+- Added option to select the display language for state values (English/German)
+
 ### 0.5.3 (2026-07-16)
 
 - Resolve issues which are reported by repository checker
