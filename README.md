@@ -84,6 +84,7 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 
 - Resolve issues which are reported by repository checker
 - Updates Timers Format
+- Time_WPein_akt 00:00:01 --> 00:00:00 if VD1 is false
 
 ### 0.5.2 (2026-07-15)
 

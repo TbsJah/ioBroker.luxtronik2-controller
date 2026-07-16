@@ -671,9 +671,14 @@ class Luxtronik2Controller extends utils.Adapter {
 						value = JSON.stringify(value);
 					}
 
-					// FIX FÜR DAS HH:MM:SS FORMAT (Löst die Formatierung über das neue Flag aus!)
+					// INTERNER HACK FÜR DEN LUXTRONIK ANZEIGEFEHLER (1 Sekunde -> 0 Sekunden)
+					let finalSeconds = Number(value);
+					if (definition.isDurationFormat && key === 'Time_WPein_akt' && finalSeconds === 1) {
+						finalSeconds = 0;
+					}
+
 					if (definition.isDurationFormat) {
-						value = this.formatSecondsToHMS(Number(value));
+						value = this.formatSecondsToHMS(finalSeconds);
 					} else if (definition.role && ['value.datetime', 'value.time', 'date'].includes(definition.role)) {
 						const totalSeconds = typeof value === 'number' ? value : parseInt(value as string, 10);
 						if (!isNaN(totalSeconds) && totalSeconds >= 0) {

@@ -593,8 +593,12 @@ class Luxtronik2Controller extends utils.Adapter {
           } else if (definition.type === "json" && typeof value === "object") {
             value = JSON.stringify(value);
           }
+          let finalSeconds = Number(value);
+          if (definition.isDurationFormat && key === "Time_WPein_akt" && finalSeconds === 1) {
+            finalSeconds = 0;
+          }
           if (definition.isDurationFormat) {
-            value = this.formatSecondsToHMS(Number(value));
+            value = this.formatSecondsToHMS(finalSeconds);
           } else if (definition.role && ["value.datetime", "value.time", "date"].includes(definition.role)) {
             const totalSeconds = typeof value === "number" ? value : parseInt(value, 10);
             if (!isNaN(totalSeconds) && totalSeconds >= 0) {
