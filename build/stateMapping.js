@@ -1486,6 +1486,7 @@ const STATE_MAPPING = {
     name: "Currently selected heating timer table",
     role: "level",
     type: "number",
+    write: true,
     luxWriteId: "222",
     dataSource: "raw_parameter",
     states: { 0: "Week (Mo-Su)", 1: "5+2 (Mo-Fr, Sa-Su)", 2: "Days (Mo, Tu, ...)" }
@@ -1496,6 +1497,7 @@ const STATE_MAPPING = {
     role: "level",
     type: "number",
     luxWriteId: "506",
+    write: true,
     dataSource: "raw_parameter",
     states: { 0: "Week (Mo-Su)", 1: "5+2 (Mo-Fr, Sa-Su)", 2: "Days (Mo, Tu, ...)" },
     required: true
@@ -1506,6 +1508,7 @@ const STATE_MAPPING = {
     role: "level",
     type: "number",
     luxWriteId: "405",
+    write: true,
     dataSource: "raw_parameter",
     states: { 0: "Week (Mo-Su)", 1: "5+2 (Mo-Fr, Sa-Su)", 2: "Days (Mo, Tu, ...)" },
     required: true
