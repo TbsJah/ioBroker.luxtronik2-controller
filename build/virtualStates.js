@@ -166,21 +166,47 @@ async function updateStatusStrings(adapter, rawValues, rawParams) {
     const codeZ2 = rawValues[118];
     const codeZ3 = rawValues[119];
     const zeitSec = rawValues[120];
+    let stateStr = "Unknown";
+    let extStateStr = "Unknown";
     const hotWaterBoilerValve = rawValues[(0, import_stateMapping.getLuxIdByKey)("hotWaterBoilerValve")] || 0;
     const opStateHotWaterOriginal = rawValues[124];
-    const h = Math.floor((zeitSec || 0) / 3600);
-    const m = Math.floor((zeitSec || 0) % 3600 / 60);
-    const s = (zeitSec || 0) % 60;
-    const zeitString = `${h < 10 ? "0" : ""}${h}:${m < 10 ? "0" : ""}${m}:${s < 10 ? "0" : ""}${s}`;
-    const stateStr = import_codes.STATE_LINE_3[codeZ3] || "Unknown";
+    const isModernFirmware = (codeZ1 === void 0 || codeZ1 === 0) && (codeZ3 === void 0 || codeZ3 === 0);
+    if (!isModernFirmware) {
+      const h = Math.floor((zeitSec || 0) / 3600);
+      const m = Math.floor((zeitSec || 0) % 3600 / 60);
+      const s = (zeitSec || 0) % 60;
+      const zeitString = `${h < 10 ? "0" : ""}${h}:${m < 10 ? "0" : ""}${m}:${s < 10 ? "0" : ""}${s}`;
+      stateStr = import_codes.STATE_LINE_3[codeZ3] || "Unknown";
+      if (import_codes.STATE_LINE_1[codeZ1]) {
+        const textZ2 = import_codes.STATE_LINE_2[codeZ2] || "";
+        extStateStr = `${import_codes.STATE_LINE_1[codeZ1]} ${textZ2} ${zeitString}`.trim();
+      }
+    } else {
+      const bzMap = {
+        0: "Heating",
+        1: "Hot water",
+        2: "Swimming pool",
+        3: "Utility block",
+        4: "Defrosting",
+        5: "Idle",
+        6: "Ext. heat source",
+        7: "Cooling"
+      };
+      const currentStateCode = rawValues[(0, import_stateMapping.getLuxIdByKey)("WP_BZ_akt")] || 5;
+      const baseState = bzMap[currentStateCode] || `Status ${currentStateCode}`;
+      stateStr = baseState;
+      extStateStr = baseState;
+      if (zeitSec !== void 0 && zeitSec > 0) {
+        const h = Math.floor(zeitSec / 3600);
+        const m = Math.floor(zeitSec % 3600 / 60);
+        const s = zeitSec % 60;
+        const zeitString = `${h < 10 ? "0" : ""}${h}:${m < 10 ? "0" : ""}${m}:${s < 10 ? "0" : ""}${s}`;
+        extStateStr += ` (${zeitString})`;
+      }
+    }
     const dpExtState = (0, import_stateMapping.getDpPath)("heatpump_extendet_state_string");
     if (dpExtState) {
       await adapter.setStateChangedAsync(dpExtState, stateStr, true);
-    }
-    let extStateStr = "Unknown";
-    if (import_codes.STATE_LINE_1[codeZ1]) {
-      const textZ2 = import_codes.STATE_LINE_2[codeZ2] || "";
-      extStateStr = `${import_codes.STATE_LINE_1[codeZ1]} ${textZ2} ${zeitString}`.trim();
     }
     const dpState = (0, import_stateMapping.getDpPath)("heatpump_state_string");
     if (dpState) {
