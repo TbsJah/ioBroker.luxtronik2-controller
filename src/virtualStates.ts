@@ -241,7 +241,7 @@ export async function updateStatusStrings(
 		const line3Map = STATE_LINE_3[lang] || STATE_LINE_3.en;
 		const stateHeatingMap = STATE_HEATING[lang] || STATE_HEATING.en;
 
-		const Heizgrenze = (rawParams[getLuxIdByKey('thresholdHeatingLimit')] || 0) / 10;
+		//	const Heizgrenze = (rawParams[getLuxIdByKey('thresholdHeatingLimit')] || 0) / 10;
 		// HIER STARTET DER NEUE, SAUBERE BLOCK:
 		const Absenkung = (rawParams[getLuxIdByKey('deltaHeatingReduction')] || 0) / 10;
 		const AbsenkungMax = (rawParams[getLuxIdByKey('thresholdTemperatureSetBack')] || 0) / 10;

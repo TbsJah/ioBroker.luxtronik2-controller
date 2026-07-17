@@ -148,7 +148,6 @@ async function updateStatusStrings(adapter, rawValues, rawParams) {
     const line2Map = import_codes.STATE_LINE_2[lang] || import_codes.STATE_LINE_2.en;
     const line3Map = import_codes.STATE_LINE_3[lang] || import_codes.STATE_LINE_3.en;
     const stateHeatingMap = import_codes.STATE_HEATING[lang] || import_codes.STATE_HEATING.en;
-    const Heizgrenze = (rawParams[(0, import_stateMapping.getLuxIdByKey)("thresholdHeatingLimit")] || 0) / 10;
     const Absenkung = (rawParams[(0, import_stateMapping.getLuxIdByKey)("deltaHeatingReduction")] || 0) / 10;
     const AbsenkungMax = (rawParams[(0, import_stateMapping.getLuxIdByKey)("thresholdTemperatureSetBack")] || 0) / 10;
     const R\u00FCcklaufSollMin = (rawParams[(0, import_stateMapping.getLuxIdByKey)("returnTemperatureTargetMin")] || 15) / 10;
