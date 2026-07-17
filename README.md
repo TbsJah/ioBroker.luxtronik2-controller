@@ -79,8 +79,7 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
-
-### **WORK IN PROGRESS**
+### 0.6.2 (2026-07-17)
 
 Added
 
@@ -118,10 +117,6 @@ Technical
 ### 0.5.2 (2026-07-15)
 
 - Resolve issues which are reported by repository checker
-
-### 0.5.1 (2026-07-14)
-
-- Fix issue notify last error after instance restart
 
 ## License
 
