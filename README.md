@@ -79,8 +79,7 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
-
-### **WORK IN PROGRESS**
+### 0.6.1 (2026-07-17)
 
 - Implemented fallback mechanism: Index 80 lc is used if 117-120 are empty.
 
@@ -102,10 +101,6 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ### 0.5.1 (2026-07-14)
 
 - Fix issue notify last error after instance restart
-
-### 0.5.0 (2026-07-14)
-
-- Code-Refactoring
 
 ## License
 

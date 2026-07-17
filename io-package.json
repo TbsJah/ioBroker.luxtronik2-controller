@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "luxtronik2-controller",
-    "version": "0.6.0",
+    "version": "0.6.1",
     "news": {
+      "0.6.1": {
+        "en": "Implemented fallback mechanism: Index 80 lc is used if 117-120 are empty.",
+        "de": "Implementierter Ausweichmechanismus: Index 80 lc wird verwendet, wenn 117-120 leer sind.",
+        "ru": "Реализован механизм резервного копирования: если ячейки 117-120 пусты, используется индекс 80 lc.",
+        "pt": "Mecanismo de fallback implementado: o índice 80 lc é usado se os índices 117 a 120 estiverem vazios.",
+        "nl": "Terugvalmechanisme geïmplementeerd: Index 80 lc wordt gebruikt als 117-120 leeg zijn.",
+        "fr": "Mécanisme de repli implémenté : l'index 80 lc est utilisé si 117-120 sont vides.",
+        "it": "Meccanismo di fallback implementato: l'indice 80 lc viene utilizzato se gli indici da 117 a 120 sono vuoti.",
+        "es": "Mecanismo de reserva implementado: se utiliza el índice 80 lc si los índices 117-120 están vacíos.",
+        "pl": "Wprowadzono mechanizm awaryjny: indeks 80 lc jest używany, jeśli indeksy 117-120 są puste.",
+        "uk": "Реалізовано резервний механізм: індекс 80 lc використовується, якщо 117-120 порожні.",
+        "zh-cn": "已实现回退机制：如果 117-120 为空，则使用索引 80 lc。"
+      },
       "0.6.0": {
         "en": "Added option to select the display language for state values (English/German)",
         "de": "Option zur Auswahl der Anzeigesprache für Statuswerte hinzugefügt (Englisch/Deutsch).",
@@ -80,19 +93,6 @@
         "pl": "przygotuj dodaj najnowsze repozytorium",
         "uk": "підготувати додавання останнього репозиторію",
         "zh-cn": "准备添加最新仓库"
-      },
-      "0.3.8": {
-        "en": "Fix issues reported by RepositoryChecker",
-        "de": "Behebung der von RepositoryChecker gemeldeten Probleme",
-        "ru": "Исправлены ошибки, о которых сообщила служба RepositoryChecker.",
-        "pt": "Corrigir problemas relatados pelo RepositoryChecker",
-        "nl": "Los problemen op die door RepositoryChecker zijn gemeld.",
-        "fr": "Correction des problèmes signalés par RepositoryChecker",
-        "it": "Risolvi i problemi segnalati da RepositoryChecker",
-        "es": "Solucionar los problemas reportados por RepositoryChecker.",
-        "pl": "Napraw problemy zgłoszone przez RepositoryChecker",
-        "uk": "Виправлення проблем, про які повідомляв RepositoryChecker",
-        "zh-cn": "修复 RepositoryChecker 报告的问题"
       }
     },
     "titleLang": {
