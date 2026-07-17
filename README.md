@@ -79,6 +79,11 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
+
+### **WORK IN PROGRESS**
+
+- Implemented fallback mechanism: Index 80 lc is used if 117-120 are empty.
+
 ### 0.6.0 (2026-07-16)
 
 - Added option to select the display language for state values (English/German)

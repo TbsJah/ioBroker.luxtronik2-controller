@@ -280,7 +280,7 @@ export async function updateStatusStrings(
 		const codeZ1 = rawValues[117];
 		const codeZ2 = rawValues[118];
 		const codeZ3 = rawValues[119];
-		const zeitSec = rawValues[120];
+		let zeitSec = rawValues[120]; // <--- Wichtig: 'let' statt 'const', damit wir es überschreiben können!
 
 		const hotWaterBoilerValve = rawValues[getLuxIdByKey('hotWaterBoilerValve')] || 0;
 		const opStateHotWaterOriginal = rawValues[124];
@@ -304,6 +304,19 @@ export async function updateStatusStrings(
 				extStateStr = `${line1Map[codeZ1]} ${textZ2} ${zeitString}`.trim();
 			}
 		} else {
+			// ==========================================
+			// ALTERNATIVE FÜR FW 3.x ZEIT-BERECHNUNG
+			// ==========================================
+			if (zeitSec === undefined || zeitSec === 0) {
+				const bzState = await adapter.getStateAsync(getDpPath('WP_BZ_akt'));
+				if (bzState && bzState.lc) {
+					// Aktuelle Uhrzeit minus Zeit der letzten Statusänderung = Dauer in Sekunden
+					zeitSec = Math.floor((Date.now() - bzState.lc) / 1000);
+				} else {
+					zeitSec = 0;
+				}
+			}
+
 			const bzMapEn: Record<number, string> = {
 				0: 'Heating',
 				1: 'Hot water',
@@ -332,12 +345,18 @@ export async function updateStatusStrings(
 			stateStr = baseState;
 			extStateStr = baseState;
 
-			if (zeitSec !== undefined && zeitSec > 0) {
-				const h = Math.floor(zeitSec / 3600);
-				const m = Math.floor((zeitSec % 3600) / 60);
-				const s = zeitSec % 60;
-				const zeitString = `${h < 10 ? '0' : ''}${h}:${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
-				extStateStr += ` (${zeitString})`;
+			// Zeit-String formatieren und an extStateStr anhängen
+			const h = Math.floor(zeitSec / 3600);
+			const m = Math.floor((zeitSec % 3600) / 60);
+			const s = zeitSec % 60;
+			const zeitString = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+
+			extStateStr += ` (${zeitString})`;
+
+			// Wir aktualisieren auch den separaten Dauer-Datenpunkt manuell, da 120 fehlt!
+			const dpDuration = getDpPath('heatpump_duration');
+			if (dpDuration) {
+				await adapter.setStateChangedAsync(dpDuration, zeitString, true);
 			}
 		}
 

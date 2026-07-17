@@ -174,7 +174,7 @@ async function updateStatusStrings(adapter, rawValues, rawParams) {
     const codeZ1 = rawValues[117];
     const codeZ2 = rawValues[118];
     const codeZ3 = rawValues[119];
-    const zeitSec = rawValues[120];
+    let zeitSec = rawValues[120];
     const hotWaterBoilerValve = rawValues[(0, import_stateMapping.getLuxIdByKey)("hotWaterBoilerValve")] || 0;
     const opStateHotWaterOriginal = rawValues[124];
     let stateStr = "Unknown";
@@ -191,6 +191,14 @@ async function updateStatusStrings(adapter, rawValues, rawParams) {
         extStateStr = `${line1Map[codeZ1]} ${textZ2} ${zeitString}`.trim();
       }
     } else {
+      if (zeitSec === void 0 || zeitSec === 0) {
+        const bzState = await adapter.getStateAsync((0, import_stateMapping.getDpPath)("WP_BZ_akt"));
+        if (bzState && bzState.lc) {
+          zeitSec = Math.floor((Date.now() - bzState.lc) / 1e3);
+        } else {
+          zeitSec = 0;
+        }
+      }
       const bzMapEn = {
         0: "Heating",
         1: "Hot water",
@@ -216,12 +224,14 @@ async function updateStatusStrings(adapter, rawValues, rawParams) {
       const baseState = bzMap[currentStateCode] || `Status ${currentStateCode}`;
       stateStr = baseState;
       extStateStr = baseState;
-      if (zeitSec !== void 0 && zeitSec > 0) {
-        const h = Math.floor(zeitSec / 3600);
-        const m = Math.floor(zeitSec % 3600 / 60);
-        const s = zeitSec % 60;
-        const zeitString = `${h < 10 ? "0" : ""}${h}:${m < 10 ? "0" : ""}${m}:${s < 10 ? "0" : ""}${s}`;
-        extStateStr += ` (${zeitString})`;
+      const h = Math.floor(zeitSec / 3600);
+      const m = Math.floor(zeitSec % 3600 / 60);
+      const s = zeitSec % 60;
+      const zeitString = `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+      extStateStr += ` (${zeitString})`;
+      const dpDuration = (0, import_stateMapping.getDpPath)("heatpump_duration");
+      if (dpDuration) {
+        await adapter.setStateChangedAsync(dpDuration, zeitString, true);
       }
     }
     const dpExtState = (0, import_stateMapping.getDpPath)("heatpump_extendet_state_string");
