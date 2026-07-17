@@ -242,33 +242,34 @@ export async function updateStatusStrings(
 		const stateHeatingMap = STATE_HEATING[lang] || STATE_HEATING.en;
 
 		const Heizgrenze = (rawParams[getLuxIdByKey('thresholdHeatingLimit')] || 0) / 10;
+		// HIER STARTET DER NEUE, SAUBERE BLOCK:
 		const Absenkung = (rawParams[getLuxIdByKey('deltaHeatingReduction')] || 0) / 10;
 		const AbsenkungMax = (rawParams[getLuxIdByKey('thresholdTemperatureSetBack')] || 0) / 10;
 		const RücklaufSollMin = (rawParams[getLuxIdByKey('returnTemperatureTargetMin')] || 15) / 10;
-		const RücklaufSoll = (rawValues[getLuxIdByKey('temperature_target_return')] || 15) / 10;
 		const BetriebsartHeizung = rawParams[getLuxIdByKey('heating_operation_mode')] || 0;
 		const Außentemperatur = (rawValues[getLuxIdByKey('temperature_outside')] || 0) / 10;
-		const Mitteltemperatur = (rawValues[getLuxIdByKey('Mitteltemperatur')] || 0) / 10;
 
-		let heatingStr = 'Unknown';
+		// Wir lesen den ECHTEN Zustand (Index 125) aus, statt die Betriebsart zu missbrauchen!
+		const opStateHeatingVal = rawValues[getLuxIdByKey('opStateHeating')] ?? 3;
 
-		if (
-			BetriebsartHeizung === 0 &&
-			Mitteltemperatur >= Heizgrenze &&
-			(RücklaufSoll === RücklaufSollMin || (RücklaufSoll === 20 && Außentemperatur < 10))
-		) {
-			const textFrost = lang === 'de' ? 'Frostschutz' : 'Frost protection';
-			const textHeating = lang === 'de' ? 'Heizgrenze' : 'Heating limit';
-			heatingStr =
-				Außentemperatur >= 10 ? `${textHeating} (Target ${RücklaufSollMin} °C)` : `${textFrost} (Target 20 °C)`;
-		} else {
-			heatingStr = stateHeatingMap[BetriebsartHeizung] || `Unknown (${BetriebsartHeizung})`;
+		let heatingStr = stateHeatingMap[opStateHeatingVal] || `Unknown (${opStateHeatingVal})`;
+
+		if (opStateHeatingVal === 2) {
+			// 2 = Heizgrenze
+			heatingStr += ` (Target ${RücklaufSollMin} °C)`;
+		} else if (opStateHeatingVal === 4) {
+			// 4 = Frostschutz
+			heatingStr += ` (Target 20 °C)`;
+		} else if (opStateHeatingVal === 0 || opStateHeatingVal === 1) {
+			// 0 = Abgesenkt, 1 = Normal
 			if (BetriebsartHeizung === 0) {
+				// Nur im Automatik-Modus ergänzen
 				const textNormal = lang === 'de' ? 'Normal da' : 'Normal as';
-				heatingStr =
-					AbsenkungMax <= Außentemperatur
-						? `${heatingStr} ${Absenkung} °C`
-						: `${textNormal} < ${AbsenkungMax} °C`;
+				if (AbsenkungMax <= Außentemperatur) {
+					heatingStr += ` ${Absenkung} °C`;
+				} else {
+					heatingStr = `${textNormal} < ${AbsenkungMax} °C`;
+				}
 			}
 		}
 
@@ -291,7 +292,7 @@ export async function updateStatusStrings(
 		// FW 3.x Check
 		const isModernFirmware = (codeZ1 === undefined || codeZ1 === 0) && (codeZ3 === undefined || codeZ3 === 0);
 
-		if (!isModernFirmware) {
+		if (isModernFirmware) {
 			const h = Math.floor((zeitSec || 0) / 3600);
 			const m = Math.floor(((zeitSec || 0) % 3600) / 60);
 			const s = (zeitSec || 0) % 60;
@@ -318,24 +319,24 @@ export async function updateStatusStrings(
 			}
 
 			const bzMapEn: Record<number, string> = {
-				0: 'Heating',
+				0: 'Heating operation',
 				1: 'Hot water',
-				2: 'Swimming pool',
-				3: 'Utility block',
+				2: 'Swimming pool / Photovoltaics',
+				3: 'Lock time',
 				4: 'Defrosting',
-				5: 'Idle',
+				5: 'No demand',
 				6: 'Ext. heat source',
 				7: 'Cooling',
 			};
 			const bzMapDe: Record<number, string> = {
-				0: 'Heizung',
+				0: 'Heizbetrieb',
 				1: 'Warmwasser',
-				2: 'Schwimmbad',
+				2: 'Schwimmbad / PV',
 				3: 'EVU-Sperre',
 				4: 'Abtauen',
-				5: 'Leerlauf',
+				5: 'Kein Bedarf',
 				6: 'Zweiter Erzeuger',
-				7: 'Kühlung',
+				7: 'Kühlbetrieb',
 			};
 			const bzMap = lang === 'de' ? bzMapDe : bzMapEn;
 
@@ -343,20 +344,30 @@ export async function updateStatusStrings(
 			const baseState = bzMap[currentStateCode] || `Status ${currentStateCode}`;
 
 			stateStr = baseState;
-			extStateStr = baseState;
 
-			// Zeit-String formatieren und an extStateStr anhängen
+			// Zeit-String formatieren
 			const h = Math.floor(zeitSec / 3600);
 			const m = Math.floor((zeitSec % 3600) / 60);
 			const s = zeitSec % 60;
-			const zeitString = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+			const zeitStringDuration = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 
-			extStateStr += ` (${zeitString})`;
+			const hText = lang === 'de' ? (h === 1 ? 'Stunde' : 'Stunden') : h === 1 ? 'hour' : 'hours';
+			const mText = lang === 'de' ? (m === 1 ? 'Minute' : 'Minuten') : m === 1 ? 'minute' : 'minutes';
+			const sText = lang === 'de' ? (s === 1 ? 'Sekunde' : 'Sekunden') : s === 1 ? 'second' : 'seconds';
+			const zeitString = `${h} ${hText} ${m} ${mText} ${s} ${sText}`;
+
+			// Ermitteln, ob die Wärmepumpe läuft oder steht
+			const isRunning = [0, 1, 2, 4, 6, 7].includes(currentStateCode);
+			const line1Text = isRunning ? line1Map[0] || 'Heat pump running' : line1Map[1] || 'Heat pump idle';
+			const line2Text = line2Map[0] || 'since';
+
+			// Setzt den String zusammen: z.B. "Wärmepumpe steht seit 01:33:06"
+			extStateStr = `${line1Text} ${line2Text} ${zeitString}`;
 
 			// Wir aktualisieren auch den separaten Dauer-Datenpunkt manuell, da 120 fehlt!
 			const dpDuration = getDpPath('heatpump_duration');
 			if (dpDuration) {
-				await adapter.setStateChangedAsync(dpDuration, zeitString, true);
+				await adapter.setStateChangedAsync(dpDuration, zeitStringDuration, true);
 			}
 		}
 
