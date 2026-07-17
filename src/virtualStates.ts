@@ -281,7 +281,7 @@ export async function updateStatusStrings(
 		const codeZ1 = rawValues[117];
 		const codeZ2 = rawValues[118];
 		const codeZ3 = rawValues[119];
-		let zeitSec = rawValues[120]; // <--- Wichtig: 'let' statt 'const', damit wir es überschreiben können!
+		let zeitSec = rawValues[120];
 
 		const hotWaterBoilerValve = rawValues[getLuxIdByKey('hotWaterBoilerValve')] || 0;
 		const opStateHotWaterOriginal = rawValues[124];
@@ -292,7 +292,7 @@ export async function updateStatusStrings(
 		// FW 3.x Check
 		const isModernFirmware = (codeZ1 === undefined || codeZ1 === 0) && (codeZ3 === undefined || codeZ3 === 0);
 
-		if (isModernFirmware) {
+		if (!isModernFirmware) {
 			const h = Math.floor((zeitSec || 0) / 3600);
 			const m = Math.floor(((zeitSec || 0) % 3600) / 60);
 			const s = (zeitSec || 0) % 60;

@@ -182,7 +182,7 @@ async function updateStatusStrings(adapter, rawValues, rawParams) {
     let stateStr = "Unknown";
     let extStateStr = "Unknown";
     const isModernFirmware = (codeZ1 === void 0 || codeZ1 === 0) && (codeZ3 === void 0 || codeZ3 === 0);
-    if (isModernFirmware) {
+    if (!isModernFirmware) {
       const h = Math.floor((zeitSec || 0) / 3600);
       const m = Math.floor((zeitSec || 0) % 3600 / 60);
       const s = (zeitSec || 0) % 60;
