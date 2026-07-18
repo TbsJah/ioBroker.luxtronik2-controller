@@ -1142,7 +1142,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		write: false,
 		luxWriteId: '66',
 		factor: 3600,
-		dataSource: 'raw_parameter',
+		dataSource: 'raw_value',
 	},
 
 	// ==========================================
