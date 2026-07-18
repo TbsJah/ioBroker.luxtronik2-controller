@@ -297,7 +297,7 @@ const STATE_MAPPING = {
     write: false,
     luxWriteId: "173",
     dataSource: "raw_value",
-    factor: 10
+    factor: 1
   },
   // Outputs
   AVout: {
@@ -1139,7 +1139,7 @@ const STATE_MAPPING = {
     unit: "l/h",
     write: false,
     luxWriteId: "254",
-    factor: 10,
+    factor: 1,
     dataSource: "raw_value"
   },
   // ==========================================
