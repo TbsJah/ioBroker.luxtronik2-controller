@@ -1113,7 +1113,7 @@ const STATE_MAPPING = {
     write: false,
     luxWriteId: "66",
     factor: 3600,
-    dataSource: "raw_parameter"
+    dataSource: "raw_value"
   },
   // ==========================================
   // SETTINGS & PARAMETERS (Writable)

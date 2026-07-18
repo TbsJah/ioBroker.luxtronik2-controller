@@ -79,6 +79,12 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
+
+### **WORK IN PROGRESS**
+
+- Cooling operating hours: Fixed the hours_cooling datapoint.
+  The value is now correctly read from real-time telemetry data (raw_value) and displayed as a regular number of hours (resolves an issue where the date "Jan 1, 1970" was incorrectly shown).
+
 ### 0.6.2 (2026-07-17)
 
 Added
