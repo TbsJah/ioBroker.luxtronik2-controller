@@ -245,6 +245,9 @@ class Luxtronik2Controller extends utils.Adapter {
       await this.syncConfigValue("returnTemperatureHysteresis", (_g = config.sync_return_temperature_hysteresis) != null ? _g : 1.5);
       await this.syncConfigValue("zip_aktiv", (_h = config.zip_aktiv) != null ? _h : 0);
       await this.syncConfigValue("Heizen_nach_Wasser", (_i = config.Heating_after_warmwater) != null ? _i : false);
+      if (config.zip_optimierung_aktiv !== false && config.zip_hardware_timer_disable === true) {
+        await this.syncConfigValue("hotWaterCircPumpOnTime", 0);
+      }
     } catch (err) {
       (0, import_logger.writeLog)(`Failed to apply the baseline idle configuration defaults: ${err.message}`, "error");
     }
