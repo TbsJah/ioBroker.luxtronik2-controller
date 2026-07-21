@@ -1095,7 +1095,32 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_value',
 		luxWriteId: '134',
 	},
-
+	write_cycles_today: {
+		folder: 'Information.12_SystemInfo',
+		name: {
+			en: 'Write cycles to flash memory (today)',
+			de: 'Schreibvorgänge auf Flash-Speicher (heute)',
+		},
+		role: 'value',
+		type: 'number',
+		isVirtual: true,
+		write: false,
+		def: 0,
+		required: true,
+	},
+	write_cycles_total: {
+		folder: 'Information.12_SystemInfo',
+		name: {
+			en: 'Write cycles to flash memory (total)',
+			de: 'Schreibvorgänge auf Flash-Speicher (gesamt)',
+		},
+		role: 'value',
+		type: 'number',
+		isVirtual: true,
+		write: false,
+		def: 0,
+		required: true,
+	},
 	// ==========================================
 	// COOLING
 	// ==========================================

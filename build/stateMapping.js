@@ -1068,6 +1068,32 @@ const STATE_MAPPING = {
     dataSource: "raw_value",
     luxWriteId: "134"
   },
+  write_cycles_today: {
+    folder: "Information.12_SystemInfo",
+    name: {
+      en: "Write cycles to flash memory (today)",
+      de: "Schreibvorg\xE4nge auf Flash-Speicher (heute)"
+    },
+    role: "value",
+    type: "number",
+    isVirtual: true,
+    write: false,
+    def: 0,
+    required: true
+  },
+  write_cycles_total: {
+    folder: "Information.12_SystemInfo",
+    name: {
+      en: "Write cycles to flash memory (total)",
+      de: "Schreibvorg\xE4nge auf Flash-Speicher (gesamt)"
+    },
+    role: "value",
+    type: "number",
+    isVirtual: true,
+    write: false,
+    def: 0,
+    required: true
+  },
   // ==========================================
   // COOLING
   // ==========================================

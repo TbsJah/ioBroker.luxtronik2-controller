@@ -2,7 +2,7 @@ import type { AdapterInstance } from '@iobroker/adapter-core';
 import * as net from 'node:net';
 import { WebSocket, type RawData } from 'ws';
 import { writeLog } from './logger';
-
+import { getDpPath } from './stateMapping';
 // =========================================================
 // KONSTANTEN
 // =========================================================
@@ -33,6 +33,78 @@ const CONSTANTS = {
  * Liste der bekannten klassischen TCP-Ports der Luxtronik-Steuerung.
  */
 const TCP_PORTS = new Set([8888, 8889]);
+
+// =========================================================
+// INTELLIGENTE SCHREIB-FUNKTION (READ-BEFORE-WRITE)
+// =========================================================
+
+/**
+ * Erweitertes Adapter-Interface für den Zugriff auf den Rohwert-Cache
+ */
+export interface RawAdapter extends AdapterInstance {
+	/** Konfigurationsobjekt des Adapters */
+	config: any;
+	/** Array der aktuellen Rohwert-Parameter aus dem Cache */
+	currentRawParams?: number[];
+	/** Gibt an, ob das Debug-Logging aktiviert ist. */
+	isDebugLogActive?: boolean;
+}
+
+/**
+ * Schreibt einen Wert nur dann über das Netzwerk, wenn er vom Ist-Zustand abweicht.
+ *
+ * @param adapter Die erweiterte ioBroker Adapter-Instanz
+ * @param cmd Die Parameter-ID (Register)
+ * @param val Der zu schreibende Wert
+ */
+export async function writePumpSafe(adapter: RawAdapter, cmd: string | number, val: any): Promise<void> {
+	const paramId = typeof cmd === 'string' ? parseInt(cmd, 10) : cmd;
+	let value = typeof val === 'string' ? parseInt(val, 10) : val;
+
+	if (typeof value === 'boolean') {
+		value = value ? 1 : 0;
+	}
+
+	// 1. GLOBAL READ-BEFORE-WRITE PRÜFUNG
+	if (adapter.currentRawParams && adapter.currentRawParams[paramId] === value) {
+		if (adapter.isDebugLogActive) {
+			writeLog(
+				`[Global SafeWrite] Register ${paramId} steht bereits auf ${value}. Netzwerk-Schreibbefehl blockiert!`,
+				'debug',
+			);
+		}
+		return;
+	}
+
+	if (adapter.isDebugLogActive) {
+		writeLog(`writePumpSafe: Sende an Luxtronik -> Register ${paramId}, Wert: ${value}`, 'debug');
+	}
+
+	// 2. ECHTER NETZWERK-BEFEHL
+	await writeRawParameter(adapter, paramId, value);
+
+	// 3. OPTIMISTISCHES CACHE-UPDATE
+	if (adapter.currentRawParams) {
+		adapter.currentRawParams[paramId] = value;
+	}
+
+	// 4. BEIDE ZÄHLER HOCHZÄHLEN UND SPEICHERN
+	if (typeof adapter.writeCyclesToday === 'number') {
+		adapter.writeCyclesToday++;
+		adapter.writeCyclesTotal++;
+
+		const dpToday = getDpPath('write_cycles_today');
+		const dpTotal = getDpPath('write_cycles_total');
+
+		if (dpToday) {
+			// Fire-and-Forget: Klassisches setState ohne Promise-Zwang
+			void adapter.setState(dpToday, { val: adapter.writeCyclesToday, ack: true });
+		}
+		if (dpTotal) {
+			void adapter.setState(dpTotal, { val: adapter.writeCyclesTotal, ack: true });
+		}
+	}
+}
 
 // =========================================================
 // HILFSFUNKTIONEN
@@ -377,4 +449,42 @@ export async function dumpAllRawToLog(adapter: AdapterInstance): Promise<void> {
 		const msg = err instanceof Error ? err.message : String(err);
 		writeLog(`Error executing raw dump: ${msg}`, 'error');
 	}
+}
+
+/**
+ * Erweitertes ioBroker Adapter-Interface für den Rohdaten-Zugriff.
+ * Stellt sicher, dass die in der Hauptklasse definierten Caches und
+ * Zähler in den ausgelagerten Netzwerk-Funktionen typsicher zur Verfügung stehen.
+ */
+export interface RawAdapter extends AdapterInstance {
+	/**
+	 * Die Adapter-Konfiguration aus der Benutzeroberfläche (io-package.json)
+	 * kombiniert mit dynamischen Werten.
+	 */
+	config: any;
+
+	/**
+	 * Globaler Cache der aktuellen Roh-Parameter (Befehl 3003) von der Wärmepumpe.
+	 * Wird als Referenz für die "Read-Before-Write" Logik verwendet, um
+	 * redundante Schreibvorgänge (Flash-Wear) zu blockieren.
+	 */
+	currentRawParams?: number[];
+
+	/**
+	 * Gibt an, ob das erweiterte Debug-Logging durch den Nutzer oder das System
+	 * aktuell aktiviert ist.
+	 */
+	isDebugLogActive?: boolean;
+
+	/**
+	 * Zähler für die physischen Schreibvorgänge auf den Flash-Speicher
+	 * am aktuellen Kalendertag. Wird jede Nacht um 00:00 Uhr auf 0 zurückgesetzt.
+	 */
+	writeCyclesToday: number;
+
+	/**
+	 * Fortlaufender Zähler für alle physischen Schreibvorgänge auf den Flash-Speicher
+	 * über die gesamte Lebensdauer des Adapters (seit dem letzten kompletten Reset).
+	 */
+	writeCyclesTotal: number;
 }

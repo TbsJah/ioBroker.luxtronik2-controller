@@ -31,12 +31,14 @@ __export(rawFunctions_exports, {
   delay: () => delay,
   dumpAllRawToLog: () => dumpAllRawToLog,
   readAllRaw: () => readAllRaw,
+  writePumpSafe: () => writePumpSafe,
   writeRawParameter: () => writeRawParameter
 });
 module.exports = __toCommonJS(rawFunctions_exports);
 var net = __toESM(require("node:net"));
 var import_ws = require("ws");
 var import_logger = require("./logger");
+var import_stateMapping = require("./stateMapping");
 const CONSTANTS = {
   /** Schreib-Befehl für einen Parameter */
   CMD_WRITE: 3002,
@@ -56,6 +58,41 @@ const CONSTANTS = {
   DELAY_RECONNECT: 1e3
 };
 const TCP_PORTS = /* @__PURE__ */ new Set([8888, 8889]);
+async function writePumpSafe(adapter, cmd, val) {
+  const paramId = typeof cmd === "string" ? parseInt(cmd, 10) : cmd;
+  let value = typeof val === "string" ? parseInt(val, 10) : val;
+  if (typeof value === "boolean") {
+    value = value ? 1 : 0;
+  }
+  if (adapter.currentRawParams && adapter.currentRawParams[paramId] === value) {
+    if (adapter.isDebugLogActive) {
+      (0, import_logger.writeLog)(
+        `[Global SafeWrite] Register ${paramId} steht bereits auf ${value}. Netzwerk-Schreibbefehl blockiert!`,
+        "debug"
+      );
+    }
+    return;
+  }
+  if (adapter.isDebugLogActive) {
+    (0, import_logger.writeLog)(`writePumpSafe: Sende an Luxtronik -> Register ${paramId}, Wert: ${value}`, "debug");
+  }
+  await writeRawParameter(adapter, paramId, value);
+  if (adapter.currentRawParams) {
+    adapter.currentRawParams[paramId] = value;
+  }
+  if (typeof adapter.writeCyclesToday === "number") {
+    adapter.writeCyclesToday++;
+    adapter.writeCyclesTotal++;
+    const dpToday = (0, import_stateMapping.getDpPath)("write_cycles_today");
+    const dpTotal = (0, import_stateMapping.getDpPath)("write_cycles_total");
+    if (dpToday) {
+      void adapter.setState(dpToday, { val: adapter.writeCyclesToday, ack: true });
+    }
+    if (dpTotal) {
+      void adapter.setState(dpTotal, { val: adapter.writeCyclesTotal, ack: true });
+    }
+  }
+}
 function delay(adapter, ms) {
   return new Promise((resolve) => adapter.setTimeout(resolve, ms));
 }
@@ -283,6 +320,7 @@ async function dumpAllRawToLog(adapter) {
   delay,
   dumpAllRawToLog,
   readAllRaw,
+  writePumpSafe,
   writeRawParameter
 });
 //# sourceMappingURL=rawFunctions.js.map

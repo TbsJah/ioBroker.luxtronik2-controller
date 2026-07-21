@@ -13,7 +13,7 @@ import {
 	ensureCustomObjectsExist,
 	isStateEnabled,
 } from './objectManager';
-import { dumpAllRawToLog, readAllRaw, writeRawParameter } from './rawFunctions';
+import { dumpAllRawToLog, readAllRaw, writePumpSafe } from './rawFunctions';
 import { STATE_MAPPING, getDpPath } from './stateMapping';
 import {
 	calculateTemperatureSpread,
@@ -26,8 +26,13 @@ import {
 	updateSystemInfos,
 	updateTimerTables,
 } from './virtualStates';
-import { handleActivateZip, stopZipAndDeaeration } from './zipManager';
-
+import {
+	checkAndHandleMotionSensor,
+	disableHardwareZipTimer,
+	handleActivateZip,
+	stopZipAndDeaeration,
+	subscribeMotionSensors,
+} from './zipManager';
 /**
  * Main class for the Luxtronik2 Controller ioBroker Adapter.
  */
@@ -42,6 +47,8 @@ class Luxtronik2Controller extends utils.Adapter {
 	public lastKnownErrorTimestamp: number | null = null;
 	/** Determines whether verbose debugging output is enabled */
 	public isDebugLogActive: boolean = false;
+	// Cache für den globalen Schreibschutz
+	public currentRawParams: number[] = [];
 	/** ioBroker interval handle for the main data polling loop */
 	private pollingInterval: ioBroker.Interval | undefined;
 	/** Cache for the last evaluated heat pump operating state code */
@@ -59,7 +66,9 @@ class Luxtronik2Controller extends utils.Adapter {
 	private errorCount: number = 0;
 	/** Maximum allowed sequential request failures before connection is flagged as interrupted */
 	private readonly MAX_ERRORS: number = 3;
-
+	public writeCyclesToday: number = 0;
+	public writeCyclesTotal: number = 0;
+	private midnightTimer?: ioBroker.Timeout;
 	/**
 	 * Initializes a new instance of the Luxtronik2Controller class.
 	 *
@@ -120,17 +129,20 @@ class Luxtronik2Controller extends utils.Adapter {
 			writeLog('Synchronizing configuration values with the heat pump...', 'info');
 		}
 		await this.setIdleDefaults();
-
-		if (config.motion_sensors_aktiv && Array.isArray(config.motionSensors)) {
-			for (const sensor of config.motionSensors) {
-				if (sensor.oid && typeof sensor.oid === 'string' && sensor.oid.trim() !== '') {
-					this.subscribeForeignStates(sensor.oid.trim());
-					if (this.isDebugLogActive) {
-						writeLog(`Motion sensor subscribed: ${sensor.name} (${sensor.oid})`, 'info');
-					}
-				}
-			}
+		if (this.isDebugLogActive) {
+			writeLog('Synchronizing configuration values with the heat pump...', 'info');
 		}
+		await this.setIdleDefaults();
+		await disableHardwareZipTimer(this);
+		// Schreib-Zähler aus ioBroker laden (sichert den Stand bei einem Adapter-Neustart)
+		const cycleTodayState = await this.getStateAsync(getDpPath('write_cycles_today'));
+		this.writeCyclesToday = cycleTodayState && typeof cycleTodayState.val === 'number' ? cycleTodayState.val : 0;
+
+		const cycleTotalState = await this.getStateAsync(getDpPath('write_cycles_total'));
+		this.writeCyclesTotal = cycleTotalState && typeof cycleTotalState.val === 'number' ? cycleTotalState.val : 0;
+
+		this.scheduleMidnightReset(); // Startet den 00:00 Uhr Timer (nur für den Tageszähler!)
+		subscribeMotionSensors(this);
 
 		this.subscribeStates('*');
 
@@ -165,6 +177,23 @@ class Luxtronik2Controller extends utils.Adapter {
 		}, intervalSeconds * 1000);
 
 		await this.setState('info.connection', true, true);
+	}
+
+	/**
+	 * Berechnet die Zeit bis Mitternacht und setzt NUR den heutigen Schreibzähler auf 0 zurück.
+	 */
+	private scheduleMidnightReset(): void {
+		const now = new Date();
+		const night = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
+		const msToMidnight = night.getTime() - now.getTime();
+
+		this.midnightTimer = this.setTimeout(() => {
+			this.writeCyclesToday = 0;
+			void this.setState(getDpPath('write_cycles_today'), { val: 0, ack: true });
+
+			// Timer für den nächsten Tag neu aufziehen
+			this.scheduleMidnightReset();
+		}, msToMidnight);
 	}
 
 	/**
@@ -343,8 +372,8 @@ class Luxtronik2Controller extends utils.Adapter {
 							'hotWaterTemperatureHysteresis',
 							config.sync_hotwater_temperature_hysteresis ?? 2,
 						);
-						await this.syncConfigValue('zip_aktiv', config.zip_aktiv_ww ?? 0);
-						await this.setOwnStateIfDifferent(getDpPath('Activate_Zip'), true, false);
+						// await this.syncConfigValue('zip_aktiv', config.zip_aktiv_ww ?? 0);
+						// await this.setOwnStateIfDifferent(getDpPath('Activate_Zip'), true, false);
 
 						await this.syncConfigValue(
 							'heating_system_circ_pump_voltage_minimal',
@@ -356,9 +385,9 @@ class Luxtronik2Controller extends utils.Adapter {
 						);
 					}
 				} else if (istAbtauen) {
-					if (config.zip_optimierung_aktiv !== false) {
-						await this.syncConfigValue('heating_system_circ_pump_voltage_nominal', 10);
-					}
+					// if (config.zip_optimierung_aktiv !== false) {
+					// 	await this.syncConfigValue('heating_system_circ_pump_voltage_nominal', 10);
+					// }
 				}
 				this.lastBzVal = bzVal;
 			}
@@ -417,7 +446,7 @@ class Luxtronik2Controller extends utils.Adapter {
 
 				if (config.zip_optimierung_aktiv !== false) {
 					const now = Date.now();
-					if (now - this.lastPumpOptimization > 300000) {
+					if (now - this.lastPumpOptimization > 600000) {
 						if (spreizung < 6.5 && hupAktiv > 5.5) {
 							await this.syncConfigValue('heating_system_circ_pump_voltage_nominal', hupAktiv - 0.25);
 							this.lastPumpOptimization = now;
@@ -481,27 +510,6 @@ class Luxtronik2Controller extends utils.Adapter {
 	}
 
 	/**
-	 * Directly transmits a raw command block buffer over the chosen communications channel.
-	 *
-	 * @param cmd - The parameter numeric index code.
-	 * @param val - The compiled target payload value.
-	 * @returns A promise that resolves when the transmission finishes.
-	 */
-	private async writePumpAsync(cmd: string | number, val: any): Promise<void> {
-		if (this.isDebugLogActive) {
-			writeLog(`writePumpAsync direct interface command triggered: Register ${cmd}, value: ${val}`, 'debug');
-		}
-		const paramId = typeof cmd === 'string' ? parseInt(cmd, 10) : cmd;
-		let value = typeof val === 'string' ? parseInt(val, 10) : val;
-
-		if (typeof value === 'boolean') {
-			value = value ? 1 : 0;
-		}
-
-		await writeRawParameter(this, paramId, value);
-	}
-
-	/**
 	 * Pushes a hardware write task into a single-threaded execution queue to guarantee transmission safety.
 	 *
 	 * @param cmd - Target parameter register ID.
@@ -512,7 +520,7 @@ class Luxtronik2Controller extends utils.Adapter {
 		return new Promise((resolve, reject) => {
 			this.writeQueue.push(async () => {
 				try {
-					await this.writePumpAsync(cmd, val);
+					await writePumpSafe(this, cmd, val);
 					resolve();
 				} catch (err) {
 					reject(err instanceof Error ? err : new Error(String(err)));
@@ -591,6 +599,7 @@ class Luxtronik2Controller extends utils.Adapter {
 
 			try {
 				rawParams = await readAllRaw(this, 3003);
+				this.currentRawParams = rawParams; //Cache für Schreibschutz aktuell halten
 			} catch (err: unknown) {
 				this.log.debug(
 					`Raw parameter acquisition response error (Command 3003): ${err instanceof Error ? err.message : String(err)}`,
@@ -771,6 +780,10 @@ class Luxtronik2Controller extends utils.Adapter {
 				clearTimeout(this.zipTimer);
 			}
 
+			if (this.midnightTimer) {
+				this.clearTimeout(this.midnightTimer);
+			}
+
 			void this.setState('info.connection', { val: false, ack: true });
 
 			writeLog(
@@ -795,46 +808,10 @@ class Luxtronik2Controller extends utils.Adapter {
 			return;
 		}
 
-		const config = this.config as Record<string, any>;
-		if (config.motion_sensors_aktiv && config.motionSensors && Array.isArray(config.motionSensors)) {
-			const matchedSensor = config.motionSensors.find((s: any) => s.oid && s.oid.trim() === id);
-
-			if (matchedSensor && state.val === true) {
-				const zipOutState = await this.getStateAsync(getDpPath('ZIPout'));
-				if (zipOutState && zipOutState.val === 1) {
-					if (this.isDebugLogActive) {
-						writeLog(
-							`Motion registered at sensor '${matchedSensor.name}' but circulation pump ZIP is already running. Action ignored.`,
-							'debug',
-						);
-					}
-					return;
-				}
-
-				const now = Date.now();
-				const lastZipChange = zipOutState?.lc || 0;
-
-				if (now - lastZipChange > (config.zip_last_run_min || 600) * 1000) {
-					if (this.isDebugLogActive) {
-						writeLog(
-							`Motion registered at sensor '${matchedSensor.name || id}'. Launching circulation pump ZIP macro sequence.`,
-							'debug',
-						);
-					}
-					await this.setState(getDpPath('Activate_Zip'), {
-						val: true,
-						ack: false,
-					});
-				} else {
-					if (this.isDebugLogActive) {
-						writeLog(
-							`Motion registered at sensor '${matchedSensor.name || id}' but circulation pump execution suppressed due to anti-cycling protective interval timer.`,
-							'debug',
-						);
-					}
-				}
-				return;
-			}
+		// Bewegungsmelder an den Manager auslagern
+		const isMotionSensor = await checkAndHandleMotionSensor(this, id, state);
+		if (isMotionSensor) {
+			return; // Der zipManager hat das Event verarbeitet, wir sind hier fertig
 		}
 
 		if (state.ack) {

@@ -333,78 +333,6 @@
 					"md": 6,
 					"lg": 6,
 					"xl": 6
-				},
-				"zip_optimierung_aktiv": {
-					"type": "checkbox",
-					"label": {
-						"en": "Allow ZIP & HUP voltage optimization",
-						"de": "ZIP- & HUP-Spannungsoptimierung zulassen"
-					},
-					"help": {
-						"en": "Allows dynamic overwriting of ZIP runtimes and HUP voltages during active cycles",
-						"de": "Erlaubt das dynamische Überschreiben der ZIP-Laufzeiten und HUP-Spannungen während aktiver Takte"
-					},
-					"default": true,
-					"xs": 12,
-					"sm": 6,
-					"md": 4,
-					"lg": 4,
-					"xl": 4
-				},
-				"headerZip": {
-					"type": "header",
-					"text": {
-						"en": "Default values: Circulation pump",
-						"de": "Vorgabewerte Zirkulationspumpe"
-					},
-					"size": 4,
-					"xs": 12,
-					"sm": 12,
-					"md": 12,
-					"lg": 12,
-					"xl": 12
-				},
-				"zip_aktiv": {
-					"type": "number",
-					"label": {
-						"en": "ZIP duration ON (s)",
-						"de": "ZIP Dauer an (s)"
-					},
-					"default": 120,
-					"disabled": "!data.zip_optimierung_aktiv",
-					"xs": 12,
-					"sm": 12,
-					"md": 4,
-					"lg": 4,
-					"xl": 4
-				},
-				"zip_last_run_min": {
-					"type": "number",
-					"label": {
-						"en": "ZIP duration OFF (s)",
-						"de": "ZIP Dauer aus (s)"
-					},
-					"disabled": "!data.zip_optimierung_aktiv",
-					"default": 600,
-					"xs": 12,
-					"sm": 12,
-					"md": 4,
-					"lg": 4,
-					"xl": 4
-				},
-				"zip_aktiv_ww": {
-					"type": "number",
-					"label": {
-						"en": "ZIP duration during hot water generation (s)",
-						"de": "ZIP Dauer bei Warmwassererzeugung (s)"
-					},
-					"disabled": "!data.zip_optimierung_aktiv",
-					"default": 600,
-					"xs": 12,
-					"sm": 12,
-					"md": 4,
-					"lg": 4,
-					"xl": 4
 				}
 			}
 		},
@@ -2335,23 +2263,122 @@
 					},
 					"command": "testTelegram",
 					"color": "primary",
-					"icon": "send",
+					"variant": "outlined",
+					"icon": "notifications",
 					"xs": 12,
 					"sm": 12,
-					"md": 6,
-					"lg": 6,
-					"xl": 6
+					"md": 3,
+					"lg": 3,
+					"xl": 3
 				}
 			}
 		},
-		"motionSensorsTab": {
+		"zipTab": {
 			"type": "panel",
 			"label": {
-				"en": "Motion sensors",
-				"de": "Bewegungssensoren"
+				"en": "Circulation pump",
+				"de": "Zirkulationspumpe"
 			},
-			"icon": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='currentColor' d='M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2s-2 .9-2 2s.9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8l2.1 2v6h2v-7.5l-2.1-2l.6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1c-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7z'/%3E%3C/svg%3E",
+			"icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMjQgMjQiPgoJPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIgLz4KCTxwYXRoIGZpbGw9ImN1cnJlbnRDb2xvciIgZD0iTTEwLjU4OCAxNC40MTNRMTAgMTMuODI1IDEwIDEzcTAtLjU3NS4yMzgtMS4xMzd0LjkxMi0xLjYxM2wuNDI1LS42MjVxLjE1LS4yMjUuNDI1LS4yMjV0LjQyNS4yMjVsLjQyNS42MjVxLjY3NSAxLjA1LjkxMyAxLjYxM1QxNCAxM3EwIC44MjUtLjU4NyAxLjQxM1QxMiAxNXQtMS40MTItLjU4N00zIDE3aDQuMXEtLjQyNS0uNDI1LS43ODctLjkyNVQ1LjY3NSAxNUgzem0xMi41MzgtMS40NjNRMTcgMTQuMDc2IDE3IDEydC0xLjQ2My0zLjUzN1QxMiA3VDguNDYzIDguNDYzVDcgMTJ0MS40NjMgMy41MzhUMTIgMTd0My41MzgtMS40NjNNMTguMzI1IDlIMjFWN2gtNC4xcS40MjUuNDI1Ljc4OC45MjVUMTguMzI1IDlNMyAxOXEwIC40MjUtLjI4OC43MTNUMiAyMHQtLjcxMi0uMjg4VDEgMTl2LTZxMC0uNDI1LjI4OC0uNzEyVDIgMTJ0LjcxMy4yODhUMyAxM2gyLjA3NXEtLjA1LS4yNS0uMDYyLS40ODhUNSAxMnEwLTIuOTI1IDIuMDM4LTQuOTYyVDEyIDVoOXEwLS40MjUuMjg4LS43MTJUMjIgNHQuNzEzLjI4OFQyMyA1djZxMCAuNDI1LS4yODguNzEzVDIyIDEydC0uNzEyLS4yODhUMjEgMTFoLTIuMDc1cS4wNS4yNS4wNjMuNDg4VDE5IDEycTAgMi45MjUtMi4wMzcgNC45NjNUMTIgMTl6bTAtMnYtMnptMTgtOFY3em0tOSAzIiAvPgo8L3N2Zz4K",
 			"items": {
+				"informationZip": {
+					"type": "staticText",
+					"text": {
+						"en": "By default, the circulation pump (ZIP) is controlled via fixed switching and cycle times of the heat pump. Since this rigid scheduling wastes energy, this adapter offers an intelligent optimization:<br><br>• <b>Demand-driven:</b> By linking motion detectors or buttons (boolean datapoints), the ZIP is only activated when hot water is actually needed.<br>• <b>Safe Operation:</b> The adapter activates the pump via the internal manual control, bypassing the regular timer tables to protect the hardware.<br><br><b>💡 Tip! Hardware protection (EEPROM Flash Wear)</b><br>To minimize background write operations in the controller, set the base ZIP times once to the <i>Mon-Sun</i> table and enter <i>00:00 - 00:00</i>. Set the cycle times to <b>Off: 60 minutes</b> and <b>On: 0 minutes</b>.",
+						"de": "Die Zirkulationspumpe (ZIP) wird standardmäßig über feste Schalt- und Taktzeiten der Wärmepumpe gesteuert. Da diese starre Zeitsteuerung oft unnötig Energie verbraucht, bietet dieser Adapter eine intelligente Optimierung:<br><br>• <b>Bedarfsgesteuert:</b> Durch die Verknüpfung von Bewegungsmeldern oder Tastern (Boolean-Datenpunkte) wird die ZIP nur dann aktiviert, wenn tatsächlich Warmwasser benötigt wird.<br>• <b>Funktionsweise:</b> Der Adapter startet die Pumpe über die interne Handsteuerung und umgeht die reguläre Schaltuhr, um die Hardware zu schonen.<br><br><b>💡 Tipp! Hardware-Schutz (EEPROM Flash-Wear)</b><br>Um das ständige Schreiben im Regler zu minimieren, stellen Sie die regulären ZIP-Zeiten einmalig auf die Tabelle <i>Mo-So</i> und tragen Sie dort <i>00:00 - 00:00</i> ein. Die Taktzeiten setzen Sie auf <b>Aus: 60 Minuten</b> und <b>An: 0 Minuten</b>."
+					},
+					"style": { "height": "120px" },
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
+				"abstandZip1": {
+					"type": "staticText",
+					"text": "",
+					"style": { "height": "20px" },
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
+				"zip_lWP_aktiv": {
+					"type": "checkbox",
+					"label": {
+						"en": "Disable base ZIP values",
+						"de": "Deaktivere reguläre ZIP Werte"
+					},
+					"help": {
+						"en": "Setting the cycle times on and off",
+						"de": "Setzen der Taktzeiten ein und aus"
+					},
+					"default": true,
+					"xs": 12,
+					"sm": 4,
+					"md": 2,
+					"lg": 2,
+					"xl": 2
+				},
+				"zip_optimierung_aktiv": {
+					"type": "checkbox",
+					"label": {
+						"en": "Allow ZIP optimization",
+						"de": "ZIP-Optimierung zulassen"
+					},
+					"help": {
+						"en": "Allows dynamic overwriting of ZIP runtimes during active cycles",
+						"de": "Erlaubt das dynamische Überschreiben der ZIP-Laufzeiten während aktiver Takte"
+					},
+					"default": true,
+					"xs": 12,
+					"sm": 4,
+					"md": 2,
+					"lg": 2,
+					"xl": 2
+				},
+				"headerZip": {
+					"type": "header",
+					"text": {
+						"en": "Values Circulation pump optimisation",
+						"de": "Vorgabewerte Zirkulationspumpenoptimierung"
+					},
+					"size": 3,
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
+				"zip_aktiv": {
+					"type": "number",
+					"label": {
+						"en": "ZIP duration ON (s)",
+						"de": "ZIP Dauer an (s)"
+					},
+					"default": 120,
+					"disabled": "!data.zip_optimierung_aktiv",
+					"xs": 12,
+					"sm": 12,
+					"md": 4,
+					"lg": 4,
+					"xl": 4
+				},
+				"zip_last_run_min": {
+					"type": "number",
+					"label": {
+						"en": "ZIP duration OFF (s)",
+						"de": "ZIP Dauer aus (s)"
+					},
+					"disabled": "!data.zip_optimierung_aktiv",
+					"default": 1200,
+					"xs": 12,
+					"sm": 12,
+					"md": 4,
+					"lg": 4,
+					"xl": 4
+				},
 				"motion_sensors_aktiv": {
 					"type": "checkbox",
 					"label": {
@@ -2456,14 +2483,32 @@
 								{
 									"label": {
 										"en": "Telemetry (rawValues)",
-										"de": "Messwert (rawValues)"
+										"de": "Messwert (rawValues)",
+										"ru": "Telemetry (rawValues)",
+										"pt": "Telemetry (rawValues)",
+										"nl": "Telemetry (rawValues)",
+										"fr": "Telemetry (rawValues)",
+										"it": "Telemetry (rawValues)",
+										"es": "Telemetry (rawValues)",
+										"pl": "Telemetry (rawValues)",
+										"uk": "Telemetry (rawValues)",
+										"zh-cn": "Telemetry (rawValues)"
 									},
 									"value": "value"
 								},
 								{
 									"label": {
 										"en": "Parameter (rawParams)",
-										"de": "Parameter (rawParams)"
+										"de": "Parameter (rawParams)",
+										"ru": "Parameter (rawParams)",
+										"pt": "Parameter (rawParams)",
+										"nl": "Parameter (rawParams)",
+										"fr": "Parameter (rawParams)",
+										"it": "Parameter (rawParams)",
+										"es": "Parameter (rawParams)",
+										"pl": "Parameter (rawParams)",
+										"uk": "Parameter (rawParams)",
+										"zh-cn": "Parameter (rawParams)"
 									},
 									"value": "parameter"
 								}
@@ -2490,28 +2535,64 @@
 								{
 									"label": {
 										"en": "Number",
-										"de": "Zahl"
+										"de": "Zahl",
+										"ru": "Number",
+										"pt": "Number",
+										"nl": "Number",
+										"fr": "Number",
+										"it": "Number",
+										"es": "Number",
+										"pl": "Number",
+										"uk": "Number",
+										"zh-cn": "Number"
 									},
 									"value": "number"
 								},
 								{
 									"label": {
 										"en": "Text",
-										"de": "Text"
+										"de": "Text",
+										"ru": "Text",
+										"pt": "Text",
+										"nl": "Text",
+										"fr": "Text",
+										"it": "Text",
+										"es": "Text",
+										"pl": "Text",
+										"uk": "Text",
+										"zh-cn": "Text"
 									},
 									"value": "string"
 								},
 								{
 									"label": {
 										"en": "True/False",
-										"de": "Wahr/Falsch"
+										"de": "Wahr/Falsch",
+										"ru": "True/False",
+										"pt": "True/False",
+										"nl": "True/False",
+										"fr": "True/False",
+										"it": "True/False",
+										"es": "True/False",
+										"pl": "True/False",
+										"uk": "True/False",
+										"zh-cn": "True/False"
 									},
 									"value": "boolean"
 								},
 								{
 									"label": {
 										"en": "Date/Time (Unix)",
-										"de": "Datum/Uhrzeit (Unix)"
+										"de": "Datum/Uhrzeit (Unix)",
+										"ru": "Date/Time (Unix)",
+										"pt": "Date/Time (Unix)",
+										"nl": "Date/Time (Unix)",
+										"fr": "Date/Time (Unix)",
+										"it": "Date/Time (Unix)",
+										"es": "Date/Time (Unix)",
+										"pl": "Date/Time (Unix)",
+										"uk": "Date/Time (Unix)",
+										"zh-cn": "Date/Time (Unix)"
 									},
 									"value": "datetime"
 								}

@@ -276,7 +276,7 @@ async function ensureAllObjectsExist(adapter) {
           needsUpdate = true;
         }
         if (needsUpdate) {
-          await adapter.extendObjectAsync(stateId, { type: "state", common: commonDef });
+          await adapter.extendObject(stateId, { type: "state", common: commonDef });
           (0, import_logger.writeLog)(`Properties of '${stateId}' synchronized (Repair).`, "debug");
         }
       }
@@ -350,7 +350,7 @@ async function ensureCustomObjectsExist(adapter) {
       await adapter.setObjectNotExistsAsync(stateId, objDef);
       adapter.createdStates.add(stateId);
     }
-    await adapter.extendObjectAsync(stateId, { common: objDef.common, native: objDef.native });
+    await adapter.extendObject(stateId, { common: objDef.common, native: objDef.native });
     if (isWritable) {
       adapter.subscribeStates(stateId);
     }
