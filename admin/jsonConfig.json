@@ -2483,14 +2483,32 @@
 								{
 									"label": {
 										"en": "Telemetry (rawValues)",
-										"de": "Messwert (rawValues)"
+										"de": "Messwert (rawValues)",
+										"ru": "Telemetry (rawValues)",
+										"pt": "Telemetry (rawValues)",
+										"nl": "Telemetry (rawValues)",
+										"fr": "Telemetry (rawValues)",
+										"it": "Telemetry (rawValues)",
+										"es": "Telemetry (rawValues)",
+										"pl": "Telemetry (rawValues)",
+										"uk": "Telemetry (rawValues)",
+										"zh-cn": "Telemetry (rawValues)"
 									},
 									"value": "value"
 								},
 								{
 									"label": {
 										"en": "Parameter (rawParams)",
-										"de": "Parameter (rawParams)"
+										"de": "Parameter (rawParams)",
+										"ru": "Parameter (rawParams)",
+										"pt": "Parameter (rawParams)",
+										"nl": "Parameter (rawParams)",
+										"fr": "Parameter (rawParams)",
+										"it": "Parameter (rawParams)",
+										"es": "Parameter (rawParams)",
+										"pl": "Parameter (rawParams)",
+										"uk": "Parameter (rawParams)",
+										"zh-cn": "Parameter (rawParams)"
 									},
 									"value": "parameter"
 								}
@@ -2517,28 +2535,64 @@
 								{
 									"label": {
 										"en": "Number",
-										"de": "Zahl"
+										"de": "Zahl",
+										"ru": "Number",
+										"pt": "Number",
+										"nl": "Number",
+										"fr": "Number",
+										"it": "Number",
+										"es": "Number",
+										"pl": "Number",
+										"uk": "Number",
+										"zh-cn": "Number"
 									},
 									"value": "number"
 								},
 								{
 									"label": {
 										"en": "Text",
-										"de": "Text"
+										"de": "Text",
+										"ru": "Text",
+										"pt": "Text",
+										"nl": "Text",
+										"fr": "Text",
+										"it": "Text",
+										"es": "Text",
+										"pl": "Text",
+										"uk": "Text",
+										"zh-cn": "Text"
 									},
 									"value": "string"
 								},
 								{
 									"label": {
 										"en": "True/False",
-										"de": "Wahr/Falsch"
+										"de": "Wahr/Falsch",
+										"ru": "True/False",
+										"pt": "True/False",
+										"nl": "True/False",
+										"fr": "True/False",
+										"it": "True/False",
+										"es": "True/False",
+										"pl": "True/False",
+										"uk": "True/False",
+										"zh-cn": "True/False"
 									},
 									"value": "boolean"
 								},
 								{
 									"label": {
 										"en": "Date/Time (Unix)",
-										"de": "Datum/Uhrzeit (Unix)"
+										"de": "Datum/Uhrzeit (Unix)",
+										"ru": "Date/Time (Unix)",
+										"pt": "Date/Time (Unix)",
+										"nl": "Date/Time (Unix)",
+										"fr": "Date/Time (Unix)",
+										"it": "Date/Time (Unix)",
+										"es": "Date/Time (Unix)",
+										"pl": "Date/Time (Unix)",
+										"uk": "Date/Time (Unix)",
+										"zh-cn": "Date/Time (Unix)"
 									},
 									"value": "datetime"
 								}
