@@ -28,6 +28,7 @@ import {
 } from './virtualStates';
 import {
 	checkAndHandleMotionSensor,
+	disableHardwareZipTimer,
 	handleActivateZip,
 	stopZipAndDeaeration,
 	subscribeMotionSensors,
@@ -132,8 +133,8 @@ class Luxtronik2Controller extends utils.Adapter {
 			writeLog('Synchronizing configuration values with the heat pump...', 'info');
 		}
 		await this.setIdleDefaults();
-
-		// NEU: Schreib-Zähler aus ioBroker laden (sichert den Stand bei einem Adapter-Neustart)
+		await disableHardwareZipTimer(this);
+		// Schreib-Zähler aus ioBroker laden (sichert den Stand bei einem Adapter-Neustart)
 		const cycleTodayState = await this.getStateAsync(getDpPath('write_cycles_today'));
 		this.writeCyclesToday = cycleTodayState && typeof cycleTodayState.val === 'number' ? cycleTodayState.val : 0;
 
@@ -301,10 +302,6 @@ class Luxtronik2Controller extends utils.Adapter {
 			await this.syncConfigValue('returnTemperatureHysteresis', config.sync_return_temperature_hysteresis ?? 1.5);
 			await this.syncConfigValue('zip_aktiv', config.zip_aktiv ?? 0);
 			await this.syncConfigValue('Heizen_nach_Wasser', config.Heating_after_warmwater ?? false);
-
-			if (config.zip_optimierung_aktiv !== false && config.zip_hardware_timer_disable === true) {
-				await this.syncConfigValue('hotWaterCircPumpOnTime', 0);
-			}
 		} catch (err: any) {
 			writeLog(`Failed to apply the baseline idle configuration defaults: ${err.message}`, 'error');
 		}
@@ -388,9 +385,9 @@ class Luxtronik2Controller extends utils.Adapter {
 						);
 					}
 				} else if (istAbtauen) {
-					if (config.zip_optimierung_aktiv !== false) {
-						await this.syncConfigValue('heating_system_circ_pump_voltage_nominal', 10);
-					}
+					// if (config.zip_optimierung_aktiv !== false) {
+					// 	await this.syncConfigValue('heating_system_circ_pump_voltage_nominal', 10);
+					// }
 				}
 				this.lastBzVal = bzVal;
 			}
@@ -449,7 +446,7 @@ class Luxtronik2Controller extends utils.Adapter {
 
 				if (config.zip_optimierung_aktiv !== false) {
 					const now = Date.now();
-					if (now - this.lastPumpOptimization > 300000) {
+					if (now - this.lastPumpOptimization > 600000) {
 						if (spreizung < 6.5 && hupAktiv > 5.5) {
 							await this.syncConfigValue('heating_system_circ_pump_voltage_nominal', hupAktiv - 0.25);
 							this.lastPumpOptimization = now;

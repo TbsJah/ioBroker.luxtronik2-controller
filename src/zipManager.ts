@@ -445,3 +445,58 @@ export async function checkAndHandleMotionSensor(
 	// Da es unser Sensor war, geben wir true zurück (auch wenn der Wert false war)
 	return true;
 }
+/**
+ * Deaktiviert die regulären Hardware-Timer der Zirkulationspumpe beim Adapter-Start.
+ * Schreibt die Hardware-schonenden Vorgabewerte (00:00, 60 Min Aus, 0 Min An) in die Luxtronik.
+ * Dank 'safeRawWrite' passiert dies physisch nur, wenn die Werte abweichen.
+ *
+ * @param adapter - Die erweiterte Adapter-Instanz
+ */
+export async function disableHardwareZipTimer(adapter: ExtendedAdapter): Promise<void> {
+	const config = adapter.config;
+
+	// Prüfen, ob die Checkbox "Deaktiviere reguläre ZIP Werte" aktiv ist
+	// (Passe den Namen 'zip_hardware_timer_disable' an deine jsonConfig an, falls er anders heißt)
+	if (config.zip_hardware_timer_disable === true) {
+		if (adapter.isDebugLogActive) {
+			writeLog('Applying safe hardware defaults for ZIP timers (disabling standard schedule)...', 'info');
+		}
+
+		try {
+			// 1. Tabelle auf "Woche (Mo-So)" stellen (Register 506 = 0)
+			await safeRawWrite(adapter, 'hotWaterCircPumpTimerTableSelected', 506, 0);
+			await adapter.setOwnStateIfDifferent(getDpPath('hotWaterCircPumpTimerTableSelected'), 0, true);
+
+			// 2. Taktzeiten einstellen (An: 0 Minuten, Aus: 60 Minuten)
+			await safeRawWrite(adapter, 'hotWaterCircPumpOnTime', 697, 0);
+			await adapter.setOwnStateIfDifferent(getDpPath('hotWaterCircPumpOnTime'), 0, true);
+
+			await safeRawWrite(adapter, 'hotWaterCircPumpOffTime', 698, 60);
+			await adapter.setOwnStateIfDifferent(getDpPath('hotWaterCircPumpOffTime'), 60, true);
+
+			// 3. Alle Start-/Endzeiten der Mo-So Tabelle auf "00:00 - 00:00" (Rohwert = 0 Sekunden) setzen
+			const timeIds = [
+				{ key: 'Zirkulation_MoSo_Start1', id: 507 },
+				{ key: 'Zirkulation_MoSo_End1', id: 508 },
+				{ key: 'Zirkulation_MoSo_Start2', id: 509 },
+				{ key: 'Zirkulation_MoSo_End2', id: 510 },
+				{ key: 'Zirkulation_MoSo_Start3', id: 511 },
+				{ key: 'Zirkulation_MoSo_End3', id: 512 },
+				{ key: 'Zirkulation_MoSo_Start4', id: 513 },
+				{ key: 'Zirkulation_MoSo_End4', id: 514 },
+				{ key: 'Zirkulation_MoSo_Start5', id: 515 },
+				{ key: 'Zirkulation_MoSo_End5', id: 516 },
+			];
+
+			for (const t of timeIds) {
+				// Rohwert 0 entspricht 00:00:00 Uhr
+				await safeRawWrite(adapter, t.key, t.id, 0);
+				// UI-State synchronisieren (ioBroker erwartet das String-Format)
+				await adapter.setOwnStateIfDifferent(getDpPath(t.key), '00:00', true);
+			}
+		} catch (err: unknown) {
+			const msg = err instanceof Error ? err.message : String(err);
+			writeLog(`Error applying safe ZIP defaults: ${msg}`, 'error');
+		}
+	}
+}

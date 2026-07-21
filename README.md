@@ -85,9 +85,11 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 **Features & Enhancements**
 
 - **Global EEPROM Flash Protection (Read-Before-Write):** Implemented a global interceptor for all hardware write commands (`writePumpSafe`). The adapter now caches the current heat pump parameters in real-time and strictly blocks any duplicate or redundant write requests before they are sent over the network. This drastically reduces unnecessary network traffic and protects the Luxtronik flash memory from premature wear.
+- **Automated Hardware-Safe ZIP Defaults:** The adapter can now automatically enforce hardware-safe circulation pump schedules upon startup (setting the Mo-Su table to `00:00`, ON-time to `0 min`, and OFF-time to `60 min`). This initialization relies on the new read-before-write mechanism to ensure it only writes to the EEPROM if the values differ from the current hardware state.
 - **Write Cycle Monitoring:** Introduced two new virtual data points under System Info (`write_cycles_today` and `write_cycles_total`) to transparently track the exact number of physical write operations sent to the heat pump. The daily counter automatically resets every night at midnight.
 - **Cooling Extension & Intelligent Status:** Comprehensive integration of new cooling data points (e.g., `cooling_status`, `cooling_configured`, `opStateCooling`). Added the dynamically calculated `opStateCoolingString`, which accurately evaluates and displays the current cooling state (e.g., "Cooling limit", "Waiting for timer release", or "Cooling since HH:MM:SS").
-- **Admin UI - Flash Wear Warning & Tip:** Updated the configuration UI for the circulation pump (ZIP) optimization. Added an explicit tip advising users to set base ZIP times to `00:00 - 00:00` in the tables to prevent background hardware writes.
+- **Admin UI - Notification Testing:** Added a dedicated "Send Test Message" button to the configuration interface to easily verify Telegram and ioBroker Notification Center setups directly from the UI.
+- **Admin UI - Flash Wear Guidance:** Updated the configuration UI for the circulation pump (ZIP) optimization. Added a prominent, styled tip advising users on how the adapter protects the EEPROM and how to properly configure the base ZIP times.
 - **Hardened ZIP Macro Execution:** Reaffirmed and secured the ZIP demand-driven macro to exclusively use the deaeration program (Entlüftungsprogramm). This bypasses the need to constantly overwrite persistent timer tables, providing a much safer, non-persistent way to trigger the circulation pump on demand.
 - **New Flow Rate Datapoints:** Added flow rate tracking for the heat source (`flow_rate_heat_source`, ID 173) and cooling (`flow_rate_cooling`, ID 254) to the state mapping.
 - **Extended Admin UI:** All newly added cooling data points and the heat source flow rate can now be individually enabled or disabled via new checkboxes in the adapter configuration (`jsonConfig.json`).
@@ -102,10 +104,29 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 
 **Technical Changes (Under the Hood)**
 
-- **Separation of Concerns (zipManager):** Completely refactored the motion sensor and circulation pump logic. Extracted the motion sensor subscription and event handling (`checkAndHandleMotionSensor`, `subscribeMotionSensors`) out of the `main.ts` file and centralized it entirely into `zipManager.ts`. This makes the main controller significantly leaner and improves code maintainability.
+- **Separation of Concerns (zipManager):** Completely refactored the motion sensor and circulation pump logic. Extracted the motion sensor subscription, event handling (`checkAndHandleMotionSensor`, `subscribeMotionSensors`), and startup initialization (`disableHardwareZipTimer`) out of the `main.ts` file and centralized them entirely into `zipManager.ts`. This makes the main controller significantly leaner and improves code maintainability.
 - **Centralized Network Operations:** Moved the core write logic out of the main controller and relocated it to `rawFunctions.ts` to keep the raw TCP/WebSocket communication strictly separated from the adapter's state management.
 - **Global Time Refactoring (DRY):** Centralized the duration and time calculation for status texts in the `updateStatusStrings` function. The hours/minutes/seconds logic (including the FW 3.x fallback) is now efficiently calculated only once and globally shared across heating, hot water, and cooling states.
 - **i18n Support for State Names:** Updated the internal state definition (`name: string | { en: string; de?: string }`) to fully support translation objects, allowing natively translated datapoint names in the ioBroker object tree.
+
+### 0.6.2 (2026-07-17)
+
+**Added**
+
+- Bilingual support (i18n): Full support for English and German (adapter settings, state names, dropdown menus, and dynamic status texts).
+- Language selection: Added a new dropdown menu in the adapter settings to freely choose the preferred output language for the ioBroker object tree.
+- Firmware 3.x compatibility: Implemented an intelligent fallback system that dynamically calculates the status texts (heatpump_state_string) and runtime (heatpump_duration) from the main operating state. This is required because modern Luxtronik controllers no longer transmit the old LCD text lines.
+
+**Fixed**
+
+- Incorrect heating state (Frost protection): Fixed an issue where a switched-off heating system was incorrectly displayed as "Frost protection". The code now evaluates the correct index for the heating operating state (opStateHeating / 125) instead of incorrectly calculating it via the parameter.
+- Timer display: Restored the clean HH:MM:SS formatting in the ioBroker UI without the annoying "s" (seconds) by introducing an internal isDurationFormat flag.
+- Timer glitch fixed: When the compressor is idle, 00:00:01 (1 second) was often incorrectly displayed. This is now cleanly filtered to 00:00:00.
+- ioBroker Repo-Checker warnings: Added the missing write: true property to the timer table selection states (role: "level") to fix the E1011 error.
+
+**Technical**
+
+- Fixed ESLint warnings (dot-notation) for object properties.
 
 ### 0.6.1 (2026-07-17)
 

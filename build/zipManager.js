@@ -19,6 +19,7 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 var zipManager_exports = {};
 __export(zipManager_exports, {
   checkAndHandleMotionSensor: () => checkAndHandleMotionSensor,
+  disableHardwareZipTimer: () => disableHardwareZipTimer,
   handleActivateZip: () => handleActivateZip,
   restoreOriginalZipConfig: () => restoreOriginalZipConfig,
   stopZipAndDeaeration: () => stopZipAndDeaeration,
@@ -289,9 +290,45 @@ async function checkAndHandleMotionSensor(adapter, id, state) {
   }
   return true;
 }
+async function disableHardwareZipTimer(adapter) {
+  const config = adapter.config;
+  if (config.zip_hardware_timer_disable === true) {
+    if (adapter.isDebugLogActive) {
+      (0, import_logger.writeLog)("Applying safe hardware defaults for ZIP timers (disabling standard schedule)...", "info");
+    }
+    try {
+      await safeRawWrite(adapter, "hotWaterCircPumpTimerTableSelected", 506, 0);
+      await adapter.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)("hotWaterCircPumpTimerTableSelected"), 0, true);
+      await safeRawWrite(adapter, "hotWaterCircPumpOnTime", 697, 0);
+      await adapter.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)("hotWaterCircPumpOnTime"), 0, true);
+      await safeRawWrite(adapter, "hotWaterCircPumpOffTime", 698, 60);
+      await adapter.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)("hotWaterCircPumpOffTime"), 60, true);
+      const timeIds = [
+        { key: "Zirkulation_MoSo_Start1", id: 507 },
+        { key: "Zirkulation_MoSo_End1", id: 508 },
+        { key: "Zirkulation_MoSo_Start2", id: 509 },
+        { key: "Zirkulation_MoSo_End2", id: 510 },
+        { key: "Zirkulation_MoSo_Start3", id: 511 },
+        { key: "Zirkulation_MoSo_End3", id: 512 },
+        { key: "Zirkulation_MoSo_Start4", id: 513 },
+        { key: "Zirkulation_MoSo_End4", id: 514 },
+        { key: "Zirkulation_MoSo_Start5", id: 515 },
+        { key: "Zirkulation_MoSo_End5", id: 516 }
+      ];
+      for (const t of timeIds) {
+        await safeRawWrite(adapter, t.key, t.id, 0);
+        await adapter.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)(t.key), "00:00", true);
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      (0, import_logger.writeLog)(`Error applying safe ZIP defaults: ${msg}`, "error");
+    }
+  }
+}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   checkAndHandleMotionSensor,
+  disableHardwareZipTimer,
   handleActivateZip,
   restoreOriginalZipConfig,
   stopZipAndDeaeration,
