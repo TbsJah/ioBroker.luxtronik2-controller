@@ -28,8 +28,8 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 var rawFunctions_exports = {};
 __export(rawFunctions_exports, {
-  delay: () => delay,
   dumpAllRawToLog: () => dumpAllRawToLog,
+  queueWrite: () => queueWrite,
   readAllRaw: () => readAllRaw,
   writePumpSafe: () => writePumpSafe,
   writeRawParameter: () => writeRawParameter
@@ -39,6 +39,7 @@ var net = __toESM(require("node:net"));
 var import_ws = require("ws");
 var import_logger = require("./logger");
 var import_stateMapping = require("./stateMapping");
+var import_utils = require("./utils");
 const CONSTANTS = {
   /** Schreib-Befehl für einen Parameter */
   CMD_WRITE: 3002,
@@ -92,9 +93,6 @@ async function writePumpSafe(adapter, cmd, val) {
       void adapter.setState(dpTotal, { val: adapter.writeCyclesTotal, ack: true });
     }
   }
-}
-function delay(adapter, ms) {
-  return new Promise((resolve) => adapter.setTimeout(resolve, ms));
 }
 function shouldUseWs(adapter) {
   const port = adapter.config.port ? Number(adapter.config.port) : CONSTANTS.PORT_TCP;
@@ -296,7 +294,7 @@ async function dumpAllRawToLog(adapter) {
   const useWs = shouldUseWs(adapter);
   try {
     const dumpList = async (command, title) => {
-      await delay(adapter, CONSTANTS.DELAY_RECONNECT);
+      await (0, import_utils.delay)(adapter, CONSTANTS.DELAY_RECONNECT);
       (0, import_logger.writeLog)("=======================================================", "info");
       (0, import_logger.writeLog)(`START COMPACT RAW DUMP: LIST ${command} (${title}) via ${useWs ? "WebSocket" : "TCP"}`, "info");
       (0, import_logger.writeLog)("=======================================================", "info");
@@ -307,7 +305,7 @@ async function dumpAllRawToLog(adapter) {
       (0, import_logger.writeLog)(`--- END OF LIST ${command} (Total ${data.length} indices logged) ---`, "info");
       (0, import_logger.writeLog)("=======================================================", "info");
     };
-    await delay(adapter, CONSTANTS.DELAY_RECONNECT);
+    await (0, import_utils.delay)(adapter, CONSTANTS.DELAY_RECONNECT);
     await dumpList(CONSTANTS.CMD_READ_PARAM, "PARAMETERS");
     await dumpList(CONSTANTS.CMD_READ_VALUE, "VALUES");
   } catch (err) {
@@ -315,10 +313,47 @@ async function dumpAllRawToLog(adapter) {
     (0, import_logger.writeLog)(`Error executing raw dump: ${msg}`, "error");
   }
 }
+async function queueWrite(adapter, cmd, val) {
+  return new Promise((resolve, reject) => {
+    adapter.writeQueue.push(async () => {
+      try {
+        await writePumpSafe(adapter, cmd, val);
+        resolve();
+      } catch (err) {
+        reject(err instanceof Error ? err : new Error(String(err)));
+      }
+    });
+    void processQueue(adapter);
+  });
+}
+async function processQueue(adapter) {
+  if (adapter.isWriting || adapter.writeQueue.length === 0) {
+    return;
+  }
+  adapter.isWriting = true;
+  try {
+    while (adapter.writeQueue.length > 0) {
+      const task = adapter.writeQueue.shift();
+      if (task) {
+        try {
+          await task();
+          await new Promise((resolve) => adapter.setTimeout(resolve, 300));
+        } catch (taskError) {
+          (0, import_logger.writeLog)(
+            `Error processing specific serial write task sequence in queue: ${taskError.message}`,
+            "error"
+          );
+        }
+      }
+    }
+  } finally {
+    adapter.isWriting = false;
+  }
+}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  delay,
   dumpAllRawToLog,
+  queueWrite,
   readAllRaw,
   writePumpSafe,
   writeRawParameter

@@ -24,6 +24,7 @@ __export(actionHandlers_exports, {
 module.exports = __toCommonJS(actionHandlers_exports);
 var import_logger = require("./logger");
 var import_stateMapping = require("./stateMapping");
+var import_utils = require("./utils");
 const CONSTANTS = {
   /** Status-Code für den Ruhezustand der Anlage */
   STATE_IDLE: 5,
@@ -32,9 +33,6 @@ const CONSTANTS = {
   /** Temporäre Hysterese für die Zwangswarmwasserbereitung */
   FORCE_WW_HYSTERESIS: 1
 };
-function getNumber(state, fallback = 0) {
-  return typeof (state == null ? void 0 : state.val) === "number" ? state.val : fallback;
-}
 async function handleZwangswarmwasser(adapter, id) {
   try {
     const localId = id.replace(`${adapter.namespace}.`, "");
@@ -43,8 +41,8 @@ async function handleZwangswarmwasser(adapter, id) {
       adapter.getStateAsync((0, import_stateMapping.getDpPath)("Wamwassertemperatur_Ist")),
       adapter.getStateAsync((0, import_stateMapping.getDpPath)("Wamwassertemperatur_Soll"))
     ]);
-    const wwIst = getNumber(wwIstState);
-    const wwSoll = getNumber(wwSollState);
+    const wwIst = (0, import_utils.getNumber)(wwIstState);
+    const wwSoll = (0, import_utils.getNumber)(wwSollState);
     if (wwIst >= wwSoll - 1) {
       (0, import_logger.writeLog)(
         `Forced hot water: Ignored - Actual (${wwIst}\xB0C) is already sufficient (Target: ${wwSoll}\xB0C).`,
@@ -72,10 +70,10 @@ async function handleZwangsheizen(adapter, id) {
       adapter.getStateAsync((0, import_stateMapping.getDpPath)("temperature_target_return")),
       adapter.getStateAsync((0, import_stateMapping.getDpPath)("returnTemperatureHysteresis"))
     ]);
-    const bzVal = getNumber(bzState, -1);
-    const ruecklauf = getNumber(ruecklaufState);
-    const ruecklaufSoll = getNumber(ruecklaufSollState);
-    const hysterese = getNumber(hystereseState);
+    const bzVal = (0, import_utils.getNumber)(bzState, -1);
+    const ruecklauf = (0, import_utils.getNumber)(ruecklaufState);
+    const ruecklaufSoll = (0, import_utils.getNumber)(ruecklaufSollState);
+    const hysterese = (0, import_utils.getNumber)(hystereseState);
     if (bzVal !== CONSTANTS.STATE_IDLE) {
       (0, import_logger.writeLog)(`Forced heating: Ignored - System is not idle (Status: ${bzVal}).`, "info");
       return;

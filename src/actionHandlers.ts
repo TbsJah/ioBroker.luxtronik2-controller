@@ -1,6 +1,7 @@
 import type { AdapterInstance } from '@iobroker/adapter-core';
 import { writeLog } from './logger';
 import { getDpPath } from './stateMapping';
+import { getNumber } from './utils';
 
 // =========================================================
 // TYPEN & KONSTANTEN
@@ -22,21 +23,6 @@ const CONSTANTS = {
 	/** Temporäre Hysterese für die Zwangswarmwasserbereitung */
 	FORCE_WW_HYSTERESIS: 1,
 };
-
-// =========================================================
-// HILFSFUNKTIONEN
-// =========================================================
-
-/**
- * Extrahiert typsicher einen numerischen Wert aus einem ioBroker-State.
- *
- * @param state Der abgerufene ioBroker-State.
- * @param fallback Der Fallback-Wert, falls der State ungültig oder keine Zahl ist (Standard: 0).
- * @returns Die ausgelesene Zahl oder der Fallback-Wert.
- */
-function getNumber(state: ioBroker.State | null | undefined, fallback = 0): number {
-	return typeof state?.val === 'number' ? state.val : fallback;
-}
 
 // =========================================================
 // AKTIONEN

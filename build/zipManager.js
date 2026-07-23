@@ -26,16 +26,14 @@ __export(zipManager_exports, {
   subscribeMotionSensors: () => subscribeMotionSensors
 });
 module.exports = __toCommonJS(zipManager_exports);
+var import_convert = require("./convert");
 var import_logger = require("./logger");
+var import_rawFunctions = require("./rawFunctions");
 var import_stateMapping = require("./stateMapping");
 const CONSTANTS = {
-  /** Command ID for the deaeration program */
   CMD_DEAERATE: 158,
-  /** Command ID for the circulation pump (ZIP) */
   CMD_ZIP: 684,
-  /** Seconds representing the end of a day (23:59:00) */
   END_OF_DAY: 86340,
-  /** Delay in milliseconds between consecutive hardware write operations */
   WRITE_DELAY: 100
 };
 async function safeRawWrite(adapter, key, luxId, rawValue) {
@@ -51,10 +49,7 @@ async function safeRawWrite(adapter, key, luxId, rawValue) {
     } else if (typeof state.val === "number") {
       currentRaw = state.val;
     } else if (typeof state.val === "string") {
-      const timeMatch = state.val.match(/^(\d{1,2}):(\d{1,2})/);
-      if (timeMatch) {
-        currentRaw = parseInt(timeMatch[1], 10) * 3600 + parseInt(timeMatch[2], 10) * 60;
-      }
+      currentRaw = (0, import_convert.timeStringToSeconds)(state.val);
     }
     if (currentRaw === rawValue) {
       if (adapter.isDebugLogActive) {
@@ -69,7 +64,7 @@ async function safeRawWrite(adapter, key, luxId, rawValue) {
   if (adapter.isDebugLogActive) {
     (0, import_logger.writeLog)(`[SafeWrite] \xC4nderung erkannt. Schreibe ${rawValue} in Register ${luxId} (${key})...`, "debug");
   }
-  await adapter.queueWrite(luxId, rawValue);
+  await (0, import_rawFunctions.queueWrite)(adapter, luxId, rawValue);
   await new Promise((resolve) => {
     adapter.setTimeout(resolve, CONSTANTS.WRITE_DELAY);
   });
@@ -80,6 +75,57 @@ function clearZipTimer(adapter) {
   }
   adapter.clearTimeout(adapter.zipTimer);
   adapter.zipTimer = void 0;
+}
+async function isZipAllowedBySchedule(adapter) {
+  const config = adapter.config;
+  if (config.zip_hardware_timer_disable === true) {
+    return true;
+  }
+  try {
+    const tableState = await adapter.getStateAsync((0, import_stateMapping.getDpPath)("hotWaterCircPumpTimerTableSelected"));
+    const tableMode = tableState ? Number(tableState.val) : 0;
+    const now = /* @__PURE__ */ new Date();
+    const day = now.getDay();
+    const currentSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+    let prefix = "Zirkulation_MoSo";
+    let endSuffix = "End";
+    if (tableMode === 1) {
+      prefix = day >= 1 && day <= 5 ? "Zirkulation_MoFr" : "Zirkulation_SaSo";
+      endSuffix = "Ende";
+    } else if (tableMode === 2) {
+      const days = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
+      prefix = `Zirkulation_${days[day]}`;
+      endSuffix = "Ende";
+    }
+    let isAllowed = false;
+    for (let i = 1; i <= 5; i++) {
+      const startKey = `${prefix}_Start${i}`;
+      const endKey = `${prefix}_${endSuffix}${i}`;
+      const startState = await adapter.getStateAsync((0, import_stateMapping.getDpPath)(startKey));
+      const endState = await adapter.getStateAsync((0, import_stateMapping.getDpPath)(endKey));
+      if (startState && startState.val && endState && endState.val) {
+        const startSec = (0, import_convert.timeStringToSeconds)(String(startState.val));
+        const endSec = (0, import_convert.timeStringToSeconds)(String(endState.val));
+        if (startSec !== endSec) {
+          let actualEndSec = endSec;
+          if (endSec === 0 && startSec > 0) {
+            actualEndSec = 86400;
+          }
+          if (currentSeconds >= startSec && currentSeconds <= actualEndSec) {
+            isAllowed = true;
+            break;
+          }
+        }
+      }
+    }
+    return isAllowed;
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (adapter.isDebugLogActive) {
+      (0, import_logger.writeLog)(`[ZIP] Fehler bei der Zeitplan-Pr\xFCfung: ${msg}`, "error");
+    }
+    return true;
+  }
 }
 async function restoreOriginalZipConfig(adapter) {
   if (!adapter.originalZipConfig) {
@@ -96,12 +142,7 @@ async function restoreOriginalZipConfig(adapter) {
       }
       let rawVal = val;
       if (def.role === "value.datetime" && typeof val === "string") {
-        const timeMatch = val.match(/^(\d{1,2}):(\d{1,2})/);
-        if (timeMatch) {
-          rawVal = parseInt(timeMatch[1], 10) * 3600 + parseInt(timeMatch[2], 10) * 60;
-        } else {
-          rawVal = 0;
-        }
+        rawVal = (0, import_convert.timeStringToSeconds)(val);
       }
       const targetPath = (0, import_stateMapping.getDpPath)(key);
       if (targetPath) {
@@ -109,11 +150,9 @@ async function restoreOriginalZipConfig(adapter) {
       }
       const luxId = Number(def.luxWriteId);
       if (!isNaN(luxId)) {
-        await adapter.queueWrite(luxId, Number(rawVal));
+        await (0, import_rawFunctions.queueWrite)(adapter, luxId, Number(rawVal));
         await new Promise((resolve) => {
-          adapter.setTimeout(() => {
-            resolve();
-          }, CONSTANTS.WRITE_DELAY);
+          adapter.setTimeout(() => resolve(), CONSTANTS.WRITE_DELAY);
         });
       }
     }
@@ -147,7 +186,7 @@ async function stopZipAndDeaeration(adapter) {
     const isDeaerateActive = (runDeaerateState == null ? void 0 : runDeaerateState.val) === 1 || (runDeaerateState == null ? void 0 : runDeaerateState.val) === true;
     if (isZipActive || isDeaerateActive) {
       if (adapter.isDebugLogActive) {
-        (0, import_logger.writeLog)("Conditions met: Stopping active ZIP macro and deaeration program...", "info");
+        (0, import_logger.writeLog)("Stopping active ZIP macro and deaeration program...", "info");
       }
       clearZipTimer(adapter);
       await restoreOriginalZipConfig(adapter);
@@ -215,10 +254,7 @@ async function handleActivateZip(adapter, id, durationSeconds) {
   const safeDurationSeconds = Math.max(1, isNaN(durationSeconds) ? 60 : durationSeconds);
   if (isZipAlreadyRunning) {
     if (adapter.isDebugLogActive) {
-      (0, import_logger.writeLog)(
-        "[ZIP] Zirkulationspumpe l\xE4uft bereits. Verl\xE4ngere Timer, \xFCberspringe erneuten Start-Befehl.",
-        "debug"
-      );
+      (0, import_logger.writeLog)("[ZIP] Pumpe l\xE4uft bereits. Verl\xE4ngere Timer.", "debug");
     }
     if (adapter.zipTimer) {
       adapter.clearTimeout(adapter.zipTimer);
@@ -233,9 +269,7 @@ async function handleActivateZip(adapter, id, durationSeconds) {
             (0, import_logger.writeLog)(`[ZIP] Fehler beim Ausschalten des Relais: ${msg}`, "error");
           }
         }
-        if (adapter.isDebugLogActive) {
-          (0, import_logger.writeLog)(`[ZIP] Zeit abgelaufen. Externe Relais ausgeschaltet.`, "debug");
-        }
+        await adapter.setState(localId, { val: false, ack: true });
       } else {
         await stopZipAndDeaeration(adapter);
       }
@@ -244,7 +278,7 @@ async function handleActivateZip(adapter, id, durationSeconds) {
   }
   if (validActors.length > 0) {
     if (adapter.isDebugLogActive) {
-      (0, import_logger.writeLog)(`[ZIP] Externer Relais-Modus aktiv. Schalte ${validActors.length} Aktor(en) auf TRUE`, "debug");
+      (0, import_logger.writeLog)(`[ZIP] Schalte ${validActors.length} externe(n) Aktor(en) EIN`, "debug");
     }
     for (const actor of validActors) {
       try {
@@ -266,8 +300,9 @@ async function handleActivateZip(adapter, id, durationSeconds) {
           (0, import_logger.writeLog)(`[ZIP] Fehler beim Ausschalten von ${actor.zip_external_relay_id}: ${msg}`, "error");
         }
       }
+      await adapter.setState(localId, { val: false, ack: true });
       if (adapter.isDebugLogActive) {
-        (0, import_logger.writeLog)(`[ZIP] Zeit abgelaufen. Externe Relais ausgeschaltet.`, "debug");
+        (0, import_logger.writeLog)(`[ZIP] Zeit abgelaufen. Externe Relais AUS.`, "debug");
       }
     }, safeDurationSeconds * 1e3);
     return;
@@ -364,6 +399,16 @@ async function checkAndHandleMotionSensor(adapter, id, state) {
     return false;
   }
   if (state.val === true) {
+    const isAllowedBySchedule = await isZipAllowedBySchedule(adapter);
+    if (!isAllowedBySchedule) {
+      if (adapter.isDebugLogActive) {
+        (0, import_logger.writeLog)(
+          `Motion registered at sensor '${matchedSensor.name || id}', but action ignored because it is outside the configured Luxtronik ZIP schedule.`,
+          "debug"
+        );
+      }
+      return true;
+    }
     const activateZipState = await adapter.getStateAsync((0, import_stateMapping.getDpPath)("Activate_Zip"));
     const now = Date.now();
     const lastZipChange = (activateZipState == null ? void 0 : activateZipState.lc) || 0;
@@ -375,10 +420,7 @@ async function checkAndHandleMotionSensor(adapter, id, state) {
           "debug"
         );
       }
-      await adapter.setState((0, import_stateMapping.getDpPath)("Activate_Zip"), {
-        val: true,
-        ack: false
-      });
+      await adapter.setState((0, import_stateMapping.getDpPath)("Activate_Zip"), { val: true, ack: false });
     } else {
       if (adapter.isDebugLogActive) {
         (0, import_logger.writeLog)(
@@ -394,7 +436,7 @@ async function disableHardwareZipTimer(adapter) {
   const config = adapter.config;
   if (config.zip_hardware_timer_disable === true) {
     if (adapter.isDebugLogActive) {
-      (0, import_logger.writeLog)("Applying safe hardware defaults for ZIP timers (disabling standard schedule)...", "info");
+      (0, import_logger.writeLog)("Applying safe hardware defaults for ZIP timers...", "info");
     }
     try {
       await safeRawWrite(adapter, "hotWaterCircPumpTimerTableSelected", 506, 0);

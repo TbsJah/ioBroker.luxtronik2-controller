@@ -3,6 +3,7 @@
  */
 import * as utils from '@iobroker/adapter-core';
 import { handleZwangsheizen, handleZwangswarmwasser } from './actionHandlers';
+import { formatTimerSecondsToTime } from './convert';
 import { initLogger, setCustomDebug, writeLog } from './logger';
 import { checkAndSendErrorNotifications, handleTestMessage, sendTelegramNotification } from './notificationManager';
 import {
@@ -13,7 +14,7 @@ import {
 	ensureCustomObjectsExist,
 	isStateEnabled,
 } from './objectManager';
-import { dumpAllRawToLog, readAllRaw, writePumpSafe } from './rawFunctions';
+import { dumpAllRawToLog, queueWrite, readAllRaw } from './rawFunctions';
 import { STATE_MAPPING, getDpPath } from './stateMapping';
 import {
 	calculateTemperatureSpread,
@@ -59,9 +60,9 @@ class Luxtronik2Controller extends utils.Adapter {
 	private lastPumpOptimization: number = 0;
 
 	/** Internal array storing pending serial hardware write tasks */
-	private writeQueue: (() => Promise<void>)[] = [];
+	public writeQueue: (() => Promise<void>)[] = [];
 	/** Lock flag indicating that the write queue is currently being processed */
-	private isWriting: boolean = false;
+	public isWriting: boolean = false;
 	/** Counter tracking sequential communication timeouts/failures */
 	private errorCount: number = 0;
 	/** Maximum allowed sequential request failures before connection is flagged as interrupted */
@@ -239,7 +240,7 @@ class Luxtronik2Controller extends utils.Adapter {
 				try {
 					const targetWriteId = definition.luxWriteId;
 					const writeId = isRawWrite ? parseInt(targetWriteId, 10) : targetWriteId;
-					await this.queueWrite(writeId, valueToWrite);
+					await queueWrite(this, writeId, valueToWrite);
 					await new Promise(r => global.setTimeout(r, 200));
 				} catch (err: any) {
 					writeLog(
@@ -527,77 +528,6 @@ class Luxtronik2Controller extends utils.Adapter {
 	}
 
 	/**
-	 * Pushes a hardware write task into a single-threaded execution queue to guarantee transmission safety.
-	 *
-	 * @param cmd - Target parameter register ID.
-	 * @param val - The value payload to map.
-	 * @returns A promise that completes once the queue executes this task.
-	 */
-	public async queueWrite(cmd: string | number, val: any): Promise<void> {
-		return new Promise((resolve, reject) => {
-			this.writeQueue.push(async () => {
-				try {
-					await writePumpSafe(this, cmd, val);
-					resolve();
-				} catch (err) {
-					reject(err instanceof Error ? err : new Error(String(err)));
-				}
-			});
-			void this.processQueue();
-		});
-	}
-
-	/**
-	 * Iteratively processes sequential write tasks inside the internal queue buffer.
-	 * Enforces defensive execution delay separation spacing to secure hardware stability.
-	 *
-	 * @returns A promise that resolves when processing cycles resolve.
-	 */
-	private async processQueue(): Promise<void> {
-		if (this.isWriting || this.writeQueue.length === 0) {
-			return;
-		}
-
-		this.isWriting = true;
-
-		try {
-			while (this.writeQueue.length > 0) {
-				const task = this.writeQueue.shift();
-
-				if (task) {
-					try {
-						await task();
-						await new Promise(resolve => global.setTimeout(resolve, 300));
-					} catch (taskError: any) {
-						writeLog(
-							`Error processing specific serial write task sequence in queue: ${taskError.message}`,
-							'error',
-						);
-					}
-				}
-			}
-		} finally {
-			this.isWriting = false;
-		}
-	}
-
-	/**
-	 * Standardizes raw seconds telemetry counters into readable zero-padded "HH:MM:SS" time blocks.
-	 *
-	 * @param totalSeconds - Total input seconds configuration value.
-	 * @returns Legible time block string.
-	 */
-	private formatSecondsToHMS(totalSeconds: number): string {
-		if (totalSeconds < 0 || isNaN(totalSeconds)) {
-			return '00:00:00';
-		}
-		const hours = Math.floor(totalSeconds / 3600);
-		const minutes = Math.floor((totalSeconds % 3600) / 60);
-		const seconds = Math.floor(totalSeconds % 60);
-		return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-	}
-
-	/**
 	 * Fetches, parses, converts types, and populates live data registries over the configured TCP socket.
 	 * Dispatches calculation and history logging subroutines accordingly.
 	 *
@@ -704,7 +634,7 @@ class Luxtronik2Controller extends utils.Adapter {
 					}
 
 					if (definition.isDurationFormat) {
-						value = this.formatSecondsToHMS(finalSeconds);
+						value = formatTimerSecondsToTime(finalSeconds);
 					} else if (definition.role && ['value.datetime', 'value.time', 'date'].includes(definition.role)) {
 						const totalSeconds = typeof value === 'number' ? value : parseInt(value as string, 10);
 						if (!isNaN(totalSeconds) && totalSeconds >= 0) {
@@ -863,7 +793,7 @@ class Luxtronik2Controller extends utils.Adapter {
 								'info',
 							);
 						}
-						await this.queueWrite(targetWriteId, valueToWrite);
+						await queueWrite(this, targetWriteId, valueToWrite);
 					}
 				}
 			} catch (err: any) {
@@ -960,7 +890,7 @@ class Luxtronik2Controller extends utils.Adapter {
 			}
 
 			const targetWriteId = definition.luxWriteId;
-			await this.queueWrite(parseInt(targetWriteId, 10), valueToWrite);
+			await queueWrite(this, parseInt(targetWriteId, 10), valueToWrite);
 		} catch (err: any) {
 			writeLog(
 				`Failed to finalize downstream state change command event pipeline execution loop: ${err.message}`,

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../src/utils.ts"],
+  "sourcesContent": ["import type { AdapterInstance } from '@iobroker/adapter-core';\n\n/**\n * Extrahiert typsicher einen numerischen Wert aus einem ioBroker-State.\n *\n * @param state Der abgerufene ioBroker-State.\n * @param fallback Der Fallback-Wert, falls der State ung\u00FCltig oder keine Zahl ist (Standard: 0).\n * @returns Die ausgelesene Zahl oder der Fallback-Wert.\n */\nexport function getNumber(state: ioBroker.State | null | undefined, fallback = 0): number {\n\treturn typeof state?.val === 'number' ? state.val : fallback;\n}\n\n/**\n * Erzeugt eine asynchrone Pause (Delay) unter Ber\u00FCcksichtigung des ioBroker Timeouts.\n *\n * @param adapter Die Instanz des ioBroker-Adapters.\n * @param ms Die Wartezeit in Millisekunden.\n * @returns Ein Promise, das nach Ablauf der Zeit aufgel\u00F6st wird.\n */\nexport function delay(adapter: AdapterInstance, ms: number): Promise<void> {\n\treturn new Promise(resolve => adapter.setTimeout(resolve, ms));\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AASO,SAAS,UAAU,OAA0C,WAAW,GAAW;AACzF,SAAO,QAAO,+BAAO,SAAQ,WAAW,MAAM,MAAM;AACrD;AASO,SAAS,MAAM,SAA0B,IAA2B;AAC1E,SAAO,IAAI,QAAQ,aAAW,QAAQ,WAAW,SAAS,EAAE,CAAC;AAC9D;",
+  "names": []
+}

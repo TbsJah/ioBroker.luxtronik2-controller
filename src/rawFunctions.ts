@@ -3,6 +3,7 @@ import * as net from 'node:net';
 import { WebSocket, type RawData } from 'ws';
 import { writeLog } from './logger';
 import { getDpPath } from './stateMapping';
+import { delay } from './utils';
 // =========================================================
 // KONSTANTEN
 // =========================================================
@@ -104,22 +105,6 @@ export async function writePumpSafe(adapter: RawAdapter, cmd: string | number, v
 			void adapter.setState(dpTotal, { val: adapter.writeCyclesTotal, ack: true });
 		}
 	}
-}
-
-// =========================================================
-// HILFSFUNKTIONEN
-// =========================================================
-
-/**
- * Erzeugt eine asynchrone Pause (Delay) unter Berücksichtigung des ioBroker Timeouts.
- * Verhindert das Blockieren der Node.js Event-Loop.
- *
- * @param adapter Die Instanz des ioBroker-Adapters.
- * @param ms Die Wartezeit in Millisekunden.
- * @returns Ein Promise, das nach Ablauf der Zeit aufgelöst wird.
- */
-export function delay(adapter: AdapterInstance, ms: number): Promise<void> {
-	return new Promise(resolve => adapter.setTimeout(resolve, ms));
 }
 
 /**
@@ -487,4 +472,70 @@ export interface RawAdapter extends AdapterInstance {
 	 * über die gesamte Lebensdauer des Adapters (seit dem letzten kompletten Reset).
 	 */
 	writeCyclesTotal: number;
+
+	/**
+	 * Interner Puffer für die zu verarbeitenden Schreibaufgaben.
+	 */
+	writeQueue: (() => Promise<void>)[];
+
+	/**
+	 * TRUE, wenn gerade eine Schreibwarteschlange abgearbeitet wird.
+	 */
+	isWriting: boolean;
+}
+
+/**
+ * Pushes a hardware write task into a single-threaded execution queue to guarantee transmission safety.
+ *
+ * @param adapter - The adapter instance.
+ * @param cmd - Target parameter register ID.
+ * @param val - The value payload to map.
+ * @returns A promise that completes once the queue executes this task.
+ */
+export async function queueWrite(adapter: RawAdapter, cmd: string | number, val: any): Promise<void> {
+	return new Promise((resolve, reject) => {
+		adapter.writeQueue.push(async () => {
+			try {
+				await writePumpSafe(adapter, cmd, val);
+				resolve();
+			} catch (err) {
+				reject(err instanceof Error ? err : new Error(String(err)));
+			}
+		});
+		void processQueue(adapter);
+	});
+}
+
+/**
+ * Iteratively processes sequential write tasks inside the internal queue buffer.
+ * Enforces defensive execution delay separation spacing to secure hardware stability.
+ *
+ * @param adapter - The adapter instance.
+ */
+async function processQueue(adapter: RawAdapter): Promise<void> {
+	if (adapter.isWriting || adapter.writeQueue.length === 0) {
+		return;
+	}
+
+	adapter.isWriting = true;
+
+	try {
+		while (adapter.writeQueue.length > 0) {
+			const task = adapter.writeQueue.shift();
+
+			if (task) {
+				try {
+					await task();
+					await new Promise<void>(resolve => adapter.setTimeout(resolve, 300));
+				} catch (taskError: any) {
+					writeLog(
+						`Error processing specific serial write task sequence in queue: ${taskError.message}`,
+						'error',
+					);
+				}
+			}
+		}
+	} finally {
+		adapter.isWriting = false;
+	}
 }

@@ -1,22 +1,16 @@
 import type { AdapterInstance } from '@iobroker/adapter-core';
+import { timeStringToSeconds } from './convert';
 import { writeLog } from './logger';
+import { queueWrite } from './rawFunctions';
 import { getDpPath, STATE_MAPPING } from './stateMapping';
-
 // =========================================================
 // CONSTANTS
 // =========================================================
 
-/**
- * Constants used for the circulation pump and deaeration configurations.
- */
 const CONSTANTS = {
-	/** Command ID for the deaeration program */
 	CMD_DEAERATE: 158,
-	/** Command ID for the circulation pump (ZIP) */
 	CMD_ZIP: 684,
-	/** Seconds representing the end of a day (23:59:00) */
 	END_OF_DAY: 86340,
-	/** Delay in milliseconds between consecutive hardware write operations */
 	WRITE_DELAY: 100,
 };
 
@@ -24,60 +18,32 @@ const CONSTANTS = {
 // TYPES & INTERFACES
 // =========================================================
 
-/**
- * Defines the structure for saving and restoring the original circulation pump configuration.
- */
 export type ZipConfig = Partial<Record<keyof typeof STATE_MAPPING, ioBroker.StateValue | null>>;
 
-/**
- * Extended adapter interface to provide type safety for dynamic properties and methods.
- */
 interface ExtendedAdapter extends AdapterInstance {
 	config: ioBroker.AdapterConfig & Record<string, any>;
-	/** Cached copy of the original circulation pump settings before macro activation */
 	originalZipConfig?: ZipConfig | null;
-	/** ioBroker timeout handle for the hot water circulation pump macro */
 	zipTimer?: ioBroker.Timeout;
-	/** Determines whether verbose debugging output is enabled */
 	isDebugLogActive?: boolean;
-	/**
-	 * Function to queue a hardware write operation.
-	 *
-	 * @param luxId - Target parameter register ID
-	 * @param value - The value payload to write
-	 * @returns A promise resolving once the task is queued
-	 */
-	queueWrite: (luxId: number, value: number) => Promise<void>;
-	/**
-	 * Function to synchronize a configuration value.
-	 *
-	 * @param key - The unique key identifier within the STATE_MAPPING
-	 * @param value - The raw or parsed value to apply
-	 * @returns A promise resolving when the synchronization finishes
-	 */
 	syncConfigValue: (key: string, value: any) => Promise<void>;
-	/**
-	 * Function to safely update an internal state if the value differs.
-	 *
-	 * @param dpPath - The state path ID
-	 * @param value - The updated value to process
-	 * @param ack - Explicit acknowledgment flag status
-	 * @returns A promise resolving when the write operation completes
-	 */
 	setOwnStateIfDifferent: (dpPath: string, value: any, ack?: boolean) => Promise<void>;
+	writeCyclesToday: number;
+	writeCyclesTotal: number;
+	writeQueue: (() => Promise<void>)[];
+	isWriting: boolean;
 }
 
 // =========================================================
 // HELPER FUNCTIONS
 // =========================================================
+
 /**
  * Schützt den Speicher durch Read-Before-Write direkt auf Rohwert-Ebene.
- * Blockiert unnötige Schreibbefehle an die Luxtronik.
  *
- * @param adapter - The extended adapter instance used for state and write operations
- * @param key - The state mapping key to write
- * @param luxId - The Luxtronik register ID to update
- * @param rawValue - The raw value to write to the device
+ * @param adapter The adapter instance used to read/write states and queue writes
+ * @param key The state mapping key to write
+ * @param luxId The Luxtronik register id to write to
+ * @param rawValue The raw numeric value to write into the register
  */
 async function safeRawWrite(
 	adapter: ExtendedAdapter,
@@ -95,20 +61,15 @@ async function safeRawWrite(
 	if (state && state.val !== null) {
 		let currentRaw: number | null = null;
 
-		// IoBroker-Werte in Luxtronik-Rohwerte (Zahlen) zurückrechnen
 		if (typeof state.val === 'boolean') {
 			currentRaw = state.val ? 1 : 0;
 		} else if (typeof state.val === 'number') {
 			currentRaw = state.val;
 		} else if (typeof state.val === 'string') {
-			// Wandelt Zeit-Strings (z.B. "23:59:00") zurück in reine Sekunden
-			const timeMatch = state.val.match(/^(\d{1,2}):(\d{1,2})/);
-			if (timeMatch) {
-				currentRaw = parseInt(timeMatch[1], 10) * 3600 + parseInt(timeMatch[2], 10) * 60;
-			}
+			// NEU: Frühjahrsputz! Nutzt die zentrale Funktion anstatt Inline-RegEx
+			currentRaw = timeStringToSeconds(state.val);
 		}
 
-		// DIE ENTSCHEIDENDE PRÜFUNG: Ist der Wert bereits identisch?
 		if (currentRaw === rawValue) {
 			if (adapter.isDebugLogActive) {
 				writeLog(
@@ -116,33 +77,96 @@ async function safeRawWrite(
 					'debug',
 				);
 			}
-			return; // Abbrechen! Schont den Flash-Speicher.
+			return;
 		}
 	}
 
-	// Nur schreiben, wenn es eine echte Änderung gibt
 	if (adapter.isDebugLogActive) {
 		writeLog(`[SafeWrite] Änderung erkannt. Schreibe ${rawValue} in Register ${luxId} (${key})...`, 'debug');
 	}
-	await adapter.queueWrite(luxId, rawValue);
+	await queueWrite(adapter, luxId, rawValue);
 
-	// Kurze Hardware-Schonpause nach dem Senden
 	await new Promise<void>(resolve => {
 		adapter.setTimeout(resolve, CONSTANTS.WRITE_DELAY);
 	});
 }
 
-/**
- * Safely clears the active circulation pump macro timer.
- *
- * @param adapter - The extended adapter instance
- */
 function clearZipTimer(adapter: ExtendedAdapter): void {
 	if (!adapter.zipTimer) {
 		return;
 	}
 	adapter.clearTimeout(adapter.zipTimer);
 	adapter.zipTimer = undefined;
+}
+
+/**
+ * Prüft dynamisch, ob die aktuelle Uhrzeit laut den Luxtronik-Zeitplänen für die Zirkulation freigegeben ist.
+ *
+ * @param adapter - Instanz des Adapters, verwendet zum Lesen von States und Konfigurationen
+ */
+async function isZipAllowedBySchedule(adapter: ExtendedAdapter): Promise<boolean> {
+	const config = adapter.config;
+
+	// Wenn Hardware-Timer deaktivert sind -> Dauerfreigabe
+	if (config.zip_hardware_timer_disable === true) {
+		return true;
+	}
+
+	try {
+		const tableState = await adapter.getStateAsync(getDpPath('hotWaterCircPumpTimerTableSelected'));
+		const tableMode = tableState ? Number(tableState.val) : 0;
+
+		const now = new Date();
+		const day = now.getDay();
+		const currentSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+
+		let prefix = 'Zirkulation_MoSo';
+		let endSuffix = 'End';
+
+		if (tableMode === 1) {
+			// 5+2
+			prefix = day >= 1 && day <= 5 ? 'Zirkulation_MoFr' : 'Zirkulation_SaSo';
+			endSuffix = 'Ende';
+		} else if (tableMode === 2) {
+			// Einzeltage
+			const days = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+			prefix = `Zirkulation_${days[day]}`;
+			endSuffix = 'Ende';
+		}
+
+		let isAllowed = false;
+
+		for (let i = 1; i <= 5; i++) {
+			const startKey = `${prefix}_Start${i}`;
+			const endKey = `${prefix}_${endSuffix}${i}`;
+
+			const startState = await adapter.getStateAsync(getDpPath(startKey));
+			const endState = await adapter.getStateAsync(getDpPath(endKey));
+
+			if (startState && startState.val && endState && endState.val) {
+				const startSec = timeStringToSeconds(String(startState.val));
+				const endSec = timeStringToSeconds(String(endState.val));
+
+				if (startSec !== endSec) {
+					let actualEndSec = endSec;
+					if (endSec === 0 && startSec > 0) {
+						actualEndSec = 86400; // Mitternacht
+					}
+					if (currentSeconds >= startSec && currentSeconds <= actualEndSec) {
+						isAllowed = true;
+						break;
+					}
+				}
+			}
+		}
+		return isAllowed;
+	} catch (err: unknown) {
+		const msg = err instanceof Error ? err.message : String(err);
+		if (adapter.isDebugLogActive) {
+			writeLog(`[ZIP] Fehler bei der Zeitplan-Prüfung: ${msg}`, 'error');
+		}
+		return true; // Fallback: Erlauben, damit es im Fehlerfall warm bleibt
+	}
 }
 
 // =========================================================
@@ -174,12 +198,8 @@ export async function restoreOriginalZipConfig(adapter: ExtendedAdapter): Promis
 			let rawVal = val;
 
 			if (def.role === 'value.datetime' && typeof val === 'string') {
-				const timeMatch = val.match(/^(\d{1,2}):(\d{1,2})/);
-				if (timeMatch) {
-					rawVal = parseInt(timeMatch[1], 10) * 3600 + parseInt(timeMatch[2], 10) * 60;
-				} else {
-					rawVal = 0;
-				}
+				// NEU: Frühjahrsputz! Nutzt die zentrale Funktion
+				rawVal = timeStringToSeconds(val);
 			}
 
 			const targetPath = getDpPath(key);
@@ -189,11 +209,9 @@ export async function restoreOriginalZipConfig(adapter: ExtendedAdapter): Promis
 
 			const luxId = Number(def.luxWriteId);
 			if (!isNaN(luxId)) {
-				await adapter.queueWrite(luxId, Number(rawVal));
+				await queueWrite(adapter, luxId, Number(rawVal));
 				await new Promise<void>(resolve => {
-					adapter.setTimeout(() => {
-						resolve();
-					}, CONSTANTS.WRITE_DELAY);
+					adapter.setTimeout(() => resolve(), CONSTANTS.WRITE_DELAY);
 				});
 			}
 		}
@@ -215,7 +233,6 @@ export async function stopZipAndDeaeration(adapter: ExtendedAdapter): Promise<vo
 	const actors = adapter.config.actors || [];
 	const validActors = actors.filter((a: any) => a.zip_external_relay_id && a.zip_external_relay_id.trim() !== '');
 
-	// Alle externen Relais abschalten, falls konfiguriert
 	if (validActors.length > 0) {
 		try {
 			for (const actor of validActors) {
@@ -239,17 +256,15 @@ export async function stopZipAndDeaeration(adapter: ExtendedAdapter): Promise<vo
 
 		if (isZipActive || isDeaerateActive) {
 			if (adapter.isDebugLogActive) {
-				writeLog('Conditions met: Stopping active ZIP macro and deaeration program...', 'info');
+				writeLog('Stopping active ZIP macro and deaeration program...', 'info');
 			}
 
 			clearZipTimer(adapter);
 			await restoreOriginalZipConfig(adapter);
 
-			// NEU: Sicherer Stopp über Read-Before-Write
 			await safeRawWrite(adapter, 'runDeaerate', CONSTANTS.CMD_DEAERATE, 0);
 			await safeRawWrite(adapter, 'hotWaterCircPumpDeaerate', CONSTANTS.CMD_ZIP, 0);
 
-			// UI-Datenpunkte lokal aktualisieren, ohne erneuten Netzwerktraffic zu erzeugen
 			const dpDeaerate = getDpPath('runDeaerate');
 			const dpCircDeaerate = getDpPath('hotWaterCircPumpDeaerate');
 			if (dpDeaerate) {
@@ -279,22 +294,18 @@ export async function stopZipAndDeaeration(adapter: ExtendedAdapter): Promise<vo
  * @returns A promise resolving when the activation sequence completes
  */
 export async function handleActivateZip(adapter: ExtendedAdapter, id: string, durationSeconds: number): Promise<void> {
-	// 1. EXTERNE AKTOREN AUSLESEN
-	// (Aus der neuen Array-Tabelle in der Konfiguration)
 	const actors = adapter.config.actors || [];
 	const validActors = actors.filter((a: any) => a.zip_external_relay_id && a.zip_external_relay_id.trim() !== '');
 
 	let isZipAlreadyRunning = false;
 
-	// 2. STATUS PRÜFEN: LÄUFT DIE ZIRKULATION BEREITS?
 	if (validActors.length > 0) {
-		// A) Externe Aktoren prüfen
 		for (const actor of validActors) {
 			try {
 				const foreignState = await adapter.getForeignStateAsync(actor.zip_external_relay_id);
 				if (foreignState && foreignState.val === true) {
 					isZipAlreadyRunning = true;
-					break; // Ein aktives Relais reicht aus
+					break;
 				}
 			} catch (err: unknown) {
 				const msg = err instanceof Error ? err.message : String(err);
@@ -307,7 +318,6 @@ export async function handleActivateZip(adapter: ExtendedAdapter, id: string, du
 			}
 		}
 	} else {
-		// B) Luxtronik intern prüfen (Fallback)
 		try {
 			const internalZip = await adapter.getStateAsync(getDpPath('ZIPout'));
 			if (internalZip && (internalZip.val === 1 || internalZip.val === true)) {
@@ -321,7 +331,6 @@ export async function handleActivateZip(adapter: ExtendedAdapter, id: string, du
 		}
 	}
 
-	// Setze den lokalen Button/Sensor-Status auf true
 	const localId = id.replace(`${adapter.namespace}.`, '');
 	await adapter.setState(localId, { val: true, ack: true });
 
@@ -332,13 +341,9 @@ export async function handleActivateZip(adapter: ExtendedAdapter, id: string, du
 
 	const safeDurationSeconds = Math.max(1, isNaN(durationSeconds) ? 60 : durationSeconds);
 
-	// 3. LOGIK-WEICHE A: PUMPE LÄUFT BEREITS -> NUR TIMER VERLÄNGERN
 	if (isZipAlreadyRunning) {
 		if (adapter.isDebugLogActive) {
-			writeLog(
-				'[ZIP] Zirkulationspumpe läuft bereits. Verlängere Timer, überspringe erneuten Start-Befehl.',
-				'debug',
-			);
+			writeLog('[ZIP] Pumpe läuft bereits. Verlängere Timer.', 'debug');
 		}
 
 		if (adapter.zipTimer) {
@@ -347,37 +352,32 @@ export async function handleActivateZip(adapter: ExtendedAdapter, id: string, du
 
 		adapter.zipTimer = adapter.setTimeout(async () => {
 			if (validActors.length > 0) {
-				// Externe Aktoren abschalten
 				for (const actor of validActors) {
 					try {
 						await adapter.setForeignStateAsync(actor.zip_external_relay_id, false, false);
-					} catch (err: unknown) {
+					} catch (err) {
 						const msg = err instanceof Error ? err.message : String(err);
 						writeLog(`[ZIP] Fehler beim Ausschalten des Relais: ${msg}`, 'error');
 					}
 				}
-				if (adapter.isDebugLogActive) {
-					writeLog(`[ZIP] Zeit abgelaufen. Externe Relais ausgeschaltet.`, 'debug');
-				}
+				await adapter.setState(localId, { val: false, ack: true }); // Reset Button
 			} else {
-				// Luxtronik abschalten
 				await stopZipAndDeaeration(adapter);
 			}
 		}, safeDurationSeconds * 1000);
 
-		return; // WICHTIG: Funktion hier abbrechen, damit keine redundanten "Einschalten"-Befehle gesendet werden!
+		return;
 	}
 
-	// 4. LOGIK-WEICHE B: EXTERNE RELAIS EINSCHALTEN
 	if (validActors.length > 0) {
 		if (adapter.isDebugLogActive) {
-			writeLog(`[ZIP] Externer Relais-Modus aktiv. Schalte ${validActors.length} Aktor(en) auf TRUE`, 'debug');
+			writeLog(`[ZIP] Schalte ${validActors.length} externe(n) Aktor(en) EIN`, 'debug');
 		}
 
 		for (const actor of validActors) {
 			try {
 				await adapter.setForeignStateAsync(actor.zip_external_relay_id, true, false);
-			} catch (err: unknown) {
+			} catch (err) {
 				const msg = err instanceof Error ? err.message : String(err);
 				writeLog(`[ZIP] Fehler beim Einschalten von ${actor.zip_external_relay_id}: ${msg}`, 'error');
 			}
@@ -391,20 +391,20 @@ export async function handleActivateZip(adapter: ExtendedAdapter, id: string, du
 			for (const actor of validActors) {
 				try {
 					await adapter.setForeignStateAsync(actor.zip_external_relay_id, false, false);
-				} catch (err: unknown) {
+				} catch (err) {
 					const msg = err instanceof Error ? err.message : String(err);
 					writeLog(`[ZIP] Fehler beim Ausschalten von ${actor.zip_external_relay_id}: ${msg}`, 'error');
 				}
 			}
+			await adapter.setState(localId, { val: false, ack: true }); // Reset Button
 			if (adapter.isDebugLogActive) {
-				writeLog(`[ZIP] Zeit abgelaufen. Externe Relais ausgeschaltet.`, 'debug');
+				writeLog(`[ZIP] Zeit abgelaufen. Externe Relais AUS.`, 'debug');
 			}
 		}, safeDurationSeconds * 1000);
 
-		return; // WICHTIG: Luxtronik-Fallback überspringen!
+		return;
 	}
 
-	// 5. LOGIK-WEICHE C: NORMALE LUXTRONIK-STEUERUNG (Falls keine Aktoren eingetragen sind)
 	const bzState = await adapter.getStateAsync(getDpPath('WP_BZ_akt'));
 	const bzVal = bzState ? Number(bzState.val) : 5;
 
@@ -425,11 +425,9 @@ export async function handleActivateZip(adapter: ExtendedAdapter, id: string, du
 	clearZipTimer(adapter);
 
 	if (useDeaeration) {
-		// Sicherer Start über Read-Before-Write
 		await safeRawWrite(adapter, 'runDeaerate', CONSTANTS.CMD_DEAERATE, 1);
 		await safeRawWrite(adapter, 'hotWaterCircPumpDeaerate', CONSTANTS.CMD_ZIP, 1);
 
-		// UI-Datenpunkte lokal aktualisieren
 		const dpDeaerate = getDpPath('runDeaerate');
 		const dpCircDeaerate = getDpPath('hotWaterCircPumpDeaerate');
 		if (dpDeaerate) {
@@ -480,7 +478,6 @@ export async function handleActivateZip(adapter: ExtendedAdapter, id: string, du
 		for (const u of updates) {
 			const def = STATE_MAPPING[u.key];
 			if (def && def.luxWriteId) {
-				// Tabellen-Updates laufen jetzt durch die Schreibsperre
 				await safeRawWrite(adapter, u.key, parseInt(def.luxWriteId, 10), u.raw);
 			}
 		}
@@ -520,15 +517,6 @@ export function subscribeMotionSensors(adapter: ExtendedAdapter): void {
  * @param state - Der neue ioBroker-Zustand
  * @returns true, wenn das Event von einem Bewegungsmelder stammte (sodass onStateChange abbrechen kann)
  */
-/**
- * Prüft bei einem StateChange, ob ein abonnierter Bewegungsmelder ausgelöst hat.
- * Wendet die Cooldown-Logik an und triggert bei Bedarf das ZIP-Makro.
- *
- * @param adapter - Die erweiterte Adapter-Instanz
- * @param id - Die ID des Datenpunkts, der sich geändert hat
- * @param state - Der neue ioBroker-Zustand
- * @returns true, wenn das Event von einem Bewegungsmelder stammte (sodass onStateChange abbrechen kann)
- */
 export async function checkAndHandleMotionSensor(
 	adapter: ExtendedAdapter,
 	id: string,
@@ -536,29 +524,33 @@ export async function checkAndHandleMotionSensor(
 ): Promise<boolean> {
 	const config = adapter.config;
 
-	// Prüfen ob die Überwachung überhaupt aktiv und richtig konfiguriert ist
 	if (!config.motion_sensors_aktiv || !config.motionSensors || !Array.isArray(config.motionSensors)) {
-		return false; // Funktion ist aus, weiter in der main.ts
+		return false;
 	}
 
 	const matchedSensor = config.motionSensors.find((s: any) => s.oid && s.oid.trim() === id);
-
 	if (!matchedSensor) {
-		return false; // Kein hinterlegter Bewegungsmelder, weiter in der main.ts
+		return false;
 	}
 
-	// Wir reagieren nur, wenn der Melder auf "true" (Bewegung) geht
 	if (state.val === true) {
-		// NEU: Wir prüfen den Status unseres eigenen virtuellen Trigger-Datenpunkts anstatt ZIPout
-		const activateZipState = await adapter.getStateAsync(getDpPath('Activate_Zip'));
+		const isAllowedBySchedule = await isZipAllowedBySchedule(adapter);
 
+		if (!isAllowedBySchedule) {
+			if (adapter.isDebugLogActive) {
+				writeLog(
+					`Motion registered at sensor '${matchedSensor.name || id}', but action ignored because it is outside the configured Luxtronik ZIP schedule.`,
+					'debug',
+				);
+			}
+			return true;
+		}
+
+		const activateZipState = await adapter.getStateAsync(getDpPath('Activate_Zip'));
 		const now = Date.now();
 		const lastZipChange = activateZipState?.lc || 0;
 		const isCurrentlyActive = activateZipState?.val === true;
 
-		// NEU: Cooldown-Prüfung
-		// Wir starten ODER verlängern, wenn die ZIP GERADE LÄUFT (isCurrentlyActive)
-		// ODER wenn die eingestellte Cooldown-Sperrzeit abgelaufen ist.
 		if (isCurrentlyActive || now - lastZipChange > (config.zip_last_run_min || 600) * 1000) {
 			if (adapter.isDebugLogActive) {
 				writeLog(
@@ -566,11 +558,7 @@ export async function checkAndHandleMotionSensor(
 					'debug',
 				);
 			}
-			// Trigger für das Activate_Zip Makro (Löst die handleActivateZip Funktion aus)
-			await adapter.setState(getDpPath('Activate_Zip'), {
-				val: true,
-				ack: false,
-			});
+			await adapter.setState(getDpPath('Activate_Zip'), { val: true, ack: false });
 		} else {
 			if (adapter.isDebugLogActive) {
 				writeLog(
@@ -581,9 +569,9 @@ export async function checkAndHandleMotionSensor(
 		}
 	}
 
-	// Da es unser Sensor war, geben wir true zurück (auch wenn der Wert false war)
 	return true;
 }
+
 /**
  * Deaktiviert die regulären Hardware-Timer der Zirkulationspumpe beim Adapter-Start.
  * Schreibt die Hardware-schonenden Vorgabewerte (00:00, 60 Min Aus, 0 Min An) in die Luxtronik.
@@ -594,26 +582,21 @@ export async function checkAndHandleMotionSensor(
 export async function disableHardwareZipTimer(adapter: ExtendedAdapter): Promise<void> {
 	const config = adapter.config;
 
-	// Prüfen, ob die Checkbox "Deaktiviere reguläre ZIP Werte" aktiv ist
-	// (Passe den Namen 'zip_hardware_timer_disable' an deine jsonConfig an, falls er anders heißt)
 	if (config.zip_hardware_timer_disable === true) {
 		if (adapter.isDebugLogActive) {
-			writeLog('Applying safe hardware defaults for ZIP timers (disabling standard schedule)...', 'info');
+			writeLog('Applying safe hardware defaults for ZIP timers...', 'info');
 		}
 
 		try {
-			// 1. Tabelle auf "Woche (Mo-So)" stellen (Register 506 = 0)
 			await safeRawWrite(adapter, 'hotWaterCircPumpTimerTableSelected', 506, 0);
 			await adapter.setOwnStateIfDifferent(getDpPath('hotWaterCircPumpTimerTableSelected'), 0, true);
 
-			// 2. Taktzeiten einstellen (An: 0 Minuten, Aus: 60 Minuten)
 			await safeRawWrite(adapter, 'hotWaterCircPumpOnTime', 697, 0);
 			await adapter.setOwnStateIfDifferent(getDpPath('hotWaterCircPumpOnTime'), 0, true);
 
 			await safeRawWrite(adapter, 'hotWaterCircPumpOffTime', 698, 60);
 			await adapter.setOwnStateIfDifferent(getDpPath('hotWaterCircPumpOffTime'), 60, true);
 
-			// 3. Alle Start-/Endzeiten der Mo-So Tabelle auf "00:00 - 00:00" (Rohwert = 0 Sekunden) setzen
 			const timeIds = [
 				{ key: 'Zirkulation_MoSo_Start1', id: 507 },
 				{ key: 'Zirkulation_MoSo_End1', id: 508 },
@@ -628,9 +611,7 @@ export async function disableHardwareZipTimer(adapter: ExtendedAdapter): Promise
 			];
 
 			for (const t of timeIds) {
-				// Rohwert 0 entspricht 00:00:00 Uhr
 				await safeRawWrite(adapter, t.key, t.id, 0);
-				// UI-State synchronisieren (ioBroker erwartet das String-Format)
 				await adapter.setOwnStateIfDifferent(getDpPath(t.key), '00:00', true);
 			}
 		} catch (err: unknown) {
