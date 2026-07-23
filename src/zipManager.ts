@@ -279,50 +279,46 @@ export async function stopZipAndDeaeration(adapter: ExtendedAdapter): Promise<vo
  * @returns A promise resolving when the activation sequence completes
  */
 export async function handleActivateZip(adapter: ExtendedAdapter, id: string, durationSeconds: number): Promise<void> {
-	const externalRelayId = adapter.config.zip_external_relay_id;
+	// 1. EXTERNE AKTOREN AUSLESEN
+	// (Aus der neuen Array-Tabelle in der Konfiguration)
+	const actors = adapter.config.actors || [];
+	const validActors = actors.filter((a: any) => a.zip_external_relay_id && a.zip_external_relay_id.trim() !== '');
 
-	// 1. PRÜFEN: GIBT ES EIN EXTERNES RELAIS?
-	if (externalRelayId && typeof externalRelayId === 'string' && externalRelayId.trim() !== '') {
-		if (adapter.isDebugLogActive) {
-			writeLog(`[ZIP] Externer Relais-Modus aktiv. Schalte: ${externalRelayId} auf TRUE`, 'debug');
-		}
+	let isZipAlreadyRunning = false;
 
-		try {
-			// Relais EINSCHALTEN (setForeignState nutzt man für adapterfremde Datenpunkte)
-			await adapter.setForeignStateAsync(externalRelayId, true, false);
-
-			// Alten Timer löschen, falls die Bewegung verlängert wird
-			if (adapter.zipTimer) {
-				adapter.clearTimeout(adapter.zipTimer);
-			}
-
-			// Neuen Auto-Off Timer setzen
-			adapter.zipTimer = adapter.setTimeout(async () => {
-				try {
-					await adapter.setForeignStateAsync(externalRelayId, false, false);
-					if (adapter.isDebugLogActive) {
-						writeLog(
-							`[ZIP] Zeit abgelaufen. Schalte externes Relais: ${externalRelayId} auf FALSE`,
-							'debug',
-						);
-					}
-				} catch (err: unknown) {
-					const msg = err instanceof Error ? err.message : String(err);
-					writeLog(`[ZIP] Fehler beim Ausschalten der externen Relais: ${msg}`, 'error');
+	// 2. STATUS PRÜFEN: LÄUFT DIE ZIRKULATION BEREITS?
+	if (validActors.length > 0) {
+		// A) Externe Aktoren prüfen
+		for (const actor of validActors) {
+			try {
+				const foreignState = await adapter.getForeignStateAsync(actor.zip_external_relay_id);
+				if (foreignState && foreignState.val === true) {
+					isZipAlreadyRunning = true;
+					break; // Ein aktives Relais reicht aus
 				}
-			}, durationSeconds * 1000);
-		} catch (err: unknown) {
-			const msg = err instanceof Error ? err.message : String(err);
-			writeLog(`[ZIP] Fehler beim Einschalten der externen Relais: ${msg}`, 'error');
+			} catch (err: unknown) {
+				const msg = err instanceof Error ? err.message : String(err);
+				if (adapter.isDebugLogActive) {
+					writeLog(
+						`[ZIP] Konnte Status des externen Relais ${actor.zip_external_relay_id} nicht lesen: ${msg}`,
+						'debug',
+					);
+				}
+			}
 		}
-
-		// WICHTIG: Hier brechen wir die Funktion ab!
-		// Es geht KEIN Befehl mehr an die Luxtronik-Heizung.
-		return;
+	} else {
+		// B) Luxtronik intern prüfen (Fallback)
+		try {
+			const internalZip = await adapter.getStateAsync(getDpPath('ZIPout' as any));
+			if (internalZip && (internalZip.val === 1 || internalZip.val === true)) {
+				isZipAlreadyRunning = true;
+			}
+		} catch (err) {
+			// Ignorieren, falls Wert noch nicht existiert
+		}
 	}
 
-	// 2. FALLBACK: NORMALE LUXTRONIK-STEUERUNG (falls kein Shelly eingetragen ist)
-
+	// Setze den lokalen Button/Sensor-Status auf true
 	const localId = id.replace(`${adapter.namespace}.`, '');
 	await adapter.setState(localId, { val: true, ack: true });
 
@@ -332,6 +328,80 @@ export async function handleActivateZip(adapter: ExtendedAdapter, id: string, du
 	}
 
 	const safeDurationSeconds = Math.max(1, isNaN(durationSeconds) ? 60 : durationSeconds);
+
+	// 3. LOGIK-WEICHE A: PUMPE LÄUFT BEREITS -> NUR TIMER VERLÄNGERN
+	if (isZipAlreadyRunning) {
+		if (adapter.isDebugLogActive) {
+			writeLog(
+				'[ZIP] Zirkulationspumpe läuft bereits. Verlängere Timer, überspringe erneuten Start-Befehl.',
+				'debug',
+			);
+		}
+
+		if (adapter.zipTimer) {
+			adapter.clearTimeout(adapter.zipTimer);
+		}
+
+		adapter.zipTimer = adapter.setTimeout(async () => {
+			if (validActors.length > 0) {
+				// Externe Aktoren abschalten
+				for (const actor of validActors) {
+					try {
+						await adapter.setForeignStateAsync(actor.zip_external_relay_id, false, false);
+					} catch (err: unknown) {
+						const msg = err instanceof Error ? err.message : String(err);
+						writeLog(`[ZIP] Fehler beim Ausschalten des Relais: ${msg}`, 'error');
+					}
+				}
+				if (adapter.isDebugLogActive) {
+					writeLog(`[ZIP] Zeit abgelaufen. Externe Relais ausgeschaltet.`, 'debug');
+				}
+			} else {
+				// Luxtronik abschalten
+				await stopZipAndDeaeration(adapter);
+			}
+		}, safeDurationSeconds * 1000);
+
+		return; // WICHTIG: Funktion hier abbrechen, damit keine redundanten "Einschalten"-Befehle gesendet werden!
+	}
+
+	// 4. LOGIK-WEICHE B: EXTERNE RELAIS EINSCHALTEN
+	if (validActors.length > 0) {
+		if (adapter.isDebugLogActive) {
+			writeLog(`[ZIP] Externer Relais-Modus aktiv. Schalte ${validActors.length} Aktor(en) auf TRUE`, 'debug');
+		}
+
+		for (const actor of validActors) {
+			try {
+				await adapter.setForeignStateAsync(actor.zip_external_relay_id, true, false);
+			} catch (err: unknown) {
+				const msg = err instanceof Error ? err.message : String(err);
+				writeLog(`[ZIP] Fehler beim Einschalten von ${actor.zip_external_relay_id}: ${msg}`, 'error');
+			}
+		}
+
+		if (adapter.zipTimer) {
+			adapter.clearTimeout(adapter.zipTimer);
+		}
+
+		adapter.zipTimer = adapter.setTimeout(async () => {
+			for (const actor of validActors) {
+				try {
+					await adapter.setForeignStateAsync(actor.zip_external_relay_id, false, false);
+				} catch (err: unknown) {
+					const msg = err instanceof Error ? err.message : String(err);
+					writeLog(`[ZIP] Fehler beim Ausschalten von ${actor.zip_external_relay_id}: ${msg}`, 'error');
+				}
+			}
+			if (adapter.isDebugLogActive) {
+				writeLog(`[ZIP] Zeit abgelaufen. Externe Relais ausgeschaltet.`, 'debug');
+			}
+		}, safeDurationSeconds * 1000);
+
+		return; // WICHTIG: Luxtronik-Fallback überspringen!
+	}
+
+	// 5. LOGIK-WEICHE C: NORMALE LUXTRONIK-STEUERUNG (Falls keine Aktoren eingetragen sind)
 	const bzState = await adapter.getStateAsync(getDpPath('WP_BZ_akt'));
 	const bzVal = bzState ? Number(bzState.val) : 5;
 
@@ -352,7 +422,7 @@ export async function handleActivateZip(adapter: ExtendedAdapter, id: string, du
 	clearZipTimer(adapter);
 
 	if (useDeaeration) {
-		// NEU: Sicherer Start über Read-Before-Write
+		// Sicherer Start über Read-Before-Write
 		await safeRawWrite(adapter, 'runDeaerate', CONSTANTS.CMD_DEAERATE, 1);
 		await safeRawWrite(adapter, 'hotWaterCircPumpDeaerate', CONSTANTS.CMD_ZIP, 1);
 
@@ -407,7 +477,7 @@ export async function handleActivateZip(adapter: ExtendedAdapter, id: string, du
 		for (const u of updates) {
 			const def = STATE_MAPPING[u.key];
 			if (def && def.luxWriteId) {
-				// Auch die Tabellen-Updates laufen jetzt durch die Schreibsperre
+				// Tabellen-Updates laufen jetzt durch die Schreibsperre
 				await safeRawWrite(adapter, u.key, parseInt(def.luxWriteId, 10), u.raw);
 			}
 		}
