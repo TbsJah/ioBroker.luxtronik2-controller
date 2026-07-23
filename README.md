@@ -84,11 +84,11 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 
 **Technical Changes (Under the Hood)**
 
-- **Separation of Concerns (zipManager):** Completely refactored the motion sensor and circulation pump logic. Extracted the event handling and startup initialization out of `main.ts` into `zipManager.ts`. It now also dynamically handles iterations over arrays of external actors.
-- **Network Queue Isolation:** Extracted the core transmission queue (`queueWrite`, `processQueue`) from the main adapter class into `rawFunctions.ts`, achieving 100% isolation of TCP/WebSocket network logic from ioBroker state management.
-- **Comprehensive Code Refactoring (DRY):** Created dedicated `convert.ts` and `utils.ts` modules to centralize time string formatting (`timeStringToSeconds`, `formatTimerSecondsToTime`) and generic helper functions (`getNumber`, `delay`).
-- **Global Time Refactoring:** Centralized the duration and time calculation for status texts in the `updateStatusStrings` function.
-- **i18n Support for State Names:** Updated the internal state definition (`name: string | { en: string; de?: string }`) to fully support translation objects, allowing natively translated datapoint names in the ioBroker object tree.
+- **Separation of Concerns (zipManager):**
+- **Network Queue Isolation:**
+- **Comprehensive Code Refactoring (DRY):**
+- **Global Time Refactoring:**
+- **i18n Support for State Names:**
 
 ### 0.6.2 (2026-07-17)
 
