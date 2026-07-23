@@ -125,6 +125,21 @@ async function restoreOriginalZipConfig(adapter) {
   }
 }
 async function stopZipAndDeaeration(adapter) {
+  const actors = adapter.config.actors || [];
+  const validActors = actors.filter((a) => a.zip_external_relay_id && a.zip_external_relay_id.trim() !== "");
+  if (validActors.length > 0) {
+    try {
+      for (const actor of validActors) {
+        await adapter.setForeignStateAsync(actor.zip_external_relay_id, false, false);
+      }
+      if (adapter.isDebugLogActive) {
+        (0, import_logger.writeLog)(`[ZIP] Not-Aus f\xFCr externe Relais gesendet.`, "debug");
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      (0, import_logger.writeLog)(`[ZIP] Fehler beim Ausschalten der externen Relais: ${msg}`, "error");
+    }
+  }
   try {
     const activateZipState = await adapter.getStateAsync((0, import_stateMapping.getDpPath)("Activate_Zip"));
     const runDeaerateState = await adapter.getStateAsync((0, import_stateMapping.getDpPath)("runDeaerate"));
@@ -157,6 +172,36 @@ async function stopZipAndDeaeration(adapter) {
   }
 }
 async function handleActivateZip(adapter, id, durationSeconds) {
+  const externalRelayId = adapter.config.zip_external_relay_id;
+  if (externalRelayId && typeof externalRelayId === "string" && externalRelayId.trim() !== "") {
+    if (adapter.isDebugLogActive) {
+      (0, import_logger.writeLog)(`[ZIP] Externer Relais-Modus aktiv. Schalte: ${externalRelayId} auf TRUE`, "debug");
+    }
+    try {
+      await adapter.setForeignStateAsync(externalRelayId, true, false);
+      if (adapter.zipTimer) {
+        adapter.clearTimeout(adapter.zipTimer);
+      }
+      adapter.zipTimer = adapter.setTimeout(async () => {
+        try {
+          await adapter.setForeignStateAsync(externalRelayId, false, false);
+          if (adapter.isDebugLogActive) {
+            (0, import_logger.writeLog)(
+              `[ZIP] Zeit abgelaufen. Schalte externes Relais: ${externalRelayId} auf FALSE`,
+              "debug"
+            );
+          }
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : String(err);
+          (0, import_logger.writeLog)(`[ZIP] Fehler beim Ausschalten der externen Relais: ${msg}`, "error");
+        }
+      }, durationSeconds * 1e3);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      (0, import_logger.writeLog)(`[ZIP] Fehler beim Einschalten der externen Relais: ${msg}`, "error");
+    }
+    return;
+  }
   const localId = id.replace(`${adapter.namespace}.`, "");
   await adapter.setState(localId, { val: true, ack: true });
   if (durationSeconds <= 0) {

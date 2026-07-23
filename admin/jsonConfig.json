@@ -2284,8 +2284,8 @@
 				"informationZip": {
 					"type": "staticText",
 					"text": {
-						"en": "By default, the circulation pump (ZIP) is controlled via fixed switching and cycle times of the heat pump. Since this rigid scheduling wastes energy, this adapter offers an intelligent optimization:<br><br>• <b>Demand-driven:</b> By linking motion detectors or buttons (boolean datapoints), the ZIP is only activated when hot water is actually needed.<br>• <b>Safe Operation:</b> The adapter activates the pump via the internal manual control, bypassing the regular timer tables to protect the hardware.<br><br><b>💡 Tip! Hardware protection (EEPROM Flash Wear)</b><br>To minimize background write operations in the controller, set the base ZIP times once to the <i>Mon-Sun</i> table and enter <i>00:00 - 00:00</i>. Set the cycle times to <b>Off: 60 minutes</b> and <b>On: 0 minutes</b>.",
-						"de": "Die Zirkulationspumpe (ZIP) wird standardmäßig über feste Schalt- und Taktzeiten der Wärmepumpe gesteuert. Da diese starre Zeitsteuerung oft unnötig Energie verbraucht, bietet dieser Adapter eine intelligente Optimierung:<br><br>• <b>Bedarfsgesteuert:</b> Durch die Verknüpfung von Bewegungsmeldern oder Tastern (Boolean-Datenpunkte) wird die ZIP nur dann aktiviert, wenn tatsächlich Warmwasser benötigt wird.<br>• <b>Funktionsweise:</b> Der Adapter startet die Pumpe über die interne Handsteuerung und umgeht die reguläre Schaltuhr, um die Hardware zu schonen.<br><br><b>💡 Tipp! Hardware-Schutz (EEPROM Flash-Wear)</b><br>Um das ständige Schreiben im Regler zu minimieren, stellen Sie die regulären ZIP-Zeiten einmalig auf die Tabelle <i>Mo-So</i> und tragen Sie dort <i>00:00 - 00:00</i> ein. Die Taktzeiten setzen Sie auf <b>Aus: 60 Minuten</b> und <b>An: 0 Minuten</b>."
+						"en": "By default, the circulation pump (ZIP) is controlled via fixed switching and cycle times of the heat pump. Since this rigid scheduling wastes energy, this adapter offers an intelligent optimization:<br><br>• <b>Demand-driven:</b> By linking motion detectors or buttons (boolean datapoints), the ZIP is only activated when hot water is actually needed.<br>• <b>Safe Operation:</b> The adapter activates the pump via the internal manual control, bypassing the regular timer tables to protect the hardware.<br><br>💡 <b>Tip! Hardware protection (EEPROM Flash Wear)</b><br>To minimize background write operations in the controller, set the base ZIP times once to the <i>Mon-Sun</i> table and enter <i>00:00 - 00:00</i>. Set the cycle times to <b>Off: 60 minutes</b> and <b>On: 0 minutes</b>.<br><br><b>Info:</b> To reduce write operations on the controller, it is highly recommended to control the ZIP(s) via an external actor ➔ <b>0 write operations</b> on the controller!<br><i>For comparison:</i> An activation via the Luxtronik2 controller requires 4 write operations for the deaeration program. Using the ZIP control table requires between 4 (best case) and 14 (worst case) write operations in the flash memory per activation.",
+						"de": "Die Zirkulationspumpe (ZIP) wird standardmäßig über feste Schalt- und Taktzeiten der Wärmepumpe gesteuert. Da diese starre Zeitsteuerung oft unnötig Energie verbraucht, bietet dieser Adapter eine intelligente Optimierung:<br><br>• <b>Bedarfsgesteuert:</b> Durch die Verknüpfung von Bewegungsmeldern oder Tastern (Boolean-Datenpunkte) wird die ZIP nur dann aktiviert, wenn tatsächlich Warmwasser benötigt wird.<br>• <b>Funktionsweise:</b> Der Adapter startet die Pumpe über die interne Handsteuerung und umgeht die reguläre Schaltuhr, um die Hardware zu schonen.<br><br>💡 <b>Tipp! Hardware-Schutz (EEPROM Flash-Wear)</b><br>Um das ständige Schreiben im Regler zu minimieren, stellen Sie die regulären ZIP-Zeiten einmalig auf die Tabelle <i>Mo-So</i> und tragen Sie dort <i>00:00 - 00:00</i> ein. Die Taktzeiten setzen Sie auf <b>Aus: 60 Minuten</b> und <b>An: 0 Minuten</b>.<br><br><b>Info:</b> Um die Schreibvorgänge auf dem Regler zu reduzieren, ist es empfehlenswert, die ZIP(s) über einen externen Aktor zu steuern ➔ <b>0 Schreibvorgänge</b> im Regler!<br><i>Zum Vergleich:</i> Eine Aktivierung per Luxtronik2 Regler benötigt für das Entlüftungsprogramm 4 Schreibvorgänge. Über die ZIP-Steuertabelle sind es im besten Fall 4 und im schlechtesten Fall 14 Schreibvorgänge im Flash-Speicher pro Aktivierung."
 					},
 					"style": { "height": "120px" },
 					"xs": 12,
@@ -2297,7 +2297,7 @@
 				"abstandZip1": {
 					"type": "staticText",
 					"text": "",
-					"style": { "height": "20px" },
+					"style": { "height": "40px" },
 					"xs": 12,
 					"sm": 12,
 					"md": 12,
@@ -2391,7 +2391,7 @@
 					"lg": 12,
 					"xl": 12
 				},
-				"headerSensors": {
+				"headerMotionSensors": {
 					"type": "header",
 					"text": {
 						"en": "Motion sensors for circulation pump (ZIP)",
@@ -2422,11 +2422,56 @@
 							"width": "30%"
 						},
 						{
-							"type": "text",
+							"type": "objectId",
 							"attr": "oid",
 							"title": {
 								"en": "Select Object-ID",
 								"de": "Objekt-ID auswählen"
+							},
+							"width": "70%"
+						}
+					]
+				},
+				"headerActors": {
+					"type": "header",
+					"text": {
+						"en": "External relays/actors for circulation pump",
+						"de": "Externe Relais/Aktoren für Zirkulationspumpe"
+					},
+					"size": 4,
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
+				"actors": {
+					"type": "table",
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12,
+					"items": [
+						{
+							"type": "text",
+							"attr": "name",
+							"title": {
+								"en": "Name (e.g. Zip1)",
+								"de": "Bezeichnung (z.B. Zip1)"
+							},
+							"width": "30%"
+						},
+						{
+							"type": "objectId",
+							"attr": "zip_external_relay_id",
+							"title": {
+								"en": "External Relay Object ID (e.g. shelly.0.Relay0.Switch)",
+								"de": "Objekt-ID des externen Relais (z.B. shelly.0.Relay0.Switch)"
+							},
+							"help": {
+								"en": "If filled, this state will be switched instead of the internal Luxtronik pump.",
+								"de": "Wenn ausgefüllt, wird dieser Datenpunkt (true/false) anstelle der Luxtronik-Pumpe geschaltet. 100% Flash-Schutz!"
 							},
 							"width": "70%"
 						}

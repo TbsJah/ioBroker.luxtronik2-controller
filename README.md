@@ -84,29 +84,31 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 
 **Features & Enhancements**
 
-- **Global EEPROM Flash Protection (Read-Before-Write):** Implemented a global interceptor for all hardware write commands (`writePumpSafe`). The adapter now caches the current heat pump parameters in real-time and strictly blocks any duplicate or redundant write requests before they are sent over the network. This drastically reduces unnecessary network traffic and protects the Luxtronik flash memory from premature wear.
-- **Automated Hardware-Safe ZIP Defaults:** The adapter can now automatically enforce hardware-safe circulation pump schedules upon startup (setting the Mo-Su table to `00:00`, ON-time to `0 min`, and OFF-time to `60 min`). This initialization relies on the new read-before-write mechanism to ensure it only writes to the EEPROM if the values differ from the current hardware state.
-- **Write Cycle Monitoring:** Introduced two new virtual data points under System Info (`write_cycles_today` and `write_cycles_total`) to transparently track the exact number of physical write operations sent to the heat pump. The daily counter automatically resets every night at midnight.
-- **Cooling Extension & Intelligent Status:** Comprehensive integration of new cooling data points (e.g., `cooling_status`, `cooling_configured`, `opStateCooling`). Added the dynamically calculated `opStateCoolingString`, which accurately evaluates and displays the current cooling state (e.g., "Cooling limit", "Waiting for timer release", or "Cooling since HH:MM:SS").
+- **External Actor Support for ZIP (100% Flash Safe):** Added the ultimate hardware protection feature. Users can now configure a list of external actors (e.g., Shelly or Zigbee relays) via their object IDs in the Admin UI. When motion is detected, the adapter switches these relays directly, completely bypassing the heat pump and reducing Luxtronik EEPROM write cycles to absolute zero.
+- **Global EEPROM Flash Protection (Read-Before-Write):** Implemented a global interceptor for all hardware write commands (`writePumpSafe`). The adapter now caches the current heat pump parameters in real-time and strictly blocks any duplicate or redundant write requests before they are sent over the network.
+- **Automated Hardware-Safe ZIP Defaults:** The adapter can now automatically enforce hardware-safe circulation pump schedules upon startup (setting the Mo-Su table to `00:00`, ON-time to `0 min`, and OFF-time to `60 min`).
+- **Admin UI - Flash Wear Statistics & Guidance:** Expanded the ZIP configuration page with detailed educational information. Added hard data explaining that internal ZIP control causes between 4 and 14 physical write operations per activation, highly recommending the new external actor setup.
+- **Write Cycle Monitoring:** Introduced two new virtual data points under System Info (`write_cycles_today` and `write_cycles_total`) to transparently track physical write operations sent to the heat pump. The daily counter automatically resets every night at midnight.
+- **Cooling Extension & Intelligent Status:** Comprehensive integration of new cooling data points (e.g., `cooling_status`, `cooling_configured`, `opStateCooling`). Added the dynamically calculated `opStateCoolingString`.
 - **Admin UI - Notification Testing:** Added a dedicated "Send Test Message" button to the configuration interface to easily verify Telegram and ioBroker Notification Center setups directly from the UI.
-- **Admin UI - Flash Wear Guidance:** Updated the configuration UI for the circulation pump (ZIP) optimization. Added a prominent, styled tip advising users on how the adapter protects the EEPROM and how to properly configure the base ZIP times.
-- **Hardened ZIP Macro Execution:** Reaffirmed and secured the ZIP demand-driven macro to exclusively use the deaeration program (Entlüftungsprogramm). This bypasses the need to constantly overwrite persistent timer tables, providing a much safer, non-persistent way to trigger the circulation pump on demand.
+- **Hardened ZIP Macro Execution:** Reaffirmed and secured the ZIP demand-driven macro to exclusively use the deaeration program (Entlüftungsprogramm).
 - **New Flow Rate Datapoints:** Added flow rate tracking for the heat source (`flow_rate_heat_source`, ID 173) and cooling (`flow_rate_cooling`, ID 254) to the state mapping.
 - **Extended Admin UI:** All newly added cooling data points and the heat source flow rate can now be individually enabled or disabled via new checkboxes in the adapter configuration (`jsonConfig.json`).
 - **New Hardware Supported:** Officially added the MSW2-9S heat pump to the model recognition (`HP_TYPES`).
 
 **Bugfixes**
 
-- **TypeScript/Linter Strictness:** Fixed strictly typed linter errors (e.g., `@typescript-eslint/no-floating-promises`) by correctly handling asynchronous database calls. Used the `void` operator for safe, fire-and-forget `setState` operations without blocking the event loop.
+- **Admin UI i18n Compliance:** Fixed missing language definitions (E5611) in the `jsonConfig.json` dropdown menus to strictly comply with the latest ioBroker repository checks.
+- **TypeScript/Linter Strictness:** Fixed strictly typed linter errors (e.g., `@typescript-eslint/no-floating-promises` and template literal typings) by correctly handling asynchronous database calls and unknown error types.
 - **Missing Imports:** Resolved compilation errors regarding missing helper functions (e.g., `getDpPath`) during module refactoring.
-- **Cooling Operating Hours:** Fixed the `hours_cooling` datapoint. The value is now correctly read from real-time telemetry data (`raw_value`) and displayed as a regular number of hours, resolving an issue where the timestamp "Jan 1, 1970" was incorrectly shown.
+- **Cooling Operating Hours:** Fixed the `hours_cooling` datapoint. The value is now correctly read from real-time telemetry data (`raw_value`), resolving an issue where the timestamp "Jan 1, 1970" was incorrectly shown.
 - **Config Cleanup:** Fixed an incorrect identifier in the admin UI (changed `sync_Gerätezeit` to `sync_deviceTime`) and removed unused/dead checkboxes.
 
 **Technical Changes (Under the Hood)**
 
-- **Separation of Concerns (zipManager):** Completely refactored the motion sensor and circulation pump logic. Extracted the motion sensor subscription, event handling (`checkAndHandleMotionSensor`, `subscribeMotionSensors`), and startup initialization (`disableHardwareZipTimer`) out of the `main.ts` file and centralized them entirely into `zipManager.ts`. This makes the main controller significantly leaner and improves code maintainability.
-- **Centralized Network Operations:** Moved the core write logic out of the main controller and relocated it to `rawFunctions.ts` to keep the raw TCP/WebSocket communication strictly separated from the adapter's state management.
-- **Global Time Refactoring (DRY):** Centralized the duration and time calculation for status texts in the `updateStatusStrings` function. The hours/minutes/seconds logic (including the FW 3.x fallback) is now efficiently calculated only once and globally shared across heating, hot water, and cooling states.
+- **Separation of Concerns (zipManager):** Completely refactored the motion sensor and circulation pump logic. Extracted the event handling and startup initialization out of `main.ts` into `zipManager.ts`. It now also dynamically handles iterations over arrays of external actors.
+- **Centralized Network Operations:** Moved the core write logic out of the main controller and relocated it to `rawFunctions.ts` to keep the raw TCP/WebSocket communication separated from the adapter's state management.
+- **Global Time Refactoring (DRY):** Centralized the duration and time calculation for status texts in the `updateStatusStrings` function.
 - **i18n Support for State Names:** Updated the internal state definition (`name: string | { en: string; de?: string }`) to fully support translation objects, allowing natively translated datapoint names in the ioBroker object tree.
 
 ### 0.6.2 (2026-07-17)
