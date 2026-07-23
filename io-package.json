@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "luxtronik2-controller",
-    "version": "0.6.3",
+    "version": "0.6.4",
     "news": {
+      "0.6.4": {
+        "en": "Refactoring",
+        "de": "Refactoring",
+        "ru": "Рефакторинг",
+        "pt": "Refatorização",
+        "nl": "Refactoring",
+        "fr": "Refactoration",
+        "it": "Refactoring",
+        "es": "Refactoring",
+        "pl": "Refaktoring",
+        "uk": "Рефакторинг",
+        "zh-cn": "正在重构"
+      },
       "0.6.3": {
         "en": "Technical Changes (Under the Hood)\n\n- Separation of Concerns (zipManager):\n- Network Queue Isolation:\n- Comprehensive Code Refactoring (DRY):\n- Global Time Refactoring:\n- i18n Support for State Names:",
         "de": "Technische Änderungen (Unter der Hood)\n\n- Trennung von Anliegen (zipManager):\nNetzwerk Queue Isolation:\nUmfassendes Code Refactoring (DRY):\nGlobal Time Refactoring:\n- i18n Unterstützung für staatliche Namen:",
@@ -80,19 +93,6 @@
         "pl": "Rozwiąż problemy zgłoszone przez moduł sprawdzający repozytorium",
         "uk": "Вирішення проблем, про які повідомляє перевірник репозиторію",
         "zh-cn": "解决存储库检查器报告的问题"
-      },
-      "0.5.1": {
-        "en": "Fix issue notify last error after instance restart",
-        "de": "Problem behoben: Benachrichtigung über letzten Fehler nach Neustart der Instanz.",
-        "ru": "Исправлена ошибка, из-за которой после перезапуска экземпляра отображалось уведомление о последней ошибке.",
-        "pt": "Corrigido o problema que impedia a notificação do último erro após a reinicialização da instância.",
-        "nl": "Probleem opgelost: melding van laatste foutmelding na herstart van instantie",
-        "fr": "Correction d'un problème de notification de la dernière erreur après le redémarrage de l'instance",
-        "it": "Risolvi il problema notificando l'ultimo errore dopo il riavvio dell'istanza",
-        "es": "Solucionar el problema de notificación del último error tras el reinicio de la instancia",
-        "pl": "Naprawiono problem z powiadomieniem o ostatnim błędzie po ponownym uruchomieniu instancji",
-        "uk": "Виправлено помилку, що повідомляє про останню помилку після перезапуску екземпляра",
-        "zh-cn": "修复实例重启后通知最后错误的问题"
       }
     },
     "titleLang": {
