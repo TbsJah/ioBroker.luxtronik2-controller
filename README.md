@@ -82,13 +82,13 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 
 ### **WORK IN PROGRESS**
 
-**Technical Changes (Under the Hood)**
+Technical Changes (Under the Hood)
 
-- **Separation of Concerns (zipManager):**
-- **Network Queue Isolation:**
-- **Comprehensive Code Refactoring (DRY):**
-- **Global Time Refactoring:**
-- **i18n Support for State Names:**
+- Separation of Concerns (zipManager):
+- Network Queue Isolation:
+- Comprehensive Code Refactoring (DRY):
+- Global Time Refactoring:
+- i18n Support for State Names:
 
 ### 0.6.2 (2026-07-17)
 
