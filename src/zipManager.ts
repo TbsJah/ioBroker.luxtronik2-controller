@@ -541,16 +541,6 @@ export async function checkAndHandleMotionSensor(
 	if (state.val === true) {
 		const zipOutState = await adapter.getStateAsync(getDpPath('ZIPout'));
 
-		if (zipOutState && zipOutState.val === 1) {
-			if (adapter.isDebugLogActive) {
-				writeLog(
-					`Motion registered at sensor '${matchedSensor.name}' but circulation pump ZIP is already running. Action ignored.`,
-					'debug',
-				);
-			}
-			return true;
-		}
-
 		const now = Date.now();
 		const lastZipChange = zipOutState?.lc || 0;
 
