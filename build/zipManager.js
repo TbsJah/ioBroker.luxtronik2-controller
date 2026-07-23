@@ -200,6 +200,10 @@ async function handleActivateZip(adapter, id, durationSeconds) {
         isZipAlreadyRunning = true;
       }
     } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (adapter.isDebugLogActive) {
+        (0, import_logger.writeLog)(`[ZIP] ${msg}`, "debug");
+      }
     }
   }
   const localId = id.replace(`${adapter.namespace}.`, "");

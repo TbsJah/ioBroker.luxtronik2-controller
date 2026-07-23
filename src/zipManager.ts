@@ -309,12 +309,15 @@ export async function handleActivateZip(adapter: ExtendedAdapter, id: string, du
 	} else {
 		// B) Luxtronik intern prüfen (Fallback)
 		try {
-			const internalZip = await adapter.getStateAsync(getDpPath('ZIPout' as any));
+			const internalZip = await adapter.getStateAsync(getDpPath('ZIPout'));
 			if (internalZip && (internalZip.val === 1 || internalZip.val === true)) {
 				isZipAlreadyRunning = true;
 			}
 		} catch (err) {
-			// Ignorieren, falls Wert noch nicht existiert
+			const msg = err instanceof Error ? err.message : String(err);
+			if (adapter.isDebugLogActive) {
+				writeLog(`[ZIP] ${msg}`, 'debug');
+			}
 		}
 	}
 
