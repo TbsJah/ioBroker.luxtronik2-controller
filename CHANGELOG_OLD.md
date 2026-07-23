@@ -23,6 +23,10 @@
 ### 0.1.0 (2026-07-09)
 
 - initial release
+## 0.5.2 (2026-07-15)
+
+- Resolve issues which are reported by repository checker
+
 ## 0.5.1 (2026-07-14)
 
 - Fix issue notify last error after instance restart

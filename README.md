@@ -79,8 +79,7 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
-
-### **WORK IN PROGRESS**
+### 0.6.3 (2026-07-23)
 
 Technical Changes (Under the Hood)
 
@@ -123,10 +122,6 @@ Technical Changes (Under the Hood)
 - Updates Timers Format
 - Time_WPein_akt 00:00:01 --> 00:00:00 if VD1 is false
 - Fallback if Firmware > 3 for extStateStr & StateStr
-
-### 0.5.2 (2026-07-15)
-
-- Resolve issues which are reported by repository checker
 
 ## License
 
