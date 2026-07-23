@@ -520,6 +520,15 @@ export function subscribeMotionSensors(adapter: ExtendedAdapter): void {
  * @param state - Der neue ioBroker-Zustand
  * @returns true, wenn das Event von einem Bewegungsmelder stammte (sodass onStateChange abbrechen kann)
  */
+/**
+ * Prüft bei einem StateChange, ob ein abonnierter Bewegungsmelder ausgelöst hat.
+ * Wendet die Cooldown-Logik an und triggert bei Bedarf das ZIP-Makro.
+ *
+ * @param adapter - Die erweiterte Adapter-Instanz
+ * @param id - Die ID des Datenpunkts, der sich geändert hat
+ * @param state - Der neue ioBroker-Zustand
+ * @returns true, wenn das Event von einem Bewegungsmelder stammte (sodass onStateChange abbrechen kann)
+ */
 export async function checkAndHandleMotionSensor(
 	adapter: ExtendedAdapter,
 	id: string,
@@ -527,6 +536,7 @@ export async function checkAndHandleMotionSensor(
 ): Promise<boolean> {
 	const config = adapter.config;
 
+	// Prüfen ob die Überwachung überhaupt aktiv und richtig konfiguriert ist
 	if (!config.motion_sensors_aktiv || !config.motionSensors || !Array.isArray(config.motionSensors)) {
 		return false; // Funktion ist aus, weiter in der main.ts
 	}
@@ -534,25 +544,29 @@ export async function checkAndHandleMotionSensor(
 	const matchedSensor = config.motionSensors.find((s: any) => s.oid && s.oid.trim() === id);
 
 	if (!matchedSensor) {
-		return false; // Kein Bewegungsmelder, weiter in der main.ts
+		return false; // Kein hinterlegter Bewegungsmelder, weiter in der main.ts
 	}
 
 	// Wir reagieren nur, wenn der Melder auf "true" (Bewegung) geht
 	if (state.val === true) {
-		const zipOutState = await adapter.getStateAsync(getDpPath('ZIPout'));
+		// NEU: Wir prüfen den Status unseres eigenen virtuellen Trigger-Datenpunkts anstatt ZIPout
+		const activateZipState = await adapter.getStateAsync(getDpPath('Activate_Zip'));
 
 		const now = Date.now();
-		const lastZipChange = zipOutState?.lc || 0;
+		const lastZipChange = activateZipState?.lc || 0;
+		const isCurrentlyActive = activateZipState?.val === true;
 
-		// Cooldown-Prüfung
-		if (now - lastZipChange > (config.zip_last_run_min || 600) * 1000) {
+		// NEU: Cooldown-Prüfung
+		// Wir starten ODER verlängern, wenn die ZIP GERADE LÄUFT (isCurrentlyActive)
+		// ODER wenn die eingestellte Cooldown-Sperrzeit abgelaufen ist.
+		if (isCurrentlyActive || now - lastZipChange > (config.zip_last_run_min || 600) * 1000) {
 			if (adapter.isDebugLogActive) {
 				writeLog(
-					`Motion registered at sensor '${matchedSensor.name || id}'. Launching circulation pump ZIP macro sequence.`,
+					`Motion registered at sensor '${matchedSensor.name || id}'. Launching or extending circulation pump ZIP macro sequence.`,
 					'debug',
 				);
 			}
-			// Trigger für das Activate_Zip Makro
+			// Trigger für das Activate_Zip Makro (Löst die handleActivateZip Funktion aus)
 			await adapter.setState(getDpPath('Activate_Zip'), {
 				val: true,
 				ack: false,

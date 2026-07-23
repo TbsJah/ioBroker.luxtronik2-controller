@@ -364,13 +364,14 @@ async function checkAndHandleMotionSensor(adapter, id, state) {
     return false;
   }
   if (state.val === true) {
-    const zipOutState = await adapter.getStateAsync((0, import_stateMapping.getDpPath)("ZIPout"));
+    const activateZipState = await adapter.getStateAsync((0, import_stateMapping.getDpPath)("Activate_Zip"));
     const now = Date.now();
-    const lastZipChange = (zipOutState == null ? void 0 : zipOutState.lc) || 0;
-    if (now - lastZipChange > (config.zip_last_run_min || 600) * 1e3) {
+    const lastZipChange = (activateZipState == null ? void 0 : activateZipState.lc) || 0;
+    const isCurrentlyActive = (activateZipState == null ? void 0 : activateZipState.val) === true;
+    if (isCurrentlyActive || now - lastZipChange > (config.zip_last_run_min || 600) * 1e3) {
       if (adapter.isDebugLogActive) {
         (0, import_logger.writeLog)(
-          `Motion registered at sensor '${matchedSensor.name || id}'. Launching circulation pump ZIP macro sequence.`,
+          `Motion registered at sensor '${matchedSensor.name || id}'. Launching or extending circulation pump ZIP macro sequence.`,
           "debug"
         );
       }
