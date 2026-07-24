@@ -175,14 +175,18 @@ async function updateStatusStrings(adapter, rawValues, rawParams) {
     const Au\u00DFentemperatur = (rawValues[(0, import_stateMapping.getLuxIdByKey)("temperature_outside")] || 0) / 10;
     const HeatingLimit = rawParams[(0, import_stateMapping.getLuxIdByKey)("deltaHeatingReduction")] || 0;
     const opStateHeatingVal = (_a = rawValues[(0, import_stateMapping.getLuxIdByKey)("opStateHeating")]) != null ? _a : 3;
-    const temperature_target_return = rawValues[(0, import_stateMapping.getLuxIdByKey)("temperature_target_return")] || 15;
+    const Mitteltemperatur = (rawValues[(0, import_stateMapping.getLuxIdByKey)("Mitteltemperatur")] || 15) / 10;
+    const thresholdHeatingLimit = (rawParams[(0, import_stateMapping.getLuxIdByKey)("thresholdHeatingLimit")] || 15) / 10;
+    const temperature_target_return = (rawValues[(0, import_stateMapping.getLuxIdByKey)("temperature_target_return")] || 15) / 10;
     let heatingStr = stateHeatingMap[opStateHeatingVal] || `Unknown (${opStateHeatingVal})`;
     if (opStateHeatingVal === 2) {
       heatingStr += ` (Target ${R\u00FCcklaufSollMin} \xB0C)`;
     } else if (opStateHeatingVal === 4) {
       heatingStr += ` (Target 20 \xB0C)`;
     } else if (opStateHeatingVal === 0 || opStateHeatingVal === 1) {
-      if (HeatingLimit === 1) {
+      (0, import_logger.writeLog)(`opStateHeatingVal = 0`, "info");
+      if (HeatingLimit === 0 && Mitteltemperatur > thresholdHeatingLimit) {
+        (0, import_logger.writeLog)(`HeatingLimit = true`, "info");
         const textFrost = lang === "de" ? "Frostschutz" : "Frost Protection";
         heatingStr = `${textFrost} ${temperature_target_return} \xB0C`;
       } else if (BetriebsartHeizung === 0) {

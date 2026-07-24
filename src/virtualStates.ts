@@ -281,7 +281,9 @@ export async function updateStatusStrings(
 		const Außentemperatur = (rawValues[getLuxIdByKey('temperature_outside')] || 0) / 10;
 		const HeatingLimit = rawParams[getLuxIdByKey('deltaHeatingReduction')] || 0;
 		const opStateHeatingVal = rawValues[getLuxIdByKey('opStateHeating')] ?? 3;
-		const temperature_target_return = rawValues[getLuxIdByKey('temperature_target_return')] || 15;
+		const Mitteltemperatur = (rawValues[getLuxIdByKey('Mitteltemperatur')] || 15) / 10;
+		const thresholdHeatingLimit = (rawParams[getLuxIdByKey('thresholdHeatingLimit')] || 15) / 10;
+		const temperature_target_return = (rawValues[getLuxIdByKey('temperature_target_return')] || 15) / 10;
 		let heatingStr = stateHeatingMap[opStateHeatingVal] || `Unknown (${opStateHeatingVal})`;
 
 		if (opStateHeatingVal === 2) {
@@ -289,7 +291,9 @@ export async function updateStatusStrings(
 		} else if (opStateHeatingVal === 4) {
 			heatingStr += ` (Target 20 °C)`;
 		} else if (opStateHeatingVal === 0 || opStateHeatingVal === 1) {
-			if (HeatingLimit === 1) {
+			writeLog(`opStateHeatingVal = 0`, 'info');
+			if (HeatingLimit === 0 && Mitteltemperatur > thresholdHeatingLimit) {
+				writeLog(`HeatingLimit = true`, 'info');
 				const textFrost = lang === 'de' ? 'Frostschutz' : 'Frost Protection';
 				heatingStr = `${textFrost} ${temperature_target_return} °C`;
 			} else if (BetriebsartHeizung === 0) {
