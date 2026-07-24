@@ -279,8 +279,9 @@ export async function updateStatusStrings(
 		const RücklaufSollMin = (rawParams[getLuxIdByKey('returnTemperatureTargetMin')] || 15) / 10;
 		const BetriebsartHeizung = rawParams[getLuxIdByKey('heating_operation_mode')] || 0;
 		const Außentemperatur = (rawValues[getLuxIdByKey('temperature_outside')] || 0) / 10;
-
+		const HeatingLimit = rawParams[getLuxIdByKey('deltaHeatingReduction')] || 0;
 		const opStateHeatingVal = rawValues[getLuxIdByKey('opStateHeating')] ?? 3;
+		const temperature_target_return = rawValues[getLuxIdByKey('temperature_target_return')] || 15;
 		let heatingStr = stateHeatingMap[opStateHeatingVal] || `Unknown (${opStateHeatingVal})`;
 
 		if (opStateHeatingVal === 2) {
@@ -288,7 +289,10 @@ export async function updateStatusStrings(
 		} else if (opStateHeatingVal === 4) {
 			heatingStr += ` (Target 20 °C)`;
 		} else if (opStateHeatingVal === 0 || opStateHeatingVal === 1) {
-			if (BetriebsartHeizung === 0) {
+			if (HeatingLimit === 1) {
+				const textFrost = lang === 'de' ? 'Frostschutz' : 'Frost Protection';
+				heatingStr = `${textFrost} ${temperature_target_return} °C`;
+			} else if (BetriebsartHeizung === 0) {
 				const textNormal = lang === 'de' ? 'Normal da' : 'Normal as';
 				if (AbsenkungMax <= Außentemperatur) {
 					heatingStr += ` ${Absenkung} °C`;
