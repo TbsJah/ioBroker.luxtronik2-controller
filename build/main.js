@@ -291,7 +291,7 @@ class Luxtronik2Controller extends utils.Adapter {
    * @returns A promise that resolves when the execution cycle finishes.
    */
   async runOptimizationSchedule() {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t, _u, _v;
     try {
       const config = this.config;
       const bzState = await this.getStateAsync((0, import_stateMapping.getDpPath)("WP_BZ_akt"));
@@ -367,6 +367,9 @@ class Luxtronik2Controller extends utils.Adapter {
         hupAktivState,
         heizenHystereseState,
         nachWasserState,
+        mitteltempState,
+        thresholdHeatingLimitstate,
+        heatingLimitState,
         aelterAls10
       ] = await Promise.all([
         this.getStateAsync((0, import_stateMapping.getDpPath)("Wamwassertemperatur_Soll")),
@@ -380,6 +383,9 @@ class Luxtronik2Controller extends utils.Adapter {
         this.getStateAsync((0, import_stateMapping.getDpPath)("HUPout")),
         this.getStateAsync((0, import_stateMapping.getDpPath)("returnTemperatureHysteresis")),
         this.getStateAsync((0, import_stateMapping.getDpPath)("Heizen_nach_Wasser")),
+        this.getStateAsync((0, import_stateMapping.getDpPath)("Mitteltemperatur")),
+        this.getStateAsync((0, import_stateMapping.getDpPath)("thresholdHeatingLimit")),
+        this.getStateAsync((0, import_stateMapping.getDpPath)("heatingLimit")),
         this.istBetriebszustandAelterAls10Min()
       ]);
       const wwSoll = (_i = wwSollState == null ? void 0 : wwSollState.val) != null ? _i : 0;
@@ -392,12 +398,15 @@ class Luxtronik2Controller extends utils.Adapter {
       const ruecklaufSoll = (_n = ruecklaufSollState == null ? void 0 : ruecklaufSollState.val) != null ? _n : 0;
       const hupAktiv = (_o = hupAktivState == null ? void 0 : hupAktivState.val) != null ? _o : 0;
       const heizenHysterese = (_p = heizenHystereseState == null ? void 0 : heizenHystereseState.val) != null ? _p : 0;
+      const mitteltemperatur = (_q = mitteltempState == null ? void 0 : mitteltempState.val) != null ? _q : 0;
+      const thresholdHeatingLimit = (_r = thresholdHeatingLimitstate == null ? void 0 : thresholdHeatingLimitstate.val) != null ? _r : 0;
+      const heatingLimit = (_s = heatingLimitState == null ? void 0 : heatingLimitState.val) != null ? _s : 0;
       const nachWasser = nachWasserState == null ? void 0 : nachWasserState.val;
       if (istHeizen) {
         if (config.regelung_aktiv !== false && aelterAls10 && vd1) {
-          const fusspunkt = (_q = await this.getStateAsync((0, import_stateMapping.getDpPath)("heating_curve_parallel_offset"))) == null ? void 0 : _q.val;
+          const fusspunkt = (_t = await this.getStateAsync((0, import_stateMapping.getDpPath)("heating_curve_parallel_offset"))) == null ? void 0 : _t.val;
           if (fusspunkt === 35) {
-            const fallbackFusspunkt = (_r = config.fusspunkt) != null ? _r : 21.7;
+            const fallbackFusspunkt = (_u = config.fusspunkt) != null ? _u : 21.7;
             await this.syncConfigValue("heating_curve_parallel_offset", fallbackFusspunkt);
           }
         }
@@ -430,14 +439,16 @@ class Luxtronik2Controller extends utils.Adapter {
             await this.syncConfigValue("Heizen_nach_Wasser", true);
           }
           if (wwSoll - wwIst > 2 && ruecklauf >= ruecklaufSoll + heizenHysterese - 0.1) {
-            const fallbackHyst = (_s = config.sync_hotwater_temperature_hysteresis) != null ? _s : 2;
+            const fallbackHyst = (_v = config.sync_hotwater_temperature_hysteresis) != null ? _v : 2;
             await this.syncConfigValue("hotWaterTemperatureHysteresis", fallbackHyst);
           }
         }
       }
       if (istWarmwasser && nachWasser) {
         if (config.regelung_aktiv !== false) {
-          await this.syncConfigValue("heating_curve_parallel_offset", 35);
+          if (heatingLimit === 1 && mitteltemperatur < thresholdHeatingLimit || heatingLimit === 0) {
+            await this.syncConfigValue("heating_curve_parallel_offset", 35);
+          }
         }
       }
       if (istLeerlauf) {

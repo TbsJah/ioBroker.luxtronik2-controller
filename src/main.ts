@@ -422,6 +422,9 @@ class Luxtronik2Controller extends utils.Adapter {
 				hupAktivState,
 				heizenHystereseState,
 				nachWasserState,
+				mitteltempState,
+				thresholdHeatingLimitstate,
+				heatingLimitState,
 				aelterAls10,
 			] = await Promise.all([
 				this.getStateAsync(getDpPath('Wamwassertemperatur_Soll')),
@@ -435,6 +438,9 @@ class Luxtronik2Controller extends utils.Adapter {
 				this.getStateAsync(getDpPath('HUPout')),
 				this.getStateAsync(getDpPath('returnTemperatureHysteresis')),
 				this.getStateAsync(getDpPath('Heizen_nach_Wasser')),
+				this.getStateAsync(getDpPath('Mitteltemperatur')),
+				this.getStateAsync(getDpPath('thresholdHeatingLimit')),
+				this.getStateAsync(getDpPath('heatingLimit')),
 				this.istBetriebszustandAelterAls10Min(),
 			]);
 
@@ -448,6 +454,9 @@ class Luxtronik2Controller extends utils.Adapter {
 			const ruecklaufSoll = (ruecklaufSollState?.val as number) ?? 0;
 			const hupAktiv = (hupAktivState?.val as number) ?? 0;
 			const heizenHysterese = (heizenHystereseState?.val as number) ?? 0;
+			const mitteltemperatur = (mitteltempState?.val as number) ?? 0;
+			const thresholdHeatingLimit = (thresholdHeatingLimitstate?.val as number) ?? 0;
+			const heatingLimit = (heatingLimitState?.val as number) ?? 0;
 			const nachWasser = nachWasserState?.val;
 
 			// =========================================================
@@ -501,7 +510,9 @@ class Luxtronik2Controller extends utils.Adapter {
 
 			if (istWarmwasser && nachWasser) {
 				if (config.regelung_aktiv !== false) {
-					await this.syncConfigValue('heating_curve_parallel_offset', 35);
+					if ((heatingLimit === 1 && mitteltemperatur < thresholdHeatingLimit) || heatingLimit === 0) {
+						await this.syncConfigValue('heating_curve_parallel_offset', 35);
+					}
 				}
 			}
 

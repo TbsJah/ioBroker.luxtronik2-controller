@@ -173,14 +173,24 @@ async function updateStatusStrings(adapter, rawValues, rawParams) {
     const R\u00FCcklaufSollMin = (rawParams[(0, import_stateMapping.getLuxIdByKey)("returnTemperatureTargetMin")] || 15) / 10;
     const BetriebsartHeizung = rawParams[(0, import_stateMapping.getLuxIdByKey)("heating_operation_mode")] || 0;
     const Au\u00DFentemperatur = (rawValues[(0, import_stateMapping.getLuxIdByKey)("temperature_outside")] || 0) / 10;
+    const HeatingLimit = rawParams[(0, import_stateMapping.getLuxIdByKey)("heatingLimit")] || 0;
     const opStateHeatingVal = (_a = rawValues[(0, import_stateMapping.getLuxIdByKey)("opStateHeating")]) != null ? _a : 3;
+    const Mitteltemperatur = (rawValues[(0, import_stateMapping.getLuxIdByKey)("Mitteltemperatur")] || 15) / 10;
+    const thresholdHeatingLimit = (rawParams[(0, import_stateMapping.getLuxIdByKey)("thresholdHeatingLimit")] || 15) / 10;
+    const temperature_target_return = (rawValues[(0, import_stateMapping.getLuxIdByKey)("temperature_target_return")] || 15) / 10;
     let heatingStr = stateHeatingMap[opStateHeatingVal] || `Unknown (${opStateHeatingVal})`;
     if (opStateHeatingVal === 2) {
       heatingStr += ` (Target ${R\u00FCcklaufSollMin} \xB0C)`;
     } else if (opStateHeatingVal === 4) {
       heatingStr += ` (Target 20 \xB0C)`;
     } else if (opStateHeatingVal === 0 || opStateHeatingVal === 1) {
-      if (BetriebsartHeizung === 0) {
+      if (HeatingLimit === 1 && Mitteltemperatur > thresholdHeatingLimit && Au\u00DFentemperatur < 10) {
+        const textFrost = lang === "de" ? "Frostschutz" : "Frost Protection";
+        heatingStr = `${textFrost} ${temperature_target_return} \xB0C`;
+      } else if (HeatingLimit === 1 && Mitteltemperatur > thresholdHeatingLimit && Au\u00DFentemperatur > 10) {
+        const text = lang === "de" ? "Heizgrenze" : "Heating limit";
+        heatingStr = `${text} ${temperature_target_return} \xB0C`;
+      } else if (BetriebsartHeizung === 0) {
         const textNormal = lang === "de" ? "Normal da" : "Normal as";
         if (AbsenkungMax <= Au\u00DFentemperatur) {
           heatingStr += ` ${Absenkung} \xB0C`;
