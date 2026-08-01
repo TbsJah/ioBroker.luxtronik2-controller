@@ -4,19 +4,6 @@
     "version": "0.6.4",
     "news": {
       "0.6.4": {
-        "en": "Refactoring",
-        "de": "Refactoring",
-        "ru": "Рефакторинг",
-        "pt": "Refatorização",
-        "nl": "Refactoring",
-        "fr": "Refactoration",
-        "it": "Refactoring",
-        "es": "Refactoring",
-        "pl": "Refaktoring",
-        "uk": "Рефакторинг",
-        "zh-cn": "正在重构"
-      },
-      "0.6.3": {
         "en": "Technical Changes (Under the Hood)\n\n- Separation of Concerns (zipManager):\n- Network Queue Isolation:\n- Comprehensive Code Refactoring (DRY):\n- Global Time Refactoring:\n- i18n Support for State Names:",
         "de": "Technische Änderungen (Unter der Hood)\n\n- Trennung von Anliegen (zipManager):\nNetzwerk Queue Isolation:\nUmfassendes Code Refactoring (DRY):\nGlobal Time Refactoring:\n- i18n Unterstützung für staatliche Namen:",
         "ru": "Технические изменения (под капотом)\n\nРазделение интересов (zipManager):\nИзоляция сетевых очередей:\nКомплексный рефакторинг кода (DRY):\nРефактор глобального времени:\ni18n Поддержка государственных имен:",
