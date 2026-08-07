@@ -79,8 +79,7 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
-
-### **WORK IN PROGRESS**
+### 0.6.5 (2026-08-07)
 
 - review / fix findings reported by claude based checker.
 
@@ -148,10 +147,6 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ### 0.6.1 (2026-07-17)
 
 - Implemented fallback mechanism: Index 80 lc is used if 117-120 are empty.
-
-### 0.6.0 (2026-07-16)
-
-- Added option to select the display language for state values (English/German)
 
 ## License
 

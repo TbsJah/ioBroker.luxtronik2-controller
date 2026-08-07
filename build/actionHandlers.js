@@ -36,7 +36,7 @@ const CONSTANTS = {
 async function handleZwangswarmwasser(adapter, id) {
   try {
     const localId = id.replace(`${adapter.namespace}.`, "");
-    await adapter.setStateAsync(localId, { val: false, ack: true });
+    await adapter.setState(localId, { val: false, ack: true });
     const [wwIstState, wwSollState] = await Promise.all([
       adapter.getStateAsync((0, import_stateMapping.getDpPath)("Wamwassertemperatur_Ist")),
       adapter.getStateAsync((0, import_stateMapping.getDpPath)("Wamwassertemperatur_Soll"))
