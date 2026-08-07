@@ -36,6 +36,7 @@ const CONSTANTS = {
   END_OF_DAY: 86340,
   WRITE_DELAY: 100
 };
+const LEGACY_DAYS = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
 async function safeRawWrite(adapter, key, luxId, rawValue) {
   const dpPath = (0, import_stateMapping.getDpPath)(key);
   if (!dpPath) {
@@ -53,16 +54,13 @@ async function safeRawWrite(adapter, key, luxId, rawValue) {
     }
     if (currentRaw === rawValue) {
       if (adapter.isDebugLogActive) {
-        (0, import_logger.writeLog)(
-          `[SafeWrite] Wert f\xFCr '${key}' ist bereits auf Zielwert (${rawValue}). Schreibvorgang blockiert!`,
-          "debug"
-        );
+        (0, import_logger.writeLog)(`[SafeWrite] Value for '${key}' is already at target (${rawValue}). Write blocked!`, "debug");
       }
       return;
     }
   }
   if (adapter.isDebugLogActive) {
-    (0, import_logger.writeLog)(`[SafeWrite] \xC4nderung erkannt. Schreibe ${rawValue} in Register ${luxId} (${key})...`, "debug");
+    (0, import_logger.writeLog)(`[SafeWrite] Change detected. Writing ${rawValue} to register ${luxId} (${key})...`, "debug");
   }
   await (0, import_rawFunctions.queueWrite)(adapter, luxId, rawValue);
   await new Promise((resolve) => {
@@ -93,8 +91,7 @@ async function isZipAllowedBySchedule(adapter) {
       prefix = day >= 1 && day <= 5 ? "Zirkulation_MoFr" : "Zirkulation_SaSo";
       endSuffix = "Ende";
     } else if (tableMode === 2) {
-      const days = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
-      prefix = `Zirkulation_${days[day]}`;
+      prefix = `Zirkulation_${LEGACY_DAYS[day]}`;
       endSuffix = "Ende";
     }
     let isAllowed = false;
@@ -122,7 +119,7 @@ async function isZipAllowedBySchedule(adapter) {
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     if (adapter.isDebugLogActive) {
-      (0, import_logger.writeLog)(`[ZIP] Fehler bei der Zeitplan-Pr\xFCfung: ${msg}`, "error");
+      (0, import_logger.writeLog)(`[ZIP] Error during schedule check: ${msg}`, "error");
     }
     return true;
   }
@@ -172,11 +169,11 @@ async function stopZipAndDeaeration(adapter) {
         await adapter.setForeignStateAsync(actor.zip_external_relay_id, false, false);
       }
       if (adapter.isDebugLogActive) {
-        (0, import_logger.writeLog)(`[ZIP] Not-Aus f\xFCr externe Relais gesendet.`, "debug");
+        (0, import_logger.writeLog)(`[ZIP] Emergency stop sent for external relays.`, "debug");
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      (0, import_logger.writeLog)(`[ZIP] Fehler beim Ausschalten der externen Relais: ${msg}`, "error");
+      (0, import_logger.writeLog)(`[ZIP] Error switching off external relays: ${msg}`, "error");
     }
   }
   try {
@@ -226,7 +223,7 @@ async function handleActivateZip(adapter, id, durationSeconds) {
         const msg = err instanceof Error ? err.message : String(err);
         if (adapter.isDebugLogActive) {
           (0, import_logger.writeLog)(
-            `[ZIP] Konnte Status des externen Relais ${actor.zip_external_relay_id} nicht lesen: ${msg}`,
+            `[ZIP] Could not read status of external relay ${actor.zip_external_relay_id}: ${msg}`,
             "debug"
           );
         }
@@ -254,7 +251,7 @@ async function handleActivateZip(adapter, id, durationSeconds) {
   const safeDurationSeconds = Math.max(1, isNaN(durationSeconds) ? 60 : durationSeconds);
   if (isZipAlreadyRunning) {
     if (adapter.isDebugLogActive) {
-      (0, import_logger.writeLog)("[ZIP] Pumpe l\xE4uft bereits. Verl\xE4ngere Timer.", "debug");
+      (0, import_logger.writeLog)("[ZIP] Pump is already running. Extending timer.", "debug");
     }
     if (adapter.zipTimer) {
       adapter.clearTimeout(adapter.zipTimer);
@@ -266,7 +263,7 @@ async function handleActivateZip(adapter, id, durationSeconds) {
             await adapter.setForeignStateAsync(actor.zip_external_relay_id, false, false);
           } catch (err) {
             const msg = err instanceof Error ? err.message : String(err);
-            (0, import_logger.writeLog)(`[ZIP] Fehler beim Ausschalten des Relais: ${msg}`, "error");
+            (0, import_logger.writeLog)(`[ZIP] Error switching off relay: ${msg}`, "error");
           }
         }
         await adapter.setState(localId, { val: false, ack: true });
@@ -278,14 +275,14 @@ async function handleActivateZip(adapter, id, durationSeconds) {
   }
   if (validActors.length > 0) {
     if (adapter.isDebugLogActive) {
-      (0, import_logger.writeLog)(`[ZIP] Schalte ${validActors.length} externe(n) Aktor(en) EIN`, "debug");
+      (0, import_logger.writeLog)(`[ZIP] Switching ON ${validActors.length} external actor(s)`, "debug");
     }
     for (const actor of validActors) {
       try {
         await adapter.setForeignStateAsync(actor.zip_external_relay_id, true, false);
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
-        (0, import_logger.writeLog)(`[ZIP] Fehler beim Einschalten von ${actor.zip_external_relay_id}: ${msg}`, "error");
+        (0, import_logger.writeLog)(`[ZIP] Error switching on ${actor.zip_external_relay_id}: ${msg}`, "error");
       }
     }
     if (adapter.zipTimer) {
@@ -297,12 +294,12 @@ async function handleActivateZip(adapter, id, durationSeconds) {
           await adapter.setForeignStateAsync(actor.zip_external_relay_id, false, false);
         } catch (err) {
           const msg = err instanceof Error ? err.message : String(err);
-          (0, import_logger.writeLog)(`[ZIP] Fehler beim Ausschalten von ${actor.zip_external_relay_id}: ${msg}`, "error");
+          (0, import_logger.writeLog)(`[ZIP] Error switching off ${actor.zip_external_relay_id}: ${msg}`, "error");
         }
       }
       await adapter.setState(localId, { val: false, ack: true });
       if (adapter.isDebugLogActive) {
-        (0, import_logger.writeLog)(`[ZIP] Zeit abgelaufen. Externe Relais AUS.`, "debug");
+        (0, import_logger.writeLog)(`[ZIP] Timeout. External relays OFF.`, "debug");
       }
     }, safeDurationSeconds * 1e3);
     return;
@@ -399,6 +396,9 @@ async function checkAndHandleMotionSensor(adapter, id, state) {
     return false;
   }
   if (state.val === true) {
+    if (!state.ack) {
+      return false;
+    }
     const isAllowedBySchedule = await isZipAllowedBySchedule(adapter);
     if (!isAllowedBySchedule) {
       if (adapter.isDebugLogActive) {

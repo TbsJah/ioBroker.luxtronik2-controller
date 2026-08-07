@@ -15,6 +15,15 @@ const CONSTANTS = {
 };
 
 // =========================================================
+// LEGACY STATE ID MAPPINGS
+// =========================================================
+// Note: The following array uses German words because they must perfectly match
+// the historically grown state IDs in STATE_MAPPING.
+// If the state IDs are ever renamed to English in a future version,
+// this lookup mapping needs to be updated accordingly.
+const LEGACY_DAYS = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+
+// =========================================================
 // TYPES & INTERFACES
 // =========================================================
 
@@ -72,17 +81,14 @@ async function safeRawWrite(
 
 		if (currentRaw === rawValue) {
 			if (adapter.isDebugLogActive) {
-				writeLog(
-					`[SafeWrite] Wert für '${key}' ist bereits auf Zielwert (${rawValue}). Schreibvorgang blockiert!`,
-					'debug',
-				);
+				writeLog(`[SafeWrite] Value for '${key}' is already at target (${rawValue}). Write blocked!`, 'debug');
 			}
 			return;
 		}
 	}
 
 	if (adapter.isDebugLogActive) {
-		writeLog(`[SafeWrite] Änderung erkannt. Schreibe ${rawValue} in Register ${luxId} (${key})...`, 'debug');
+		writeLog(`[SafeWrite] Change detected. Writing ${rawValue} to register ${luxId} (${key})...`, 'debug');
 	}
 	await queueWrite(adapter, luxId, rawValue);
 
@@ -100,14 +106,14 @@ function clearZipTimer(adapter: ExtendedAdapter): void {
 }
 
 /**
- * Prüft dynamisch, ob die aktuelle Uhrzeit laut den Luxtronik-Zeitplänen für die Zirkulation freigegeben ist.
+ * Dynamically checks whether the current time is enabled for circulation according to the Luxtronik schedules.
  *
- * @param adapter - Instanz des Adapters, verwendet zum Lesen von States und Konfigurationen
+ * @param adapter - Instance of the adapter, used for reading states and configurations
  */
 async function isZipAllowedBySchedule(adapter: ExtendedAdapter): Promise<boolean> {
 	const config = adapter.config;
 
-	// Wenn Hardware-Timer deaktivert sind -> Dauerfreigabe
+	// If hardware timers are disabled -> permanent release
 	if (config.zip_hardware_timer_disable === true) {
 		return true;
 	}
@@ -124,13 +130,12 @@ async function isZipAllowedBySchedule(adapter: ExtendedAdapter): Promise<boolean
 		let endSuffix = 'End';
 
 		if (tableMode === 1) {
-			// 5+2
+			// 5+2 (Mon-Fri / Sat-Sun)
 			prefix = day >= 1 && day <= 5 ? 'Zirkulation_MoFr' : 'Zirkulation_SaSo';
 			endSuffix = 'Ende';
 		} else if (tableMode === 2) {
-			// Einzeltage
-			const days = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
-			prefix = `Zirkulation_${days[day]}`;
+			// Single days
+			prefix = `Zirkulation_${LEGACY_DAYS[day]}`;
 			endSuffix = 'Ende';
 		}
 
@@ -150,7 +155,7 @@ async function isZipAllowedBySchedule(adapter: ExtendedAdapter): Promise<boolean
 				if (startSec !== endSec) {
 					let actualEndSec = endSec;
 					if (endSec === 0 && startSec > 0) {
-						actualEndSec = 86400; // Mitternacht
+						actualEndSec = 86400; // Midnight
 					}
 					if (currentSeconds >= startSec && currentSeconds <= actualEndSec) {
 						isAllowed = true;
@@ -163,9 +168,9 @@ async function isZipAllowedBySchedule(adapter: ExtendedAdapter): Promise<boolean
 	} catch (err: unknown) {
 		const msg = err instanceof Error ? err.message : String(err);
 		if (adapter.isDebugLogActive) {
-			writeLog(`[ZIP] Fehler bei der Zeitplan-Prüfung: ${msg}`, 'error');
+			writeLog(`[ZIP] Error during schedule check: ${msg}`, 'error');
 		}
-		return true; // Fallback: Erlauben, damit es im Fehlerfall warm bleibt
+		return true; // Fallback: Allow circulation so it stays warm in case of errors
 	}
 }
 
@@ -239,11 +244,11 @@ export async function stopZipAndDeaeration(adapter: ExtendedAdapter): Promise<vo
 				await adapter.setForeignStateAsync(actor.zip_external_relay_id, false, false);
 			}
 			if (adapter.isDebugLogActive) {
-				writeLog(`[ZIP] Not-Aus für externe Relais gesendet.`, 'debug');
+				writeLog(`[ZIP] Emergency stop sent for external relays.`, 'debug');
 			}
 		} catch (err: unknown) {
 			const msg = err instanceof Error ? err.message : String(err);
-			writeLog(`[ZIP] Fehler beim Ausschalten der externen Relais: ${msg}`, 'error');
+			writeLog(`[ZIP] Error switching off external relays: ${msg}`, 'error');
 		}
 	}
 
@@ -311,7 +316,7 @@ export async function handleActivateZip(adapter: ExtendedAdapter, id: string, du
 				const msg = err instanceof Error ? err.message : String(err);
 				if (adapter.isDebugLogActive) {
 					writeLog(
-						`[ZIP] Konnte Status des externen Relais ${actor.zip_external_relay_id} nicht lesen: ${msg}`,
+						`[ZIP] Could not read status of external relay ${actor.zip_external_relay_id}: ${msg}`,
 						'debug',
 					);
 				}
@@ -343,7 +348,7 @@ export async function handleActivateZip(adapter: ExtendedAdapter, id: string, du
 
 	if (isZipAlreadyRunning) {
 		if (adapter.isDebugLogActive) {
-			writeLog('[ZIP] Pumpe läuft bereits. Verlängere Timer.', 'debug');
+			writeLog('[ZIP] Pump is already running. Extending timer.', 'debug');
 		}
 
 		if (adapter.zipTimer) {
@@ -357,7 +362,7 @@ export async function handleActivateZip(adapter: ExtendedAdapter, id: string, du
 						await adapter.setForeignStateAsync(actor.zip_external_relay_id, false, false);
 					} catch (err) {
 						const msg = err instanceof Error ? err.message : String(err);
-						writeLog(`[ZIP] Fehler beim Ausschalten des Relais: ${msg}`, 'error');
+						writeLog(`[ZIP] Error switching off relay: ${msg}`, 'error');
 					}
 				}
 				await adapter.setState(localId, { val: false, ack: true }); // Reset Button
@@ -371,7 +376,7 @@ export async function handleActivateZip(adapter: ExtendedAdapter, id: string, du
 
 	if (validActors.length > 0) {
 		if (adapter.isDebugLogActive) {
-			writeLog(`[ZIP] Schalte ${validActors.length} externe(n) Aktor(en) EIN`, 'debug');
+			writeLog(`[ZIP] Switching ON ${validActors.length} external actor(s)`, 'debug');
 		}
 
 		for (const actor of validActors) {
@@ -379,7 +384,7 @@ export async function handleActivateZip(adapter: ExtendedAdapter, id: string, du
 				await adapter.setForeignStateAsync(actor.zip_external_relay_id, true, false);
 			} catch (err) {
 				const msg = err instanceof Error ? err.message : String(err);
-				writeLog(`[ZIP] Fehler beim Einschalten von ${actor.zip_external_relay_id}: ${msg}`, 'error');
+				writeLog(`[ZIP] Error switching on ${actor.zip_external_relay_id}: ${msg}`, 'error');
 			}
 		}
 
@@ -393,12 +398,12 @@ export async function handleActivateZip(adapter: ExtendedAdapter, id: string, du
 					await adapter.setForeignStateAsync(actor.zip_external_relay_id, false, false);
 				} catch (err) {
 					const msg = err instanceof Error ? err.message : String(err);
-					writeLog(`[ZIP] Fehler beim Ausschalten von ${actor.zip_external_relay_id}: ${msg}`, 'error');
+					writeLog(`[ZIP] Error switching off ${actor.zip_external_relay_id}: ${msg}`, 'error');
 				}
 			}
 			await adapter.setState(localId, { val: false, ack: true }); // Reset Button
 			if (adapter.isDebugLogActive) {
-				writeLog(`[ZIP] Zeit abgelaufen. Externe Relais AUS.`, 'debug');
+				writeLog(`[ZIP] Timeout. External relays OFF.`, 'debug');
 			}
 		}, safeDurationSeconds * 1000);
 
@@ -473,7 +478,7 @@ export async function handleActivateZip(adapter: ExtendedAdapter, id: string, du
 			{ key: 'WW_MoSo_End2', raw: 0 },
 			{ key: 'hotWaterCircPumpOnTime', raw: onTimeMinutes },
 			{ key: 'hotWaterCircPumpOffTime', raw: 60 },
-		];
+		] as const;
 
 		for (const u of updates) {
 			const def = STATE_MAPPING[u.key];
@@ -534,6 +539,9 @@ export async function checkAndHandleMotionSensor(
 	}
 
 	if (state.val === true) {
+		if (!state.ack) {
+			return false; // Prevent processing unacknowledged state changes
+		}
 		const isAllowedBySchedule = await isZipAllowedBySchedule(adapter);
 
 		if (!isAllowedBySchedule) {
@@ -608,7 +616,7 @@ export async function disableHardwareZipTimer(adapter: ExtendedAdapter): Promise
 				{ key: 'Zirkulation_MoSo_End4', id: 514 },
 				{ key: 'Zirkulation_MoSo_Start5', id: 515 },
 				{ key: 'Zirkulation_MoSo_End5', id: 516 },
-			];
+			] as const;
 
 			for (const t of timeIds) {
 				await safeRawWrite(adapter, t.key, t.id, 0);

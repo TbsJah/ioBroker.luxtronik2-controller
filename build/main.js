@@ -118,7 +118,6 @@ class Luxtronik2Controller extends utils.Adapter {
     if (this.isDebugLogActive) {
       (0, import_logger.writeLog)("Synchronizing configuration values with the heat pump...", "info");
     }
-    await this.setIdleDefaults();
     await (0, import_zipManager.disableHardwareZipTimer)(this);
     const cycleTodayState = await this.getStateAsync((0, import_stateMapping.getDpPath)("write_cycles_today"));
     this.writeCyclesToday = cycleTodayState && typeof cycleTodayState.val === "number" ? cycleTodayState.val : 0;

@@ -133,7 +133,6 @@ class Luxtronik2Controller extends utils.Adapter {
 		if (this.isDebugLogActive) {
 			writeLog('Synchronizing configuration values with the heat pump...', 'info');
 		}
-		await this.setIdleDefaults();
 		await disableHardwareZipTimer(this);
 		// Schreib-Zähler aus ioBroker laden (sichert den Stand bei einem Adapter-Neustart)
 		const cycleTodayState = await this.getStateAsync(getDpPath('write_cycles_today'));

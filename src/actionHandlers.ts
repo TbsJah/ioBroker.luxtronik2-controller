@@ -37,7 +37,7 @@ const CONSTANTS = {
 export async function handleZwangswarmwasser(adapter: ActionAdapter, id: string): Promise<void> {
 	try {
 		const localId = id.replace(`${adapter.namespace}.`, '');
-		await adapter.setStateAsync(localId, { val: false, ack: true });
+		await adapter.setState(localId, { val: false, ack: true });
 
 		const [wwIstState, wwSollState] = await Promise.all([
 			adapter.getStateAsync(getDpPath('Wamwassertemperatur_Ist')),
@@ -75,7 +75,7 @@ export async function handleZwangswarmwasser(adapter: ActionAdapter, id: string)
 export async function handleZwangsheizen(adapter: ActionAdapter, id: string): Promise<void> {
 	try {
 		const localId = id.replace(`${adapter.namespace}.`, '');
-		await adapter.setStateAsync(localId, { val: false, ack: true });
+		await adapter.setState(localId, { val: false, ack: true });
 
 		const [bzState, ruecklaufState, ruecklaufSollState, hystereseState] = await Promise.all([
 			adapter.getStateAsync(getDpPath('WP_BZ_akt')),

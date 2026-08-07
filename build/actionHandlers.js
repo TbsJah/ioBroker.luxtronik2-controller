@@ -63,7 +63,7 @@ async function handleZwangswarmwasser(adapter, id) {
 async function handleZwangsheizen(adapter, id) {
   try {
     const localId = id.replace(`${adapter.namespace}.`, "");
-    await adapter.setStateAsync(localId, { val: false, ack: true });
+    await adapter.setState(localId, { val: false, ack: true });
     const [bzState, ruecklaufState, ruecklaufSollState, hystereseState] = await Promise.all([
       adapter.getStateAsync((0, import_stateMapping.getDpPath)("WP_BZ_akt")),
       adapter.getStateAsync((0, import_stateMapping.getDpPath)("temperature_return")),

@@ -287,10 +287,7 @@ const STATE_MAPPING = {
   },
   flow_rate_heat_source: {
     folder: "Information.02_Inputs",
-    name: {
-      en: "Flow rate heat source (WQ)",
-      de: "Durchfluss W\xE4rmequelle (WQ)"
-    },
+    name: "Flow rate heat source (WQ)",
     role: "value",
     type: "number",
     unit: "l/h",
@@ -1070,10 +1067,7 @@ const STATE_MAPPING = {
   },
   write_cycles_today: {
     folder: "Information.12_SystemInfo",
-    name: {
-      en: "Write cycles to flash memory (today)",
-      de: "Schreibvorg\xE4nge auf Flash-Speicher (heute)"
-    },
+    name: "Write cycles to flash memory (today)",
     role: "value",
     type: "number",
     isVirtual: true,
@@ -1083,10 +1077,7 @@ const STATE_MAPPING = {
   },
   write_cycles_total: {
     folder: "Information.12_SystemInfo",
-    name: {
-      en: "Write cycles to flash memory (total)",
-      de: "Schreibvorg\xE4nge auf Flash-Speicher (gesamt)"
-    },
+    name: "Write cycles to flash memory (total)",
     role: "value",
     type: "number",
     isVirtual: true,
@@ -1126,7 +1117,7 @@ const STATE_MAPPING = {
   ID_WEB_FreigabKuehl: {
     folder: "Information.13_Cooling",
     name: "Cooling release",
-    role: "switch",
+    role: "sensor.switch",
     type: "boolean",
     write: false,
     luxWriteId: "146",
@@ -1179,7 +1170,7 @@ const STATE_MAPPING = {
   cooling_inlet_temp: {
     folder: "Information.13_Cooling",
     name: "Cooling inlet temperature",
-    role: "level.temperature",
+    role: "value.temperature",
     type: "number",
     unit: "\xB0C",
     write: false,
@@ -1211,10 +1202,7 @@ const STATE_MAPPING = {
   },
   flow_rate_cooling: {
     folder: "Information.13_Cooling",
-    name: {
-      en: "Flow rate cooling",
-      de: "Durchflussmenge K\xFChlung"
-    },
+    name: "Flow rate cooling",
     role: "value",
     type: "number",
     unit: "l/h",

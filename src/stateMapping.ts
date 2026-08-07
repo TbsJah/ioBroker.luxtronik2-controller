@@ -305,10 +305,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 	},
 	flow_rate_heat_source: {
 		folder: 'Information.02_Inputs',
-		name: {
-			en: 'Flow rate heat source (WQ)',
-			de: 'Durchfluss Wärmequelle (WQ)',
-		},
+		name: 'Flow rate heat source (WQ)',
 		role: 'value',
 		type: 'number',
 		unit: 'l/h',
@@ -1097,10 +1094,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 	},
 	write_cycles_today: {
 		folder: 'Information.12_SystemInfo',
-		name: {
-			en: 'Write cycles to flash memory (today)',
-			de: 'Schreibvorgänge auf Flash-Speicher (heute)',
-		},
+		name: 'Write cycles to flash memory (today)',
 		role: 'value',
 		type: 'number',
 		isVirtual: true,
@@ -1110,10 +1104,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 	},
 	write_cycles_total: {
 		folder: 'Information.12_SystemInfo',
-		name: {
-			en: 'Write cycles to flash memory (total)',
-			de: 'Schreibvorgänge auf Flash-Speicher (gesamt)',
-		},
+		name: 'Write cycles to flash memory (total)',
 		role: 'value',
 		type: 'number',
 		isVirtual: true,
@@ -1153,7 +1144,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 	ID_WEB_FreigabKuehl: {
 		folder: 'Information.13_Cooling',
 		name: 'Cooling release',
-		role: 'switch',
+		role: 'sensor.switch',
 		type: 'boolean',
 		write: false,
 		luxWriteId: '146',
@@ -1206,7 +1197,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 	cooling_inlet_temp: {
 		folder: 'Information.13_Cooling',
 		name: 'Cooling inlet temperature',
-		role: 'level.temperature',
+		role: 'value.temperature',
 		type: 'number',
 		unit: '°C',
 		write: false,
@@ -1238,10 +1229,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 	},
 	flow_rate_cooling: {
 		folder: 'Information.13_Cooling',
-		name: {
-			en: 'Flow rate cooling',
-			de: 'Durchflussmenge Kühlung',
-		},
+		name: 'Flow rate cooling',
 		role: 'value',
 		type: 'number',
 		unit: 'l/h',
