@@ -1131,7 +1131,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 	cooling_status: {
 		folder: 'Information.13_Cooling',
 		name: 'Cooling status',
-		role: 'level.mode.thermostat',
+		role: 'value',
 		type: 'number',
 		write: false,
 		luxWriteId: '6',
@@ -1160,7 +1160,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 	cooling_configured: {
 		folder: 'Information.13_Cooling',
 		name: 'Cooling configured',
-		role: 'level.mode.thermostat',
+		role: 'value',
 		type: 'number',
 		write: false,
 		luxWriteId: '205',
@@ -1173,7 +1173,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 	cooling_release: {
 		folder: 'Information.13_Cooling',
 		name: 'Cooling release',
-		role: 'level.mode.thermostat',
+		role: 'value',
 		type: 'number',
 		write: false,
 		luxWriteId: '207',
