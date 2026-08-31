@@ -1291,7 +1291,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: 'number',
 		unit: '°C',
 		write: true,
-		min: 20,
+		min: 15,
 		max: 45,
 		luxWriteId: '12',
 		factor: 10,
@@ -1580,7 +1580,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		required: true,
 		max: 10,
-		min: -20,
+		min: -25,
 		write: true,
 	},
 	temperature_ZWE_possible: {

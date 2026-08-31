@@ -134,7 +134,7 @@
 						"en": "Combines heating and hot water cycles to minimize compressor starts",
 						"de": "Kombiniert Heiz- und Warmwassertakte zur Minimierung der Verdichterstarts"
 					},
-					"default": true,
+					"default": false,
 					"xs": 12,
 					"sm": 6,
 					"md": 4,
