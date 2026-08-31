@@ -1104,7 +1104,7 @@ const STATE_MAPPING = {
   cooling_status: {
     folder: "Information.13_Cooling",
     name: "Cooling status",
-    role: "level.mode.thermostat",
+    role: "value",
     type: "number",
     write: false,
     luxWriteId: "6",
@@ -1133,7 +1133,7 @@ const STATE_MAPPING = {
   cooling_configured: {
     folder: "Information.13_Cooling",
     name: "Cooling configured",
-    role: "level.mode.thermostat",
+    role: "value",
     type: "number",
     write: false,
     luxWriteId: "205",
@@ -1146,7 +1146,7 @@ const STATE_MAPPING = {
   cooling_release: {
     folder: "Information.13_Cooling",
     name: "Cooling release",
-    role: "level.mode.thermostat",
+    role: "value",
     type: "number",
     write: false,
     luxWriteId: "207",
@@ -1263,7 +1263,7 @@ const STATE_MAPPING = {
     type: "number",
     unit: "\xB0C",
     write: true,
-    min: 20,
+    min: 15,
     max: 45,
     luxWriteId: "12",
     factor: 10,
@@ -1548,7 +1548,7 @@ const STATE_MAPPING = {
     dataSource: "raw_parameter",
     required: true,
     max: 10,
-    min: -20,
+    min: -25,
     write: true
   },
   temperature_ZWE_possible: {

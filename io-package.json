@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "luxtronik2-controller",
-    "version": "0.6.5",
+    "version": "0.6.6",
     "news": {
+      "0.6.6": {
+        "en": "review / fix findings reported by claude based checker.\nExtended minimum limit for `temperature_outdoor_min` from -20°C to -25°C\nLowered minimum allowed value for `heating_curve_parallel_offset` (base point) from 20°C to 15°C\nDisabled dynamic cycle optimization / regulation by default on initial start",
+        "de": "Überprüfung/Korrektur der vom Claude-basierten Prüfprogramm gemeldeten Fehler.\nErweiterter Mindestwert für `temperature_outdoor_min` von -20°C auf -25°C\nDer minimal zulässige Wert für `heating_curve_parallel_offset` (Basispunkt) wurde von 20 °C auf 15 °C gesenkt.\nDie dynamische Zyklusoptimierung/-regelung ist beim ersten Start standardmäßig deaktiviert.",
+        "ru": "Проверка/исправление ошибок, выявленных инструментом проверки на основе Claude.\nРасширен минимальный предел для параметра `temperature_outdoor_min` с -20°C до -25°C.\nСнижено минимально допустимое значение параметра `heating_curve_parallel_offset` (базовая точка) с 20°C до 15°C.\nПо умолчанию при первом запуске динамическая оптимизация/регулирование цикла отключены.",
+        "pt": "Revisar/corrigir as constatações relatadas pelo verificador baseado em Claude.\nLimite mínimo estendido para `temperature_outdoor_min` de -20°C para -25°C\nValor mínimo permitido reduzido para `heating_curve_parallel_offset` (ponto base) de 20°C para 15°C.\nA otimização/regulação dinâmica do ciclo está desativada por padrão na inicialização.",
+        "nl": "Controleer/corrigeer de bevindingen die door de Claude-gebaseerde checker zijn gerapporteerd.\nDe minimumgrens voor `temperature_outdoor_min` is verhoogd van -20°C naar -25°C.\nDe minimaal toegestane waarde voor `heating_curve_parallel_offset` (basispunt) is verlaagd van 20°C naar 15°C.\nDynamische cyclusoptimalisatie/regeling is standaard uitgeschakeld bij de eerste opstart.",
+        "fr": "Examiner/corriger les résultats signalés par le vérificateur basé sur Claude.\nLimite minimale étendue pour `temperature_outdoor_min` de -20°C à -25°C\nValeur minimale autorisée abaissée pour `heating_curve_parallel_offset` (point de base) de 20 °C à 15 °C\nOptimisation/régulation dynamique du cycle désactivée par défaut au démarrage initial",
+        "it": "Rivedere/correggere i problemi segnalati dal sistema di controllo basato su Claude.\nLimite minimo esteso per `tempature_outdoor_min` da -20°C a -25°C\nValore minimo consentito ridotto per `heating_curve_parallel_offset` (punto base) da 20 °C a 15 °C\nOttimizzazione/regolazione dinamica del ciclo disabilitata di default all'avvio iniziale.",
+        "es": "Revisar/corregir los hallazgos reportados por el verificador basado en Claude.\nSe amplía el límite mínimo para `temperature_outdoor_min` de -20 °C a -25 °C.\nSe ha reducido el valor mínimo permitido para `heating_curve_parallel_offset` (punto base) de 20 °C a 15 °C.\nOptimización/regulación dinámica del ciclo desactivada por defecto en el inicio inicial.",
+        "pl": "przejrzyj/popraw ustalenia zgłoszone przez moduł sprawdzający Claude.\nRozszerzono minimalny limit dla `temperature_outdoor_min` z -20°C do -25°C\nObniżono minimalną dopuszczalną wartość dla `heating_curve_parallel_offset` (punkt bazowy) z 20°C do 15°C\nDomyślnie wyłączona optymalizacja/regulacja cyklu dynamicznego przy pierwszym uruchomieniu",
+        "uk": "переглянути/виправити недоліки, отримані за допомогою перевірки на основі Клода.\nРозширено мінімальну межу для `temperature_outdoor_min` з -20°C до -25°C\nЗнижено мінімально допустиме значення для `heating_curve_parallel_offset` (базова точка) з 20°C до 15°C\nДинамічна оптимізація/регулювання циклу вимкнена за замовчуванням під час першого запуску",
+        "zh-cn": "审核/修复 Claude 检测器报告的问题。\n`temperature_outdoor_min` 的最低温度限制从 -20°C 扩展至 -25°C\n将 `heating_curve_parallel_offset`（基点）的最小允许值从 20°C 降低至 15°C\n初始启动时默认禁用动态循环优化/调节"
+      },
       "0.6.5": {
         "en": "review / fix findings reported by claude based checker.",
         "de": "überprüfung / behebung von ergebnissen, die von claude-basiertem checker gemeldet wurden.",
@@ -80,19 +93,6 @@
         "pl": "Rozwiąż problemy zgłoszone przez moduł sprawdzający repozytorium\nAktualizuje format timerów\nTime_WPein_akt 00:00:01 --> 00:00:00 jeśli VD1 jest fałszywe\nPowrót do poprzedniego stanu, jeśli oprogramowanie układowe > 3 dla extStateStr i StateStr",
         "uk": "Вирішення проблем, про які повідомляє перевірник репозиторію\nФормат таймерів оновлень\nTime_WPein_akt 00:00:01 --> 00:00:00, якщо VD1 хибне\nРезервний варіант, якщо прошивка > 3 для extStateStr та StateStr",
         "zh-cn": "解决存储库检查器报告的问题\n更新计时器格式\nTime_WPein_akt 00:00:01 --> 00:00:00 如果 VD1 为 false\n如果固件版本大于 3，则 extStateStr 和 StateStr 将回退。"
-      },
-      "0.5.2": {
-        "en": "Resolve issues which are reported by repository checker",
-        "de": "Beheben Sie die vom Repository-Prüfer gemeldeten Probleme.",
-        "ru": "Устранить проблемы, о которых сообщает средство проверки репозитория.",
-        "pt": "Resolver problemas relatados pelo verificador de repositório.",
-        "nl": "Los problemen op die door de repositorychecker worden gemeld.",
-        "fr": "Résoudre les problèmes signalés par le vérificateur de dépôt",
-        "it": "Risolvere i problemi segnalati dal controllore del repository.",
-        "es": "Resuelva los problemas que reporte el verificador del repositorio.",
-        "pl": "Rozwiąż problemy zgłoszone przez moduł sprawdzający repozytorium",
-        "uk": "Вирішення проблем, про які повідомляє перевірник репозиторію",
-        "zh-cn": "解决存储库检查器报告的问题"
       }
     },
     "titleLang": {

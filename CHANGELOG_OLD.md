@@ -23,6 +23,10 @@
 ### 0.1.0 (2026-07-09)
 
 - initial release
+## 0.6.1 (2026-07-17)
+
+- Implemented fallback mechanism: Index 80 lc is used if 117-120 are empty.
+
 ## 0.6.0 (2026-07-16)
 
 - Added option to select the display language for state values (English/German)
