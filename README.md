@@ -79,8 +79,7 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
-
-### **WORK IN PROGRESS**
+### 0.7.0 (2026-09-04)
 
 **Features & Changes**
 
@@ -145,25 +144,6 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 - **Comprehensive Code Refactoring (DRY):** Created dedicated `convert.ts` and `utils.ts` modules to centralize time string formatting (`timeStringToSeconds`, `formatTimerSecondsToTime`) and generic helper functions (`getNumber`, `delay`).
 - **Global Time Refactoring:** Centralized the duration and time calculation for status texts in the `updateStatusStrings` function.
 - **i18n Support for State Names:** Updated the internal state definition (`name: string | { en: string; de?: string }`) to fully support translation objects, allowing natively translated datapoint names in the ioBroker object tree.
-
-### 0.6.2 (2026-07-17)
-
-**Added**
-
-- Bilingual support (i18n): Full support for English and German (adapter settings, state names, dropdown menus, and dynamic status texts).
-- Language selection: Added a new dropdown menu in the adapter settings to freely choose the preferred output language for the ioBroker object tree.
-- Firmware 3.x compatibility: Implemented an intelligent fallback system that dynamically calculates the status texts (heatpump_state_string) and runtime (heatpump_duration) from the main operating state. This is required because modern Luxtronik controllers no longer transmit the old LCD text lines.
-
-**Fixed**
-
-- Incorrect heating state (Frost protection): Fixed an issue where a switched-off heating system was incorrectly displayed as "Frost protection". The code now evaluates the correct index for the heating operating state (opStateHeating / 125) instead of incorrectly calculating it via the parameter.
-- Timer display: Restored the clean HH:MM:SS formatting in the ioBroker UI without the annoying "s" (seconds) by introducing an internal isDurationFormat flag.
-- Timer glitch fixed: When the compressor is idle, 00:00:01 (1 second) was often incorrectly displayed. This is now cleanly filtered to 00:00:00.
-- ioBroker Repo-Checker warnings: Added the missing write: true property to the timer table selection states (role: "level") to fix the E1011 error.
-
-**Technical**
-
-- Fixed ESLint warnings (dot-notation) for object properties.
 
 ## License
 
