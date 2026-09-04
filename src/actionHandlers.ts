@@ -20,8 +20,6 @@ const CONSTANTS = {
 	STATE_IDLE: 5,
 	/** Befehlswert für den Fußpunkt beim Zwangsheizen */
 	FORCE_HEATING_OFFSET: 35,
-	/** Temporäre Hysterese für die Zwangswarmwasserbereitung */
-	FORCE_WW_HYSTERESIS: 1,
 };
 
 // =========================================================
@@ -29,7 +27,7 @@ const CONSTANTS = {
 // =========================================================
 
 /**
- * Erzwingt die Warmwasserbereitung durch temporäre Manipulation der Hysterese.
+ * Erzwingt die Warmwasserbereitung durch temporäre Erhöhung des Sollwerts.
  *
  * @param adapter Die Instanz des ioBroker-Adapters.
  * @param id Die ID des auslösenden Datenpunkts.
@@ -39,13 +37,16 @@ export async function handleZwangswarmwasser(adapter: ActionAdapter, id: string)
 		const localId = id.replace(`${adapter.namespace}.`, '');
 		await adapter.setState(localId, { val: false, ack: true });
 
-		const [wwIstState, wwSollState] = await Promise.all([
+		// Hysterese zusätzlich auslesen, um den perfekten Zielwert zu berechnen
+		const [wwIstState, wwSollState, wwHystereseState] = await Promise.all([
 			adapter.getStateAsync(getDpPath('Wamwassertemperatur_Ist')),
 			adapter.getStateAsync(getDpPath('Wamwassertemperatur_Soll')),
+			adapter.getStateAsync(getDpPath('hotWaterTemperatureHysteresis')),
 		]);
 
 		const wwIst = getNumber(wwIstState);
 		const wwSoll = getNumber(wwSollState);
+		const wwHysterese = getNumber(wwHystereseState, 2); // Fallback auf 2K, falls nicht gefunden
 
 		if (wwIst >= wwSoll - 1) {
 			writeLog(
@@ -55,9 +56,23 @@ export async function handleZwangswarmwasser(adapter: ActionAdapter, id: string)
 			return;
 		}
 
-		await adapter.syncConfigValue('hotWaterTemperatureHysteresis', CONSTANTS.FORCE_WW_HYSTERESIS);
+		// Neuen Sollwert berechnen: Ist-Wert + aktuelle Hysterese + 1.5K Puffer
+		let forceSoll = wwIst + wwHysterese + 1.5;
+
+		// Sicherheitsprüfung: Maximaltemperatur kappen, um Regler-Fehler zu vermeiden
+		const MAX_WW_TEMP = 70;
+		if (forceSoll > MAX_WW_TEMP) {
+			forceSoll = MAX_WW_TEMP;
+		}
+
+		// Auf eine Nachkommastelle runden für saubere Übergabe
+		forceSoll = Math.round(forceSoll * 10) / 10;
+
+		// Statt der Hysterese wird nun der Warmwasser-Sollwert überschrieben
+		await adapter.syncConfigValue('warmwater_temperature', forceSoll);
+
 		writeLog(
-			`Forced hot water: Triggered - Actual (${wwIst}°C) < Target-1 (${wwSoll - 1}°C). Hysteresis temporarily set to ${CONSTANTS.FORCE_WW_HYSTERESIS}K.`,
+			`Forced hot water: Triggered - Actual (${wwIst}°C) < Target-1 (${wwSoll - 1}°C). Target temperature temporarily set to ${forceSoll}°C.`,
 			'info',
 		);
 	} catch (err: unknown) {

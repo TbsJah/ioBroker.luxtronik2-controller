@@ -29,20 +29,20 @@ const CONSTANTS = {
   /** Status-Code für den Ruhezustand der Anlage */
   STATE_IDLE: 5,
   /** Befehlswert für den Fußpunkt beim Zwangsheizen */
-  FORCE_HEATING_OFFSET: 35,
-  /** Temporäre Hysterese für die Zwangswarmwasserbereitung */
-  FORCE_WW_HYSTERESIS: 1
+  FORCE_HEATING_OFFSET: 35
 };
 async function handleZwangswarmwasser(adapter, id) {
   try {
     const localId = id.replace(`${adapter.namespace}.`, "");
     await adapter.setState(localId, { val: false, ack: true });
-    const [wwIstState, wwSollState] = await Promise.all([
+    const [wwIstState, wwSollState, wwHystereseState] = await Promise.all([
       adapter.getStateAsync((0, import_stateMapping.getDpPath)("Wamwassertemperatur_Ist")),
-      adapter.getStateAsync((0, import_stateMapping.getDpPath)("Wamwassertemperatur_Soll"))
+      adapter.getStateAsync((0, import_stateMapping.getDpPath)("Wamwassertemperatur_Soll")),
+      adapter.getStateAsync((0, import_stateMapping.getDpPath)("hotWaterTemperatureHysteresis"))
     ]);
     const wwIst = (0, import_utils.getNumber)(wwIstState);
     const wwSoll = (0, import_utils.getNumber)(wwSollState);
+    const wwHysterese = (0, import_utils.getNumber)(wwHystereseState, 2);
     if (wwIst >= wwSoll - 1) {
       (0, import_logger.writeLog)(
         `Forced hot water: Ignored - Actual (${wwIst}\xB0C) is already sufficient (Target: ${wwSoll}\xB0C).`,
@@ -50,9 +50,15 @@ async function handleZwangswarmwasser(adapter, id) {
       );
       return;
     }
-    await adapter.syncConfigValue("hotWaterTemperatureHysteresis", CONSTANTS.FORCE_WW_HYSTERESIS);
+    let forceSoll = wwIst + wwHysterese + 1.5;
+    const MAX_WW_TEMP = 70;
+    if (forceSoll > MAX_WW_TEMP) {
+      forceSoll = MAX_WW_TEMP;
+    }
+    forceSoll = Math.round(forceSoll * 10) / 10;
+    await adapter.syncConfigValue("warmwater_temperature", forceSoll);
     (0, import_logger.writeLog)(
-      `Forced hot water: Triggered - Actual (${wwIst}\xB0C) < Target-1 (${wwSoll - 1}\xB0C). Hysteresis temporarily set to ${CONSTANTS.FORCE_WW_HYSTERESIS}K.`,
+      `Forced hot water: Triggered - Actual (${wwIst}\xB0C) < Target-1 (${wwSoll - 1}\xB0C). Target temperature temporarily set to ${forceSoll}\xB0C.`,
       "info"
     );
   } catch (err) {

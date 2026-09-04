@@ -295,10 +295,10 @@ class Luxtronik2Controller extends utils.Adapter {
 				config.sync_heating_system_circ_pump_voltage_nominal_heating ?? 7,
 			);
 			await this.syncConfigValue('warmwater_temperature', config.sync_warmwater_target_temperature ?? 54);
-			await this.syncConfigValue(
-				'hotWaterTemperatureHysteresis',
-				config.sync_hotwater_temperature_hysteresis ?? 10,
-			);
+			// await this.syncConfigValue(
+			// 	'hotWaterTemperatureHysteresis',
+			// 	config.sync_hotwater_temperature_hysteresis ?? 10,
+			// );
 			await this.syncConfigValue('returnTemperatureHysteresis', config.sync_return_temperature_hysteresis ?? 1.5);
 			await this.syncConfigValue('zip_aktiv', config.zip_aktiv ?? 0);
 			await this.syncConfigValue('Heizen_nach_Wasser', config.Heating_after_warmwater ?? false);
@@ -368,10 +368,10 @@ class Luxtronik2Controller extends utils.Adapter {
 					}
 				} else if (istWarmwasser) {
 					if (config.zip_optimierung_aktiv !== false) {
-						await this.syncConfigValue(
-							'hotWaterTemperatureHysteresis',
-							config.sync_hotwater_temperature_hysteresis ?? 2,
-						);
+						// await this.syncConfigValue(
+						// 	'hotWaterTemperatureHysteresis',
+						// 	config.sync_hotwater_temperature_hysteresis ?? 2,
+						// );
 
 						// Prüfen, ob externe Aktoren konfiguriert sind
 						const actors = config.actors || [];
@@ -492,17 +492,18 @@ class Luxtronik2Controller extends utils.Adapter {
 				}
 
 				if (config.regelung_aktiv !== false) {
-					if (ruecklauf >= ruecklaufSoll + heizenHysterese - 0.1) {
-						if (aelterAls10) {
-							await this.syncConfigValue('Heizen_nach_Wasser', false);
-						}
-					} else if (!nachWasser && config.Heating_after_warmwater === true) {
-						await this.syncConfigValue('Heizen_nach_Wasser', true);
-					}
-
 					if (wwSoll - wwIst > 2 && ruecklauf >= ruecklaufSoll + heizenHysterese - 0.1) {
-						const fallbackHyst = config.sync_hotwater_temperature_hysteresis ?? 2;
-						await this.syncConfigValue('hotWaterTemperatureHysteresis', fallbackHyst);
+						// Neuen Sollwert berechnen: Ist-Wert + aktuelle Hysterese + 1.5K Puffer
+						let forceSoll = wwIst + wwHysterese + 1.5;
+
+						// Sicherheitsprüfung: Maximaltemperatur kappen
+						if (forceSoll > 75) {
+							forceSoll = 75;
+						}
+						forceSoll = Math.round(forceSoll * 10) / 10;
+
+						// Statt Hysterese wird nun der Sollwert temporär erhöht, um den WW-Takt künstlich anzustoßen
+						await this.syncConfigValue('warmwater_temperature', forceSoll);
 					}
 				}
 			}

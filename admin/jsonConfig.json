@@ -80,10 +80,13 @@
 					"lg": 12,
 					"xl": 12
 				},
-				"abstandRegelung2": {
+				"informationCycleOptimization": {
 					"type": "staticText",
-					"text": "",
-					"style": { "height": "20px" },
+					"text": {
+						"en": "By default, the Luxtronik controller treats heating and domestic hot water (DHW) cycles as separate operations, shutting down the compressor between them even if heating demand is imminent. Since frequent compressor starts cause mechanical wear and reduce energy efficiency, this adapter provides an intelligent cycle optimization:<br><br>• <b>Combined Cycles:</b> If heating demand exists or is imminent when hot water preparation finishes, the adapter coordinates the run so the compressor transitions seamlessly into heating without shutting down.<br>➔ <i>Trigger rule:</i> If <b>(DHW Target - DHW Actual) ≥ (DHW Hysteresis - 1.5 K)</b> and <b>Heating Return ≤ Return Target</b> and outdoor heating threshold is not active, heating is triggered directly with Return Target temporarily set to 35°C to force compressor operation (the previously configured Return Target is automatically restored after 10 minutes).<br>• <b>Dynamic Parameter Control:</b> Temporarily adjusts parameters (e.g. heating curve base point or pump voltages) during active cycles to support demand-driven operation.<br>• <b>Automatic Idle Reset:</b> Once the heat pump returns to idle, all modified parameters are automatically reverted to your defined default values below.<br><br>💡 <b>Tip! Safe Operation & Wear Protection</b><br>To prevent EEPROM/flash wear on your Luxtronik controller, parameters are only updated when an actual state change requires it. The fallback to default values in idle ensures the heat pump always returns to a clean, safe operating state.<br><br><b>Info:</b> If you adjust heating or hot water setpoints directly on the heat pump display while optimization is active, the adapter may revert them to the configured default values once the heat pump enters idle.",
+						"de": "Standardmäßig behandelt die Luxtronik-Steuerung Heiz- und Warmwassertakte strikt getrennt und schaltet den Verdichter dazwischen ab – selbst wenn unmittelbar danach Heizbedarf besteht. Da häufige Verdichterstarts den Verschleiß erhöhen und Effizienz kosten, bietet dieser Adapter eine intelligente Takt-Optimierung:<br><br>• <b>Kombinierte Takte:</b> Steht nach der Warmwasserbereitung Heizbedarf an, koppelt der Adapter die Vorgänge, sodass der Verdichter ohne Zwischenstopp direkt in den Heizbetrieb übergeht.<br>➔ <i>Auslöser-Regel:</i> Wenn <b>(WW Soll - WW Ist) ≥ (WW Hysterese - 1,5 K)</b> und <b>Heizung Rücklauf ≤ Rücklauf Soll</b> und die Heizgrenze nicht aktiv ist, wird direkt der Heizbetrieb gestartet und der Rücklauf-Sollwert temporär auf 35°C gesetzt, um das Heizen zu erzwingen (die zuvor eingestellte Rücklauf-Solltemperatur wird nach 10 Minuten automatisch wieder zurückgesetzt).<br>• <b>Dynamische Parameteranpassung:</b> Passt Betriebswerte (wie Fußpunkt oder Pumpenspannungen) während aktiver Takte bedarfsgerecht an.<br>• <b>Automatischer Leerlauf-Reset:</b> Sobald die Wärmepumpe wieder im Leerlauf (Idle) steht, werden alle temporär veränderten Parameter selbstständig auf die unten definierten Vorgabewerte zurückgesetzt.<br><br>💡 <b>Tipp! Anlagensicherheit & Flash-Schutz</b><br>Um den internen Flash-Speicher (EEPROM) der Luxtronik zu schonen, werden Schreibzugriffe auf ein Minimum begrenzt und nur bei tatsächlichen Statuswechseln ausgeführt. Das Erzwingen der Vorgabewerte im Leerlauf stellt sicher, dass die Anlage immer in einen definierten Ausgangszustand zurückkehrt.<br><br><b>Info:</b> Werden Parameter während einer aktiven Regelung direkt am Display der Wärmepumpe geändert, setzt der Adapter diese im Leerlauf wieder auf die hier hinterlegten Standardwerte zurück."
+					},
+					"style": { "height": "230px" },
 					"xs": 12,
 					"sm": 12,
 					"md": 12,
@@ -141,6 +144,24 @@
 					"lg": 4,
 					"xl": 4
 				},
+				"Heating_after_warmwater": {
+					"type": "checkbox",
+					"label": {
+						"en": "Heating after hot water",
+						"de": "Heizen nach Warmwasser"
+					},
+					"help": {
+						"en": "Temporarily increases the return target temperature to 35°C for 10 minutes to force heating after hot water (provided a heating cycle was started beforehand).",
+						"de": "Erhöht die Rücklauf-Solltemperatur für 10 Minuten auf 35°C, damit Heizen nach Warmwasser erzwungen wird (sofern zuvor mit einem Heiztakt begonnen worden ist)."
+					},
+					"disabled": "!data.regelung_aktiv",
+					"default": false,
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"lg": 4,
+					"xl": 4
+				},
 				"abstandRegelung3": {
 					"type": "staticText",
 					"text": "",
@@ -161,7 +182,7 @@
 						"en": "Automatically resets changed parameters (e.g. base point, HUP voltage) during idle",
 						"de": "Setzt veränderte Parameter (z.B. Fußpunkt, HUP-Spannung) im Leerlauf selbstständig zurück"
 					},
-					"default": true,
+					"default": false,
 					"xs": 12,
 					"sm": 6,
 					"md": 4,
@@ -251,20 +272,7 @@
 					"lg": 6,
 					"xl": 6
 				},
-				"Heating_after_warmwater": {
-					"type": "checkbox",
-					"label": {
-						"en": "Heating after hot water",
-						"de": "Heizen nach Warmwasser"
-					},
-					"disabled": "!data.regelung_aktiv",
-					"default": true,
-					"xs": 12,
-					"sm": 12,
-					"md": 12,
-					"lg": 12,
-					"xl": 12
-				},
+
 				"headerWater": {
 					"type": "header",
 					"text": {

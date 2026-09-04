@@ -243,7 +243,7 @@ class Luxtronik2Controller extends utils.Adapter {
    * @returns A promise that resolves when all default configuration tasks resolve.
    */
   async setIdleDefaults() {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _i;
+    var _a, _b, _c, _d, _e, _f, _g, _h;
     try {
       const config = this.config;
       await this.syncConfigValue("heating_curve_end_point", (_a = config.endpunkt) != null ? _a : 23);
@@ -257,13 +257,9 @@ class Luxtronik2Controller extends utils.Adapter {
         (_d = config.sync_heating_system_circ_pump_voltage_nominal_heating) != null ? _d : 7
       );
       await this.syncConfigValue("warmwater_temperature", (_e = config.sync_warmwater_target_temperature) != null ? _e : 54);
-      await this.syncConfigValue(
-        "hotWaterTemperatureHysteresis",
-        (_f = config.sync_hotwater_temperature_hysteresis) != null ? _f : 10
-      );
-      await this.syncConfigValue("returnTemperatureHysteresis", (_g = config.sync_return_temperature_hysteresis) != null ? _g : 1.5);
-      await this.syncConfigValue("zip_aktiv", (_h = config.zip_aktiv) != null ? _h : 0);
-      await this.syncConfigValue("Heizen_nach_Wasser", (_i = config.Heating_after_warmwater) != null ? _i : false);
+      await this.syncConfigValue("returnTemperatureHysteresis", (_f = config.sync_return_temperature_hysteresis) != null ? _f : 1.5);
+      await this.syncConfigValue("zip_aktiv", (_g = config.zip_aktiv) != null ? _g : 0);
+      await this.syncConfigValue("Heizen_nach_Wasser", (_h = config.Heating_after_warmwater) != null ? _h : false);
     } catch (err) {
       (0, import_logger.writeLog)(`Failed to apply the baseline idle configuration defaults: ${err.message}`, "error");
     }
@@ -290,7 +286,7 @@ class Luxtronik2Controller extends utils.Adapter {
    * @returns A promise that resolves when the execution cycle finishes.
    */
   async runOptimizationSchedule() {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t, _u, _v;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t;
     try {
       const config = this.config;
       const bzState = await this.getStateAsync((0, import_stateMapping.getDpPath)("WP_BZ_akt"));
@@ -324,10 +320,6 @@ class Luxtronik2Controller extends utils.Adapter {
           }
         } else if (istWarmwasser) {
           if (config.zip_optimierung_aktiv !== false) {
-            await this.syncConfigValue(
-              "hotWaterTemperatureHysteresis",
-              (_e = config.sync_hotwater_temperature_hysteresis) != null ? _e : 2
-            );
             const actors = config.actors || [];
             const validActors = actors.filter(
               (a) => a.zip_external_relay_id && a.zip_external_relay_id.trim() !== ""
@@ -338,16 +330,16 @@ class Luxtronik2Controller extends utils.Adapter {
                   "[ZIP] Externe Aktoren gefunden. Starte Zirkulation synchron zur Warmwasserbereitung."
                 );
               }
-              await this.syncConfigValue("zip_aktiv", (_f = config.zip_aktiv_ww) != null ? _f : 120);
+              await this.syncConfigValue("zip_aktiv", (_e = config.zip_aktiv_ww) != null ? _e : 120);
               await this.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)("Activate_Zip"), true, false);
             }
             await this.syncConfigValue(
               "heating_system_circ_pump_voltage_minimal",
-              (_g = config.sync_heating_system_circ_pump_voltage_minimal_water) != null ? _g : 3
+              (_f = config.sync_heating_system_circ_pump_voltage_minimal_water) != null ? _f : 3
             );
             await this.syncConfigValue(
               "heating_system_circ_pump_voltage_nominal",
-              (_h = config.sync_heating_system_circ_pump_voltage_nominal_water) != null ? _h : 10
+              (_g = config.sync_heating_system_circ_pump_voltage_nominal_water) != null ? _g : 10
             );
           }
         } else if (istAbtauen) {
@@ -387,25 +379,25 @@ class Luxtronik2Controller extends utils.Adapter {
         this.getStateAsync((0, import_stateMapping.getDpPath)("heatingLimit")),
         this.istBetriebszustandAelterAls10Min()
       ]);
-      const wwSoll = (_i = wwSollState == null ? void 0 : wwSollState.val) != null ? _i : 0;
-      const wwIst = (_j = wwIstState == null ? void 0 : wwIstState.val) != null ? _j : 0;
-      const ruecklauf = (_k = ruecklaufState == null ? void 0 : ruecklaufState.val) != null ? _k : 0;
-      const spreizung = (_l = spreizungState == null ? void 0 : spreizungState.val) != null ? _l : 0;
+      const wwSoll = (_h = wwSollState == null ? void 0 : wwSollState.val) != null ? _h : 0;
+      const wwIst = (_i = wwIstState == null ? void 0 : wwIstState.val) != null ? _i : 0;
+      const ruecklauf = (_j = ruecklaufState == null ? void 0 : ruecklaufState.val) != null ? _j : 0;
+      const spreizung = (_k = spreizungState == null ? void 0 : spreizungState.val) != null ? _k : 0;
       const heatingStateStr = String((heatingStateStrState == null ? void 0 : heatingStateStrState.val) || "").trim();
       const vd1 = (vd1State == null ? void 0 : vd1State.val) === 1;
-      const wwHysterese = (_m = wwHystereseState == null ? void 0 : wwHystereseState.val) != null ? _m : 0;
-      const ruecklaufSoll = (_n = ruecklaufSollState == null ? void 0 : ruecklaufSollState.val) != null ? _n : 0;
-      const hupAktiv = (_o = hupAktivState == null ? void 0 : hupAktivState.val) != null ? _o : 0;
-      const heizenHysterese = (_p = heizenHystereseState == null ? void 0 : heizenHystereseState.val) != null ? _p : 0;
-      const mitteltemperatur = (_q = mitteltempState == null ? void 0 : mitteltempState.val) != null ? _q : 0;
-      const thresholdHeatingLimit = (_r = thresholdHeatingLimitstate == null ? void 0 : thresholdHeatingLimitstate.val) != null ? _r : 0;
-      const heatingLimit = (_s = heatingLimitState == null ? void 0 : heatingLimitState.val) != null ? _s : 0;
+      const wwHysterese = (_l = wwHystereseState == null ? void 0 : wwHystereseState.val) != null ? _l : 0;
+      const ruecklaufSoll = (_m = ruecklaufSollState == null ? void 0 : ruecklaufSollState.val) != null ? _m : 0;
+      const hupAktiv = (_n = hupAktivState == null ? void 0 : hupAktivState.val) != null ? _n : 0;
+      const heizenHysterese = (_o = heizenHystereseState == null ? void 0 : heizenHystereseState.val) != null ? _o : 0;
+      const mitteltemperatur = (_p = mitteltempState == null ? void 0 : mitteltempState.val) != null ? _p : 0;
+      const thresholdHeatingLimit = (_q = thresholdHeatingLimitstate == null ? void 0 : thresholdHeatingLimitstate.val) != null ? _q : 0;
+      const heatingLimit = (_r = heatingLimitState == null ? void 0 : heatingLimitState.val) != null ? _r : 0;
       const nachWasser = nachWasserState == null ? void 0 : nachWasserState.val;
       if (istHeizen) {
         if (config.regelung_aktiv !== false && aelterAls10 && vd1) {
-          const fusspunkt = (_t = await this.getStateAsync((0, import_stateMapping.getDpPath)("heating_curve_parallel_offset"))) == null ? void 0 : _t.val;
+          const fusspunkt = (_s = await this.getStateAsync((0, import_stateMapping.getDpPath)("heating_curve_parallel_offset"))) == null ? void 0 : _s.val;
           if (fusspunkt === 35) {
-            const fallbackFusspunkt = (_u = config.fusspunkt) != null ? _u : 21.7;
+            const fallbackFusspunkt = (_t = config.fusspunkt) != null ? _t : 21.7;
             await this.syncConfigValue("heating_curve_parallel_offset", fallbackFusspunkt);
           }
         }
@@ -430,16 +422,13 @@ class Luxtronik2Controller extends utils.Adapter {
           }
         }
         if (config.regelung_aktiv !== false) {
-          if (ruecklauf >= ruecklaufSoll + heizenHysterese - 0.1) {
-            if (aelterAls10) {
-              await this.syncConfigValue("Heizen_nach_Wasser", false);
-            }
-          } else if (!nachWasser && config.Heating_after_warmwater === true) {
-            await this.syncConfigValue("Heizen_nach_Wasser", true);
-          }
           if (wwSoll - wwIst > 2 && ruecklauf >= ruecklaufSoll + heizenHysterese - 0.1) {
-            const fallbackHyst = (_v = config.sync_hotwater_temperature_hysteresis) != null ? _v : 2;
-            await this.syncConfigValue("hotWaterTemperatureHysteresis", fallbackHyst);
+            let forceSoll = wwIst + wwHysterese + 1.5;
+            if (forceSoll > 75) {
+              forceSoll = 75;
+            }
+            forceSoll = Math.round(forceSoll * 10) / 10;
+            await this.syncConfigValue("warmwater_temperature", forceSoll);
           }
         }
       }
