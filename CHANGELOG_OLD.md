@@ -23,6 +23,10 @@
 ### 0.1.0 (2026-07-09)
 
 - initial release
+## 0.6.5 (2026-08-07)
+
+- review / fix findings reported by claude based checker.
+
 ## 0.6.4 (2026-07-23)
 
 - Refactoring

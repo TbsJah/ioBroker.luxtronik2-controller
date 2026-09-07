@@ -79,8 +79,7 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
-
-### **WORK IN PROGRESS**
+### 0.7.3 (2026-09-07)
 
 **Bugfixes**
 -(Fixed) Timer Table Register Conflict: Resolved conflicting Luxtronik register IDs for Domestic Hot Water (DHW) Monday–Sunday schedules (WW_MoSo_Start1 to End5). These were previously mapped to registers 507–516 (colliding with Circulation timer registers) and have now been corrected to registers 406–415.
@@ -132,10 +131,6 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 - Extended minimum limit for `temperature_outdoor_min` from -20°C to -25°C
 - Lowered minimum allowed value for `heating_curve_parallel_offset` (base point) from 20°C to 15°C
 - Disabled dynamic cycle optimization / regulation by default on initial start
-
-### 0.6.5 (2026-08-07)
-
-- review / fix findings reported by claude based checker.
 
 ## License
 
