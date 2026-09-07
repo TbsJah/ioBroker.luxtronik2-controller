@@ -79,7 +79,8 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
-**WORK IN PROGRESS**
+
+### **WORK IN PROGRESS**
 
 **Bugfixes**
 
