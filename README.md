@@ -79,8 +79,7 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
-
-### **WORK IN PROGRESS**
+### 0.7.2 (2026-09-07)
 
 **Bugfixes**
 
@@ -129,10 +128,6 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ### 0.6.5 (2026-08-07)
 
 - review / fix findings reported by claude based checker.
-
-### 0.6.4 (2026-07-23)
-
-- Refactoring
 
 ## License
 
