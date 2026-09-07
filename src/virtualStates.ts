@@ -274,16 +274,16 @@ export async function updateStatusStrings(
 		const line3Map = STATE_LINE_3[lang] || STATE_LINE_3.en;
 		const stateHeatingMap = STATE_HEATING[lang] || STATE_HEATING.en;
 
-		const Absenkung = (rawParams[getLuxIdByKey('deltaHeatingReduction')] || 0) / 10;
-		const AbsenkungMax = (rawParams[getLuxIdByKey('thresholdTemperatureSetBack')] || 0) / 10;
-		const RücklaufSollMin = (rawParams[getLuxIdByKey('returnTemperatureTargetMin')] || 15) / 10;
-		const BetriebsartHeizung = rawParams[getLuxIdByKey('heating_operation_mode')] || 0;
-		const Außentemperatur = (rawValues[getLuxIdByKey('temperature_outside')] || 0) / 10;
-		const HeatingLimit = rawParams[getLuxIdByKey('heatingLimit')] || 0;
+		const Absenkung = (rawParams[getLuxIdByKey('deltaHeatingReduction')] ?? 0) / 10;
+		const AbsenkungMax = (rawParams[getLuxIdByKey('thresholdTemperatureSetBack')] ?? 0) / 10;
+		const RücklaufSollMin = (rawParams[getLuxIdByKey('returnTemperatureTargetMin')] ?? 15) / 10;
+		const BetriebsartHeizung = rawParams[getLuxIdByKey('heating_operation_mode')] ?? 0;
+		const Außentemperatur = (rawValues[getLuxIdByKey('temperature_outside')] ?? 0) / 10;
+		const HeatingLimit = rawParams[getLuxIdByKey('heatingLimit')] ?? 0;
 		const opStateHeatingVal = rawValues[getLuxIdByKey('opStateHeating')] ?? 3;
-		const Mitteltemperatur = (rawValues[getLuxIdByKey('Mitteltemperatur')] || 15) / 10;
-		const thresholdHeatingLimit = (rawParams[getLuxIdByKey('thresholdHeatingLimit')] || 15) / 10;
-		const temperature_target_return = (rawValues[getLuxIdByKey('temperature_target_return')] || 15) / 10;
+		const Mitteltemperatur = (rawValues[getLuxIdByKey('Mitteltemperatur')] ?? 15) / 10;
+		const thresholdHeatingLimit = (rawParams[getLuxIdByKey('thresholdHeatingLimit')] ?? 15) / 10;
+		const temperature_target_return = (rawValues[getLuxIdByKey('temperature_target_return')] ?? 15) / 10;
 		let heatingStr = stateHeatingMap[opStateHeatingVal] || `Unknown (${opStateHeatingVal})`;
 
 		if (opStateHeatingVal === 2) {
@@ -353,7 +353,7 @@ export async function updateStatusStrings(
 			};
 			const bzMap = lang === 'de' ? bzMapDe : bzMapEn;
 
-			const currentStateCode = rawValues[getLuxIdByKey('WP_BZ_akt')] || 5;
+			const currentStateCode = rawValues[getLuxIdByKey('WP_BZ_akt')] ?? 5;
 			stateStr = bzMap[currentStateCode] || `Status ${currentStateCode}`;
 
 			const isRunning = [0, 1, 2, 4, 6, 7].includes(currentStateCode);
@@ -406,7 +406,7 @@ export async function updateStatusStrings(
 		// STATUS KÜHLUNG BERECHNEN (opStateCoolingString)
 		// ==========================================
 		const coolingOpMode = rawParams[getLuxIdByKey('cooling_operation_mode')]; // 0 = Aus, 1 = Automatik
-		const coolingReleaseTemp = (rawParams[getLuxIdByKey('cooling_release_temp')] || 0) / 10;
+		const coolingReleaseTemp = (rawParams[getLuxIdByKey('cooling_release_temp')] ?? 0) / 10;
 
 		// Boolean Prüfung für Freigabe (Index 207 / cooling_release)
 		const rawFreigabe = rawValues[getLuxIdByKey('cooling_release')];

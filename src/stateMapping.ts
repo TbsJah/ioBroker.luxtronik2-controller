@@ -1370,7 +1370,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 	// Hot Water
 	warmwater_temperature: {
 		folder: 'Settings.03_HotWater',
-		name: 'Hot water target temperature',
+		name: 'Hot water target temperature (Deckung WP ohne ZWE)',
 		role: 'level.temperature',
 		type: 'number',
 		unit: '°C',
@@ -1384,7 +1384,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 	},
 	temperature_hot_water_target: {
 		folder: 'Settings.03_HotWater',
-		name: 'Hot water target temperature (Parameter 105)',
+		name: 'Hot water target temperature (Parameter 105) Wunschwert',
 		role: 'level.temperature',
 		type: 'number',
 		unit: '°C',

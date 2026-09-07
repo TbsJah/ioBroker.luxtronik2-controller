@@ -140,7 +140,7 @@ async function calculateTemperatureSpread(adapter) {
   }
 }
 async function updateStatusStrings(adapter, rawValues, rawParams) {
-  var _a;
+  var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l;
   try {
     const config = adapter.config;
     const lang = config.language === "de" ? "de" : "en";
@@ -168,16 +168,16 @@ async function updateStatusStrings(adapter, rawValues, rawParams) {
     const line2Map = import_codes.STATE_LINE_2[lang] || import_codes.STATE_LINE_2.en;
     const line3Map = import_codes.STATE_LINE_3[lang] || import_codes.STATE_LINE_3.en;
     const stateHeatingMap = import_codes.STATE_HEATING[lang] || import_codes.STATE_HEATING.en;
-    const Absenkung = (rawParams[(0, import_stateMapping.getLuxIdByKey)("deltaHeatingReduction")] || 0) / 10;
-    const AbsenkungMax = (rawParams[(0, import_stateMapping.getLuxIdByKey)("thresholdTemperatureSetBack")] || 0) / 10;
-    const R\u00FCcklaufSollMin = (rawParams[(0, import_stateMapping.getLuxIdByKey)("returnTemperatureTargetMin")] || 15) / 10;
-    const BetriebsartHeizung = rawParams[(0, import_stateMapping.getLuxIdByKey)("heating_operation_mode")] || 0;
-    const Au\u00DFentemperatur = (rawValues[(0, import_stateMapping.getLuxIdByKey)("temperature_outside")] || 0) / 10;
-    const HeatingLimit = rawParams[(0, import_stateMapping.getLuxIdByKey)("heatingLimit")] || 0;
-    const opStateHeatingVal = (_a = rawValues[(0, import_stateMapping.getLuxIdByKey)("opStateHeating")]) != null ? _a : 3;
-    const Mitteltemperatur = (rawValues[(0, import_stateMapping.getLuxIdByKey)("Mitteltemperatur")] || 15) / 10;
-    const thresholdHeatingLimit = (rawParams[(0, import_stateMapping.getLuxIdByKey)("thresholdHeatingLimit")] || 15) / 10;
-    const temperature_target_return = (rawValues[(0, import_stateMapping.getLuxIdByKey)("temperature_target_return")] || 15) / 10;
+    const Absenkung = ((_a = rawParams[(0, import_stateMapping.getLuxIdByKey)("deltaHeatingReduction")]) != null ? _a : 0) / 10;
+    const AbsenkungMax = ((_b = rawParams[(0, import_stateMapping.getLuxIdByKey)("thresholdTemperatureSetBack")]) != null ? _b : 0) / 10;
+    const R\u00FCcklaufSollMin = ((_c = rawParams[(0, import_stateMapping.getLuxIdByKey)("returnTemperatureTargetMin")]) != null ? _c : 15) / 10;
+    const BetriebsartHeizung = (_d = rawParams[(0, import_stateMapping.getLuxIdByKey)("heating_operation_mode")]) != null ? _d : 0;
+    const Au\u00DFentemperatur = ((_e = rawValues[(0, import_stateMapping.getLuxIdByKey)("temperature_outside")]) != null ? _e : 0) / 10;
+    const HeatingLimit = (_f = rawParams[(0, import_stateMapping.getLuxIdByKey)("heatingLimit")]) != null ? _f : 0;
+    const opStateHeatingVal = (_g = rawValues[(0, import_stateMapping.getLuxIdByKey)("opStateHeating")]) != null ? _g : 3;
+    const Mitteltemperatur = ((_h = rawValues[(0, import_stateMapping.getLuxIdByKey)("Mitteltemperatur")]) != null ? _h : 15) / 10;
+    const thresholdHeatingLimit = ((_i = rawParams[(0, import_stateMapping.getLuxIdByKey)("thresholdHeatingLimit")]) != null ? _i : 15) / 10;
+    const temperature_target_return = ((_j = rawValues[(0, import_stateMapping.getLuxIdByKey)("temperature_target_return")]) != null ? _j : 15) / 10;
     let heatingStr = stateHeatingMap[opStateHeatingVal] || `Unknown (${opStateHeatingVal})`;
     if (opStateHeatingVal === 2) {
       heatingStr += ` (Target ${R\u00FCcklaufSollMin} \xB0C)`;
@@ -234,7 +234,7 @@ async function updateStatusStrings(adapter, rawValues, rawParams) {
         7: "K\xFChlbetrieb"
       };
       const bzMap = lang === "de" ? bzMapDe : bzMapEn;
-      const currentStateCode2 = rawValues[(0, import_stateMapping.getLuxIdByKey)("WP_BZ_akt")] || 5;
+      const currentStateCode2 = (_k = rawValues[(0, import_stateMapping.getLuxIdByKey)("WP_BZ_akt")]) != null ? _k : 5;
       stateStr = bzMap[currentStateCode2] || `Status ${currentStateCode2}`;
       const isRunning = [0, 1, 2, 4, 6, 7].includes(currentStateCode2);
       const line1Text = isRunning ? line1Map[0] || "Heat pump running" : line1Map[1] || "Heat pump idle";
@@ -272,7 +272,7 @@ async function updateStatusStrings(adapter, rawValues, rawParams) {
       await adapter.setStateChangedAsync(dpHotWater, hotWaterStr, true);
     }
     const coolingOpMode = rawParams[(0, import_stateMapping.getLuxIdByKey)("cooling_operation_mode")];
-    const coolingReleaseTemp = (rawParams[(0, import_stateMapping.getLuxIdByKey)("cooling_release_temp")] || 0) / 10;
+    const coolingReleaseTemp = ((_l = rawParams[(0, import_stateMapping.getLuxIdByKey)("cooling_release_temp")]) != null ? _l : 0) / 10;
     const rawFreigabe = rawValues[(0, import_stateMapping.getLuxIdByKey)("cooling_release")];
     const isReleased = rawFreigabe === 1 || String(rawFreigabe).toLowerCase() === "true";
     const currentStateCode = rawValues[(0, import_stateMapping.getLuxIdByKey)("WP_BZ_akt")];
