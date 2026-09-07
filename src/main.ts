@@ -34,6 +34,7 @@ import {
 	stopZipAndDeaeration,
 	subscribeMotionSensors,
 } from './zipManager';
+
 /**
  * Main class for the Luxtronik2 Controller ioBroker Adapter.
  */
@@ -70,6 +71,7 @@ class Luxtronik2Controller extends utils.Adapter {
 	public writeCyclesToday: number = 0;
 	public writeCyclesTotal: number = 0;
 	private midnightTimer?: ioBroker.Timeout;
+
 	/**
 	 * Initializes a new instance of the Luxtronik2Controller class.
 	 *
@@ -120,20 +122,15 @@ class Luxtronik2Controller extends utils.Adapter {
 		await ensureAllObjectsExist(this);
 		await ensureCustomObjectsExist(this);
 
-		await this.setState(getDpPath('Regelung_Aktiv'), { val: config.regelung_aktiv !== false, ack: true });
+		// Strikte "Opt-In" Prüfung beim Start
+		await this.setState(getDpPath('Regelung_Aktiv'), { val: config.regelung_aktiv === true, ack: true });
 
 		const debugState = await this.getStateAsync(getDpPath('Schreibe_Debug_Log'));
 		this.isDebugLogActive = debugState?.val === true;
 		setCustomDebug(this.isDebugLogActive);
 
-		if (this.isDebugLogActive) {
-			writeLog('Synchronizing configuration values with the heat pump...', 'info');
-		}
-		await this.setIdleDefaults();
-		if (this.isDebugLogActive) {
-			writeLog('Synchronizing configuration values with the heat pump...', 'info');
-		}
 		await disableHardwareZipTimer(this);
+
 		// Schreib-Zähler aus ioBroker laden (sichert den Stand bei einem Adapter-Neustart)
 		const cycleTodayState = await this.getStateAsync(getDpPath('write_cycles_today'));
 		this.writeCyclesToday = cycleTodayState && typeof cycleTodayState.val === 'number' ? cycleTodayState.val : 0;
@@ -295,10 +292,6 @@ class Luxtronik2Controller extends utils.Adapter {
 				config.sync_heating_system_circ_pump_voltage_nominal_heating ?? 7,
 			);
 			await this.syncConfigValue('warmwater_temperature', config.sync_warmwater_target_temperature ?? 54);
-			// await this.syncConfigValue(
-			// 	'hotWaterTemperatureHysteresis',
-			// 	config.sync_hotwater_temperature_hysteresis ?? 10,
-			// );
 			await this.syncConfigValue('returnTemperatureHysteresis', config.sync_return_temperature_hysteresis ?? 1.5);
 			await this.syncConfigValue('zip_aktiv', config.zip_aktiv ?? 0);
 			await this.syncConfigValue('Heizen_nach_Wasser', config.Heating_after_warmwater ?? false);
@@ -334,6 +327,10 @@ class Luxtronik2Controller extends utils.Adapter {
 			const bzState = await this.getStateAsync(getDpPath('WP_BZ_akt'));
 			const bzVal = bzState && bzState.val !== null ? String(bzState.val).trim() : '';
 
+			// Live-Status des ioBroker Schalters "Regelung_Aktiv" auslesen
+			const regelungAktivState = await this.getStateAsync(getDpPath('Regelung_Aktiv'));
+			const isRegelungAktiv = regelungAktivState?.val === true;
+
 			const istHeizen = bzVal === '0';
 			const istWarmwasser = bzVal === '1';
 			const istAbtauen = bzVal === '4';
@@ -348,11 +345,11 @@ class Luxtronik2Controller extends utils.Adapter {
 			// =========================================================
 			if (bzVal !== this.lastBzVal) {
 				if (istLeerlauf) {
-					if (config.idle_defaults_aktiv !== false) {
+					if (config.idle_defaults_aktiv === true) {
 						await this.setIdleDefaults();
 					}
 				} else if (istHeizen) {
-					if (config.zip_optimierung_aktiv !== false) {
+					if (config.zip_optimierung_aktiv === true) {
 						await this.syncConfigValue('zip_aktiv', config.zip_aktiv ?? 0);
 						await this.syncConfigValue(
 							'heating_system_circ_pump_voltage_minimal',
@@ -363,16 +360,11 @@ class Luxtronik2Controller extends utils.Adapter {
 							config.sync_heating_system_circ_pump_voltage_nominal_heating ?? 7,
 						);
 					}
-					if (config.regelung_aktiv !== false) {
+					if (isRegelungAktiv) {
 						await this.syncConfigValue('Heizen_nach_Wasser', config.Heating_after_warmwater ?? false);
 					}
 				} else if (istWarmwasser) {
-					if (config.zip_optimierung_aktiv !== false) {
-						// await this.syncConfigValue(
-						// 	'hotWaterTemperatureHysteresis',
-						// 	config.sync_hotwater_temperature_hysteresis ?? 2,
-						// );
-
+					if (config.zip_optimierung_aktiv === true) {
 						// Prüfen, ob externe Aktoren konfiguriert sind
 						const actors = config.actors || [];
 						const validActors = actors.filter(
@@ -401,10 +393,6 @@ class Luxtronik2Controller extends utils.Adapter {
 							config.sync_heating_system_circ_pump_voltage_nominal_water ?? 10,
 						);
 					}
-				} else if (istAbtauen) {
-					// if (config.zip_optimierung_aktiv !== false) {
-					// 	await this.syncConfigValue('heating_system_circ_pump_voltage_nominal', 10);
-					// }
 				}
 				this.lastBzVal = bzVal;
 			}
@@ -462,7 +450,7 @@ class Luxtronik2Controller extends utils.Adapter {
 			// 2. CONTINUOUS IN-SERVICE TELEMETRY EVALUATION
 			// =========================================================
 			if (istHeizen) {
-				if (config.regelung_aktiv !== false && aelterAls10 && vd1) {
+				if (isRegelungAktiv && aelterAls10 && vd1) {
 					const fusspunkt = (await this.getStateAsync(getDpPath('heating_curve_parallel_offset')))?.val;
 					if (fusspunkt === 35) {
 						const fallbackFusspunkt = config.fusspunkt ?? 21.7;
@@ -470,7 +458,7 @@ class Luxtronik2Controller extends utils.Adapter {
 					}
 				}
 
-				if (config.zip_optimierung_aktiv !== false) {
+				if (config.zip_optimierung_aktiv === true) {
 					const now = Date.now();
 					if (now - this.lastPumpOptimization > 600000) {
 						if (spreizung < 6.5 && hupAktiv > 5.5) {
@@ -491,14 +479,24 @@ class Luxtronik2Controller extends utils.Adapter {
 					}
 				}
 
-				if (config.regelung_aktiv !== false) {
+				if (isRegelungAktiv) {
+					// WICHTIG: Heizen_nach_Wasser Logik (Reset & Setzen)
+					if (ruecklauf >= ruecklaufSoll + heizenHysterese - 0.1) {
+						if (aelterAls10) {
+							await this.syncConfigValue('Heizen_nach_Wasser', false);
+						}
+					} else if (!nachWasser && config.Heating_after_warmwater === true) {
+						await this.syncConfigValue('Heizen_nach_Wasser', true);
+					}
+
+					// Warmwassertakt erzwingen
 					if (wwSoll - wwIst > 2 && ruecklauf >= ruecklaufSoll + heizenHysterese - 0.1) {
 						// Neuen Sollwert berechnen: Ist-Wert + aktuelle Hysterese + 1.5K Puffer
 						let forceSoll = wwIst + wwHysterese + 1.5;
 
-						// Sicherheitsprüfung: Maximaltemperatur kappen
-						if (forceSoll > 75) {
-							forceSoll = 75;
+						// Sicherheitsprüfung: Maximaltemperatur kappen (Passend zu actionHandlers = 70°C)
+						if (forceSoll > 70) {
+							forceSoll = 70;
 						}
 						forceSoll = Math.round(forceSoll * 10) / 10;
 
@@ -509,7 +507,7 @@ class Luxtronik2Controller extends utils.Adapter {
 			}
 
 			if (istWarmwasser && nachWasser) {
-				if (config.regelung_aktiv !== false) {
+				if (isRegelungAktiv) {
 					if ((heatingLimit === 1 && mitteltemperatur < thresholdHeatingLimit) || heatingLimit === 0) {
 						await this.syncConfigValue('heating_curve_parallel_offset', 35);
 					}
@@ -517,13 +515,13 @@ class Luxtronik2Controller extends utils.Adapter {
 			}
 
 			if (istLeerlauf) {
-				if (config.zip_optimierung_aktiv !== false) {
+				if (config.zip_optimierung_aktiv === true) {
 					if (wwIst <= wwSoll - wwHysterese || ruecklauf <= ruecklaufSoll - heizenHysterese) {
 						await stopZipAndDeaeration(this);
 					}
 				}
 
-				if (config.regelung_aktiv !== false) {
+				if (isRegelungAktiv) {
 					if (
 						wwSoll - wwIst >= wwHysterese - 1.5 &&
 						ruecklauf <= ruecklaufSoll &&

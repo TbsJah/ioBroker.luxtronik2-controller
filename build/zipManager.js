@@ -76,7 +76,7 @@ function clearZipTimer(adapter) {
 }
 async function isZipAllowedBySchedule(adapter) {
   const config = adapter.config;
-  if (config.zip_hardware_timer_disable === true) {
+  if (config.zip_lWP_aktiv === true) {
     return true;
   }
   try {
@@ -434,7 +434,7 @@ async function checkAndHandleMotionSensor(adapter, id, state) {
 }
 async function disableHardwareZipTimer(adapter) {
   const config = adapter.config;
-  if (config.zip_hardware_timer_disable === true) {
+  if (config.zip_lWP_aktiv === true) {
     if (adapter.isDebugLogActive) {
       (0, import_logger.writeLog)("Applying safe hardware defaults for ZIP timers...", "info");
     }

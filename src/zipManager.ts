@@ -113,8 +113,9 @@ function clearZipTimer(adapter: ExtendedAdapter): void {
 async function isZipAllowedBySchedule(adapter: ExtendedAdapter): Promise<boolean> {
 	const config = adapter.config;
 
+	// Korrektur: Nutzt nun den korrekten Key aus der UI (zip_lWP_aktiv)
 	// If hardware timers are disabled -> permanent release
-	if (config.zip_hardware_timer_disable === true) {
+	if (config.zip_lWP_aktiv === true) {
 		return true;
 	}
 
@@ -590,7 +591,8 @@ export async function checkAndHandleMotionSensor(
 export async function disableHardwareZipTimer(adapter: ExtendedAdapter): Promise<void> {
 	const config = adapter.config;
 
-	if (config.zip_hardware_timer_disable === true) {
+	// Korrektur: Nutzt nun den korrekten Key aus der UI (zip_lWP_aktiv)
+	if (config.zip_lWP_aktiv === true) {
 		if (adapter.isDebugLogActive) {
 			writeLog('Applying safe hardware defaults for ZIP timers...', 'info');
 		}
