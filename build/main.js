@@ -745,12 +745,8 @@ class Luxtronik2Controller extends utils.Adapter {
       }
       await this.setState(relativeId, { val: state.val, ack: true });
       let valueToWrite = state.val;
-      if (definition.role === "value.datetime") {
-        const valStr = String(state.val).trim();
-        const timeMatch = valStr.match(/^(\d{1,2}):(\d{1,2})/);
-        if (timeMatch) {
-          valueToWrite = parseInt(timeMatch[1], 10) * 3600 + parseInt(timeMatch[2], 10) * 60;
-        }
+      if (definition.isDurationFormat || definition.role === "value.datetime" || definition.role === "value.time") {
+        valueToWrite = (0, import_convert.timeStringToSeconds)(state.val);
       } else if (definition.factor && typeof state.val === "number") {
         valueToWrite = state.val * definition.factor;
       }

@@ -2264,7 +2264,7 @@ const STATE_MAPPING = {
     type: "string",
     isDurationFormat: true,
     dataSource: "raw_parameter",
-    luxWriteId: "507",
+    luxWriteId: "406",
     write: true,
     required: true
   },
@@ -2275,7 +2275,7 @@ const STATE_MAPPING = {
     type: "string",
     isDurationFormat: true,
     dataSource: "raw_parameter",
-    luxWriteId: "508",
+    luxWriteId: "407",
     write: true,
     required: true
   },
@@ -2286,7 +2286,7 @@ const STATE_MAPPING = {
     type: "string",
     isDurationFormat: true,
     dataSource: "raw_parameter",
-    luxWriteId: "509",
+    luxWriteId: "408",
     write: true,
     required: true
   },
@@ -2297,7 +2297,7 @@ const STATE_MAPPING = {
     type: "string",
     isDurationFormat: true,
     dataSource: "raw_parameter",
-    luxWriteId: "510",
+    luxWriteId: "409",
     write: true,
     required: true
   },
@@ -2308,7 +2308,7 @@ const STATE_MAPPING = {
     type: "string",
     isDurationFormat: true,
     dataSource: "raw_parameter",
-    luxWriteId: "511",
+    luxWriteId: "410",
     write: true,
     required: true
   },
@@ -2319,7 +2319,7 @@ const STATE_MAPPING = {
     type: "string",
     isDurationFormat: true,
     dataSource: "raw_parameter",
-    luxWriteId: "512",
+    luxWriteId: "411",
     write: true,
     required: true
   },
@@ -2330,7 +2330,7 @@ const STATE_MAPPING = {
     type: "string",
     isDurationFormat: true,
     dataSource: "raw_parameter",
-    luxWriteId: "513",
+    luxWriteId: "412",
     write: true,
     required: true
   },
@@ -2341,7 +2341,7 @@ const STATE_MAPPING = {
     type: "string",
     isDurationFormat: true,
     dataSource: "raw_parameter",
-    luxWriteId: "514",
+    luxWriteId: "413",
     write: true,
     required: true
   },
@@ -2352,7 +2352,7 @@ const STATE_MAPPING = {
     type: "string",
     isDurationFormat: true,
     dataSource: "raw_parameter",
-    luxWriteId: "515",
+    luxWriteId: "414",
     write: true,
     required: true
   },
@@ -2363,7 +2363,7 @@ const STATE_MAPPING = {
     type: "string",
     isDurationFormat: true,
     dataSource: "raw_parameter",
-    luxWriteId: "516",
+    luxWriteId: "415",
     write: true,
     required: true
   },
