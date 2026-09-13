@@ -583,18 +583,27 @@ class Luxtronik2Controller extends utils.Adapter {
 				const luxId = definition.luxWriteId || key;
 				let value: any = undefined;
 
+				// DYNAMISCHER FAKTOR FÜR HUP
+				let appliedFactor = definition.factor;
+				if (
+					key === 'heating_system_circ_pump_voltage_nominal' ||
+					key === 'heating_system_circ_pump_voltage_minimal'
+				) {
+					appliedFactor = config.hup_voltage_factor !== undefined ? Number(config.hup_voltage_factor) : 100;
+				}
+
 				if (definition.dataSource) {
 					switch (definition.dataSource) {
 						case 'raw_parameter':
 							value = rawParams?.[parseInt(luxId, 10)];
-							if (value !== undefined && definition.factor) {
-								value /= definition.factor;
+							if (value !== undefined && appliedFactor) {
+								value /= appliedFactor;
 							}
 							break;
 						case 'raw_value':
 							value = rawValues?.[parseInt(luxId, 10)];
-							if (value !== undefined && definition.factor) {
-								value /= definition.factor;
+							if (value !== undefined && appliedFactor) {
+								value /= appliedFactor;
 							}
 							break;
 						case 'parameter':
@@ -607,8 +616,8 @@ class Luxtronik2Controller extends utils.Adapter {
 					if (/^\d+$/.test(luxId)) {
 						const idx = parseInt(luxId, 10);
 						value = definition.folder.startsWith('Settings') ? rawParams?.[idx] : rawValues?.[idx];
-						if (value !== undefined && definition.factor) {
-							value /= definition.factor;
+						if (value !== undefined && appliedFactor) {
+							value /= appliedFactor;
 						}
 					} else {
 						value = undefined;

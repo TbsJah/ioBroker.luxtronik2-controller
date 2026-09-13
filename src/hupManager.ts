@@ -1,9 +1,15 @@
 import type { AdapterInstance } from '@iobroker/adapter-core';
 import { writeLog } from './logger';
 
+/**
+ * Erweitertes ioBroker Adapter-Interface für den HUP-Manager.
+ */
 export interface HupAdapter extends AdapterInstance {
+	/** Die Adapter-Konfiguration kombiniert mit dynamischen Werten. */
 	config: ioBroker.AdapterConfig & Record<string, any>;
+	/** Funktion zum Synchronisieren eines Wertes mit der Wärmepumpe. */
 	syncConfigValue: (key: string, value: any) => Promise<void>;
+	/** Gibt an, ob das erweiterte Debug-Logging aktiv ist. */
 	isDebugLogActive?: boolean;
 }
 

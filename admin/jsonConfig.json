@@ -325,6 +325,27 @@
 					"lg": 12,
 					"xl": 12
 				},
+				"hup_voltage_factor": {
+					"type": "select",
+					"label": {
+						"en": "Hardware voltage scale",
+						"de": "Hardware Spannungs-Faktor"
+					},
+					"help": {
+						"en": "Select 100 for V2.x (1000 = 10.0V). Select 10 for V3.x (100 = 10.0V).",
+						"de": "Für V2.x Firmware: 100 wählen (1000 = 10,0V). Für V3.x Firmware (z.B. LWCV 82): 10 wählen (100 = 10,0V)."
+					},
+					"options": [
+						{ "label": "100 (Standard / Firmware V2.x)", "value": 100 },
+						{ "label": "10 (Firmware V3.x)", "value": 10 }
+					],
+					"default": 100,
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
 				"hup_optimierung_aktiv": {
 					"type": "checkbox",
 					"label": {
