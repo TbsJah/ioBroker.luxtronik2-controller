@@ -24,6 +24,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var utils = __toESM(require("@iobroker/adapter-core"));
 var import_actionHandlers = require("./actionHandlers");
 var import_convert = require("./convert");
+var import_hupManager = require("./hupManager");
 var import_logger = require("./logger");
 var import_notificationManager = require("./notificationManager");
 var import_objectManager = require("./objectManager");
@@ -301,6 +302,8 @@ class Luxtronik2Controller extends utils.Adapter {
         } else if (istHeizen) {
           if (config.zip_optimierung_aktiv === true) {
             await this.syncConfigValue("zip_aktiv", (_a = config.zip_aktiv) != null ? _a : 0);
+          }
+          if (config.hup_optimierung_aktiv === true) {
             await this.syncConfigValue(
               "heating_system_circ_pump_voltage_minimal",
               (_b = config.sync_heating_system_circ_pump_voltage_minimal_heating) != null ? _b : 3
@@ -328,6 +331,8 @@ class Luxtronik2Controller extends utils.Adapter {
               await this.syncConfigValue("zip_aktiv", (_e = config.zip_aktiv_ww) != null ? _e : 120);
               await this.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)("Activate_Zip"), true, false);
             }
+          }
+          if (config.hup_optimierung_aktiv === true) {
             await this.syncConfigValue(
               "heating_system_circ_pump_voltage_minimal",
               (_f = config.sync_heating_system_circ_pump_voltage_minimal_water) != null ? _f : 3
@@ -395,26 +400,13 @@ class Luxtronik2Controller extends utils.Adapter {
             await this.syncConfigValue("heating_curve_parallel_offset", fallbackFusspunkt);
           }
         }
-        if (config.zip_optimierung_aktiv === true) {
-          const now = Date.now();
-          if (now - this.lastPumpOptimization > 6e5) {
-            if (spreizung < 6.5 && hupAktiv > 5.5) {
-              await this.syncConfigValue("heating_system_circ_pump_voltage_nominal", hupAktiv - 0.25);
-              this.lastPumpOptimization = now;
-              (0, import_logger.writeLog)(
-                `Temperature spread too low (${spreizung}K). Scaling down HUP nominal target to ${hupAktiv - 0.25}V.`,
-                "info"
-              );
-            } else if (spreizung > 7.5 && hupAktiv < 10) {
-              await this.syncConfigValue("heating_system_circ_pump_voltage_nominal", hupAktiv + 0.25);
-              this.lastPumpOptimization = now;
-              (0, import_logger.writeLog)(
-                `Temperature spread too high (${spreizung}K). Scaling up HUP nominal target to ${hupAktiv + 0.25}V.`,
-                "info"
-              );
-            }
-          }
-        }
+        this.lastPumpOptimization = await (0, import_hupManager.handleHupOptimization)(
+          this,
+          istHeizen,
+          spreizung,
+          hupAktiv,
+          this.lastPumpOptimization
+        );
         if (isRegelungAktiv) {
           if (ruecklauf >= ruecklaufSoll + heizenHysterese - 0.1) {
             if (aelterAls10) {

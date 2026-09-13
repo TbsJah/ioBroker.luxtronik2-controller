@@ -4,6 +4,7 @@
 import * as utils from '@iobroker/adapter-core';
 import { handleZwangsheizen, handleZwangswarmwasser } from './actionHandlers';
 import { formatTimerSecondsToTime, timeStringToSeconds } from './convert';
+import { handleHupOptimization } from './hupManager';
 import { initLogger, setCustomDebug, writeLog } from './logger';
 import { checkAndSendErrorNotifications, handleTestMessage, sendTelegramNotification } from './notificationManager';
 import {
@@ -351,6 +352,8 @@ class Luxtronik2Controller extends utils.Adapter {
 				} else if (istHeizen) {
 					if (config.zip_optimierung_aktiv === true) {
 						await this.syncConfigValue('zip_aktiv', config.zip_aktiv ?? 0);
+					}
+					if (config.hup_optimierung_aktiv === true) {
 						await this.syncConfigValue(
 							'heating_system_circ_pump_voltage_minimal',
 							config.sync_heating_system_circ_pump_voltage_minimal_heating ?? 3,
@@ -383,7 +386,9 @@ class Luxtronik2Controller extends utils.Adapter {
 							// Makro über den Trigger-Datenpunkt auslösen
 							await this.setOwnStateIfDifferent(getDpPath('Activate_Zip'), true, false);
 						}
+					}
 
+					if (config.hup_optimierung_aktiv === true) {
 						await this.syncConfigValue(
 							'heating_system_circ_pump_voltage_minimal',
 							config.sync_heating_system_circ_pump_voltage_minimal_water ?? 3,
@@ -458,26 +463,14 @@ class Luxtronik2Controller extends utils.Adapter {
 					}
 				}
 
-				if (config.zip_optimierung_aktiv === true) {
-					const now = Date.now();
-					if (now - this.lastPumpOptimization > 600000) {
-						if (spreizung < 6.5 && hupAktiv > 5.5) {
-							await this.syncConfigValue('heating_system_circ_pump_voltage_nominal', hupAktiv - 0.25);
-							this.lastPumpOptimization = now;
-							writeLog(
-								`Temperature spread too low (${spreizung}K). Scaling down HUP nominal target to ${hupAktiv - 0.25}V.`,
-								'info',
-							);
-						} else if (spreizung > 7.5 && hupAktiv < 10) {
-							await this.syncConfigValue('heating_system_circ_pump_voltage_nominal', hupAktiv + 0.25);
-							this.lastPumpOptimization = now;
-							writeLog(
-								`Temperature spread too high (${spreizung}K). Scaling up HUP nominal target to ${hupAktiv + 0.25}V.`,
-								'info',
-							);
-						}
-					}
-				}
+				// Ausgelagerte HUP-Optimierung aufrufen
+				this.lastPumpOptimization = await handleHupOptimization(
+					this,
+					istHeizen,
+					spreizung,
+					hupAktiv,
+					this.lastPumpOptimization,
+				);
 
 				if (isRegelungAktiv) {
 					// WICHTIG: Heizen_nach_Wasser Logik (Reset & Setzen)
