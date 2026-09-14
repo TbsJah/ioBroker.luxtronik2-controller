@@ -30,6 +30,7 @@ var import_notificationManager = require("./notificationManager");
 var import_objectManager = require("./objectManager");
 var import_rawFunctions = require("./rawFunctions");
 var import_stateMapping = require("./stateMapping");
+var import_svgGenerator = require("./svgGenerator");
 var import_virtualStates = require("./virtualStates");
 var import_zipManager = require("./zipManager");
 class Luxtronik2Controller extends utils.Adapter {
@@ -80,15 +81,36 @@ class Luxtronik2Controller extends utils.Adapter {
     this.on("unload", this.onUnload.bind(this));
     this.on("message", this.onMessage.bind(this));
   }
-  /**
-   * Processes incoming inter-adapter messages or commands dispatched from the Admin UI.
-   *
-   * @param obj - The standardized ioBroker message structure containing parameters and optional callbacks.
-   * @returns A promise that resolves once the message has been processed.
-   */
   async onMessage(obj) {
     if (obj.command === "testTelegram") {
       await (0, import_notificationManager.handleTestMessage)(this, obj);
+    } else if (obj.command === "getHeatCurve") {
+      try {
+        let fp = 21.7;
+        let ep = 23;
+        if (obj.message && typeof obj.message === "object") {
+          const msg = obj.message;
+          if (msg.fusspunkt !== void 0) {
+            fp = parseFloat(msg.fusspunkt);
+          }
+          if (msg.endpunkt !== void 0) {
+            ep = parseFloat(msg.endpunkt);
+          }
+        }
+        if (isNaN(fp)) {
+          fp = 21.7;
+        }
+        if (isNaN(ep)) {
+          ep = 23;
+        }
+        const svg = (0, import_svgGenerator.generateHeatCurveSVG)(fp, ep);
+        const base64 = `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
+        if (obj.callback) {
+          this.sendTo(obj.from, obj.command, base64, obj.callback);
+        }
+      } catch (err) {
+        this.log.error(`Error generating heat curve: ${err.message}`);
+      }
     }
   }
   /**

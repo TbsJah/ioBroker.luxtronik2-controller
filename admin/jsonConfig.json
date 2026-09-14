@@ -9,7 +9,7 @@
 				"en": "Connection",
 				"de": "Verbindung"
 			},
-			"icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMjQgMjQiPgoJPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIgLz4KCTxwYXRoIGZpbGw9ImN1cnJlbnRDb2xvciIgZD0iTTEwLjU4OCAxNC40MTNRMTAgMTMuODI1IDEwIDEzcTAtLjU3NS4yMzgtMS4xMzd0LjkxMi0xLjYxM2wuNDI1LS42MjVxLjE1LS4yMjUuNDI1LS4yMjV0LjQyNS4yMjVsLjQyNS42MjVxLjY3NSAxLjA1LjkxMyAxLjYxM1QxNCAxM3EwIC44MjUtLjU4NyAxLjQxM1QxMiAxNXQtMS40MTItLjU4N00zIDE3aDQuMXEtLjQyNS0uNDI1LS43ODctLjkyNVQ1LjY3NSAxNUgzem0xMi41MzgtMS40NjNRMTcgMTQuMDc2IDE3IDEydC0xLjQ2My0zLjUzN1QxMiA3VDguNDYzIDguNDYzVDcgMTJ0MS40NjMgMy41MzhUMTIgMTd0My41MzgtMS40NjNNMTguMzI1IDlIMjFWN2gtNC4xcS40MjUuNDI1Ljc4OC45MjVUMTguMzI1IDlNMyAxOXEwIC40MjUtLjI4OC43MTNUMiAyMHQtLjcxMi0uMjg4VDEgMTl2LTZxMC0uNDI1LjI4OC0uNzEyVDIgMTJ0LjcxMy4yODhUMyAxM2gyLjA3NXEtLjA1LS4yNS0uMDYyLS40ODhUNSAxMnEwLTIuOTI1IDIuMDM4LTQuOTYyVDEyIDVoOXEwLS40MjUuMjg4LS43MTJUMjIgNHQuNzEzLjI4OFQyMyA1djZxMCAuNDI1LS4yODguNzEzVDIyIDEydC0uNzEyLS4yODhUMjEgMTFoLTIuMDc1cS4wNS4yNS4wNjMuNDg4VDE5IDEycTAgMi45MjUtMi4wMzcgNC45NjNUMTIgMTl6bTAtMnYtMnptMTgtOFY3em0tOSAzIiAvPgo8L3N2Zz4K",
+			"icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMjQgMjQiPgoJPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIgLz4KCTxwYXRoIGZpbGw9ImN1cnJlbnRDb2xvciIgZD0iTTMuMDI1IDIwLjk3NVEyIDE5Ljk1IDIgMTguNXQxLjAyNS0yLjQ3NVQ1LjUgMTVxLjQ1IDAgLjg3NS4xMTJ0LjguMzEzTDExIDExLjZWOC44NXEtMS4xLS4zMjUtMS44LTEuMjM3VDguNSA1LjVxMC0xLjQ1IDEuMDI1LTIuNDc1VDEyIDJ0Mi40NzUgMS4wMjVUMTUuNSA1LjVxMCAxLjItLjcgMi4xMTNUMTMgOC44NXYyLjc1bDMuODUgMy44MjVxLjM3NS0uMi43ODgtLjMxMlQxOC41IDE1cTEuNDUgMCAyLjQ3NSAxLjAyNVQyMiAxOC41dC0xLjAyNSAyLjQ3NVQxOC41IDIydC0yLjQ3NS0xLjAyNVQxNSAxOC41cTAtLjQ1LjExMi0uODc1dC4zMTMtLjhMMTIgMTMuNGwtMy40MjUgMy40MjVxLjIuMzc1LjMxMy44VDkgMTguNXEwIDEuNDUtMS4wMjUgMi40NzVUNS41IDIydC0yLjQ3NS0xLjAyNW0xNi41MzgtMS40MTJRMjAgMTkuMTI1IDIwIDE4LjV0LS40MzctMS4wNjJUMTguNSAxN3QtMS4wNjIuNDM4VDE3IDE4LjV0LjQzOCAxLjA2M1QxOC41IDIwdDEuMDYzLS40MzdtLTYuNS0xM3EuNDM3LS40MzguNDM3LTEuMDYzdC0uNDM3LTEuMDYyVDEyIDR0LTEuMDYyLjQzOFQxMC41IDUuNXQuNDM4IDEuMDYzVDEyIDd0MS4wNjMtLjQzN20tNi41IDEzUTcgMTkuMTI1IDcgMTguNXQtLjQzNy0xLjA2MlQ1LjUgMTd0LTEuMDYyLjQzOFQ0IDE4LjV0LjQzOCAxLjA2M1Q1LjUgMjB0MS4wNjMtLjQzNyIgLz4KPC9zdmc+Cg==",
 			"items": {
 				"headerConnection": {
 					"type": "header",
@@ -140,7 +140,7 @@
 						"en": "By default, the Luxtronik controller treats heating and domestic hot water (DHW) cycles as separate operations. This adapter coordinates the run so the compressor transitions seamlessly into heating without shutting down.<br><br>➔ <i>Trigger rule:</i> If <b>(DHW Target - DHW Actual) ≥ (DHW Hysteresis - 1.5 K)</b> and <b>Heating Return ≤ Return Target</b> and outdoor heating threshold is not active, heating is triggered directly with Return Target temporarily set to 35°C to force compressor operation.",
 						"de": "Standardmäßig behandelt die Luxtronik-Steuerung Heiz- und Warmwassertakte strikt getrennt. Dieser Adapter koppelt die Vorgänge, sodass der Verdichter ohne Zwischenstopp direkt in den Heizbetrieb übergeht.<br><br>➔ <i>Auslöser-Regel:</i> Wenn <b>(WW Soll - WW Ist) ≥ (WW Hysterese - 1,5 K)</b> und <b>Heizung Rücklauf ≤ Rücklauf Soll</b> und die Heizgrenze nicht aktiv ist, wird direkt der Heizbetrieb gestartet und der Rücklauf-Sollwert temporär auf 35°C gesetzt, um das Heizen zu erzwingen."
 					},
-					"style": { "height": "140px" },
+					"style": { "marginBottom": "20px", "fontSize": "14px" },
 					"xs": 12,
 					"sm": 12,
 					"md": 12,
@@ -154,6 +154,14 @@
 						"de": "Intelligente Takt-Optimierung aktivieren"
 					},
 					"default": false,
+					"confirm": {
+						"condition": "data.regelung_aktiv === true && data.idle_defaults_aktiv !== true",
+						"title": { "en": "Important Recommendation", "de": "Wichtige Empfehlung" },
+						"text": {
+							"en": "You are activating the intelligent cycle optimization. It is highly recommended to also enable 'Force default values during idle' in the 'Idle Defaults' tab! This ensures that the heat pump returns to a safe state after the adapter intervenes.",
+							"de": "Du aktivierst die intelligente Takt-Optimierung. Es wird dringend empfohlen, im Reiter 'Leerlauf' die Option 'Standardwerte im Leerlauf erzwingen' einzuschalten! Nur so ist garantiert, dass die Wärmepumpe nach dem Eingreifen des Adapters wieder in einen sicheren Ursprungszustand zurückkehrt."
+						}
+					},
 					"xs": 12,
 					"sm": 6,
 					"md": 6,
@@ -163,13 +171,49 @@
 				"Heating_after_warmwater": {
 					"type": "checkbox",
 					"label": { "en": "Heating after hot water", "de": "Heizen nach Warmwasser erzwingen" },
-					"disabled": "!data.regelung_aktiv",
+					"hidden": "!data.regelung_aktiv",
 					"default": false,
 					"xs": 12,
 					"sm": 6,
 					"md": 6,
 					"lg": 6,
 					"xl": 6
+				},
+				"exampleImageCycle_de": {
+					"type": "staticImage",
+					"src": "img/Takt_Optimierung_de.svg",
+					"hidden": "systemConfig.language !== 'de'",
+					"style": {
+						"width": "1200px",
+						"maxWidth": "100%",
+						"height": "auto",
+						"border": "1px solid #cccccc",
+						"borderRadius": "5px",
+						"marginTop": "10px"
+					},
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
+				"exampleImageCycle_en": {
+					"type": "staticImage",
+					"src": "img/Takt_Optimierung_en.svg",
+					"hidden": "systemConfig.language === 'de'",
+					"style": {
+						"width": "1200px",
+						"maxWidth": "100%",
+						"height": "auto",
+						"border": "1px solid #cccccc",
+						"borderRadius": "5px",
+						"marginTop": "10px"
+					},
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
 				}
 			}
 		},
@@ -184,10 +228,29 @@
 				"informationIdle": {
 					"type": "staticText",
 					"text": {
-						"en": "To prevent EEPROM/flash wear on your Luxtronik controller, parameters are only updated during active optimizations. Once the heat pump returns to idle, all modified parameters are automatically reverted to your defined default values below to ensure a safe operating state.",
-						"de": "Um den internen Flash-Speicher der Luxtronik zu schonen, werden Schreibzugriffe nur während aktiver Optimierungen (z.B. Heiztakt) ausgeführt. Das Erzwingen der Vorgabewerte im Leerlauf (Standby) stellt sicher, dass die Anlage danach immer in einen sauberen Ausgangszustand zurückkehrt."
+						"en": "<b>⚠️ Flash Memory Protection</b><br>To prevent EEPROM/flash wear on your Luxtronik controller, parameters are only updated during active optimizations. Once the heat pump returns to idle, all modified parameters are automatically reverted to your defined default values below to ensure a safe operating state.<br><br><b>💡 Recommendation:</b> It is highly recommended to enable this feature if you use the intelligent cycle optimization (hot water + heating) and/or the dynamic HUP control!",
+						"de": "<b>⚠️ Hardware-Schutz (Flash-Memory)</b><br>Um den internen Speicher der Luxtronik zu schonen, greift dieser Adapter nur dann schreibend ein, wenn eine aktive Optimierung läuft (z.B. ein Heiztakt). Sobald die Wärmepumpe wieder in den Leerlauf (Standby) wechselt, müssen die Parameter auf sichere Standardwerte zurückgesetzt werden. <br><br><i>Trage hier unbedingt die originalen Werte deiner Heizungsanlage ein!</i><br><br><b>💡 Empfehlung:</b> Es wird dringend empfohlen, diese Vorgabewerte zu aktivieren, wenn du die intelligente Takt-Optimierung (Warmwasser + Heizen) und/oder die dynamische HUP-Steuerung nutzt!"
 					},
-					"style": { "height": "80px" },
+					"style": { "marginBottom": "15px", "fontSize": "14px" },
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
+				"heatCurveCredit": {
+					"type": "staticText",
+					"text": {
+						"en": "💡 <b>Note:</b> A big thank you to <a href='https://www.mnemotron.de/lux/heatcurve.html' target='_blank' style='color: #1976d2; text-decoration: none;'>mnemotron.de</a> for the inspiration for this visual heat curve diagram!",
+						"de": "💡 <b>Hinweis:</b> Ein großes Dankeschön an <a href='https://www.mnemotron.de/lux/heatcurve.html' target='_blank' style='color: #1976d2; text-decoration: none;'>mnemotron.de</a> für die Inspiration zu dieser Heizkurven-Darstellung!"
+					},
+					"hidden": "!data.idle_defaults_aktiv",
+					"style": {
+						"fontSize": "12px",
+						"fontStyle": "italic",
+						"marginTop": "-10px",
+						"marginBottom": "20px"
+					},
 					"xs": 12,
 					"sm": 12,
 					"md": 12,
@@ -256,6 +319,28 @@
 					"lg": 4,
 					"xl": 4
 				},
+				"sync_heating_system_circ_pump_voltage_minimal_heating": {
+					"type": "number",
+					"label": { "en": "HUP Min (Heating) (V)", "de": "HUP Min (Heizen) (V)" },
+					"hidden": "!data.idle_defaults_aktiv",
+					"default": 3,
+					"xs": 12,
+					"sm": 6,
+					"md": 6,
+					"lg": 6,
+					"xl": 6
+				},
+				"sync_heating_system_circ_pump_voltage_nominal_heating": {
+					"type": "number",
+					"label": { "en": "HUP Nom (Heating) (V)", "de": "HUP Nom (Heizen) (V)" },
+					"hidden": "!data.idle_defaults_aktiv",
+					"default": 7,
+					"xs": 12,
+					"sm": 6,
+					"md": 6,
+					"lg": 6,
+					"xl": 6
+				},
 				"headerWater": {
 					"type": "header",
 					"text": { "en": "Default values: Hot water", "de": "Vorgabewerte Warmwasser" },
@@ -289,39 +374,6 @@
 					"lg": 6,
 					"xl": 6
 				},
-				"headerHupDefaults": {
-					"type": "header",
-					"text": { "en": "Default values: Heating Pump (HUP)", "de": "Vorgabewerte Heizungspumpe (HUP)" },
-					"hidden": "!data.idle_defaults_aktiv",
-					"size": 4,
-					"xs": 12,
-					"sm": 12,
-					"md": 12,
-					"lg": 12,
-					"xl": 12
-				},
-				"sync_heating_system_circ_pump_voltage_minimal_heating": {
-					"type": "number",
-					"label": { "en": "HUP Min (Heating) (V)", "de": "HUP Min (Heizen) (V)" },
-					"hidden": "!data.idle_defaults_aktiv",
-					"default": 3,
-					"xs": 12,
-					"sm": 6,
-					"md": 3,
-					"lg": 3,
-					"xl": 3
-				},
-				"sync_heating_system_circ_pump_voltage_nominal_heating": {
-					"type": "number",
-					"label": { "en": "HUP Nom (Heating) (V)", "de": "HUP Nom (Heizen) (V)" },
-					"hidden": "!data.idle_defaults_aktiv",
-					"default": 7,
-					"xs": 12,
-					"sm": 6,
-					"md": 3,
-					"lg": 3,
-					"xl": 3
-				},
 				"sync_heating_system_circ_pump_voltage_minimal_water": {
 					"type": "number",
 					"label": { "en": "HUP Min (HW) (V)", "de": "HUP Min (WW) (V)" },
@@ -329,9 +381,9 @@
 					"default": 3,
 					"xs": 12,
 					"sm": 6,
-					"md": 3,
-					"lg": 3,
-					"xl": 3
+					"md": 6,
+					"lg": 6,
+					"xl": 6
 				},
 				"sync_heating_system_circ_pump_voltage_nominal_water": {
 					"type": "number",
@@ -340,9 +392,29 @@
 					"default": 10,
 					"xs": 12,
 					"sm": 6,
-					"md": 3,
-					"lg": 3,
-					"xl": 3
+					"md": 6,
+					"lg": 6,
+					"xl": 6
+				},
+				"heatCurvePreview": {
+					"type": "imageSendTo",
+					"command": "getHeatCurve",
+					"data": {
+						"fusspunkt": "${data.fusspunkt}",
+						"endpunkt": "${data.endpunkt}"
+					},
+					"alsoDependsOn": ["fusspunkt", "endpunkt"],
+					"hidden": "!data.idle_defaults_aktiv",
+					"style": {
+						"maxWidth": "800px",
+						"marginTop": "20px",
+						"marginBottom": "20px"
+					},
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
 				}
 			}
 		},
@@ -357,10 +429,10 @@
 				"infoHup": {
 					"type": "staticText",
 					"text": {
-						"en": "Dynamic voltage control for 0–10V / PWM heating circulating pumps (HUP). Automatically adjusts nominal pump voltage during heating cycles based on supply/return temperature spread.",
-						"de": "Dynamische Spannungsregelung für steuerbare 0–10V / PWM-Heizungsumwälzpumpen (HUP). Passt die Nominalspannung während des Heizbetriebs anhand der Vor-/Rücklaufspreizung automatisch an."
+						"en": "Dynamic voltage control for 0–10V / PWM heating circulating pumps (HUP). Automatically adjusts nominal pump voltage during heating cycles based on supply/return temperature spread.<br><br><b>⚠️ Important Prerequisites:</b><br>1. <b>Hardware Check:</b> Only enable this if your pump is actively controlled by the Luxtronik controller (e.g. via 0-10V or PWM). If you have a self-regulating pump (like Grundfos ALPHA2 AutoAdapt), it optimizes flow on its own. Using this adapter function simultaneously would cause both systems to fight each other!<br>2. <b>System Types:</b> The ideal spread depends entirely on your heating system. Underfloor heating (FBH) typically requires 3 to 5 K, whereas traditional radiators often run optimally between 7 to 10 K.<br>3. <b>Voltage Scale:</b> Ensure you select the correct hardware multiplier for your firmware version below.",
+						"de": "Dynamische Spannungsregelung für steuerbare 0–10V / PWM-Heizungsumwälzpumpen (HUP). Passt die Nominalspannung während des Heizbetriebs anhand der Vor-/Rücklaufspreizung automatisch an.<br><br><b>⚠️ Wichtige Voraussetzungen:</b><br>1. <b>Hardware-Check:</b> Aktiviere dies nur, wenn deine Pumpe wirklich vom Luxtronik-Regler (0-10V / PWM) gesteuert wird! Wenn du eine selbstregelnde Hocheffizienzpumpe (z. B. Grundfos ALPHA2 AutoAdapt) verbaut hast, optimiert diese den Volumenstrom bereits selbst. Würde der Adapter eingreifen, arbeiten beide Regler gegeneinander!<br>2. <b>Anlagentyp:</b> Die optimale Spreizung ist extrem individuell. Eine Fußbodenheizung (FBH) benötigt meist 3 bis 5 Kelvin, Radiatoren oft 7 bis 10 Kelvin.<br>3. <b>Spannungsfaktor:</b> Wähle unten zwingend die korrekte Hardware-Skalierung passend zu deiner Firmware."
 					},
-					"style": { "height": "50px" },
+					"style": { "marginBottom": "20px", "fontSize": "14px" },
 					"xs": 12,
 					"sm": 12,
 					"md": 12,
@@ -395,6 +467,14 @@
 						"de": "Dynamische HUP-Spreizungsregelung aktivieren"
 					},
 					"default": false,
+					"confirm": {
+						"condition": "data.hup_optimierung_aktiv === true && data.idle_defaults_aktiv !== true",
+						"title": { "en": "Important Recommendation", "de": "Wichtige Empfehlung" },
+						"text": {
+							"en": "You are activating dynamic pump control. It is highly recommended to also enable 'Force default values during idle' in the 'Idle Defaults' tab! This ensures your pump returns to its safe baseline voltage when the heating cycle finishes.",
+							"de": "Du aktivierst die dynamische Pumpensteuerung. Es wird dringend empfohlen, im Reiter 'Leerlauf' die Option 'Standardwerte im Leerlauf erzwingen' einzuschalten! Nur so ist garantiert, dass die Pumpenspannung nach dem Heizen wieder auf den sicheren Ursprungswert zurückfällt."
+						}
+					},
 					"xs": 12,
 					"sm": 12,
 					"md": 12,
@@ -506,6 +586,44 @@
 					"md": 4,
 					"lg": 4,
 					"xl": 4
+				},
+				"hupImage_de": {
+					"type": "staticImage",
+					"src": "img/HUP_Optimierung_de.svg",
+					"hidden": "!systemConfig.language || !systemConfig.language.startsWith('de')",
+					"style": {
+						"width": "900px",
+						"maxWidth": "100%",
+						"height": "auto",
+						"border": "1px solid #cccccc",
+						"borderRadius": "5px",
+						"marginTop": "20px",
+						"marginBottom": "20px"
+					},
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
+				"hupImage_en": {
+					"type": "staticImage",
+					"src": "img/HUP_Optimierung_en.svg",
+					"hidden": "systemConfig.language && systemConfig.language.startsWith('de')",
+					"style": {
+						"width": "900px",
+						"maxWidth": "100%",
+						"height": "auto",
+						"border": "1px solid #cccccc",
+						"borderRadius": "5px",
+						"marginTop": "20px",
+						"marginBottom": "20px"
+					},
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
 				}
 			}
 		},

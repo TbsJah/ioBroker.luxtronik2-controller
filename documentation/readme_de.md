@@ -25,8 +25,56 @@ Auf dieser Seite werden die grundlegenden Netzwerkeinstellungen für die Kommuni
 
 _Beispiel: Wenn die Wärmepumpe Wasser aufheizt, schreibt der Adapter je nach Auswahl entweder `Warmwasser` (Deutsch) oder `Hot water` (Englisch) in den Objektbaum._
 
-![Beispiel für übersetzte Werte im ioBroker Objektbaum DE](./documentation/Bilder/Objekte_DE.png)
-![Beispiel für übersetzte Werte im ioBroker Objektbaum EN](./documentation/Bilder/Objekte_EN.png)
+![Beispiel für übersetzte Werte im ioBroker Objektbaum](./admin/img/Objekte.png)
+
+### 2. Reiter: Takt-Optimierung
+
+Standardmäßig behandelt die Luxtronik-Steuerung Heiz- und Warmwassertakte strikt getrennt. Dies führt oft dazu, dass der Verdichter nach der Warmwasserbereitung stoppt, nur um kurz darauf für einen Heiztakt wieder anzulaufen (erhöhter Verschleiß). Dieser Adapter koppelt die Vorgänge intelligent, sodass der Verdichter nahtlos und effizient in einem einzigen Takt durchläuft.
+
+- **Intelligente Takt-Optimierung aktivieren:** Schaltet die übergreifende Logik zur Vermeidung von unnötigen Verdichter-Stopps ein.
+    - **Auslöser-Regel (Vorzündung):** Wenn das Warmwasser abkühlt `(WW Soll - WW Ist ≥ WW Hysterese - 1,5 K)` **UND** gleichzeitig Heizbedarf besteht `(Rücklauf Ist ≤ Rücklauf Soll)` sowie die Sommer-Heizgrenze nicht aktiv ist, greift der Adapter ein.
+    - **Aktion:** Der Adapter startet direkt den Heizbetrieb und setzt den Rücklauf-Sollwert temporär auf 35°C, um das sofortige Anlaufen des Verdichters zu erzwingen. Wenn die Anlage kurz darauf auf Warmwasser umschaltet, läuft der Verdichter einfach weiter.
+- **Heizen nach Warmwasser erzwingen:** Wenn aktiv, prüft der Adapter das System auch _nach_ einem Warmwassertakt. Der Rücklauf-Sollwert bleibt auf 35°C angehoben, damit der Verdichter nach der Warmwasserbereitung nicht abschaltet, sondern sofort den Heiztakt fortsetzt.
+
+> **⚠️ Wichtiger Hinweis:**
+> Wenn du diese Takt-Optimierung nutzt, wird **dringend empfohlen**, im Reiter _"Leerlauf"_ die Option _"Standardwerte im Leerlauf erzwingen"_ zu aktivieren. Nur so ist garantiert, dass der temporär manipulierte 35°C-Sollwert am Ende des Taktes wieder sauber auf deine normalen Heizungs-Werte zurückgesetzt wird!
+
+![Beispiel für die Taktoptimierung](./admin/img/Takt_Optimierung_de.svg)
+
+### 3. Reiter: Leerlauf (Hardware-Schutz)
+
+Die Luxtronik-Steuerung speichert geänderte Parameter in einem internen Flash-Speicher, der nur eine begrenzte Anzahl an Schreibzyklen verträgt (EEPROM Flash Wear). Um diesen Speicher zu schonen, greift der Adapter schreibend nur dann ein, wenn die Anlage aktiv läuft (Heizen oder Warmwasser).
+
+Sobald die Wärmepumpe in den **Leerlauf (Standby)** wechselt, ist die Optimierung beendet. Um zu verhindern, dass die Anlage mit temporären (veränderten) Parametern aus der Optimierung weiterläuft, zwingt der Adapter die Steuerung zurück in einen sicheren Ausgangszustand.
+
+> **💡 Dringende Empfehlung:**
+> Wenn du die **intelligente Takt-Optimierung** (Kopplung von Warmwasser und Heizung) und/oder die **dynamische HUP-Steuerung** nutzt, solltest du das Setzen der Standardwerte im Leerlauf unbedingt aktivieren! Nur so ist garantiert, dass die Anlage nach einem Eingriff des Adapters wieder exakt mit deinen originalen Wunschwerten weiterarbeitet.
+
+- **Vorgabewerte:** Trage hier zwingend die exakten Original-Vorgabewerte deiner Heizung ein (z. B. Standard-Hysterese für Heizen/Warmwasser, Fußpunkt, Endpunkt und Pumpenspannungen).
+- **Visuelle Heizkurve:** Zur besseren Orientierung generiert der Adapter live eine grafische Vorschau deiner Heizkurve (Rücklauf-Soll), sobald du Fuß- und Endpunkt einträgst. _(Ein großes Dankeschön an [mnemotron.de](https://www.mnemotron.de/lux/heatcurve.html) für die Inspiration zu dieser Darstellung!)_
+
+### 4. Reiter: Heizumwälzpumpe (HUP)
+
+Die Heizumwälzpumpe (HUP) befördert das warme Wasser von der Wärmepumpe in deinen Heizkreis. Eine feste Pumpenleistung ist jedoch ineffizient: Ist sie zu hoch, rauscht das Wasser zu schnell durch die Rohre und kann die Wärme nicht optimal an den Raum abgeben. Ist sie zu niedrig, kühlt das Wasser zu stark ab und die Wärmepumpe verliert an Effizienz.
+
+Dieser Adapter löst das Problem über eine **dynamische Steuerung anhand der Temperaturspreizung** (Differenz zwischen Vorlauf und Rücklauf). Die Steuerspannung der Pumpe wird während eines Heiztaktes in regelmäßigen Abständen in winzigen Schritten erhöht oder verringert, um immer genau im perfekten Zielbereich zu bleiben.
+
+> **⚠️ Wichtige Voraussetzungen (Bitte vor Aktivierung prüfen!)**
+>
+> 1. **Hardware-Kompatibilität:** Nutze diese Funktion nur, wenn deine Umwälzpumpe wirklich über ein Steuerkabel (0-10V oder PWM) an die Luxtronik-Platine angeschlossen ist! Besitzt du eine Pumpe, die den Volumenstrom eigenständig regelt (z. B. eine _Grundfos ALPHA2 AutoAdapt_ auf Stellung "Auto"), darfst du die Funktion **nicht** aktivieren. Andernfalls würden der Adapter und die Pumpe permanent gegeneinander regeln.
+> 2. **Spannungsfaktor (Firmware):** Ältere V2.x-Firmwares erwarten die Steuerspannung in einem anderen Datenformat als neuere V3.x-Firmwares (z. B. bei der LWCV 82). Wähle in der Konfiguration zwingend den richtigen Hardware-Faktor für deine Anlage aus (`100` für V2.x vs. `10` für V3.x).
+> 3. **Sicherheits-Reset (Leerlauf):** Aktiviere unbedingt die Funktion _"Standardwerte im Leerlauf erzwingen"_ im Reiter "Leerlauf". Dadurch fällt die Pumpe nach Ende des Heiztaktes wieder auf ihre feste Standardspannung zurück, anstatt auf dem manipulierten Wert stehen zu bleiben.
+
+#### Konfiguration deiner Anlage
+
+Die optimale Temperaturspreizung ist für jedes Haus extrem individuell und hängt vom Heizsystem ab:
+
+- **Fußbodenheizung (FBH):** Arbeitet mit viel Wasser und niedrigen Temperaturen. Hier sind **3 bis 5 Kelvin** Spreizung oft optimal.
+- **Heizkörper (Radiatoren):** Benötigen höhere Vorlauftemperaturen und kühlen im Raum stärker ab. Hier rechnet man meist mit **7 bis 10 Kelvin** Spreizung.
+
+Trage unter _Minimum/Maximum Spreizung_ die für dein System passenden Grenzwerte ein. Der Adapter wird dann alle _X Minuten_ (Einstellintervall) prüfen, ob die Spreizung noch im Zielkorridor liegt. Ist die Spreizung zu gering (Wasser fließt zu schnell), wird die Pumpenspannung um die eingestellte _Schrittgröße_ (z. B. 0,25 V) verringert. Ist die Spreizung zu hoch, wird sie sanft erhöht.
+
+![Beispiel für die HUP-Optimierung](./admin/img/HUP_Optimierung_de.svg)
 
 ## Aktionen & Automatisierungen (folder: Aktionen)
 

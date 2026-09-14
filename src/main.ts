@@ -17,6 +17,7 @@ import {
 } from './objectManager';
 import { dumpAllRawToLog, queueWrite, readAllRaw } from './rawFunctions';
 import { STATE_MAPPING, getDpPath } from './stateMapping';
+import { generateHeatCurveSVG } from './svgGenerator';
 import {
 	calculateTemperatureSpread,
 	calculateTotalEnergy,
@@ -91,15 +92,44 @@ class Luxtronik2Controller extends utils.Adapter {
 		this.on('message', this.onMessage.bind(this));
 	}
 
-	/**
-	 * Processes incoming inter-adapter messages or commands dispatched from the Admin UI.
-	 *
-	 * @param obj - The standardized ioBroker message structure containing parameters and optional callbacks.
-	 * @returns A promise that resolves once the message has been processed.
-	 */
 	private async onMessage(obj: ioBroker.Message): Promise<void> {
 		if (obj.command === 'testTelegram') {
 			await handleTestMessage(this, obj);
+		} else if (obj.command === 'getHeatCurve') {
+			try {
+				let fp = 21.7;
+				let ep = 23.0;
+
+				// Werte aus der Config-UI auslesen
+				if (obj.message && typeof obj.message === 'object') {
+					const msg = obj.message as Record<string, any>;
+					if (msg.fusspunkt !== undefined) {
+						fp = parseFloat(msg.fusspunkt);
+					}
+					if (msg.endpunkt !== undefined) {
+						ep = parseFloat(msg.endpunkt);
+					}
+				}
+
+				// Fallbacks, falls der Nutzer Quatsch eintippt
+				if (isNaN(fp)) {
+					fp = 21.7;
+				}
+				if (isNaN(ep)) {
+					ep = 23.0;
+				}
+
+				// SVG generieren und als Base64-Bild verpacken
+				const svg = generateHeatCurveSVG(fp, ep);
+				const base64 = `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`;
+
+				// Bild zurück an die Benutzeroberfläche schicken!
+				if (obj.callback) {
+					this.sendTo(obj.from, obj.command, base64, obj.callback);
+				}
+			} catch (err: any) {
+				this.log.error(`Error generating heat curve: ${err.message}`);
+			}
 		}
 	}
 

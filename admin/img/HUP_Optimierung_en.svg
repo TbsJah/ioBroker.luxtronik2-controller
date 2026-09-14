@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 400" style="background:#ffffff; font-family:Arial, sans-serif; border: 1px solid #e0e0e0; border-radius: 8px;">
+    <text x="450" y="40" font-size="20" font-weight="bold" fill="#333" text-anchor="middle">Logic: Dynamic HUP Spread Control</text>
+    <text x="450" y="65" font-size="13" fill="#666" text-anchor="middle">Every X minutes, the controller compares the current temperature spread (Flow - Return) with your targets.</text>
+
+    <rect x="50" y="110" width="240" height="120" fill="#e3f2fd" stroke="#2196f3" stroke-width="2" rx="8"/>
+    <text x="170" y="145" font-size="16" font-weight="bold" fill="#1565c0" text-anchor="middle">Spread &lt; Minimum</text>
+    <text x="170" y="170" font-size="13" fill="#333" text-anchor="middle">(e.g. below 6.5 K)</text>
+    <text x="170" y="200" font-size="12" fill="#555" text-anchor="middle">Water flows too fast through</text>
+    <text x="170" y="215" font-size="12" fill="#555" text-anchor="middle">the pipes (insufficient cooling)</text>
+    
+    <path d="M 170 240 L 170 290 L 160 290 L 170 310 L 180 290 L 170 290" fill="#f44336" />
+    
+    <rect x="50" y="320" width="240" height="50" fill="#ffebee" stroke="#f44336" stroke-width="2" rx="8"/>
+    <text x="170" y="350" font-size="14" font-weight="bold" fill="#c62828" text-anchor="middle">Decrease Voltage (-0.25 V)</text>
+
+    <rect x="330" y="110" width="240" height="120" fill="#e8f5e9" stroke="#4caf50" stroke-width="2" rx="8"/>
+    <text x="450" y="145" font-size="16" font-weight="bold" fill="#2e7d32" text-anchor="middle">Optimal Range</text>
+    <text x="450" y="170" font-size="13" fill="#333" text-anchor="middle">(e.g. 6.5 K to 7.5 K)</text>
+    <text x="450" y="200" font-size="12" fill="#555" text-anchor="middle">Heat transfer and flow rate</text>
+    <text x="450" y="215" font-size="12" fill="#555" text-anchor="middle">are perfectly balanced</text>
+    
+    <rect x="440" y="260" width="20" height="20" fill="#4caf50" rx="4"/>
+    
+    <rect x="330" y="320" width="240" height="50" fill="#f1f8e9" stroke="#4caf50" stroke-width="2" rx="8"/>
+    <text x="450" y="350" font-size="14" font-weight="bold" fill="#2e7d32" text-anchor="middle">Maintain Voltage (=)</text>
+
+    <rect x="610" y="110" width="240" height="120" fill="#fff3e0" stroke="#ff9800" stroke-width="2" rx="8"/>
+    <text x="730" y="145" font-size="16" font-weight="bold" fill="#e65100" text-anchor="middle">Spread &gt; Maximum</text>
+    <text x="730" y="170" font-size="13" fill="#333" text-anchor="middle">(e.g. above 7.5 K)</text>
+    <text x="730" y="200" font-size="12" fill="#555" text-anchor="middle">Water flows too slowly through</text>
+    <text x="730" y="215" font-size="12" fill="#555" text-anchor="middle">the pipes (cools down too much)</text>
+    
+    <path d="M 730 310 L 730 260 L 720 260 L 730 240 L 740 260 L 730 260" fill="#2196f3" />
+    
+    <rect x="610" y="320" width="240" height="50" fill="#e3f2fd" stroke="#2196f3" stroke-width="2" rx="8"/>
+    <text x="730" y="350" font-size="14" font-weight="bold" fill="#1565c0" text-anchor="middle">Increase Voltage (+0.25 V)</text>
+</svg>
