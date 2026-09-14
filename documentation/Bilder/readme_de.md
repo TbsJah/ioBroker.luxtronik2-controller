@@ -25,8 +25,8 @@ Auf dieser Seite werden die grundlegenden Netzwerkeinstellungen für die Kommuni
 
 _Beispiel: Wenn die Wärmepumpe Wasser aufheizt, schreibt der Adapter je nach Auswahl entweder `Warmwasser` (Deutsch) oder `Hot water` (Englisch) in den Objektbaum._
 
-![Beispiel für übersetzte Werte im ioBroker Objektbaum DE](./documentation/Bilder/Objekte_DE.png)
-![Beispiel für übersetzte Werte im ioBroker Objektbaum EN](./documentation/Bilder/Objekte_EN.png)
+![Beispiel für übersetzte Werte im ioBroker Objektbaum](./admin/img/language_example.png)
+_(Ersetze diesen Platzhalter-Pfad mit dem echten Pfad zu deinem Screenshotbild in deinem Repository)_
 
 ## Aktionen & Automatisierungen (folder: Aktionen)
 

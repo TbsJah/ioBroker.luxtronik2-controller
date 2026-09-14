@@ -492,18 +492,22 @@ class Luxtronik2Controller extends utils.Adapter {
         }
         const luxId = definition.luxWriteId || key;
         let value = void 0;
+        let appliedFactor = definition.factor;
+        if (key === "heating_system_circ_pump_voltage_nominal" || key === "heating_system_circ_pump_voltage_minimal") {
+          appliedFactor = config.hup_voltage_factor !== void 0 ? Number(config.hup_voltage_factor) : 100;
+        }
         if (definition.dataSource) {
           switch (definition.dataSource) {
             case "raw_parameter":
               value = rawParams == null ? void 0 : rawParams[parseInt(luxId, 10)];
-              if (value !== void 0 && definition.factor) {
-                value /= definition.factor;
+              if (value !== void 0 && appliedFactor) {
+                value /= appliedFactor;
               }
               break;
             case "raw_value":
               value = rawValues == null ? void 0 : rawValues[parseInt(luxId, 10)];
-              if (value !== void 0 && definition.factor) {
-                value /= definition.factor;
+              if (value !== void 0 && appliedFactor) {
+                value /= appliedFactor;
               }
               break;
             case "parameter":
@@ -516,8 +520,8 @@ class Luxtronik2Controller extends utils.Adapter {
           if (/^\d+$/.test(luxId)) {
             const idx = parseInt(luxId, 10);
             value = definition.folder.startsWith("Settings") ? rawParams == null ? void 0 : rawParams[idx] : rawValues == null ? void 0 : rawValues[idx];
-            if (value !== void 0 && definition.factor) {
-              value /= definition.factor;
+            if (value !== void 0 && appliedFactor) {
+              value /= appliedFactor;
             }
           } else {
             value = void 0;

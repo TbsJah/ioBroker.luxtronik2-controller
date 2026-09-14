@@ -9,78 +9,60 @@
 				"en": "Connection",
 				"de": "Verbindung"
 			},
-			"icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMjQgMjQiPgoJPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIgLz4KCTxwYXRoIGZpbGw9ImN1cnJlbnRDb2xvciIgZD0iTTMuMDI1IDIwLjk3NVEyIDE5Ljk1IDIgMTguNXQxLjAyNS0yLjQ3NVQ1LjUgMTVxLjQ1IDAgLjg3NS4xMTJ0LjguMzEzTDExIDExLjZWOC44NXEtMS4xLS4zMjUtMS44LTEuMjM3VDguNSA1LjVxMC0xLjQ1IDEuMDI1LTIuNDc1VDEyIDJ0Mi40NzUgMS4wMjVUMTUuNSA1LjVxMCAxLjItLjcgMi4xMTNUMTMgOC44NXYyLjc1bDMuODUgMy44MjVxLjM3NS0uMi43ODgtLjMxMlQxOC41IDE1cTEuNDUgMCAyLjQ3NSAxLjAyNVQyMiAxOC41dC0xLjAyNSAyLjQ3NVQxOC41IDIydC0yLjQ3NS0xLjAyNVQxNSAxOC41cTAtLjQ1LjExMi0uODc1dC4zMTMtLjhMMTIgMTMuNGwtMy40MjUgMy40MjVxLjIuMzc1LjMxMy44VDkgMTguNXEwIDEuNDUtMS4wMjUgMi40NzVUNS41IDIydC0yLjQ3NS0xLjAyNW0xNi41MzgtMS40MTJRMjAgMTkuMTI1IDIwIDE4LjV0LS40MzctMS4wNjJUMTguNSAxN3QtMS4wNjIuNDM4VDE3IDE4LjV0LjQzOCAxLjA2M1QxOC41IDIwdDEuMDYzLS40MzdtLTYuNS0xM3EuNDM3LS40MzguNDM3LTEuMDYzdC0uNDM3LTEuMDYyVDEyIDR0LTEuMDYyLjQzOFQxMC41IDUuNXQuNDM4IDEuMDYzVDEyIDd0MS4wNjMtLjQzN20tNi41IDEzUTcgMTkuMTI1IDcgMTguNXQtLjQzNy0xLjA2MlQ1LjUgMTd0LTEuMDYyLjQzOFQ0IDE4LjV0LjQzOCAxLjA2M1Q1LjUgMjB0MS4wNjMtLjQzNyIgLz4KPC9zdmc+Cg==",
+			"icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMjQgMjQiPgoJPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIgLz4KCTxwYXRoIGZpbGw9ImN1cnJlbnRDb2xvciIgZD0iTTEwLjU4OCAxNC40MTNRMTAgMTMuODI1IDEwIDEzcTAtLjU3NS4yMzgtMS4xMzd0LjkxMi0xLjYxM2wuNDI1LS42MjVxLjE1LS4yMjUuNDI1LS4yMjV0LjQyNS4yMjVsLjQyNS42MjVxLjY3NSAxLjA1LjkxMyAxLjYxM1QxNCAxM3EwIC44MjUtLjU4NyAxLjQxM1QxMiAxNXQtMS40MTItLjU4N00zIDE3aDQuMXEtLjQyNS0uNDI1LS43ODctLjkyNVQ1LjY3NSAxNUgzem0xMi41MzgtMS40NjNRMTcgMTQuMDc2IDE3IDEydC0xLjQ2My0zLjUzN1QxMiA3VDguNDYzIDguNDYzVDcgMTJ0MS40NjMgMy41MzhUMTIgMTd0My41MzgtMS40NjNNMTguMzI1IDlIMjFWN2gtNC4xcS40MjUuNDI1Ljc4OC45MjVUMTguMzI1IDlNMyAxOXEwIC40MjUtLjI4OC43MTNUMiAyMHQtLjcxMi0uMjg4VDEgMTl2LTZxMC0uNDI1LjI4OC0uNzEyVDIgMTJ0LjcxMy4yODhUMyAxM2gyLjA3NXEtLjA1LS4yNS0uMDYyLS40ODhUNSAxMnEwLTIuOTI1IDIuMDM4LTQuOTYyVDEyIDVoOXEwLS40MjUuMjg4LS43MTJUMjIgNHQuNzEzLjI4OFQyMyA1djZxMCAuNDI1LS4yODguNzEzVDIyIDEydC0uNzEyLS4yODhUMjEgMTFoLTIuMDc1cS4wNS4yNS4wNjMuNDg4VDE5IDEycTAgMi45MjUtMi4wMzcgNC45NjNUMTIgMTl6bTAtMnYtMnptMTgtOFY3em0tOSAzIiAvPgo8L3N2Zz4K",
 			"items": {
 				"headerConnection": {
 					"type": "header",
 					"text": { "en": "Connection settings", "de": "Verbindungseinstellungen" },
-					"size": 4,
-					"xs": 12,
-					"sm": 12,
-					"md": 12,
-					"lg": 12,
-					"xl": 12
+					"size": 4, "xs": 12, "sm": 12, "md": 12, "lg": 12, "xl": 12
 				},
 				"host": {
 					"type": "text",
 					"label": { "en": "IP Address (Host)", "de": "IP-Adresse (Host)" },
 					"default": "192.168.178.81",
-					"xs": 12,
-					"sm": 12,
-					"md": 4,
-					"lg": 4,
-					"xl": 4
+					"xs": 12, "sm": 12, "md": 4, "lg": 4, "xl": 4
 				},
 				"port": {
 					"type": "number",
 					"label": { "en": "Heat pump port", "de": "Wärmepumpen Port" },
-					"help": {
-						"en": "Standard TCP: 8889 | Firmware > 3.81 (WebSockets): 8214",
-						"de": "Standard TCP: 8889 | Firmware > 3.81 (WebSockets): 8214"
-					},
-					"min": 1,
-					"max": 65535,
-					"default": 8214,
-					"xs": 12,
-					"sm": 6,
-					"md": 4,
-					"lg": 4,
-					"xl": 4
+					"help": { "en": "Standard TCP: 8889 | Firmware > 3.81 (WebSockets): 8214", "de": "Standard TCP: 8889 | Firmware > 3.81 (WebSockets): 8214" },
+					"min": 1, "max": 65535, "default": 8889,
+					"xs": 12, "sm": 6, "md": 4, "lg": 4, "xl": 4
 				},
 				"interval": {
 					"type": "number",
 					"label": { "en": "Polling interval (seconds)", "de": "Abfrageintervall (Sekunden)" },
-					"min": 10,
-					"default": 45,
-					"xs": 12,
-					"sm": 6,
-					"md": 4,
-					"lg": 4,
-					"xl": 4
+					"min": 10, "default": 30,
+					"xs": 12, "sm": 12, "md": 4, "lg": 4, "xl": 4
+				},
+				"infoInterval": {
+					"type": "staticText",
+					"text": {
+						"en": "⚠️ <b>Tip:</b> Do not set the polling interval too low! Frequent requests put a heavy load on the heat pump's CPU, making the controller very sluggish. Recommended: 30-60 seconds.",
+						"de": "⚠️ <b>Tipp:</b> Wähle das Abfrageintervall nicht zu gering! Zu häufiges Polling belastet die CPU der Wärmepumpe stark und macht die Steuerung sehr träge. Empfohlen: 30-60 Sekunden."
+					},
+					"style": { "marginTop": "0px", "marginBottom": "15px", "color": "#ff9800", "fontSize": "12px" },
+					"xs": 12, "sm": 12, "md": 12, "lg": 12, "xl": 12
 				},
 				"headerOption": {
 					"type": "header",
 					"text": { "en": "Options", "de": "Optionen" },
-					"size": 4,
-					"xs": 12,
-					"sm": 12,
-					"md": 12,
-					"lg": 12,
-					"xl": 12
+					"size": 4, "xs": 12, "sm": 12, "md": 12, "lg": 12, "xl": 12
 				},
 				"language": {
 					"type": "select",
 					"label": { "en": "Language for texts and values", "de": "Sprache für Texte und Werte" },
-					"options": [
-						{ "label": "English", "value": "en" },
-						{ "label": "Deutsch", "value": "de" }
-					],
-					"default": "en",
-					"xs": 12,
-					"sm": 6,
-					"md": 4,
-					"lg": 4,
-					"xl": 4
+					"options": [ { "label": "English", "value": "en" }, { "label": "Deutsch", "value": "de" } ],
+					"default": "de",
+					"xs": 12, "sm": 12, "md": 6, "lg": 6, "xl": 6
+				},
+				"infoLanguage": {
+					"type": "staticText",
+					"text": {
+						"en": "Select the language in which operating states and statuses (e.g. 'Heating') should be displayed in the ioBroker object tree.<br><br><i>Example:</i><br><img src='img/language_example.png' alt='Example' style='max-width: 100%; border: 1px solid #ccc; margin-top: 5px; border-radius: 4px;' />",
+						"de": "Wähle hier die Sprache, in der Betriebszustände und Statusmeldungen (z. B. 'Heizen' oder 'Warmwasser') im ioBroker-Objektbaum ausgegeben werden sollen.<br><br><i>Beispiel:</i><br><img src='img/language_example.png' alt='Beispiel' style='max-width: 100%; border: 1px solid #ccc; margin-top: 5px; border-radius: 4px;' />"
+					},
+					"xs": 12, "sm": 12, "md": 12, "lg": 12, "xl": 12
 				}
 			}
 		},

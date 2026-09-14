@@ -79,6 +79,24 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
+**WORK IN PROGRESS**
+
+**🚀 Features & Enhancements**
+
+- **[Admin UI]** Completely redesigned the adapter configuration interface (`jsonConfig.json`). Settings are now cleanly organized into logical tabs (Connection, Cycle Optimization, Idle Defaults, HUP, Circulation pump, etc.).
+- **[HUP Control]** Added a new dynamic hardware voltage scale factor for the heating circulating pump (HUP). Users can now toggle between factor 100 (for Firmware V2.x) and factor 10 (for Firmware V3.x) to ensure full compatibility across different hardware generations.
+- **[Safety]** Added a confirmation warning dialog to the Admin UI that alerts users to the importance of entering correct values when enabling "Force default values during idle".
+
+**🐛 Bugfixes**
+
+- **[HUP Control]** Fixed an incorrect conversion factor for registers 867 and 868 (nominal and minimal HUP voltage). This previously caused newer setups (like the Alpha Innotec LWCV series with FW V3.x) to calculate 1.0V instead of 10.0V, resulting in continuous "less than min" boundary warnings in the ioBroker log.
+
+**🛠 Refactoring & Under the Hood**
+
+- **[Architecture]** Extracted the heating circulating pump (HUP) logic from `main.ts` into a dedicated, isolated `hupManager.ts` file to improve code modularity and maintainability.
+- **[CI/CD]** Added Node.js 26 to the GitHub Actions test matrix (`test-and-release.yml`) to ensure future compatibility.
+- **[TypeScript]** Added the `"rootDir": "./src"` compiler option to `tsconfig.json` to resolve TS5011 build errors with newer TypeScript versions.
+
 ### 0.7.3 (2026-09-07)
 
 **Bugfixes**
