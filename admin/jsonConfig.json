@@ -386,7 +386,6 @@
 						"endpunkt": "${data.endpunkt}"
 					},
 					"alsoDependsOn": ["fusspunkt", "endpunkt"],
-					"hidden": "!data.idle_defaults_aktiv",
 					"style": {
 						"maxWidth": "800px",
 						"marginTop": "20px",
