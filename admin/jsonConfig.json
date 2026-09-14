@@ -99,7 +99,7 @@
 					"type": "staticText",
 					"text": {
 						"en": "Select the language in which operating states and statuses (e.g. 'Heating') should be displayed in the ioBroker object tree.<br><br><i>Example:</i><br><img src='documentation/Bilder/Objekte_DE.png' alt='Example' style='max-width: 100%; border: 1px solid #ccc; margin-top: 5px; border-radius: 4px;' />",
-						"de": "Wähle hier die Sprache, in der Betriebszustände und Statusmeldungen (z. B. 'Heizen' oder 'Warmwasser') im ioBroker-Objektbaum ausgegeben werden sollen.<br><br><i>Beispiel:</i><br><img src='img/language_example.png' alt='Beispiel' style='max-width: 100%; border: 1px solid #ccc; margin-top: 5px; border-radius: 4px;' />"
+						"de": "Wähle hier die Sprache, in der Betriebszustände und Statusmeldungen (z. B. 'Heizen' oder 'Warmwasser') im ioBroker-Objektbaum ausgegeben werden sollen.<br><br><i>Beispiel:</i><br><img src='documentation/Bilder/Objekte_DE.png' alt='Beispiel' style='max-width: 100%; border: 1px solid #ccc; margin-top: 5px; border-radius: 4px;' />"
 					},
 					"xs": 12,
 					"sm": 12,
