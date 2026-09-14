@@ -14,26 +14,49 @@
 				"headerConnection": {
 					"type": "header",
 					"text": { "en": "Connection settings", "de": "Verbindungseinstellungen" },
-					"size": 4, "xs": 12, "sm": 12, "md": 12, "lg": 12, "xl": 12
+					"size": 4,
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
 				},
 				"host": {
 					"type": "text",
 					"label": { "en": "IP Address (Host)", "de": "IP-Adresse (Host)" },
 					"default": "192.168.178.81",
-					"xs": 12, "sm": 12, "md": 4, "lg": 4, "xl": 4
+					"xs": 12,
+					"sm": 12,
+					"md": 4,
+					"lg": 4,
+					"xl": 4
 				},
 				"port": {
 					"type": "number",
 					"label": { "en": "Heat pump port", "de": "Wärmepumpen Port" },
-					"help": { "en": "Standard TCP: 8889 | Firmware > 3.81 (WebSockets): 8214", "de": "Standard TCP: 8889 | Firmware > 3.81 (WebSockets): 8214" },
-					"min": 1, "max": 65535, "default": 8889,
-					"xs": 12, "sm": 6, "md": 4, "lg": 4, "xl": 4
+					"help": {
+						"en": "Standard TCP: 8889 | Firmware > 3.81 (WebSockets): 8214",
+						"de": "Standard TCP: 8889 | Firmware > 3.81 (WebSockets): 8214"
+					},
+					"min": 1,
+					"max": 65535,
+					"default": 8889,
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"lg": 4,
+					"xl": 4
 				},
 				"interval": {
 					"type": "number",
 					"label": { "en": "Polling interval (seconds)", "de": "Abfrageintervall (Sekunden)" },
-					"min": 10, "default": 30,
-					"xs": 12, "sm": 12, "md": 4, "lg": 4, "xl": 4
+					"min": 10,
+					"default": 30,
+					"xs": 12,
+					"sm": 12,
+					"md": 4,
+					"lg": 4,
+					"xl": 4
 				},
 				"infoInterval": {
 					"type": "staticText",
@@ -42,27 +65,47 @@
 						"de": "⚠️ <b>Tipp:</b> Wähle das Abfrageintervall nicht zu gering! Zu häufiges Polling belastet die CPU der Wärmepumpe stark und macht die Steuerung sehr träge. Empfohlen: 30-60 Sekunden."
 					},
 					"style": { "marginTop": "0px", "marginBottom": "15px", "color": "#ff9800", "fontSize": "12px" },
-					"xs": 12, "sm": 12, "md": 12, "lg": 12, "xl": 12
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
 				},
 				"headerOption": {
 					"type": "header",
 					"text": { "en": "Options", "de": "Optionen" },
-					"size": 4, "xs": 12, "sm": 12, "md": 12, "lg": 12, "xl": 12
+					"size": 4,
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
 				},
 				"language": {
 					"type": "select",
 					"label": { "en": "Language for texts and values", "de": "Sprache für Texte und Werte" },
-					"options": [ { "label": "English", "value": "en" }, { "label": "Deutsch", "value": "de" } ],
+					"options": [
+						{ "label": "English", "value": "en" },
+						{ "label": "Deutsch", "value": "de" }
+					],
 					"default": "de",
-					"xs": 12, "sm": 12, "md": 6, "lg": 6, "xl": 6
+					"xs": 12,
+					"sm": 12,
+					"md": 6,
+					"lg": 6,
+					"xl": 6
 				},
 				"infoLanguage": {
 					"type": "staticText",
 					"text": {
-						"en": "Select the language in which operating states and statuses (e.g. 'Heating') should be displayed in the ioBroker object tree.<br><br><i>Example:</i><br><img src='img/language_example.png' alt='Example' style='max-width: 100%; border: 1px solid #ccc; margin-top: 5px; border-radius: 4px;' />",
+						"en": "Select the language in which operating states and statuses (e.g. 'Heating') should be displayed in the ioBroker object tree.<br><br><i>Example:</i><br><img src='documentation/Bilder/Objekte_DE.png' alt='Example' style='max-width: 100%; border: 1px solid #ccc; margin-top: 5px; border-radius: 4px;' />",
 						"de": "Wähle hier die Sprache, in der Betriebszustände und Statusmeldungen (z. B. 'Heizen' oder 'Warmwasser') im ioBroker-Objektbaum ausgegeben werden sollen.<br><br><i>Beispiel:</i><br><img src='img/language_example.png' alt='Beispiel' style='max-width: 100%; border: 1px solid #ccc; margin-top: 5px; border-radius: 4px;' />"
 					},
-					"xs": 12, "sm": 12, "md": 12, "lg": 12, "xl": 12
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
 				}
 			}
 		},
