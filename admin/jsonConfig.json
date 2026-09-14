@@ -107,14 +107,22 @@
 					"lg": 12,
 					"xl": 12
 				},
-				"exampleImage": {
+				"exampleImageObject": {
 					"type": "staticImage",
-					"src": "img/Objekte_DE.png",
+					"src": "img/Objekte.png",
+					"style": {
+						"width": "600px",
+						"maxWidth": "100%",
+						"height": "auto",
+						"border": "1px solid #cccccc",
+						"borderRadius": "5px",
+						"marginTop": "10px"
+					},
 					"xs": 12,
 					"sm": 12,
 					"md": 12,
-					"lg": 8,
-					"xl": 8
+					"lg": 12,
+					"xl": 12
 				}
 			}
 		},
