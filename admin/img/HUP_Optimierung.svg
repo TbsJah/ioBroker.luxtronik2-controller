@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 420" style="background:#ffffff; font-family:Arial, sans-serif; border: 1px solid #e0e0e0; border-radius: 8px;">
+    <!-- Überschrift -->
+    <text x="450" y="35" font-size="18" font-weight="bold" fill="#333" text-anchor="middle">Regellogik: Dynamische HUP-Spreizungssteuerung</text>
+    <text x="450" y="55" font-size="13" font-weight="bold" fill="#666" text-anchor="middle">Logic: Dynamic HUP Spread Control</text>
+    
+    <!-- Info Text -->
+    <text x="450" y="80" font-size="12" fill="#555" text-anchor="middle">Vergleich der aktuellen Spreizung (Vorlauf - Rücklauf) mit den Zielwerten / Compares current temperature spread with target values</text>
+
+    <!-- Zone 1: Zu geringe Spreizung (Links) -->
+    <rect x="30" y="110" width="260" height="140" fill="#e3f2fd" stroke="#2196f3" stroke-width="2" rx="8"/>
+    <text x="160" y="140" font-size="14" font-weight="bold" fill="#1565c0" text-anchor="middle">Spreizung &lt; Min | Spread &lt; Min</text>
+    <text x="160" y="162" font-size="12" fill="#333" text-anchor="middle">(z. B. unter 6,5 K / e.g. &lt; 6.5 K)</text>
+    <text x="160" y="190" font-size="11" fill="#555" text-anchor="middle">Wasser fließt zu schnell</text>
+    <text x="160" y="205" font-size="11" fill="#555" text-anchor="middle">Water flows too fast</text>
+    <text x="160" y="228" font-size="11" fill="#777" text-anchor="middle">(Wenig Abkühlung / Insufficient cooling)</text>
+    
+    <!-- Pfeil runter -->
+    <path d="M 160 260 L 160 305 L 152 305 L 160 320 L 168 305 L 160 305" fill="#f44336" />
+    
+    <!-- Action 1 -->
+    <rect x="30" y="330" width="260" height="55" fill="#ffebee" stroke="#f44336" stroke-width="2" rx="8"/>
+    <text x="160" y="352" font-size="13" font-weight="bold" fill="#c62828" text-anchor="middle">Spannung reduzieren (-0,25 V)</text>
+    <text x="160" y="370" font-size="11" font-weight="bold" fill="#c62828" text-anchor="middle">Decrease Voltage (-0.25 V)</text>
+
+    <!-- Zone 2: Optimal (Mitte) -->
+    <rect x="320" y="110" width="260" height="140" fill="#e8f5e9" stroke="#4caf50" stroke-width="2" rx="8"/>
+    <text x="450" y="140" font-size="14" font-weight="bold" fill="#2e7d32" text-anchor="middle">Optimaler Bereich | Optimal Range</text>
+    <text x="450" y="162" font-size="12" fill="#333" text-anchor="middle">(z. B. 6,5 K bis 7,5 K / 6.5 K to 7.5 K)</text>
+    <text x="450" y="190" font-size="11" fill="#555" text-anchor="middle">Wärmeabgabe und Volumenstrom</text>
+    <text x="450" y="205" font-size="11" fill="#555" text-anchor="middle">Heat transfer and flow rate</text>
+    <text x="450" y="228" font-size="11" fill="#777" text-anchor="middle">(Im perfekten Gleichgewicht / Balanced)</text>
+    
+    <!-- Gleich -->
+    <rect x="440" y="275" width="20" height="20" fill="#4caf50" rx="4"/>
+    
+    <!-- Action 2 -->
+    <rect x="320" y="330" width="260" height="55" fill="#f1f8e9" stroke="#4caf50" stroke-width="2" rx="8"/>
+    <text x="450" y="352" font-size="13" font-weight="bold" fill="#2e7d32" text-anchor="middle">Spannung beibehalten (=)</text>
+    <text x="450" y="370" font-size="11" font-weight="bold" fill="#2e7d32" text-anchor="middle">Maintain Voltage (=)</text>
+
+    <!-- Zone 3: Zu hohe Spreizung (Rechts) -->
+    <rect x="610" y="110" width="260" height="140" fill="#fff3e0" stroke="#ff9800" stroke-width="2" rx="8"/>
+    <text x="740" y="140" font-size="14" font-weight="bold" fill="#e65100" text-anchor="middle">Spreizung &gt; Max | Spread &gt; Max</text>
+    <text x="740" y="162" font-size="12" fill="#333" text-anchor="middle">(z. B. über 7,5 K / e.g. &gt; 7.5 K)</text>
+    <text x="740" y="190" font-size="11" fill="#555" text-anchor="middle">Wasser fließt zu langsam</text>
+    <text x="740" y="205" font-size="11" fill="#555" text-anchor="middle">Water flows too slowly</text>
+    <text x="740" y="228" font-size="11" fill="#777" text-anchor="middle">(Kühlt zu stark ab / Cools down too much)</text>
+    
+    <!-- Pfeil hoch -->
+    <path d="M 740 320 L 740 305 L 732 305 L 740 260 L 748 305 L 740 305" fill="#2196f3" />
+    
+    <!-- Action 3 -->
+    <rect x="610" y="330" width="260" height="55" fill="#e3f2fd" stroke="#2196f3" stroke-width="2" rx="8"/>
+    <text x="740" y="352" font-size="13" font-weight="bold" fill="#1565c0" text-anchor="middle">Spannung erhöhen (+0,25 V)</text>
+    <text x="740" y="370" font-size="11" font-weight="bold" fill="#1565c0" text-anchor="middle">Increase Voltage (+0.25 V)</text>
+</svg>

@@ -181,26 +181,8 @@
 				},
 				"exampleImageCycle_de": {
 					"type": "staticImage",
-					"src": "img/Takt_Optimierung_de.svg",
+					"src": "img/Takt_Optimierung.svg",
 					"hidden": "systemConfig.language !== 'de'",
-					"style": {
-						"width": "1200px",
-						"maxWidth": "100%",
-						"height": "auto",
-						"border": "1px solid #cccccc",
-						"borderRadius": "5px",
-						"marginTop": "10px"
-					},
-					"xs": 12,
-					"sm": 12,
-					"md": 12,
-					"lg": 12,
-					"xl": 12
-				},
-				"exampleImageCycle_en": {
-					"type": "staticImage",
-					"src": "img/Takt_Optimierung_en.svg",
-					"hidden": "systemConfig.language === 'de'",
 					"style": {
 						"width": "1200px",
 						"maxWidth": "100%",
@@ -221,7 +203,7 @@
 			"type": "panel",
 			"label": {
 				"en": "Idle Defaults",
-				"de": "Leerlauf"
+				"de": "Leerlauf - Vorgaben"
 			},
 			"icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMjQgMjQiPgoJPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIgLz4KCTxwYXRoIGZpbGw9ImN1cnJlbnRDb2xvciIgZD0ibTEyIDEzLjRsMi45IDIuOXEuMjc1LjI3NS43LjI3NXQuNy0uMjc1dC4yNzUtLjd0LS4yNzUtLjdMMTMuNCAxMmwyLjktMi45cS4yNzUtLjI3NS4yNzUtLjd0LS4yNzUtLjd0LS43LS4yNzV0LS43LjI3NUwxMiAxMC42TDkuMSA3LjdxLS4yNzUtLjI3NS0uNy0uMjc1dC0uNy4yNzV0LS4yNzUuN3QuMjc1LjdsMi45IDIuOWwtMi45IDIuOXEtLjI3NS4yNzUtLjI3NS43dC4yNzUuN3QuNy4yNzV0LjctLjI3NXpNNSAyMXEtLjgyNSAwLTEuNDEyLS41ODdUMyAxOVY1cTAtLjgyNS41ODgtMS40MTJUNSAzaDE0cS44MjUgMCAxLjQxMy41ODhUMjEgNXYxNHEwIC44MjUtLjU4NyAxLjQxM1QxOSAyMXptMC0yaDE0VjVINXpNNSA1djE0eiIgLz4KPC9zdmc+Cg==",
 			"items": {
@@ -589,27 +571,7 @@
 				},
 				"hupImage_de": {
 					"type": "staticImage",
-					"src": "img/HUP_Optimierung_de.svg",
-					"hidden": "!systemConfig.language || !systemConfig.language.startsWith('de')",
-					"style": {
-						"width": "900px",
-						"maxWidth": "100%",
-						"height": "auto",
-						"border": "1px solid #cccccc",
-						"borderRadius": "5px",
-						"marginTop": "20px",
-						"marginBottom": "20px"
-					},
-					"xs": 12,
-					"sm": 12,
-					"md": 12,
-					"lg": 12,
-					"xl": 12
-				},
-				"hupImage_en": {
-					"type": "staticImage",
-					"src": "img/HUP_Optimierung_en.svg",
-					"hidden": "systemConfig.language && systemConfig.language.startsWith('de')",
+					"src": "img/HUP_Optimierung.svg",
 					"style": {
 						"width": "900px",
 						"maxWidth": "100%",
