@@ -76,4 +76,19 @@ Trage unter _Minimum/Maximum Spreizung_ die für dein System passenden Grenzwert
 
 ![Beispiel für die HUP-Optimierung](../admin/img/HUP_Optimierung_de.svg)
 
+### 5. Reiter: Zirkulationspumpe (ZIP)
 
+Die Zirkulationspumpe (ZIP) sorgt dafür, dass an den Zapfstellen im Haus (z. B. Dusche, Waschbecken) sofort warmes Wasser anliegt. Läuft sie jedoch dauerhaft oder zeitgesteuert zu oft, kühlt sie den Warmwasserspeicher massiv aus (Energieverlust) und verbraucht unnötig Strom.
+
+Dieser Adapter bietet smarte Automatisierungen, um die ZIP nur exakt dann laufen zu lassen, wenn sie auch wirklich benötigt wird.
+
+- **Intelligente ZIP-Optimierung:** Wenn aktiv, überwacht der Adapter die Wärmepumpe. Die Zirkulation kann so zum Beispiel völlig synchron zur Warmwasserbereitung laufen.
+- **Laufzeit bei Aktivierung:** Definiert, wie lange (in Sekunden) die Pumpe laufen soll, wenn sie durch den Adapter oder manuell (über den Schalter `Activate_Zip` im Objektbaum) ausgelöst wird. Empfohlen sind meist kurze Intervalle von 120 bis 180 Sekunden, um das Rohrsystem einmal mit warmem Wasser durchzuspülen.
+- **Bewegungsmelder (On-Demand):** Das absolute Spar-Potenzial! Du kannst hier die ioBroker-Datenpunkte deiner Smart-Home-Bewegungsmelder (z. B. Zigbee-Sensoren im Badezimmer oder in der Küche) eintragen. Betritt jemand den Raum, startet der Adapter sofort einen kurzen Zirkulationstakt. Das Wasser ist warm, sobald man am Waschbecken steht, und es wird keine Energie verschwendet.
+- **Externe Aktoren (z. B. smarte Steckdosen):** Wenn deine Zirkulationspumpe nicht direkt an der Luxtronik-Platine angeklemmt ist, sondern an einem smarten Relais (z. B. Shelly, Osram Smart Plug etc.) hängt, kannst du hier die Datenpunkte der Steckdosen hinterlegen. Der Adapter schaltet deine WLAN-/Zigbee-Steckdosen dann vollautomatisch mit der internen Logik ein und aus. _(Vorteil: Dies verursacht 0 Flash-Schreibvorgänge auf dem Speicher der Wärmepumpe!)_
+
+**💡 Tipp! Hardware-Schutz (EEPROM Flash-Wear - dringend beachten!)**
+Um das ständige Schreiben im Regler zu minimieren, stellen Sie die regulären ZIP-Zeiten einmalig auf die Tabelle Mo-So und tragen Sie dort 00:00 - 00:00 ein. Die Taktzeiten setzen Sie auf Aus: 60 Minuten und An: 0 Minuten.
+
+**Um die Schreibvorgänge auf dem Regler zu reduzieren, ist es empfehlenswert, die ZIP(s) über einen externen Aktor zu steuern ➔ 0 Schreibvorgänge im Regler!
+Zum Vergleich: Eine Aktivierung per Luxtronik2 Regler benötigt für das Entlüftungsprogramm 4 Schreibvorgänge. Über die ZIP-Steuertabelle sind es im besten Fall 4 und im schlechtesten Fall 14 Schreibvorgänge im Flash-Speicher pro Zip Durchlauf.**
