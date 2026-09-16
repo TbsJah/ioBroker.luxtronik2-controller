@@ -66,7 +66,7 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 
 [Info Deutsch](documentation/readme_de.md)
 
-[Info English](documentation/readme_en.md)
+[Info English](documentation/Bilder/readme_en.md)
 
 <img src="documentation/Bilder/Haupteinstellung.png" alt="Haupteinstellung" width="100%">
 <img src="documentation/Bilder/Objekte.png" alt="Objekte" width="100%">
