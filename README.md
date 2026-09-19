@@ -58,6 +58,24 @@ Dieses Projekt steht in keinerlei Verbindung zu Alpha Innotec, Novelan, ait-deut
 
 _This project is not affiliated with Alpha Innotec, Novelan, ait-deutschland GmbH, or any other company. It is a personal project that is maintained in spare time. Use at your own risk._
 
+"project_disclaimer": "Este proyecto no está afiliado de ninguna manera con Alpha Innotec, Novelan, ait-deutschland GmbH u otros fabricantes. Es un proyecto de código abierto privado desarrollado y mantenido en el tiempo libre. El uso del adaptador es bajo su propio riesgo."
+
+"project_disclaimer": "Ce projet n'est en aucun cas affilié à Alpha Innotec, Novelan, ait-deutschland GmbH ou à d'autres fabricants. Il s'agit d'un projet open source privé développé et maintenu pendant le temps libre. L'utilisation de l'adaptateur se fait à vos propres risques."
+
+"project_disclaimer": "Ce projet n'est en aucun cas affilié à Alpha Innotec, Novelan, ait-deutschland GmbH ou à d'autres fabricants. Il s'agit d'un projet open source privé développé et maintenu pendant le temps libre. L'utilisation de l'adaptateur se fait à vos propres risques."
+
+"project_disclaimer": "Dit project is op geen enkele wijze verbonden met Alpha Innotec, Novelan, ait-deutschland GmbH of andere fabrikanten. Het is een privé open-sourceproject dat in de vrije tijd wordt ontwikkeld en onderhouden. Het gebruik van de adapter is op eigen risico."
+
+"project_disclaimer": "Ten projekt nie jest w żaden sposób powiązany z Alpha Innotec, Novelan, ait-deutschland GmbH ani innymi producentami. Jest to prywatny projekt typu open-source, rozwijany i utrzymywany w czasie wolnym. Korzystanie z adaptera odbywa się na własną odpowiedzialność."
+
+"project_disclaimer": "Este projeto não está afiliado de forma alguma à Alpha Innotec, Novelan, ait-deutschland GmbH ou a outros fabricantes. É um projeto de código aberto privado desenvolvido e mantido no tempo livre. O uso do adaptador é por sua conta e risco."
+
+"project_disclaimer": "Этот проект никоим образом не связан с компаниями Alpha Innotec, Novelan, ait-deutschland GmbH или другими производителями. Это частный проект с открытым исходным кодом, который разрабатывается и поддерживается в свободное время. Использование адаптера осуществляется на свой страх и риск."
+
+"project_disclaimer": "Цей проєкт жодним чином не пов'язаний з Alpha Innotec, Novelan, ait-deutschland GmbH чи іншими виробниками. Це приватний проєкт з відкритим кодом, який розробляється та підтримується у вільний час. Використання адаптера здійснюється на власний ризик."
+
+"project_disclaimer": "Цей проєкт жодним чином не пов'язаний з Alpha Innotec, Novelan, ait-deutschland GmbH чи іншими виробниками. Це приватний проєкт з відкритим кодом, який розробляється та підтримується у вільний час. Використання адаптера здійснюється на власний ризик."
+
 ## Reporting Bugs & Contributing
 
 Bug reports, compatibility notes for specific firmware versions, or feature requests can be submitted via the issue tracker in the [GitHub-Repository](https://github.com/TbsJah/ioBroker.luxtronik2-controller/issues).
@@ -79,6 +97,7 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
+
 ### 0.8.0 (2026-09-14)
 
 **🚀 Features & Enhancements**
