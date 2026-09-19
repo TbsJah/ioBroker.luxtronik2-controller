@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "luxtronik2-controller",
-    "version": "0.8.0",
+    "version": "0.8.1",
     "news": {
+      "0.8.1": {
+        "en": "Resolve issues which are reported by repository checker",
+        "de": "Vom Repository-Checker gemeldete Probleme lösen",
+        "ru": "Устраните проблемы, о которых сообщает средство проверки репозитория",
+        "pt": "Resolva problemas relatados pelo Repository Checker",
+        "nl": "Problemen oplossen die door de repository-checker worden gemeld",
+        "fr": "Résoudre les problèmes signalés par Repository Checker",
+        "it": "Risolve i problemi segnalati da Repository Checker",
+        "es": "Resolver los problemas que informa Repository Checker",
+        "pl": "Rozwiązywanie problemów zgłaszanych przez moduł sprawdzający repozytorium",
+        "uk": "Вирішення проблем, про які повідомляє перевірка сховища",
+        "zh-cn": "解决存储库检查器报告的问题"
+      },
       "0.8.0": {
         "en": "*🚀 Features & Enhancements**\n\n**[Admin UI]** Completely redesigned the adapter configuration interface (`jsonConfig.json`). Settings are now cleanly organized into logical tabs (Connection, Cycle Optimization, Idle Defaults, HUP, Circulation pump, etc.).\n**[HUP Control]** Added a new dynamic hardware voltage scale factor for the heating circulating pump (HUP). Users can now toggle between factor 100 (for Firmware V2.x) and factor 10 (for Firmware V3.x) to ensure full compatibility across different hardware generations.\n**[Safety]** Added a confirmation warning dialog to the Admin UI that alerts users to the importance of entering correct values when enabling \"Force default values during idle\".\n\n*🐛 Bugfixes**\n\n**[HUP Control]** Fixed an incorrect conversion factor for registers 867 and 868 (nominal and minimal HUP voltage). This previously caused newer setups (like the Alpha Innotec LWCV series with FW V3.x) to calculate 1.0V instead of 10.0V, resulting in continuous \"less than min\" boundary warnings in the ioBroker log.\n\n*🛠 Refactoring & Under the Hood**\n\n**[Architecture]** Extracted the heating circulating pump (HUP) logic from `main.ts` into a dedicated, isolated `hupManager.ts` file to improve code modularity and maintainability.\n**[CI/CD]** Added Node.js 26 to the GitHub Actions test matrix (`test-and-release.yml`) to ensure future compatibility.\n**[TypeScript]** Added the `\"rootDir\": \"./src\"` compiler option to `tsconfig.json` to resolve TS5011 build errors with newer TypeScript versions.",
         "de": "* 🚀 Funktionen & Erweiterungen**\n\n** [Admin-UI] ** Komplett überarbeitete Adapterschnittstelle (`JSONConfig.json`). Die Einstellungen sind nun übersichtlich in Tabs angeordnet (Verbindung, Zyklusoptimierung, Leerlaufwerte, HUP, Umwälzpumpe usw.).\n** [HUP Control] ** Neue dynamische Hardware-Spannungsskalierung für die Umwälzpumpe (HUP) hinzugefügt. Benutzer können jetzt zwischen Faktor 100 (für Firmware V2.x) und Faktor 10 (für Firmware V3.x) umschalten, um alle Gerätegenerationen abzudecken.\n** [Sicherheit] ** Der Admin-UI wurde eine Warnmeldung hinzugefügt, die Benutzer darauf hinweist, bei Leerlauf die richtigen Werte einzugeben.\n\n* 🐛 Bugfixes**\n\n** [HUP Control] ** Falscher Umrechnungsfaktor für Register 867 und 868 (Nenn- und Minimal-HUP-Spannung) behoben. Bisher berechneten neuere Setups (wie die Alpha Innotec LWCV-Serie mit FW V3.x) 1,0 V statt 10,0 V, was zu ständigen Grenzwarnungen im ioBroker-Log führte.\n\n* 🛠 Umbau und Unterhaube**\n\n** [Architektur] ** Extrahierte die HUP-Logik aus `main.ts` in eine eigene, isolierte `HupManager.ts`-Datei, um den Code modularer und wartbarer zu machen.\n** [CI/CD] ** Node.js 26 zur GitHub Actions Testmatrix hinzugefügt (`test-and-release.yml`) für zukünftige Kompatibilität.\n** [TypeScript] ** RootDir:“ hinzugefügt. /src „`Compileroption für `tsconfig.json` zur Behebung von TS5011-Buildfehlern mit neueren TypeScript-Versionen.",
@@ -80,19 +93,6 @@
         "pl": "przejrzyj/popraw ustalenia zgłoszone przez moduł sprawdzający Claude.\nRozszerzono minimalny limit dla `temperature_outdoor_min` z -20°C do -25°C\nObniżono minimalną dopuszczalną wartość dla `heating_curve_parallel_offset` (punkt bazowy) z 20°C do 15°C\nDomyślnie wyłączona optymalizacja/regulacja cyklu dynamicznego przy pierwszym uruchomieniu",
         "uk": "переглянути/виправити недоліки, отримані за допомогою перевірки на основі Клода.\nРозширено мінімальну межу для `temperature_outdoor_min` з -20°C до -25°C\nЗнижено мінімально допустиме значення для `heating_curve_parallel_offset` (базова точка) з 20°C до 15°C\nДинамічна оптимізація/регулювання циклу вимкнена за замовчуванням під час першого запуску",
         "zh-cn": "审核/修复 Claude 检测器报告的问题。\n`temperature_outdoor_min` 的最低温度限制从 -20°C 扩展至 -25°C\n将 `heating_curve_parallel_offset`（基点）的最小允许值从 20°C 降低至 15°C\n初始启动时默认禁用动态循环优化/调节"
-      },
-      "0.6.5": {
-        "en": "review / fix findings reported by claude based checker.",
-        "de": "überprüfung / behebung von ergebnissen, die von claude-basiertem checker gemeldet wurden.",
-        "ru": "обзор / исправление выводов, сообщенных клод на основе шашки.",
-        "pt": "revisão / correção de resultados relatados por claude based checker.",
-        "nl": "beoordeling / vaststelling bevindingen gemeld door claude gebaseerde checker.",
-        "fr": "examiner / corriger les constatations rapportées par claude checker based.",
-        "it": "recensione / corretti i risultati riportati da claude basato checker.",
-        "es": "revisión / fijar resultados reportados por el checker basado claude.",
-        "pl": "przegląd / ustalenia naprawcze zgłoszone przez kontroler claude.",
-        "uk": "переглянути / виправити результати, які повідомляються застібкою.",
-        "zh-cn": "审查/纠正基于claude的核对员报告的调查结果."
       }
     },
     "titleLang": {

@@ -23,6 +23,19 @@
 ### 0.1.0 (2026-07-09)
 
 - initial release
+## 0.7.0 (2026-09-04)
+
+**Features & Changes**
+
+- **(Changed) Cycle Optimization & Forced Hot Water**: To force a hot water cycle, the adapter now temporarily increases the hot water target temperature instead of modifying the hysteresis. This crucial safety improvement allows users to manually revert changes directly on the heat pump display without needing an installer password.
+- **(Changed) Disable default**: Disabled reset to default values in idle mode by default on initial start
+- **(Removed) Hysteresis Protection**: Removed all dynamic manipulations of the hot water hysteresis (e.g., during idle or active DHW cycles) to ensure installer-level settings remain untouched.
+- **(UI/Docs)**: Added detailed explanations and trigger rules for "Intelligent Cycle Optimization" and "Heating after hot water" directly to the admin configuration page.
+
+**Bugfixes**
+
+- Fixed adapter checker warning [W0066] by downgrading `@types/node` dependency to v22
+
 ## 0.6.6 (2026-08-31)
 
 - review / fix findings reported by claude based checker.
