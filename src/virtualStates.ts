@@ -294,6 +294,10 @@ export async function updateStatusStrings(
 		const Mitteltemperatur = (rawValues[getLuxIdByKey('Mitteltemperatur')] ?? 15) / 10;
 		const thresholdHeatingLimit = (rawParams[getLuxIdByKey('thresholdHeatingLimit')] ?? 15) / 10;
 		const temperature_target_return = (rawValues[getLuxIdByKey('temperature_target_return')] ?? 15) / 10;
+
+		// NEU: Parallelverschiebung auslesen
+		const Parallelverschiebung = (rawParams[getLuxIdByKey('heating_temperature')] ?? 0) / 10;
+
 		let heatingStr = stateHeatingMap[opStateHeatingVal] || `Unknown (${opStateHeatingVal})`;
 
 		if (opStateHeatingVal === 2) {
@@ -301,21 +305,40 @@ export async function updateStatusStrings(
 		} else if (opStateHeatingVal === 4) {
 			heatingStr += ` (Target 20 °C)`;
 		} else if (opStateHeatingVal === 0 || opStateHeatingVal === 1) {
-			//writeLog(`opStateHeatingVal = 0`, 'info');
-			if (HeatingLimit === 1 && Mitteltemperatur > thresholdHeatingLimit && Außentemperatur < 10) {
-				//	writeLog(`HeatingLimit = true`, 'info');
-				const textFrost = lang === 'de' ? 'Frostschutz' : 'Frost Protection';
-				heatingStr = `${textFrost} ${temperature_target_return} °C`;
-			} else if (HeatingLimit === 1 && Mitteltemperatur > thresholdHeatingLimit && Außentemperatur > 10) {
-				const text = lang === 'de' ? 'Heizgrenze' : 'Heating limit';
-				heatingStr = `${text} ${temperature_target_return} °C`;
-			} else if (BetriebsartHeizung === 0) {
-				const textNormal = lang === 'de' ? 'Normal da' : 'Normal as';
-				if (AbsenkungMax <= Außentemperatur) {
-					heatingStr += ` ${Absenkung} °C`;
+			// Prüfen, ob eigentlich Heizgrenze / Frostschutz aktiv ist
+			if (HeatingLimit === 1 && Mitteltemperatur > thresholdHeatingLimit) {
+				if (Außentemperatur < 10) {
+					const textFrost = lang === 'de' ? 'Frostschutz' : 'Frost protection';
+					heatingStr = `${textFrost} ${temperature_target_return} °C`;
 				} else {
-					heatingStr = `${textNormal} < ${AbsenkungMax} °C`;
+					const text = lang === 'de' ? 'Heizgrenze' : 'Heating limit';
+					heatingStr = `${text} ${temperature_target_return} °C`;
 				}
+			} else if (opStateHeatingVal === 0) {
+				// Zustand 0: Laut Luxtronik-Uhrzeit befindet sich die Anlage im "Absenk"-Zeitfenster
+				if (Absenkung !== 0) {
+					// Es ist wirklich eine Absenkung konfiguriert
+					const vorzeichen = Absenkung > 0 ? '-' : '+';
+					heatingStr = `${stateHeatingMap[0]} ${vorzeichen}${Math.abs(Absenkung)} °C`;
+				} else {
+					// Absenkung steht auf 0K (Anlage läuft einfach regulär weiter)
+					heatingStr = lang === 'de' ? 'Normal (Zeitprogramm)' : 'Normal (Timer)';
+				}
+			} else if (opStateHeatingVal === 1) {
+				// Zustand 1: Laut Luxtronik-Uhrzeit befindet sich die Anlage im "Normal"-Zeitfenster
+				heatingStr = stateHeatingMap[1] || 'Normal';
+
+				// Zusatzinfo: War die Anlage eigentlich abgesenkt, heizt aber wegen der Außentemperatur trotzdem normal?
+				if (BetriebsartHeizung === 0 && Außentemperatur < AbsenkungMax) {
+					const textNormal = lang === 'de' ? ' da AT' : ' because outside temp';
+					heatingStr += `${textNormal} < ${AbsenkungMax} °C`;
+				}
+			}
+
+			// Hänge die Parallelverschiebung an, sofern konfiguriert und kein Frostschutz aktiv
+			if (Parallelverschiebung !== 0 && !(HeatingLimit === 1 && Mitteltemperatur > thresholdHeatingLimit)) {
+				const vorzeichen = Parallelverschiebung > 0 ? '+' : '';
+				heatingStr += ` (Offset ${vorzeichen}${Parallelverschiebung} °C)`;
 			}
 		}
 
