@@ -23,6 +23,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 ));
 var utils = __toESM(require("@iobroker/adapter-core"));
 var import_actionHandlers = require("./actionHandlers");
+var import_backupManager = require("./backupManager");
 var import_convert = require("./convert");
 var import_hupManager = require("./hupManager");
 var import_logger = require("./logger");
@@ -130,6 +131,7 @@ class Luxtronik2Controller extends utils.Adapter {
     await (0, import_objectManager.cleanupEmptyFolders)(this);
     await (0, import_objectManager.ensureAllObjectsExist)(this);
     await (0, import_objectManager.ensureCustomObjectsExist)(this);
+    (0, import_backupManager.initAutoBackup)(this);
     await this.setState((0, import_stateMapping.getDpPath)("Regelung_Aktiv"), { val: config.regelung_aktiv === true, ack: true });
     const debugState = await this.getStateAsync((0, import_stateMapping.getDpPath)("Schreibe_Debug_Log"));
     this.isDebugLogActive = (debugState == null ? void 0 : debugState.val) === true;
@@ -376,7 +378,7 @@ class Luxtronik2Controller extends utils.Adapter {
         vd1State,
         wwHystereseState,
         ruecklaufSollState,
-        hupAktivState,
+        currentHupVoltState,
         heizenHystereseState,
         nachWasserState,
         mitteltempState,
@@ -392,7 +394,7 @@ class Luxtronik2Controller extends utils.Adapter {
         this.getStateAsync((0, import_stateMapping.getDpPath)("VD1out")),
         this.getStateAsync((0, import_stateMapping.getDpPath)("hotWaterTemperatureHysteresis")),
         this.getStateAsync((0, import_stateMapping.getDpPath)("temperature_target_return")),
-        this.getStateAsync((0, import_stateMapping.getDpPath)("HUPout")),
+        this.getStateAsync((0, import_stateMapping.getDpPath)("heating_system_circ_pump_voltage_nominal")),
         this.getStateAsync((0, import_stateMapping.getDpPath)("returnTemperatureHysteresis")),
         this.getStateAsync((0, import_stateMapping.getDpPath)("Heizen_nach_Wasser")),
         this.getStateAsync((0, import_stateMapping.getDpPath)("Mitteltemperatur")),
@@ -408,7 +410,7 @@ class Luxtronik2Controller extends utils.Adapter {
       const vd1 = (vd1State == null ? void 0 : vd1State.val) === 1;
       const wwHysterese = (_l = wwHystereseState == null ? void 0 : wwHystereseState.val) != null ? _l : 0;
       const ruecklaufSoll = (_m = ruecklaufSollState == null ? void 0 : ruecklaufSollState.val) != null ? _m : 0;
-      const hupAktiv = (_n = hupAktivState == null ? void 0 : hupAktivState.val) != null ? _n : 0;
+      const currentHupVolt = (_n = currentHupVoltState == null ? void 0 : currentHupVoltState.val) != null ? _n : 7;
       const heizenHysterese = (_o = heizenHystereseState == null ? void 0 : heizenHystereseState.val) != null ? _o : 0;
       const mitteltemperatur = (_p = mitteltempState == null ? void 0 : mitteltempState.val) != null ? _p : 0;
       const thresholdHeatingLimit = (_q = thresholdHeatingLimitstate == null ? void 0 : thresholdHeatingLimitstate.val) != null ? _q : 0;
@@ -426,7 +428,7 @@ class Luxtronik2Controller extends utils.Adapter {
           this,
           istHeizen,
           spreizung,
-          hupAktiv,
+          currentHupVolt,
           this.lastPumpOptimization
         );
         if (isRegelungAktiv) {
@@ -638,6 +640,7 @@ class Luxtronik2Controller extends utils.Adapter {
       if (this.zipTimer) {
         clearTimeout(this.zipTimer);
       }
+      (0, import_backupManager.stopAutoBackup)();
       if (this.midnightTimer) {
         this.clearTimeout(this.midnightTimer);
       }

@@ -105,15 +105,23 @@ async function updateHistory(adapter, rawValues, timeStartIndex, codeStartIndex,
   }
 }
 async function updateErrorHistory(adapter, rawValues) {
+  const config = adapter.config;
+  const lang = config.language === "de" ? "de" : "en";
   const dpPath = (0, import_stateMapping.getDpPath)("Fehlerspeicher");
   if (dpPath) {
-    await updateHistory(adapter, rawValues, 95, 100, dpPath, "Unknown error", import_codes.ERROR_CODES);
+    const fallback = lang === "de" ? "Unbekannter Fehler" : "Unknown error";
+    const codeMap = import_codes.ERROR_CODES[lang] || import_codes.ERROR_CODES.en;
+    await updateHistory(adapter, rawValues, 95, 100, dpPath, fallback, codeMap);
   }
 }
 async function updateOutageHistory(adapter, rawValues) {
+  const config = adapter.config;
+  const lang = config.language === "de" ? "de" : "en";
   const dpPath = (0, import_stateMapping.getDpPath)("Abschaltungen");
   if (dpPath) {
-    await updateHistory(adapter, rawValues, 111, 106, dpPath, "Unknown outage cause", import_codes.OUTAGE_CODES);
+    const fallback = lang === "de" ? "Unbekannte Abschaltung" : "Unknown outage";
+    const codeMap = import_codes.OUTAGE_CODES[lang] || import_codes.OUTAGE_CODES.en;
+    await updateHistory(adapter, rawValues, 111, 106, dpPath, fallback, codeMap);
   }
 }
 async function calculateTemperatureSpread(adapter) {
