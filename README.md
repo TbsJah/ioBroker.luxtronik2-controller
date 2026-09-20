@@ -79,15 +79,28 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
-### **WORK IN PROGRESS**
-- Update Readme 
-### 🇬🇧 English
 
-**Features & Changes**
+### **WORK IN PROGRESS**
+
+**🐛 Bugfixes**
+
+- **(Fixed) HUP Dynamic Voltage Control:** Fixed an issue where the digital relay state (`HUPout`) was queried instead of the actual nominal voltage (`heating_system_circ_pump_voltage_nominal`). This previously caused the calculation logic to produce target voltages below the hardware limit (e.g. 1.25V), triggering "less than min 3" validation warnings in the log.
+
+**(Fixed) Admin UI Backup Links:** Fixed an issue where the manual download links for logs and parameters in the Backup tab did not correctly resolve the configured heat pump IP address (changed placeholder from {host} to ${data.host}).
+
+**🚀 Features & Improvements**
+
+- **(Added) German Translations for Error & Outage Codes:** Added full German translations for all entries in `ERROR_CODES` and `OUTAGE_CODES`.
+- **(Improved) Multi-Language History Logs:** The error log (`Fehlerspeicher`) and outage history (`Abschaltungen`) now dynamically output descriptions and fallbacks in the configured adapter language (`de` / `en`).
+
 * **(Added) Backup & Diagnostics Tab:** Introduced a new tab in the adapter settings for easy access to heat pump data.
 * **(Added) Manual Downloads:** Added direct buttons to manually download the live DTA log (`/NewProc`), parameter backup (`procparam`), and error log (`procerr`) via the heat pump's web server.
 * **(Added) Automated DTA Backup:** Implemented a new scheduling feature (cron) to automatically trigger and download live DTA logs, saving them directly to the ioBroker file system for external use or archiving.
+* **(Improved) Automated DTA Backup:** Added a new configuration field allowing users to specify a custom storage path/directory within the ioBroker file system for automated DTA log downloads (defaults to `backup`). Path inputs are automatically sanitized to prevent invalid directory structures.
 
+**🛠 Refactoring & Under the Hood**
+
+- **(Development) TypeScript Definitions:** Added missing @types/node-schedule to the dev dependencies to resolve ESLint type-checking errors during the build process.
 
 ### 0.8.1 (2026-09-19)
 

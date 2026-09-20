@@ -63,12 +63,19 @@ export async function executeDtaBackup(adapter: AdapterInstance): Promise<void> 
 		const arrayBuffer = await response.arrayBuffer();
 		const buffer = Buffer.from(arrayBuffer);
 
-		// 3. Dateinamen mit aktuellem Zeitstempel generieren (z.B. dta_live_2026-09-20T07-30-00.dta)
+		// 3. Speicherpfad aus Config holen und formatieren (Fallback auf 'backup')
+		let basePath = config.autoBackupPath || 'backup';
+		basePath = basePath.replace(/^\/+|\/+$/g, '').trim(); // Entfernt Slashes am Anfang und Ende
+		if (basePath === '') {
+			basePath = 'backup';
+		}
+
+		// 4. Dateinamen mit aktuellem Zeitstempel generieren (z.B. dta_live_2026-09-20T07-30-00.dta)
 		const now = new Date();
 		const timestamp = now.toISOString().replace(/[:.]/g, '-').substring(0, 19);
-		const fileName = `backup/dta_live_${timestamp}.dta`;
+		const fileName = `${basePath}/dta_live_${timestamp}.dta`;
 
-		// 4. Im ioBroker-Dateisystem speichern (Sichtbar im Tab "Dateien" unter luxtronik2-controller.0)
+		// 5. Im ioBroker-Dateisystem speichern (Sichtbar im Tab "Dateien" unter luxtronik2-controller.0)
 		await adapter.writeFileAsync(adapter.namespace, fileName, buffer);
 
 		writeLog(`DTA Backup successfully saved as ${fileName} in ioBroker files.`, 'info');

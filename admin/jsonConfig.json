@@ -2904,7 +2904,12 @@
 				"headerBackup": {
 					"type": "header",
 					"text": { "en": "Manual Download", "de": "Manueller Download" },
-					"size": 4, "xs": 12, "sm": 12, "md": 12, "lg": 12, "xl": 12
+					"size": 4,
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
 				},
 				"backupInfo": {
 					"type": "staticText",
@@ -2913,46 +2918,71 @@
 						"de": "Über den internen Webserver der Luxtronik-Steuerung lassen sich System-Logs und Backups direkt herunterladen. Die Buttons unten nutzen automatisch die IP-Adresse, die du im Reiter 'Verbindung' eingetragen hast."
 					},
 					"style": { "marginBottom": "20px", "fontSize": "14px" },
-					"xs": 12, "sm": 12, "md": 12, "lg": 12, "xl": 12
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
 				},
 				"linkDta": {
 					"type": "staticLink",
 					"label": { "en": "Download Live Data Log (.dta)", "de": "Live Datenlog herunterladen (.dta)" },
-					"href": "http://{host}/NewProc",
+					"href": "http://${data.host}/NewProc",
 					"button": true,
 					"variant": "contained",
 					"color": "primary",
-					"xs": 12, "sm": 12, "md": 4, "lg": 4, "xl": 4
+					"xs": 12,
+					"sm": 12,
+					"md": 4,
+					"lg": 4,
+					"xl": 4
 				},
 				"linkParam": {
 					"type": "staticLink",
 					"label": { "en": "Settings Backup (.txt)", "de": "Parameter-Backup (.txt)" },
-					"href": "http://{host}/Webclient/procparam",
+					"href": "http://${data.host}/Webclient/procparam",
 					"button": true,
 					"variant": "outlined",
 					"color": "primary",
-					"xs": 12, "sm": 12, "md": 4, "lg": 4, "xl": 4
+					"xs": 12,
+					"sm": 12,
+					"md": 4,
+					"lg": 4,
+					"xl": 4
 				},
 				"linkErr": {
 					"type": "staticLink",
 					"label": { "en": "Error Log (.txt)", "de": "Fehlerspeicher (.txt)" },
-					"href": "http://{host}/Webclient/procerr",
+					"href": "http://${data.host}/Webclient/procerr",
 					"button": true,
 					"variant": "outlined",
 					"color": "secondary",
 					"style": { "marginBottom": "30px" },
-					"xs": 12, "sm": 12, "md": 4, "lg": 4, "xl": 4
+					"xs": 12,
+					"sm": 12,
+					"md": 4,
+					"lg": 4,
+					"xl": 4
 				},
 				"divider1": {
 					"type": "divider",
 					"color": "primary",
 					"style": { "marginBottom": "20px" },
-					"xs": 12, "sm": 12, "md": 12, "lg": 12, "xl": 12
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
 				},
 				"headerAutoBackup": {
 					"type": "header",
 					"text": { "en": "Automated DTA Backup", "de": "Automatisches DTA-Backup" },
-					"size": 4, "xs": 12, "sm": 12, "md": 12, "lg": 12, "xl": 12
+					"size": 4,
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
 				},
 				"autoBackupActive": {
 					"type": "checkbox",
@@ -2962,17 +2992,40 @@
 					},
 					"help": {
 						"en": "If enabled, the adapter will automatically download the DTA log according to the schedule and save it to the ioBroker file system.",
-						"de": "Wenn aktiviert, ruft der Adapter das DTA-Live-Log nach dem untenstehenden Zeitplan vollautomatisch ab und speichert es im ioBroker-Dateisystem (z.B. für USB-Sticks oder externe Skripte)."
+						"de": "Wenn aktiviert, ruft der Adapter das DTA-Live-Log nach dem untenstehenden Zeitplan vollautomatisch ab und speichert es im ioBroker-Dateisystem."
 					},
 					"default": false,
-					"xs": 12, "sm": 12, "md": 4, "lg": 4, "xl": 4
+					"xs": 12,
+					"sm": 12,
+					"md": 4,
+					"lg": 4,
+					"xl": 4
 				},
 				"autoBackupCron": {
 					"type": "cron",
 					"label": { "en": "Schedule", "de": "Zeitplan" },
 					"default": "0 2 * * *",
 					"hidden": "!data.autoBackupActive",
-					"xs": 12, "sm": 12, "md": 8, "lg": 8, "xl": 8
+					"xs": 12,
+					"sm": 12,
+					"md": 4,
+					"lg": 4,
+					"xl": 4
+				},
+				"autoBackupPath": {
+					"type": "text",
+					"label": { "en": "Storage path", "de": "Speicherpfad" },
+					"help": {
+						"en": "Directory in the ioBroker file system (e.g., 'backup').",
+						"de": "Verzeichnis im ioBroker-Dateisystem (z.B. 'backup')."
+					},
+					"default": "backup",
+					"hidden": "!data.autoBackupActive",
+					"xs": 12,
+					"sm": 12,
+					"md": 4,
+					"lg": 4,
+					"xl": 4
 				}
 			}
 		}

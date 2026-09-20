@@ -443,7 +443,7 @@ class Luxtronik2Controller extends utils.Adapter {
 				vd1State,
 				wwHystereseState,
 				ruecklaufSollState,
-				hupAktivState,
+				currentHupVoltState,
 				heizenHystereseState,
 				nachWasserState,
 				mitteltempState,
@@ -459,7 +459,7 @@ class Luxtronik2Controller extends utils.Adapter {
 				this.getStateAsync(getDpPath('VD1out')),
 				this.getStateAsync(getDpPath('hotWaterTemperatureHysteresis')),
 				this.getStateAsync(getDpPath('temperature_target_return')),
-				this.getStateAsync(getDpPath('HUPout')),
+				this.getStateAsync(getDpPath('heating_system_circ_pump_voltage_nominal')),
 				this.getStateAsync(getDpPath('returnTemperatureHysteresis')),
 				this.getStateAsync(getDpPath('Heizen_nach_Wasser')),
 				this.getStateAsync(getDpPath('Mitteltemperatur')),
@@ -476,7 +476,7 @@ class Luxtronik2Controller extends utils.Adapter {
 			const vd1 = vd1State?.val === 1;
 			const wwHysterese = (wwHystereseState?.val as number) ?? 0;
 			const ruecklaufSoll = (ruecklaufSollState?.val as number) ?? 0;
-			const hupAktiv = (hupAktivState?.val as number) ?? 0;
+			const currentHupVolt = (currentHupVoltState?.val as number) ?? 7.0;
 			const heizenHysterese = (heizenHystereseState?.val as number) ?? 0;
 			const mitteltemperatur = (mitteltempState?.val as number) ?? 0;
 			const thresholdHeatingLimit = (thresholdHeatingLimitstate?.val as number) ?? 0;
@@ -500,7 +500,7 @@ class Luxtronik2Controller extends utils.Adapter {
 					this,
 					istHeizen,
 					spreizung,
-					hupAktiv,
+					currentHupVolt,
 					this.lastPumpOptimization,
 				);
 

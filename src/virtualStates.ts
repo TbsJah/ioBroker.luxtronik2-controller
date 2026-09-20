@@ -166,9 +166,14 @@ async function updateHistory(
  * @returns A promise resolving upon completion
  */
 export async function updateErrorHistory(adapter: AdapterInstance, rawValues: number[]): Promise<void> {
+	const config = adapter.config as any;
+	const lang = config.language === 'de' ? 'de' : 'en';
 	const dpPath = getDpPath('Fehlerspeicher');
+
 	if (dpPath) {
-		await updateHistory(adapter, rawValues, 95, 100, dpPath, 'Unknown error', ERROR_CODES);
+		const fallback = lang === 'de' ? 'Unbekannter Fehler' : 'Unknown error';
+		const codeMap = ERROR_CODES[lang] || ERROR_CODES.en;
+		await updateHistory(adapter, rawValues, 95, 100, dpPath, fallback, codeMap);
 	}
 }
 
@@ -180,9 +185,14 @@ export async function updateErrorHistory(adapter: AdapterInstance, rawValues: nu
  * @returns A promise resolving upon completion
  */
 export async function updateOutageHistory(adapter: AdapterInstance, rawValues: number[]): Promise<void> {
+	const config = adapter.config as any;
+	const lang = config.language === 'de' ? 'de' : 'en';
 	const dpPath = getDpPath('Abschaltungen');
+
 	if (dpPath) {
-		await updateHistory(adapter, rawValues, 111, 106, dpPath, 'Unknown outage cause', OUTAGE_CODES);
+		const fallback = lang === 'de' ? 'Unbekannte Abschaltung' : 'Unknown outage';
+		const codeMap = OUTAGE_CODES[lang] || OUTAGE_CODES.en;
+		await updateHistory(adapter, rawValues, 111, 106, dpPath, fallback, codeMap);
 	}
 }
 
