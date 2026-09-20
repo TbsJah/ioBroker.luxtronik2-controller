@@ -28,6 +28,10 @@ export interface ExtendedAdapter extends AdapterInstance {
 	config: ioBroker.AdapterConfig & Record<string, any>;
 	/** Stores the timestamp of the last reported error to prevent duplicate alerts */
 	lastKnownErrorTimestamp?: number | null;
+	/** Stores the timestamp of the last reported outage to prevent duplicate alerts */
+	lastKnownOutageTimestamp?: number | null;
+	/** Timestamp of the last sent flow warning (Spam protection cooldown) */
+	lastFlowNotificationTime?: number;
 }
 
 // =========================================================
@@ -228,6 +232,70 @@ export async function checkAndSendErrorNotifications(
 	adapter.lastKnownErrorTimestamp = currentErrorTimestamp;
 
 	const msg = `🚨 *Heat Pump Malfunction!*\nAn error was registered on the heat pump:\n\n*Code:* ${currentErrorCode}\n*Error:* ${newestError.beschreibung}\n*Date:* ${newestError.datum}`;
+
+	await sendNotification(adapter, msg);
+}
+
+/**
+ * Überwacht den Abschalt-Speicher gezielt auf kritische Durchfluss-Probleme,
+ * die von der Wärmepumpe nicht sofort als "Fehler" gewertet werden.
+ *
+ * @param adapter - Die erweiterte Adapter-Instanz.
+ * @param oldOutageVal - Der vorherige State der Abschaltungen (JSON).
+ * @param newOutageVal - Der neue State der Abschaltungen (JSON).
+ */
+export async function checkAndSendOutageNotifications(
+	adapter: ExtendedAdapter,
+	oldOutageVal: string | undefined,
+	newOutageVal: string | undefined,
+): Promise<void> {
+	if (!newOutageVal || newOutageVal === oldOutageVal) {
+		return;
+	}
+
+	const newList = safeParse<ErrorHistoryEntry[]>(newOutageVal);
+	if (!newList || newList.length === 0) {
+		return;
+	}
+
+	const newestOutage = newList[0];
+	const currentOutageTimestamp = newestOutage.timestamp;
+	const currentOutageCode = newestOutage.code;
+
+	if (currentOutageTimestamp === undefined || currentOutageCode === 0) {
+		return;
+	}
+
+	// Wir filtern gezielt nach Durchfluss / Flow Problemen
+	const descLower = newestOutage.beschreibung.toLowerCase();
+	const isFlowIssue = descLower.includes('durchfluss') || descLower.includes('flow');
+
+	if (!isFlowIssue) {
+		return;
+	}
+
+	if (adapter.lastKnownOutageTimestamp === undefined || adapter.lastKnownOutageTimestamp === null) {
+		adapter.lastKnownOutageTimestamp = currentOutageTimestamp;
+		writeLog('Outage monitoring initialized. Last known outage timestamp set silently.', 'debug');
+		return;
+	}
+
+	if (currentOutageTimestamp <= adapter.lastKnownOutageTimestamp) {
+		return; // Kein neuer Eintrag
+	}
+
+	// Spam-Schutz: Max 1 Nachricht pro Stunde für denselben Abschalt-Typ
+	const now = Date.now();
+	if (adapter.lastFlowNotificationTime && now - adapter.lastFlowNotificationTime < 60 * 60 * 1000) {
+		adapter.lastKnownOutageTimestamp = currentOutageTimestamp; // Zeitstempel trotzdem merken
+		writeLog('Flow outage registered, but notification skipped due to 60-minute cooldown spam protection.', 'info');
+		return;
+	}
+
+	adapter.lastKnownOutageTimestamp = currentOutageTimestamp;
+	adapter.lastFlowNotificationTime = now;
+
+	const msg = `⚠️ *Warnung: Durchfluss-Problem!*\nDie Wärmepumpe hat sich wegen geringem Durchfluss abgeschaltet:\n\n*Code:* ${currentOutageCode}\n*Grund:* ${newestOutage.beschreibung}\n*Datum:* ${newestOutage.datum}\n\n_Hinweis: Die Anlage versucht meist einen Neustart. Bitte Heizkreis-Druck und Stellventile prüfen._`;
 
 	await sendNotification(adapter, msg);
 }

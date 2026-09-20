@@ -7,7 +7,12 @@ import { initAutoBackup, stopAutoBackup } from './backupManager';
 import { formatTimerSecondsToTime, timeStringToSeconds } from './convert';
 import { handleHupOptimization } from './hupManager';
 import { initLogger, setCustomDebug, writeLog } from './logger';
-import { checkAndSendErrorNotifications, handleTestMessage, sendTelegramNotification } from './notificationManager';
+import {
+	checkAndSendErrorNotifications,
+	checkAndSendOutageNotifications,
+	handleTestMessage,
+	sendTelegramNotification,
+} from './notificationManager';
 import {
 	cleanupCustomStates,
 	cleanupEmptyFolders,
@@ -718,18 +723,35 @@ class Luxtronik2Controller extends utils.Adapter {
 			await calculateTotalThermalEnergy(this);
 			await calculateTotalEnergy(this);
 
+			// ----------------------------------------------------
+			// Fehler-Historie abarbeiten & Alarmieren
+			// ----------------------------------------------------
 			const fehlerDp = getDpPath('Fehlerspeicher');
-			const oldFehlerState = await this.getStateAsync(fehlerDp);
+			const oldFehlerState = fehlerDp ? await this.getStateAsync(fehlerDp) : null;
 			const oldFehlerVal = oldFehlerState?.val as string | undefined;
 
 			await updateErrorHistory(this, rawValues);
 
-			const newFehlerState = await this.getStateAsync(fehlerDp);
+			const newFehlerState = fehlerDp ? await this.getStateAsync(fehlerDp) : null;
 			const newFehlerVal = newFehlerState?.val as string | undefined;
 
 			await checkAndSendErrorNotifications(this, oldFehlerVal, newFehlerVal);
 
+			// ----------------------------------------------------
+			// Abschalt-Historie abarbeiten & Alarmieren (Durchfluss)
+			// ----------------------------------------------------
+			const abschaltungDp = getDpPath('Abschaltungen');
+			const oldAbschaltungState = abschaltungDp ? await this.getStateAsync(abschaltungDp) : null;
+			const oldAbschaltungVal = oldAbschaltungState?.val as string | undefined;
+
 			await updateOutageHistory(this, rawValues);
+
+			const newAbschaltungState = abschaltungDp ? await this.getStateAsync(abschaltungDp) : null;
+			const newAbschaltungVal = newAbschaltungState?.val as string | undefined;
+
+			await checkAndSendOutageNotifications(this, oldAbschaltungVal, newAbschaltungVal);
+			// ----------------------------------------------------
+
 			await calculateTemperatureSpread(this);
 			await updateStatusStrings(this, rawValues, rawParams);
 			await updateCustomStates(this, rawValues, rawParams);
