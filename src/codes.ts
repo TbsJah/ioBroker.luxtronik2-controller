@@ -87,6 +87,8 @@ export const OUTAGE_CODES: Record<number, string> = {
 	7: 'Temperature operating limit min',
 	8: 'Lower operating limit',
 	9: 'No demand',
+	10: 'Unknown',
+	11: 'Low flow rate',
 };
 
 // ==========================================
