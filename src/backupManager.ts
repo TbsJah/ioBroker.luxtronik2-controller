@@ -41,50 +41,56 @@ export async function executeDtaBackup(adapter: AdapterInstance): Promise<void> 
 	}
 
 	try {
-		writeLog('Triggering live DTA flush on heat pump (/NewProc)...', 'debug');
+		writeLog('Triggering live DTA flush and fetching file (/NewProc)...', 'debug');
 
-		// 1. Zwingt die Luxtronik, den aktuellen Arbeitsspeicher in die Datei zu schreiben
-		await fetch(`http://${ip}/NewProc`).catch(() => {});
+		// 1. Neuer Firmware-Weg (Aktuelle Daten / V3.8x+): /NewProc generiert UND liefert die Datei
+		let response = await fetch(`http://${ip}/NewProc`).catch(() => null);
+		let arrayBuffer = response && response.ok ? await response.arrayBuffer() : null;
 
-		// Der Anlage kurz Zeit geben, die Datei auf den internen Speicher zu schreiben
-		await new Promise(resolve => setTimeout(resolve, 3000));
+		// Wenn die Antwort sehr klein ist (< 1000 Bytes), ist es eine ältere Firmware.
+		if (!arrayBuffer || arrayBuffer.byteLength < 1000) {
+			writeLog('Older firmware detected. Fetching historical DTA via /proclog...', 'debug');
 
-		writeLog('Downloading latest DTA file...', 'debug');
+			// 2. Offizieller Weg für ältere WP / 48h Historie: /proclog
+			response = await fetch(`http://${ip}/proclog`).catch(() => null);
 
-		// 2. Die frisch geschriebene Datei herunterladen (Versuche beide bekannten Firmware-Pfade)
-		let response = await fetch(`http://${ip}/procdta`).catch(() => null);
+			// 3. Fallback-Download für Zwischenversionen: /procdta
+			if (!response || !response.ok) {
+				writeLog('/proclog not found, trying fallback path /procdta...', 'debug');
+				response = await fetch(`http://${ip}/procdta`).catch(() => null);
+			}
 
-		// Fallback für ältere Firmwares (Ordner: /Webclient/)
-		if (!response || !response.ok) {
-			writeLog('/procdta not found, trying fallback path /Webclient/procdta...', 'debug');
-			response = await fetch(`http://${ip}/Webclient/procdta`).catch(() => null);
+			// 4. Fallback-Download: Alter Webclient-Ordner für ganz alte V1/V2 Anlagen
+			if (!response || !response.ok) {
+				writeLog('/procdta not found, trying fallback path /Webclient/procdta...', 'debug');
+				response = await fetch(`http://${ip}/Webclient/procdta`).catch(() => null);
+			}
+
+			if (!response || !response.ok) {
+				throw new Error(`HTTP Error - File not found on heat pump webserver.`);
+			}
+
+			// Puffer der Fallback-Datei einlesen
+			arrayBuffer = await response.arrayBuffer();
 		}
 
-		if (!response || !response.ok) {
-			throw new Error(`HTTP Error - File not found on heat pump webserver.`);
-		}
-
-		// Daten als Binärpuffer einlesen
-		const arrayBuffer = await response.arrayBuffer();
 		const buffer = Buffer.from(arrayBuffer);
 
-		// 3. Speicherpfad aus Config holen und formatieren
-		// Wenn das Feld leer ist, speichern wir direkt im Adapter-Namespace
+		// 5. Speicherpfad aus Config holen und formatieren
 		const basePath = config.autoBackupPath
 			? String(config.autoBackupPath)
 					.replace(/^\/+|\/+$/g, '')
 					.trim()
 			: '';
 
-		// 4. Dateinamen mit aktuellem Zeitstempel generieren (z.B. dta_live_2026-09-20T07-30-00.dta)
+		// 6. Dateinamen mit aktuellem Zeitstempel generieren (z.B. dta_live_2026-09-20T07-30-00.dta)
 		const now = new Date();
 		const timestamp = now.toISOString().replace(/[:.]/g, '-').substring(0, 19);
 		const fileName = `dta_live_${timestamp}.dta`;
 
-		// Wenn basePath existiert, hänge den Dateinamen an, sonst speichere direkt ins Root
 		const fullPath = basePath !== '' ? `${basePath}/${fileName}` : fileName;
 
-		// 5. Im ioBroker-Dateisystem speichern (Sichtbar im Tab "Dateien")
+		// 7. Im ioBroker-Dateisystem speichern (Sichtbar im Tab "Dateien")
 		await adapter.writeFileAsync(adapter.namespace, fullPath, buffer);
 
 		writeLog(`DTA Backup successfully saved as ${fullPath} in ioBroker files.`, 'info');
@@ -93,7 +99,6 @@ export async function executeDtaBackup(adapter: AdapterInstance): Promise<void> 
 		writeLog(`Failed to execute automated DTA backup: ${msg}`, 'error');
 	}
 }
-
 /**
  * Stoppt den laufenden Cronjob (wichtig für den Adapter-Neustart).
  */
