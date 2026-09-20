@@ -2944,7 +2944,6 @@
 					"button": true,
 					"variant": "outlined",
 					"color": "primary",
-					"style": { "marginBottom": "30px" },
 					"xs": 12,
 					"sm": 6,
 					"md": 4,
