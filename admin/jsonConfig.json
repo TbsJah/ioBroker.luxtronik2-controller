@@ -126,79 +126,6 @@
 				}
 			}
 		},
-		"cycleOptimizationTab": {
-			"type": "panel",
-			"label": {
-				"en": "Cycle Optimization",
-				"de": "Takt-Optimierung"
-			},
-			"icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMjQgMjQiPgoJPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIgLz4KCTxwYXRoIGZpbGw9ImN1cnJlbnRDb2xvciIgZD0iTTkuNSAxNXExLjA1IDAgMS43NzUtLjcyNWw0LTRRMTYgOS41NSAxNiA4LjV0LS43MjUtMS43NzVUMTMuNSA2dC0xLjc3NS43MjVRMTAuOCA2LjQgOS45IDYuNTc1dC0xLjUyNS44dC0uOCAxLjUyNXQuMTUgMS44MjVRNyAxMS40NSA3IDEyLjV0LjcyNSAxLjc3NVQ5LjUgMTVNNiAyMnYtNC4zcS0xLjQyNS0xLjMtMi4yMTItMy4wMzdUMyAxMXEwLTMuNzUgMi42MjUtNi4zNzVUMTIgMnEzLjEyNSAwIDUuNTM4IDEuODM4dDMuMTM3IDQuNzg3bDEuMyA1LjEyNXEuMTI1LjQ3NS0uMTc1Ljg2M1QyMSAxNWgtMnYzcTAgLjgyNS0uNTg3IDEuNDEzVDE3IDIwaC0ydjJoLTJ2LTRoNHYtNWgyLjdsLS45NS0zLjg3NXEtLjU3NS0yLjI3NS0yLjQ1LTMuN1QxMiA0UTkuMSA0IDcuMDUgNi4wMjVUNSAxMC45NXEwIDEuNS42MTMgMi44NXQxLjczNyAyLjRsLjY1LjZWMjJ6bTYuMzUtOSIgLz4KPC9zdmc+Cg==",
-			"items": {
-				"informationCycleOptimization": {
-					"type": "staticText",
-					"text": {
-						"en": "By default, the Luxtronik controller treats heating and domestic hot water (DHW) cycles as separate operations. This adapter coordinates the run so the compressor transitions seamlessly into heating without shutting down.<br><br>➔ <i>Trigger rule:</i> If <b>(DHW Target - DHW Actual) ≥ (DHW Hysteresis - 1.5 K)</b> and <b>Heating Return ≤ Return Target</b> and outdoor heating threshold is not active, heating is triggered directly with Return Target temporarily set to 35°C to force compressor operation.",
-						"de": "Standardmäßig behandelt die Luxtronik-Steuerung Heiz- und Warmwassertakte strikt getrennt. Dieser Adapter koppelt die Vorgänge, sodass der Verdichter ohne Zwischenstopp direkt in den Heizbetrieb übergeht.<br><br>➔ <i>Auslöser-Regel:</i> Wenn <b>(WW Soll - WW Ist) ≥ (WW Hysterese - 1,5 K)</b> und <b>Heizung Rücklauf ≤ Rücklauf Soll</b> und die Heizgrenze nicht aktiv ist, wird direkt der Heizbetrieb gestartet und der Rücklauf-Sollwert temporär auf 35°C gesetzt, um das Heizen zu erzwingen."
-					},
-					"style": { "marginBottom": "20px", "fontSize": "14px" },
-					"xs": 12,
-					"sm": 12,
-					"md": 12,
-					"lg": 12,
-					"xl": 12
-				},
-				"regelung_aktiv": {
-					"type": "checkbox",
-					"label": {
-						"en": "Enable intelligent cycle optimization",
-						"de": "Intelligente Takt-Optimierung aktivieren"
-					},
-					"default": false,
-					"confirm": {
-						"condition": "data.regelung_aktiv === true && data.idle_defaults_aktiv !== true",
-						"title": { "en": "Important Recommendation", "de": "Wichtige Empfehlung" },
-						"text": {
-							"en": "You are activating the intelligent cycle optimization. It is highly recommended to also enable 'Force default values during idle' in the 'Idle Defaults' tab! This ensures that the heat pump returns to a safe state after the adapter intervenes.",
-							"de": "Du aktivierst die intelligente Takt-Optimierung. Es wird dringend empfohlen, im Reiter 'Leerlauf' die Option 'Standardwerte im Leerlauf erzwingen' einzuschalten! Nur so ist garantiert, dass die Wärmepumpe nach dem Eingreifen des Adapters wieder in einen sicheren Ursprungszustand zurückkehrt."
-						}
-					},
-					"xs": 12,
-					"sm": 6,
-					"md": 6,
-					"lg": 6,
-					"xl": 6
-				},
-				"Heating_after_warmwater": {
-					"type": "checkbox",
-					"label": { "en": "Heating after hot water", "de": "Heizen nach Warmwasser erzwingen" },
-					"hidden": "!data.regelung_aktiv",
-					"default": false,
-					"xs": 12,
-					"sm": 6,
-					"md": 6,
-					"lg": 6,
-					"xl": 6
-				},
-				"exampleImageCycle_de": {
-					"type": "staticImage",
-					"src": "img/Takt_Optimierung.svg",
-					"hidden": "systemConfig.language !== 'de'",
-					"style": {
-						"width": "1200px",
-						"maxWidth": "100%",
-						"height": "auto",
-						"border": "1px solid #cccccc",
-						"borderRadius": "5px",
-						"marginTop": "10px"
-					},
-					"xs": 12,
-					"sm": 12,
-					"md": 12,
-					"lg": 12,
-					"xl": 12
-				}
-			}
-		},
 		"idleTab": {
 			"type": "panel",
 			"label": {
@@ -390,6 +317,79 @@
 						"maxWidth": "800px",
 						"marginTop": "20px",
 						"marginBottom": "20px"
+					},
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				}
+			}
+		},
+		"cycleOptimizationTab": {
+			"type": "panel",
+			"label": {
+				"en": "Cycle Optimization",
+				"de": "Takt-Optimierung"
+			},
+			"icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMjQgMjQiPgoJPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIgLz4KCTxwYXRoIGZpbGw9ImN1cnJlbnRDb2xvciIgZD0iTTkuNSAxNXExLjA1IDAgMS43NzUtLjcyNWw0LTRRMTYgOS41NSAxNiA4LjV0LS43MjUtMS43NzVUMTMuNSA2dC0xLjc3NS43MjVRMTAuOCA2LjQgOS45IDYuNTc1dC0xLjUyNS44dC0uOCAxLjUyNXQuMTUgMS44MjVRNyAxMS40NSA3IDEyLjV0LjcyNSAxLjc3NVQ5LjUgMTVNNiAyMnYtNC4zcS0xLjQyNS0xLjMtMi4yMTItMy4wMzdUMyAxMXEwLTMuNzUgMi42MjUtNi4zNzVUMTIgMnEzLjEyNSAwIDUuNTM4IDEuODM4dDMuMTM3IDQuNzg3bDEuMyA1LjEyNXEuMTI1LjQ3NS0uMTc1Ljg2M1QyMSAxNWgtMnYzcTAgLjgyNS0uNTg3IDEuNDEzVDE3IDIwaC0ydjJoLTJ2LTRoNHYtNWgyLjdsLS45NS0zLjg3NXEtLjU3NS0yLjI3NS0yLjQ1LTMuN1QxMiA0UTkuMSA0IDcuMDUgNi4wMjVUNSAxMC45NXEwIDEuNS42MTMgMi44NXQxLjczNyAyLjRsLjY1LjZWMjJ6bTYuMzUtOSIgLz4KPC9zdmc+Cg==",
+			"items": {
+				"informationCycleOptimization": {
+					"type": "staticText",
+					"text": {
+						"en": "By default, the Luxtronik controller treats heating and domestic hot water (DHW) cycles as separate operations. This adapter coordinates the run so the compressor transitions seamlessly into heating without shutting down.<br><br>➔ <i>Trigger rule:</i> If <b>(DHW Target - DHW Actual) ≥ (DHW Hysteresis - 1.5 K)</b> and <b>Heating Return ≤ Return Target</b> and outdoor heating threshold is not active, heating is triggered directly with Return Target temporarily set to 35°C to force compressor operation.",
+						"de": "Standardmäßig behandelt die Luxtronik-Steuerung Heiz- und Warmwassertakte strikt getrennt. Dieser Adapter koppelt die Vorgänge, sodass der Verdichter ohne Zwischenstopp direkt in den Heizbetrieb übergeht.<br><br>➔ <i>Auslöser-Regel:</i> Wenn <b>(WW Soll - WW Ist) ≥ (WW Hysterese - 1,5 K)</b> und <b>Heizung Rücklauf ≤ Rücklauf Soll</b> und die Heizgrenze nicht aktiv ist, wird direkt der Heizbetrieb gestartet und der Rücklauf-Sollwert temporär auf 35°C gesetzt, um das Heizen zu erzwingen."
+					},
+					"style": { "marginBottom": "20px", "fontSize": "14px" },
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
+				"regelung_aktiv": {
+					"type": "checkbox",
+					"label": {
+						"en": "Enable intelligent cycle optimization",
+						"de": "Intelligente Takt-Optimierung aktivieren"
+					},
+					"default": false,
+					"confirm": {
+						"condition": "data.regelung_aktiv === true && data.idle_defaults_aktiv !== true",
+						"title": { "en": "Important Recommendation", "de": "Wichtige Empfehlung" },
+						"text": {
+							"en": "You are activating the intelligent cycle optimization. It is highly recommended to also enable 'Force default values during idle' in the 'Idle Defaults' tab! This ensures that the heat pump returns to a safe state after the adapter intervenes.",
+							"de": "Du aktivierst die intelligente Takt-Optimierung. Es wird dringend empfohlen, im Reiter 'Leerlauf' die Option 'Standardwerte im Leerlauf erzwingen' einzuschalten! Nur so ist garantiert, dass die Wärmepumpe nach dem Eingreifen des Adapters wieder in einen sicheren Ursprungszustand zurückkehrt."
+						}
+					},
+					"xs": 12,
+					"sm": 6,
+					"md": 6,
+					"lg": 6,
+					"xl": 6
+				},
+				"Heating_after_warmwater": {
+					"type": "checkbox",
+					"label": { "en": "Heating after hot water", "de": "Heizen nach Warmwasser erzwingen" },
+					"hidden": "!data.regelung_aktiv",
+					"default": false,
+					"xs": 12,
+					"sm": 6,
+					"md": 6,
+					"lg": 6,
+					"xl": 6
+				},
+				"exampleImageCycle_de": {
+					"type": "staticImage",
+					"src": "img/Takt_Optimierung.svg",
+					"hidden": "systemConfig.language !== 'de'",
+					"style": {
+						"width": "1200px",
+						"maxWidth": "100%",
+						"height": "auto",
+						"border": "1px solid #cccccc",
+						"borderRadius": "5px",
+						"marginTop": "10px"
 					},
 					"xs": 12,
 					"sm": 12,
@@ -2890,6 +2890,89 @@
 							"width": "100px"
 						}
 					]
+				}
+			}
+		},
+		"backupTab": {
+			"type": "panel",
+			"label": {
+				"en": "Backup & Diagnostics",
+				"de": "Backup & Diagnose"
+			},
+			"icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iY3VycmVudENvbG9yIiBkPSJNMTkgOWgtNFYzSDl2Nkg1bDcgN3pNNSAxOHYyaDE0di0yeiIvPjwvc3ZnPg==",
+			"items": {
+				"headerBackup": {
+					"type": "header",
+					"text": { "en": "Manual Download", "de": "Manueller Download" },
+					"size": 4, "xs": 12, "sm": 12, "md": 12, "lg": 12, "xl": 12
+				},
+				"backupInfo": {
+					"type": "staticText",
+					"text": {
+						"en": "You can download the heat pump's internal logs directly via its web interface. The links below use the IP address configured in the 'Connection' tab.",
+						"de": "Über den internen Webserver der Luxtronik-Steuerung lassen sich System-Logs und Backups direkt herunterladen. Die Buttons unten nutzen automatisch die IP-Adresse, die du im Reiter 'Verbindung' eingetragen hast."
+					},
+					"style": { "marginBottom": "20px", "fontSize": "14px" },
+					"xs": 12, "sm": 12, "md": 12, "lg": 12, "xl": 12
+				},
+				"linkDta": {
+					"type": "staticLink",
+					"label": { "en": "Download Live Data Log (.dta)", "de": "Live Datenlog herunterladen (.dta)" },
+					"href": "http://{host}/NewProc",
+					"button": true,
+					"variant": "contained",
+					"color": "primary",
+					"xs": 12, "sm": 12, "md": 4, "lg": 4, "xl": 4
+				},
+				"linkParam": {
+					"type": "staticLink",
+					"label": { "en": "Settings Backup (.txt)", "de": "Parameter-Backup (.txt)" },
+					"href": "http://{host}/Webclient/procparam",
+					"button": true,
+					"variant": "outlined",
+					"color": "primary",
+					"xs": 12, "sm": 12, "md": 4, "lg": 4, "xl": 4
+				},
+				"linkErr": {
+					"type": "staticLink",
+					"label": { "en": "Error Log (.txt)", "de": "Fehlerspeicher (.txt)" },
+					"href": "http://{host}/Webclient/procerr",
+					"button": true,
+					"variant": "outlined",
+					"color": "secondary",
+					"style": { "marginBottom": "30px" },
+					"xs": 12, "sm": 12, "md": 4, "lg": 4, "xl": 4
+				},
+				"divider1": {
+					"type": "divider",
+					"color": "primary",
+					"style": { "marginBottom": "20px" },
+					"xs": 12, "sm": 12, "md": 12, "lg": 12, "xl": 12
+				},
+				"headerAutoBackup": {
+					"type": "header",
+					"text": { "en": "Automated DTA Backup", "de": "Automatisches DTA-Backup" },
+					"size": 4, "xs": 12, "sm": 12, "md": 12, "lg": 12, "xl": 12
+				},
+				"autoBackupActive": {
+					"type": "checkbox",
+					"label": {
+						"en": "Enable automatic DTA download",
+						"de": "Automatischen DTA-Download (Live) aktivieren"
+					},
+					"help": {
+						"en": "If enabled, the adapter will automatically download the DTA log according to the schedule and save it to the ioBroker file system.",
+						"de": "Wenn aktiviert, ruft der Adapter das DTA-Live-Log nach dem untenstehenden Zeitplan vollautomatisch ab und speichert es im ioBroker-Dateisystem (z.B. für USB-Sticks oder externe Skripte)."
+					},
+					"default": false,
+					"xs": 12, "sm": 12, "md": 4, "lg": 4, "xl": 4
+				},
+				"autoBackupCron": {
+					"type": "cron",
+					"label": { "en": "Schedule", "de": "Zeitplan" },
+					"default": "0 2 * * *",
+					"hidden": "!data.autoBackupActive",
+					"xs": 12, "sm": 12, "md": 8, "lg": 8, "xl": 8
 				}
 			}
 		}

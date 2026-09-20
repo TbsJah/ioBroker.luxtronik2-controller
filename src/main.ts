@@ -3,6 +3,7 @@
  */
 import * as utils from '@iobroker/adapter-core';
 import { handleZwangsheizen, handleZwangswarmwasser } from './actionHandlers';
+import { initAutoBackup, stopAutoBackup } from './backupManager';
 import { formatTimerSecondsToTime, timeStringToSeconds } from './convert';
 import { handleHupOptimization } from './hupManager';
 import { initLogger, setCustomDebug, writeLog } from './logger';
@@ -152,6 +153,7 @@ class Luxtronik2Controller extends utils.Adapter {
 		await cleanupEmptyFolders(this);
 		await ensureAllObjectsExist(this);
 		await ensureCustomObjectsExist(this);
+		initAutoBackup(this);
 
 		// Strikte "Opt-In" Prüfung beim Start
 		await this.setState(getDpPath('Regelung_Aktiv'), { val: config.regelung_aktiv === true, ack: true });
@@ -767,6 +769,8 @@ class Luxtronik2Controller extends utils.Adapter {
 			if (this.zipTimer) {
 				clearTimeout(this.zipTimer);
 			}
+
+			stopAutoBackup();
 
 			if (this.midnightTimer) {
 				this.clearTimeout(this.midnightTimer);
