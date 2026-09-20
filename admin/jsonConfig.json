@@ -2914,70 +2914,40 @@
 				"backupInfo": {
 					"type": "staticText",
 					"text": {
-						"en": "You can download the heat pump's internal logs directly via its web interface. <br><br><i>Note: Newer firmware versions use <b>/NewProc</b>. Older models use <b>/proclog</b> for their 48h history.</i>",
-						"de": "Über den internen Webserver der Luxtronik-Steuerung lassen sich System-Logs (.dta) direkt herunterladen. <br><br><i>Hinweis: Aktuelle Firmwares nutzen <b>/NewProc</b>. Ältere Wärmepumpen nutzen <b>/proclog</b> für das Herunterladen der Historie.</i>"
+						"en": "You can download the heat pump's internal logs (.dta) directly via its web interface.\n\n💡 Tip: To graphically analyze the .dta files on your PC, we recommend the free tool OpenDTA (https://sourceforge.net/projects/opendta/).\n\n• Live DTA (/NewProc): Generates a fresh log right now.\n• Existing DTA (/proclog): Downloads the last auto-saved log (can be 2-3 hours old).",
+						"de": "Über den internen Webserver der Luxtronik-Steuerung lassen sich System-Logs (.dta) direkt herunterladen.\n\n💡 Tipp: Zur grafischen Auswertung der .dta-Dateien am PC empfehlen wir das kostenlose Tool OpenDTA (https://sourceforge.net/projects/opendta/).\n\n• Live DTA (/NewProc): Zwingt die Anlage, sofort einen aktuellen Speicherabzug zu generieren.\n• Vorhandenes DTA (/proclog): Lädt die letzte automatisch gespeicherte Datei herunter (oft 2-3 Stunden alt)."
 					},
-					"style": { "marginBottom": "20px", "fontSize": "14px" },
+					"style": { "marginBottom": "30px", "fontSize": "14px", "whiteSpace": "pre-wrap" },
 					"xs": 12,
 					"sm": 12,
 					"md": 12,
 					"lg": 12,
 					"xl": 12
 				},
-				"linkDtaDownload": {
+				"linkNewProc": {
 					"type": "staticLink",
-					"label": { "en": "DTA (/NewProc)", "de": "DTA laden (/NewProc)" },
+					"label": { "en": "Live DTA (/NewProc)", "de": "Live DTA (/NewProc)" },
 					"href": "http://${data.host}/NewProc",
 					"button": true,
 					"variant": "contained",
 					"color": "primary",
-					"help": {
-						"de": "Um die .dta Dateien am PC grafisch auszuwerten, empfehlen wir das kostenlose Tool <a href='https://sourceforge.net/projects/opendta/' target='_blank'>OpenDTA</a>.",
-						"en": "To graphically analyze .dta files on your PC, we recommend the free tool <a href='https://sourceforge.net/projects/opendta/' target='_blank'>OpenDTA</a>."
-					},
 					"xs": 12,
 					"sm": 6,
-					"md": 3,
+					"md": 4,
 					"lg": 3,
 					"xl": 3
 				},
 				"linkProcLog": {
 					"type": "staticLink",
-					"label": { "en": "DTA older models (/proclog)", "de": "DTA alte WP (/proclog)" },
+					"label": { "en": "Existing DTA (/proclog)", "de": "Vorhandenes DTA (/proclog)" },
 					"href": "http://${data.host}/proclog",
 					"button": true,
 					"variant": "outlined",
 					"color": "primary",
-					"xs": 12,
-					"sm": 6,
-					"md": 3,
-					"lg": 3,
-					"xl": 3
-				},
-				"linkParam": {
-					"type": "staticLink",
-					"label": { "en": "Parameter (.txt)", "de": "Parameter (.txt)" },
-					"href": "http://${data.host}/procparam",
-					"button": true,
-					"variant": "outlined",
-					"color": "secondary",
-					"xs": 12,
-					"sm": 6,
-					"md": 3,
-					"lg": 3,
-					"xl": 3
-				},
-				"linkErr": {
-					"type": "staticLink",
-					"label": { "en": "Error Log (.txt)", "de": "Fehlerspeicher (.txt)" },
-					"href": "http://${data.host}/procerr",
-					"button": true,
-					"variant": "outlined",
-					"color": "secondary",
 					"style": { "marginBottom": "30px" },
 					"xs": 12,
 					"sm": 6,
-					"md": 3,
+					"md": 4,
 					"lg": 3,
 					"xl": 3
 				},
