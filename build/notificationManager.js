@@ -19,6 +19,7 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 var notificationManager_exports = {};
 __export(notificationManager_exports, {
   checkAndSendErrorNotifications: () => checkAndSendErrorNotifications,
+  checkAndSendOutageNotifications: () => checkAndSendOutageNotifications,
   handleTestMessage: () => handleTestMessage,
   sendTelegramNotification: () => sendTelegramNotification
 });
@@ -160,9 +161,55 @@ An error was registered on the heat pump:
 *Date:* ${newestError.datum}`;
   await sendNotification(adapter, msg);
 }
+async function checkAndSendOutageNotifications(adapter, oldOutageVal, newOutageVal) {
+  if (!newOutageVal || newOutageVal === oldOutageVal) {
+    return;
+  }
+  const newList = safeParse(newOutageVal);
+  if (!newList || newList.length === 0) {
+    return;
+  }
+  const newestOutage = newList[0];
+  const currentOutageTimestamp = newestOutage.timestamp;
+  const currentOutageCode = newestOutage.code;
+  if (currentOutageTimestamp === void 0 || currentOutageCode === 0) {
+    return;
+  }
+  const descLower = newestOutage.beschreibung.toLowerCase();
+  const isFlowIssue = descLower.includes("durchfluss") || descLower.includes("flow");
+  if (!isFlowIssue) {
+    return;
+  }
+  if (adapter.lastKnownOutageTimestamp === void 0 || adapter.lastKnownOutageTimestamp === null) {
+    adapter.lastKnownOutageTimestamp = currentOutageTimestamp;
+    (0, import_logger.writeLog)("Outage monitoring initialized. Last known outage timestamp set silently.", "debug");
+    return;
+  }
+  if (currentOutageTimestamp <= adapter.lastKnownOutageTimestamp) {
+    return;
+  }
+  const now = Date.now();
+  if (adapter.lastFlowNotificationTime && now - adapter.lastFlowNotificationTime < 60 * 60 * 1e3) {
+    adapter.lastKnownOutageTimestamp = currentOutageTimestamp;
+    (0, import_logger.writeLog)("Flow outage registered, but notification skipped due to 60-minute cooldown spam protection.", "info");
+    return;
+  }
+  adapter.lastKnownOutageTimestamp = currentOutageTimestamp;
+  adapter.lastFlowNotificationTime = now;
+  const msg = `\u26A0\uFE0F *Warnung: Durchfluss-Problem!*
+Die W\xE4rmepumpe hat sich wegen geringem Durchfluss abgeschaltet:
+
+*Code:* ${currentOutageCode}
+*Grund:* ${newestOutage.beschreibung}
+*Datum:* ${newestOutage.datum}
+
+_Hinweis: Die Anlage versucht meist einen Neustart. Bitte Heizkreis-Druck und Stellventile pr\xFCfen._`;
+  await sendNotification(adapter, msg);
+}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   checkAndSendErrorNotifications,
+  checkAndSendOutageNotifications,
   handleTestMessage,
   sendTelegramNotification
 });
