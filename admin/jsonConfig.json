@@ -2914,8 +2914,8 @@
 				"backupInfo": {
 					"type": "staticText",
 					"text": {
-						"en": "You can download the heat pump's internal logs directly via its web interface. The links below use the IP address configured in the 'Connection' tab.",
-						"de": "Über den internen Webserver der Luxtronik-Steuerung lassen sich System-Logs und Backups direkt herunterladen. Die Buttons unten nutzen automatisch die IP-Adresse, die du im Reiter 'Verbindung' eingetragen hast."
+						"en": "You can download the heat pump's internal logs directly via its web interface. Trigger the DTA generation first, wait a few seconds, then download the file.",
+						"de": "Über den internen Webserver der Luxtronik-Steuerung lassen sich System-Logs direkt herunterladen. Stoße zuerst die DTA-Generierung an, warte ein paar Sekunden und lade das Log dann herunter."
 					},
 					"style": { "marginBottom": "20px", "fontSize": "14px" },
 					"xs": 12,
@@ -2924,45 +2924,58 @@
 					"lg": 12,
 					"xl": 12
 				},
-				"linkDta": {
+				"linkNewProc": {
 					"type": "staticLink",
-					"label": { "en": "Download Live Data Log (.dta)", "de": "Live Datenlog herunterladen (.dta)" },
+					"label": { "en": "1. Trigger DTA", "de": "1. DTA generieren" },
 					"href": "http://${data.host}/NewProc",
-					"button": true,
-					"variant": "contained",
-					"color": "primary",
-					"xs": 12,
-					"sm": 12,
-					"md": 4,
-					"lg": 4,
-					"xl": 4
-				},
-				"linkParam": {
-					"type": "staticLink",
-					"label": { "en": "Settings Backup (.txt)", "de": "Parameter-Backup (.txt)" },
-					"href": "http://${data.host}/Webclient/procparam",
 					"button": true,
 					"variant": "outlined",
 					"color": "primary",
 					"xs": 12,
-					"sm": 12,
-					"md": 4,
-					"lg": 4,
-					"xl": 4
+					"sm": 6,
+					"md": 3,
+					"lg": 3,
+					"xl": 3
+				},
+				"linkDta": {
+					"type": "staticLink",
+					"label": { "en": "2. Download DTA", "de": "2. DTA herunterladen" },
+					"href": "http://${data.host}/procdta",
+					"button": true,
+					"variant": "contained",
+					"color": "primary",
+					"xs": 12,
+					"sm": 6,
+					"md": 3,
+					"lg": 3,
+					"xl": 3
+				},
+				"linkParam": {
+					"type": "staticLink",
+					"label": { "en": "Parameter (.txt)", "de": "Parameter (.txt)" },
+					"href": "http://${data.host}/procparam",
+					"button": true,
+					"variant": "outlined",
+					"color": "primary",
+					"xs": 12,
+					"sm": 6,
+					"md": 3,
+					"lg": 3,
+					"xl": 3
 				},
 				"linkErr": {
 					"type": "staticLink",
 					"label": { "en": "Error Log (.txt)", "de": "Fehlerspeicher (.txt)" },
-					"href": "http://${data.host}/Webclient/procerr",
+					"href": "http://${data.host}/procerr",
 					"button": true,
 					"variant": "outlined",
 					"color": "secondary",
 					"style": { "marginBottom": "30px" },
 					"xs": 12,
-					"sm": 12,
-					"md": 4,
-					"lg": 4,
-					"xl": 4
+					"sm": 6,
+					"md": 3,
+					"lg": 3,
+					"xl": 3
 				},
 				"divider1": {
 					"type": "divider",
@@ -3014,12 +3027,12 @@
 				},
 				"autoBackupPath": {
 					"type": "text",
-					"label": { "en": "Storage path", "de": "Speicherpfad" },
+					"label": { "en": "Storage subfolder", "de": "Speicher-Unterordner" },
 					"help": {
-						"en": "Directory in the ioBroker file system (e.g., 'backup').",
-						"de": "Verzeichnis im ioBroker-Dateisystem (z.B. 'backup')."
+						"en": "Leave empty to save directly in the adapter's main directory, or type a subfolder name (e.g., 'backups').",
+						"de": "Leer lassen, um direkt im Hauptverzeichnis des Adapters zu speichern. Für Unterordner einfach den Namen eintippen (z.B. 'backups')."
 					},
-					"default": "backup",
+					"placeholder": "Leer = Adapter-Verzeichnis",
 					"hidden": "!data.autoBackupActive",
 					"xs": 12,
 					"sm": 12,
