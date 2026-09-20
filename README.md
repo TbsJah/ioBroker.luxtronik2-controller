@@ -79,8 +79,7 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
-
-### **WORK IN PROGRESS**
+### 0.9.2 (2026-09-20)
 
 **🛠 Refactoring & Under the Hood**
 
@@ -138,13 +137,6 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 - **[Architecture]** Extracted the heating circulating pump (HUP) logic from `main.ts` into a dedicated, isolated `hupManager.ts` file to improve code modularity and maintainability.
 - **[CI/CD]** Added Node.js 26 to the GitHub Actions test matrix (`test-and-release.yml`) to ensure future compatibility.
 - **[TypeScript]** Added the `"rootDir": "./src"` compiler option to `tsconfig.json` to resolve TS5011 build errors with newer TypeScript versions.
-
-### 0.7.3 (2026-09-07)
-
-**Bugfixes**
--(Fixed) Timer Table Register Conflict: Resolved conflicting Luxtronik register IDs for Domestic Hot Water (DHW) Monday–Sunday schedules (WW_MoSo_Start1 to End5). These were previously mapped to registers 507–516 (colliding with Circulation timer registers) and have now been corrected to registers 406–415.
-
--(Fixed) Time-String Conversion on State Change: Fixed a parsing bug where manual updates to time strings (HH:MM / HH:MM:SS) on states marked with isDurationFormat or time-related roles were passed directly as strings instead of converting to seconds since midnight, preventing user-entered schedule values from persisting in the controller.
 
 ## License
 
