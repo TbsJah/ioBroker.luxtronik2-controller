@@ -23,6 +23,10 @@
 ### 0.1.0 (2026-07-09)
 
 - initial release
+## 0.8.1 (2026-09-19)
+
+- Resolve issues which are reported by repository checker
+
 ## 0.8.0 (2026-09-14)
 
 **🚀 Features & Enhancements**

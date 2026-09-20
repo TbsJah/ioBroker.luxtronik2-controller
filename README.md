@@ -79,8 +79,7 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
-
-### **WORK IN PROGRESS**
+### 0.10.1 (2026-09-20)
 
 **🚀 Features & Improvements**
 
@@ -137,10 +136,6 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 **🛠 Refactoring & Under the Hood**
 
 - **(Development) TypeScript Definitions:** Added missing `@types/node-schedule` to the dev dependencies to resolve ESLint type-checking errors during the build process.
-
-### 0.8.1 (2026-09-19)
-
-- Resolve issues which are reported by repository checker
 
 ## License
 

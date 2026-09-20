@@ -148,7 +148,7 @@ async function calculateTemperatureSpread(adapter) {
   }
 }
 async function updateStatusStrings(adapter, rawValues, rawParams) {
-  var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l;
+  var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m;
   try {
     const config = adapter.config;
     const lang = config.language === "de" ? "de" : "en";
@@ -186,25 +186,38 @@ async function updateStatusStrings(adapter, rawValues, rawParams) {
     const Mitteltemperatur = ((_h = rawValues[(0, import_stateMapping.getLuxIdByKey)("Mitteltemperatur")]) != null ? _h : 15) / 10;
     const thresholdHeatingLimit = ((_i = rawParams[(0, import_stateMapping.getLuxIdByKey)("thresholdHeatingLimit")]) != null ? _i : 15) / 10;
     const temperature_target_return = ((_j = rawValues[(0, import_stateMapping.getLuxIdByKey)("temperature_target_return")]) != null ? _j : 15) / 10;
+    const Parallelverschiebung = ((_k = rawParams[(0, import_stateMapping.getLuxIdByKey)("heating_temperature")]) != null ? _k : 0) / 10;
     let heatingStr = stateHeatingMap[opStateHeatingVal] || `Unknown (${opStateHeatingVal})`;
     if (opStateHeatingVal === 2) {
       heatingStr += ` (Target ${R\u00FCcklaufSollMin} \xB0C)`;
     } else if (opStateHeatingVal === 4) {
       heatingStr += ` (Target 20 \xB0C)`;
     } else if (opStateHeatingVal === 0 || opStateHeatingVal === 1) {
-      if (HeatingLimit === 1 && Mitteltemperatur > thresholdHeatingLimit && Au\u00DFentemperatur < 10) {
-        const textFrost = lang === "de" ? "Frostschutz" : "Frost Protection";
-        heatingStr = `${textFrost} ${temperature_target_return} \xB0C`;
-      } else if (HeatingLimit === 1 && Mitteltemperatur > thresholdHeatingLimit && Au\u00DFentemperatur > 10) {
-        const text = lang === "de" ? "Heizgrenze" : "Heating limit";
-        heatingStr = `${text} ${temperature_target_return} \xB0C`;
-      } else if (BetriebsartHeizung === 0) {
-        const textNormal = lang === "de" ? "Normal da" : "Normal as";
-        if (AbsenkungMax <= Au\u00DFentemperatur) {
-          heatingStr += ` ${Absenkung} \xB0C`;
+      if (HeatingLimit === 1 && Mitteltemperatur > thresholdHeatingLimit) {
+        if (Au\u00DFentemperatur < 10) {
+          const textFrost = lang === "de" ? "Frostschutz" : "Frost protection";
+          heatingStr = `${textFrost} ${temperature_target_return} \xB0C`;
         } else {
-          heatingStr = `${textNormal} < ${AbsenkungMax} \xB0C`;
+          const text = lang === "de" ? "Heizgrenze" : "Heating limit";
+          heatingStr = `${text} ${temperature_target_return} \xB0C`;
         }
+      } else if (opStateHeatingVal === 0) {
+        if (Absenkung !== 0) {
+          const vorzeichen = Absenkung > 0 ? "-" : "+";
+          heatingStr = `${stateHeatingMap[0]} ${vorzeichen}${Math.abs(Absenkung)} \xB0C`;
+        } else {
+          heatingStr = lang === "de" ? "Normal (Zeitprogramm)" : "Normal (Timer)";
+        }
+      } else if (opStateHeatingVal === 1) {
+        heatingStr = stateHeatingMap[1] || "Normal";
+        if (BetriebsartHeizung === 0 && Au\u00DFentemperatur < AbsenkungMax) {
+          const textNormal = lang === "de" ? " da AT" : " because outside temp";
+          heatingStr += `${textNormal} < ${AbsenkungMax} \xB0C`;
+        }
+      }
+      if (Parallelverschiebung !== 0 && !(HeatingLimit === 1 && Mitteltemperatur > thresholdHeatingLimit)) {
+        const vorzeichen = Parallelverschiebung > 0 ? "+" : "";
+        heatingStr += ` (Offset ${vorzeichen}${Parallelverschiebung} \xB0C)`;
       }
     }
     const dpHeating = (0, import_stateMapping.getDpPath)("opStateHeatingString");
@@ -242,7 +255,7 @@ async function updateStatusStrings(adapter, rawValues, rawParams) {
         7: "K\xFChlbetrieb"
       };
       const bzMap = lang === "de" ? bzMapDe : bzMapEn;
-      const currentStateCode2 = (_k = rawValues[(0, import_stateMapping.getLuxIdByKey)("WP_BZ_akt")]) != null ? _k : 5;
+      const currentStateCode2 = (_l = rawValues[(0, import_stateMapping.getLuxIdByKey)("WP_BZ_akt")]) != null ? _l : 5;
       stateStr = bzMap[currentStateCode2] || `Status ${currentStateCode2}`;
       const isRunning = [0, 1, 2, 4, 6, 7].includes(currentStateCode2);
       const line1Text = isRunning ? line1Map[0] || "Heat pump running" : line1Map[1] || "Heat pump idle";
@@ -280,7 +293,7 @@ async function updateStatusStrings(adapter, rawValues, rawParams) {
       await adapter.setStateChangedAsync(dpHotWater, hotWaterStr, true);
     }
     const coolingOpMode = rawParams[(0, import_stateMapping.getLuxIdByKey)("cooling_operation_mode")];
-    const coolingReleaseTemp = ((_l = rawParams[(0, import_stateMapping.getLuxIdByKey)("cooling_release_temp")]) != null ? _l : 0) / 10;
+    const coolingReleaseTemp = ((_m = rawParams[(0, import_stateMapping.getLuxIdByKey)("cooling_release_temp")]) != null ? _m : 0) / 10;
     const rawFreigabe = rawValues[(0, import_stateMapping.getLuxIdByKey)("cooling_release")];
     const isReleased = rawFreigabe === 1 || String(rawFreigabe).toLowerCase() === "true";
     const currentStateCode = rawValues[(0, import_stateMapping.getLuxIdByKey)("WP_BZ_akt")];
