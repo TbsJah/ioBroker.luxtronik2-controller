@@ -73,7 +73,13 @@ async function executeDtaBackup(adapter) {
     }
     const buffer = Buffer.from(arrayBuffer);
     const now = /* @__PURE__ */ new Date();
-    const timestamp = now.toISOString().replace(/[:.]/g, "-").substring(0, 19);
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, "0");
+    const d = String(now.getDate()).padStart(2, "0");
+    const h = String(now.getHours()).padStart(2, "0");
+    const min = String(now.getMinutes()).padStart(2, "0");
+    const s = String(now.getSeconds()).padStart(2, "0");
+    const timestamp = `${y}-${m}-${d}T${h}-${min}-${s}`;
     const filePrefix = isLive ? "dta_live" : "dta_history";
     const targetId = "0_userdata.0";
     const fileName = `luxtronik_backups/${filePrefix}_${timestamp}.dta`;

@@ -66,7 +66,13 @@ export async function executeDtaBackup(adapter: AdapterInstance): Promise<void> 
 		// 3. Datei für das Dateisystem vorbereiten
 		const buffer = Buffer.from(arrayBuffer);
 		const now = new Date();
-		const timestamp = now.toISOString().replace(/[:.]/g, '-').substring(0, 19);
+		const y = now.getFullYear();
+		const m = String(now.getMonth() + 1).padStart(2, '0');
+		const d = String(now.getDate()).padStart(2, '0');
+		const h = String(now.getHours()).padStart(2, '0');
+		const min = String(now.getMinutes()).padStart(2, '0');
+		const s = String(now.getSeconds()).padStart(2, '0');
+		const timestamp = `${y}-${m}-${d}T${h}-${min}-${s}`;
 		const filePrefix = isLive ? 'dta_live' : 'dta_history';
 
 		// DER KUGELSICHERE WEG: Speichern in 0_userdata.0

@@ -3001,8 +3001,8 @@
 				"backupLocationInfo": {
 					"type": "staticText",
 					"text": {
-						"en": "Automated DTA backups are safely stored in the global ioBroker file system. You can find them in the main ioBroker menu under 'Files' in the folder <b>0_userdata.0 &rarr; luxtronik_backups</b>. From there, you can easily download them to your PC and analyze them using tools like OpenDTA.",
-						"de": "Die automatischen DTA-Backups werden sicher im globalen ioBroker-Dateisystem abgelegt. Du findest sie im ioBroker-Hauptmenü unter dem Reiter 'Dateien' im Ordner <b>0_userdata.0 &rarr; luxtronik_backups</b>. Von dort aus kannst du sie bequem auf deinen PC herunterladen und in Tools wie OpenDTA analysieren."
+						"en": "Automated DTA backups are safely stored in the global ioBroker file system. You can find them in the main ioBroker menu under 'Files' in the folder <b>0_userdata.0.luxtronik_backups</b>. From there, you can easily download them to your PC and analyze them using tools like OpenDTA.",
+						"de": "Die automatischen DTA-Backups werden sicher im globalen ioBroker-Dateisystem abgelegt. Du findest sie im ioBroker-Hauptmenü unter dem Reiter 'Dateien' im Ordner <b>0_userdata.0.luxtronik_backups</b>. Von dort aus kannst du sie bequem auf deinen PC herunterladen und in Tools wie OpenDTA analysieren."
 					},
 					"style": {
 						"marginBottom": "20px",
