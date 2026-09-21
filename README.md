@@ -75,8 +75,7 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
-
-### **WORK IN PROGRESS**
+### 0.11.0 (2026-09-21)
 
 - **Improvements:**
     - Added global rounding to 2 decimal places for all calculated telemetry values (e.g., converting operating seconds to hours). This provides a cleaner ioBroker state tree and prevents excessively long floating-point numbers from cluttering history databases (like InfluxDB).
@@ -114,17 +113,6 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 **🐛 Bugfixes**
 
 - **(Fixed) Heating State String:** Corrected a logic issue where the status incorrectly displayed "Reduced 0 °C" during a scheduled reduction window, even if the actual reduction delta was set to 0 K. It now correctly displays "Normal (Timer)".
-
-### 0.10.0 (2026-09-20)
-
-**🚀 Features & Improvements**
-
-- **(Added) Low Flow Outage Alerts:** Implemented active monitoring for "low flow" (Durchfluss) shutdowns in the outage history. The adapter now proactively sends a notification when the heat pump stops due to flow issues, as the controller usually treats these as soft outages rather than hard errors. Includes a 60-minute cooldown to prevent notification spam.
-- **(Improved) Admin UI:** Integrated a direct recommendation link for the OpenDTA analysis tool into the description text of the Backup & Diagnostics tab.
-
-**🛠 Chores / Under the Hood**
-
-- **(Fixed) ESLint Validation:** Added missing JSDoc comments in the backup manager to resolve code validation warnings during development.
 
 ## License
 

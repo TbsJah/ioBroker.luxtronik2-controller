@@ -551,6 +551,9 @@ class Luxtronik2Controller extends utils.Adapter {
             value = void 0;
           }
         }
+        if (value !== void 0 && typeof value === "number" && appliedFactor) {
+          value = Math.round(value * 100) / 100;
+        }
         if (value !== void 0) {
           if (definition.type === "number" && typeof value === "string") {
             value = value.toLowerCase() === "ein" ? 1 : value.toLowerCase() === "aus" ? 0 : parseFloat(value);

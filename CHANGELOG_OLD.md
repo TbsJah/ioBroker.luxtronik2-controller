@@ -23,6 +23,17 @@
 ### 0.1.0 (2026-07-09)
 
 - initial release
+## 0.10.0 (2026-09-20)
+
+**🚀 Features & Improvements**
+
+- **(Added) Low Flow Outage Alerts:** Implemented active monitoring for "low flow" (Durchfluss) shutdowns in the outage history. The adapter now proactively sends a notification when the heat pump stops due to flow issues, as the controller usually treats these as soft outages rather than hard errors. Includes a 60-minute cooldown to prevent notification spam.
+- **(Improved) Admin UI:** Integrated a direct recommendation link for the OpenDTA analysis tool into the description text of the Backup & Diagnostics tab.
+
+**🛠 Chores / Under the Hood**
+
+- **(Fixed) ESLint Validation:** Added missing JSDoc comments in the backup manager to resolve code validation warnings during development.
+
 ## 0.9.2 (2026-09-20)
 
 **🛠 Refactoring & Under the Hood**
