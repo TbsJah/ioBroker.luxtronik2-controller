@@ -23,6 +23,27 @@
 ### 0.1.0 (2026-07-09)
 
 - initial release
+## 0.9.0 (2026-09-20)
+
+**🐛 Bugfixes**
+🔴 **IMPORTANT:**
+
+- **(Fixed) HUP Dynamic Voltage Control:** Fixed an issue where the digital relay state (`HUPout`) was queried instead of the actual nominal voltage (`heating_system_circ_pump_voltage_nominal`). This previously caused the calculation logic to produce target voltages below the hardware limit (e.g. 1.25V), triggering "less than min 3" validation warnings in the log.
+- **(Fixed) Admin UI Backup Links:** Fixed multiple issues with the manual download links in the Backup tab. The IP address placeholder was corrected (from `{host}` to `${data.host}`) to resolve correctly. Additionally, `404 Not Found` errors on newer firmware versions were fixed by routing links to the root web directory (`/procdta`, `/procparam`, `/procerr`) instead of the legacy `/Webclient/` directory.
+
+**🚀 Features & Improvements**
+
+- **(Added) German Translations for Error & Outage Codes:** Added full German translations for all entries in `ERROR_CODES` and `OUTAGE_CODES`.
+- **(Improved) Multi-Language History Logs:** The error log (`Fehlerspeicher`) and outage history (`Abschaltungen`) now dynamically output descriptions and fallbacks in the configured adapter language (`de` / `en`).
+- **(Added) Backup & Diagnostics Tab:** Introduced a new tab in the adapter settings for easy access to heat pump data.
+- **(Added) Manual Downloads:** Added direct buttons to manually download the parameter backup (`procparam`) and error log (`procerr`) via the heat pump's web server. The manual DTA download was split into two distinct steps ("1. Trigger DTA generation" and "2. Download DTA Log") to better reflect the hardware behavior.
+- **(Added) Automated DTA Backup & Custom Storage:** Implemented a new scheduling feature (cron) to automatically trigger and download live DTA logs, saving them directly to the ioBroker file system. The default storage location is the root directory of the adapter's file system, but users can specify a custom subfolder (e.g., `backup`) which is automatically created and sanitized.
+- **(Improved) Firmware Agnostic Backup Downloads:** The automated DTA backup manager now features an intelligent fallback mechanism. It attempts to download logs from both the root directory (`/procdta`) and the legacy subfolder (`/Webclient/procdta`), ensuring compatibility across all Luxtronik firmware versions (V1, V2, V3).
+
+**🛠 Refactoring & Under the Hood**
+
+- **(Development) TypeScript Definitions:** Added missing `@types/node-schedule` to the dev dependencies to resolve ESLint type-checking errors during the build process.
+
 ## 0.8.1 (2026-09-19)
 
 - Resolve issues which are reported by repository checker

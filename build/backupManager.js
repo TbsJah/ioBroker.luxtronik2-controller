@@ -57,36 +57,54 @@ async function executeDtaBackup(adapter) {
     (0, import_logger.writeLog)("Triggering live DTA flush (/NewProc)...", "debug");
     let response = await fetch(`http://${ip}/NewProc`).catch(() => null);
     let arrayBuffer = response && response.ok ? await response.arrayBuffer() : null;
-    let isLive = true;
     if (!arrayBuffer || arrayBuffer.byteLength < 1e3) {
       (0, import_logger.writeLog)("Live dump triggered. Waiting 3 seconds for internal file generation...", "debug");
-      await new Promise((resolve) => setTimeout(resolve, 3e3));
+      await new Promise((resolve) => {
+        adapter.setTimeout(() => resolve(), 3e3);
+      });
       (0, import_logger.writeLog)("Downloading generated live DTA file (/procdta)...", "debug");
       response = await fetch(`http://${ip}/procdta`).catch(() => null);
       if (!response || !response.ok) {
         (0, import_logger.writeLog)("/procdta not found. Falling back to existing log (/proclog)...", "debug");
         response = await fetch(`http://${ip}/proclog`).catch(() => null);
-        isLive = false;
       }
       if (!response || !response.ok) {
         (0, import_logger.writeLog)("/proclog not found, trying fallback path /Webclient/procdta...", "debug");
         response = await fetch(`http://${ip}/Webclient/procdta`).catch(() => null);
-        isLive = false;
       }
       if (!response || !response.ok) {
         throw new Error(`HTTP Error - File not found on heat pump webserver.`);
       }
       arrayBuffer = await response.arrayBuffer();
     }
+    let basePath = config.autoBackupPath || "backup";
+    basePath = basePath.replace(/^\/+|\/+$/g, "").trim();
+    if (basePath === "") {
+      basePath = "backup";
+    }
+    try {
+      const objId = `${adapter.namespace}.${basePath}`;
+      const obj = await adapter.getForeignObjectAsync(objId);
+      if (!obj) {
+        await adapter.setForeignObjectAsync(objId, {
+          type: "meta",
+          common: {
+            name: "Luxtronik Backups",
+            type: "meta.user"
+          },
+          native: {}
+        });
+      }
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      adapter.log.debug(`Could not create meta object for backup: ${errorMsg}`);
+    }
     const buffer = Buffer.from(arrayBuffer);
-    const basePath = config.autoBackupPath ? String(config.autoBackupPath).replace(/^\/+|\/+$/g, "").trim() : "";
     const now = /* @__PURE__ */ new Date();
     const timestamp = now.toISOString().replace(/[:.]/g, "-").substring(0, 19);
-    const filePrefix = isLive ? "dta_live" : "dta_history";
-    const fileName = `${filePrefix}_${timestamp}.dta`;
-    const fullPath = basePath !== "" ? `${basePath}/${fileName}` : fileName;
-    await adapter.writeFileAsync(adapter.namespace, fullPath, buffer);
-    (0, import_logger.writeLog)(`DTA Backup successfully saved as ${fullPath} in ioBroker files.`, "info");
+    const fileName = `${basePath}/dta_live_${timestamp}.dta`;
+    await adapter.writeFileAsync(adapter.namespace, fileName, buffer);
+    adapter.log.info(`DTA Backup successfully saved as ${fileName} in ioBroker files.`);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     (0, import_logger.writeLog)(`Failed to execute automated DTA backup: ${msg}`, "error");
