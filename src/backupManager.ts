@@ -44,7 +44,7 @@ export async function executeDtaBackup(adapter: AdapterInstance): Promise<void> 
 
 		let isLive = true;
 
-		// 2. Wenn die Antwort sehr klein ist (< 1000 Bytes), handelt es sich nur um die leere Trigger-Seite
+		// 2. Wenn die Antwort sehr klein ist, handelt es sich nur um die leere Trigger-Seite
 		if (!arrayBuffer || arrayBuffer.byteLength < 1000) {
 			writeLog('Live dump triggered. Waiting 3 seconds for internal file generation...', 'debug');
 			await new Promise<void>(resolve => {
@@ -52,7 +52,6 @@ export async function executeDtaBackup(adapter: AdapterInstance): Promise<void> 
 			});
 
 			writeLog('Downloading generated live DTA file (/procdta)...', 'debug');
-
 			response = await fetch(`http://${ip}/procdta`).catch(() => null);
 
 			// 3. Fallback: Lade das letzte reguläre Log herunter
@@ -62,7 +61,7 @@ export async function executeDtaBackup(adapter: AdapterInstance): Promise<void> 
 				isLive = false;
 			}
 
-			// 4. Letzter Fallback für ganz alte Webclient-Strukturen
+			// 4. Letzter Fallback für alte Webclient-Strukturen
 			if (!response || !response.ok) {
 				writeLog('/proclog not found, trying fallback path /Webclient/procdta...', 'debug');
 				response = await fetch(`http://${ip}/Webclient/procdta`).catch(() => null);
@@ -76,39 +75,27 @@ export async function executeDtaBackup(adapter: AdapterInstance): Promise<void> 
 			arrayBuffer = await response.arrayBuffer();
 		}
 
-		// 3. Speicherpfad säubern (Linter-sicher: \x2F statt maskiertem Slash)
+		// 3. Den gewünschten Unterordner-Namen auslesen (Sonderzeichen entfernen)
 		let basePath = config.autoBackupPath || 'backup';
 		basePath = basePath.replace(/[\x2F\\ ]/g, '_').trim();
 		if (basePath === '') {
 			basePath = 'backup';
 		}
 
-		// 4. Meta-Objekt für den Ordner im ioBroker anlegen (ohne Deprecated-Warnung)
-		const metaObjId = `${adapter.namespace}.${basePath}`;
-		await adapter.setObjectNotExistsAsync(basePath, {
-			type: 'meta',
-			common: {
-				name: 'Luxtronik Backups',
-				type: 'meta.user',
-			},
-			native: {},
-		});
-
-		// 5. Konvertiere das Ergebnis in einen Node.js Buffer
+		// 4. Konvertiere in Node.js Buffer
 		const buffer = Buffer.from(arrayBuffer);
 
-		// 6. Dateinamen mit aktuellem Zeitstempel generieren
-		// WICHTIG: Hier steht nun KEIN basePath/ mehr davor!
+		// 5. Dateiname generieren. WICHTIG: Der Ordnername kommt HIER mit in den String!
 		const now = new Date();
 		const timestamp = now.toISOString().replace(/[:.]/g, '-').substring(0, 19);
 		const filePrefix = isLive ? 'dta_live' : 'dta_history';
-		const fileName = `${filePrefix}_${timestamp}.dta`;
+		const fileName = `${basePath}/${filePrefix}_${timestamp}.dta`;
 
-		// 7. Im ioBroker-Dateisystem speichern
-		// WICHTIG: Das erste Argument MUSS metaObjId sein, nicht adapter.namespace!
-		await adapter.writeFileAsync(metaObjId, fileName, buffer);
+		// 6. Im ioBroker-Dateisystem speichern
+		// WICHTIG: Das erste Argument MUSS adapter.name (ohne .0) sein!
+		await adapter.writeFileAsync(adapter.name, fileName, buffer);
 
-		adapter.log.info(`DTA Backup successfully saved as ${fileName} in folder ${metaObjId}.`);
+		adapter.log.info(`DTA Backup successfully saved as ${fileName} in ioBroker folder ${adapter.name}.`);
 	} catch (err: unknown) {
 		const msg = err instanceof Error ? err.message : String(err);
 		writeLog(`Failed to execute automated DTA backup: ${msg}`, 'error');
