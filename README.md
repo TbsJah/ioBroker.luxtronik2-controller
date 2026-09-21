@@ -75,6 +75,12 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
+
+### **WORK IN PROGRESS**
+
+- **Improvements:**
+    - Added global rounding to 2 decimal places for all calculated telemetry values (e.g., converting operating seconds to hours). This provides a cleaner ioBroker state tree and prevents excessively long floating-point numbers from cluttering history databases (like InfluxDB).
+
 ### 0.10.4 (2026-09-21)
 
 - Update Readme

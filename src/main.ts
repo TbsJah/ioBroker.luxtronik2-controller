@@ -660,7 +660,9 @@ class Luxtronik2Controller extends utils.Adapter {
 						value = undefined;
 					}
 				}
-
+				if (value !== undefined && typeof value === 'number' && appliedFactor) {
+					value = Math.round(value * 100) / 100;
+				}
 				if (value !== undefined) {
 					if (definition.type === 'number' && typeof value === 'string') {
 						value =
