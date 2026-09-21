@@ -77,6 +77,15 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
+
+### **WORK IN PROGRESS**
+
+- **Fixes:**
+    - Fixed a crash during automated DTA backups caused by attempting to save files directly to the root adapter instance instead of a valid "meta" object.
+    - Added proper creation of a dedicated meta-directory for backups using `setObjectNotExistsAsync` to strictly comply with ioBroker file system requirements.
+    - Corrected the dynamic file naming logic (`dta_live` vs. `dta_history`) to accurately reflect whether a live memory dump or a fallback history log was downloaded.
+    - Resolved TypeScript deprecation warnings regarding legacy object creation methods (`setForeignObjectAsync`).
+
 ### 0.10.2 (2026-09-21)
 
 - **🚀 Features:**

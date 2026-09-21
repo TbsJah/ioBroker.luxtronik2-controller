@@ -42,6 +42,8 @@ export async function executeDtaBackup(adapter: AdapterInstance): Promise<void> 
 		let response = await fetch(`http://${ip}/NewProc`).catch(() => null);
 		let arrayBuffer = response && response.ok ? await response.arrayBuffer() : null;
 
+		let isLive = true;
+
 		// 2. Wenn die Antwort sehr klein ist (< 1000 Bytes), handelt es sich nur um die leere Trigger-Seite
 		if (!arrayBuffer || arrayBuffer.byteLength < 1000) {
 			writeLog('Live dump triggered. Waiting 3 seconds for internal file generation...', 'debug');
@@ -51,19 +53,20 @@ export async function executeDtaBackup(adapter: AdapterInstance): Promise<void> 
 
 			writeLog('Downloading generated live DTA file (/procdta)...', 'debug');
 
-			// Versuche, die frisch generierte DTA-Datei (Live-Stand) herunterzuladen
 			response = await fetch(`http://${ip}/procdta`).catch(() => null);
 
 			// 3. Fallback: Lade das letzte reguläre Log herunter (kann 2-3h alt sein)
 			if (!response || !response.ok) {
 				writeLog('/procdta not found. Falling back to existing log (/proclog)...', 'debug');
 				response = await fetch(`http://${ip}/proclog`).catch(() => null);
+				isLive = false;
 			}
 
 			// 4. Letzter Fallback für ganz alte V1/V2 Webclient-Strukturen
 			if (!response || !response.ok) {
 				writeLog('/proclog not found, trying fallback path /Webclient/procdta...', 'debug');
 				response = await fetch(`http://${ip}/Webclient/procdta`).catch(() => null);
+				isLive = false;
 			}
 
 			if (!response || !response.ok) {
@@ -73,45 +76,37 @@ export async function executeDtaBackup(adapter: AdapterInstance): Promise<void> 
 			arrayBuffer = await response.arrayBuffer();
 		}
 
-		// 3. Speicherpfad aus Config holen und formatieren (Fallback auf 'backup')
+		// 3. Speicherpfad säubern (Slashes und Leerzeichen durch Unterstriche ersetzen für gültige Objekt-ID)
 		let basePath = config.autoBackupPath || 'backup';
-		basePath = basePath.replace(/^\/+|\/+$/g, '').trim();
+		basePath = basePath.replace(/[\/\\ ]/g, '_').trim();
 		if (basePath === '') {
 			basePath = 'backup';
 		}
 
-		// Sicherstellen, dass das Meta-Verzeichnis im ioBroker existiert
-		try {
-			// Prüfen, ob der Ordner als Meta-Objekt existiert
-			const objId = `${adapter.namespace}.${basePath}`;
-			const obj = await adapter.getForeignObjectAsync(objId);
-			if (!obj) {
-				await adapter.setForeignObjectAsync(objId, {
-					type: 'meta',
-					common: {
-						name: 'Luxtronik Backups',
-						type: 'meta.user',
-					},
-					native: {},
-				});
-			}
-		} catch (err: unknown) {
-			const errorMsg = err instanceof Error ? err.message : String(err);
-			adapter.log.debug(`Could not create meta object for backup: ${errorMsg}`);
-		}
+		// 4. Sicherstellen, dass das Zielverzeichnis als Meta-Objekt existiert (ohne Deprecated-Warnung!)
+		await adapter.setObjectNotExistsAsync(basePath, {
+			type: 'meta',
+			common: {
+				name: 'Luxtronik Backups',
+				type: 'meta.user',
+			},
+			native: {},
+		});
 
-		// 3. Konvertiere das Ergebnis in einen Node.js Buffer
+		// 5. Konvertiere das Ergebnis in einen Node.js Buffer
 		const buffer = Buffer.from(arrayBuffer);
 
-		// 4. Dateinamen mit aktuellem Zeitstempel generieren
+		// 6. Dateinamen mit aktuellem Zeitstempel generieren (WICHTIG: Hier keinen Pfad mehr voranstellen!)
 		const now = new Date();
 		const timestamp = now.toISOString().replace(/[:.]/g, '-').substring(0, 19);
-		const fileName = `${basePath}/dta_live_${timestamp}.dta`;
+		const filePrefix = isLive ? 'dta_live' : 'dta_history';
+		const fileName = `${filePrefix}_${timestamp}.dta`;
 
-		// 5. Im ioBroker-Dateisystem speichern
-		await adapter.writeFileAsync(adapter.namespace, fileName, buffer);
+		// 7. Im ioBroker-Dateisystem speichern (Ziel ist jetzt exakt das Meta-Objekt)
+		const metaObjId = `${adapter.namespace}.${basePath}`;
+		await adapter.writeFileAsync(metaObjId, fileName, buffer);
 
-		adapter.log.info(`DTA Backup successfully saved as ${fileName} in ioBroker files.`);
+		adapter.log.info(`DTA Backup successfully saved as ${fileName} in folder ${metaObjId}.`);
 	} catch (err: unknown) {
 		const msg = err instanceof Error ? err.message : String(err);
 		writeLog(`Failed to execute automated DTA backup: ${msg}`, 'error');
