@@ -78,7 +78,7 @@ export async function executeDtaBackup(adapter: AdapterInstance): Promise<void> 
 
 		// 3. Speicherpfad säubern (Slashes und Leerzeichen durch Unterstriche ersetzen für gültige Objekt-ID)
 		let basePath = config.autoBackupPath || 'backup';
-		basePath = basePath.replace(/[\/\\ ]/g, '_').trim();
+		basePath = basePath.replace(/[\x2F\\ ]/g, '_').trim();
 		if (basePath === '') {
 			basePath = 'backup';
 		}
