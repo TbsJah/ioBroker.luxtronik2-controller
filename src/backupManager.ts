@@ -22,9 +22,12 @@ export function initAutoBackup(adapter: AdapterInstance): void {
 }
 
 /**
- * Führt den eigentlichen Download aus und speichert die Datei im ioBroker.
+ * Führt den automatischen DTA-Download von der Luxtronik-Wärmepumpe aus
+ * und speichert die Datei sicher im globalen ioBroker-Dateisystem (0_userdata.0).
+ * Nutzt primär den direkten Datei-Stream über /NewProc ohne künstliche Verzögerung.
  *
- * @param adapter Die ioBroker Adapter-Instanz
+ * @param adapter Die ioBroker Adapter-Instanz (für Konfiguration, Logs und Dateisystemzugriff)
+ * @returns Ein Promise, das nach Abschluss des Downloads aufgelöst wird
  */
 export async function executeDtaBackup(adapter: AdapterInstance): Promise<void> {
 	const config = adapter.config as any;
@@ -36,21 +39,9 @@ export async function executeDtaBackup(adapter: AdapterInstance): Promise<void> 
 	}
 
 	try {
-		// --- SCHRITT 0: DER FIX FÜR BESTEHENDE INSTANZEN ---
-		// Zwingt ioBroker dazu, den "meta"-Speicherordner anzulegen, falls
-		// er (wie bei deiner .0 Instanz) noch fehlt.
-		await adapter.setObjectNotExistsAsync('backups', {
-			type: 'meta',
-			common: {
-				name: 'Luxtronik DTA Backups',
-				type: 'meta.user',
-			},
-			native: {},
-		} as any);
-
 		writeLog('Fetching live DTA file (/NewProc)...', 'debug');
 
-		let isLive = true;
+		const isLive = true;
 		let arrayBuffer: ArrayBuffer | null = null;
 
 		// 1. NewProc liefert den DTA-Speicher als direkten Datei-Stream
@@ -68,30 +59,19 @@ export async function executeDtaBackup(adapter: AdapterInstance): Promise<void> 
 			}
 		}
 
-		// 3. Fallback für ältere Luxtronik-Anlagen (proclog statt procdta)
-		if (!arrayBuffer || arrayBuffer.byteLength < 1000) {
-			writeLog('/procdta not found. Falling back to /proclog...', 'debug');
-			response = await fetch(`http://${ip}/proclog`).catch(() => null);
-			isLive = false;
-			if (response && response.ok) {
-				arrayBuffer = await response.arrayBuffer();
-			}
-		}
-
-		// 4. Wenn immer noch nichts da ist: Abbruch
 		if (!arrayBuffer || arrayBuffer.byteLength < 1000) {
 			throw new Error(`HTTP Error - No valid DTA file found on heat pump webserver.`);
 		}
 
-		// 5. Speicher-Logik
+		// 3. Datei für das Dateisystem vorbereiten
 		const buffer = Buffer.from(arrayBuffer);
 		const now = new Date();
 		const timestamp = now.toISOString().replace(/[:.]/g, '-').substring(0, 19);
 		const filePrefix = isLive ? 'dta_live' : 'dta_history';
 
-		// Das Ziel ist nun unser garantiert existierender meta-Ordner
-		const targetId = `${adapter.namespace}.backups`;
-		const fileName = `${filePrefix}_${timestamp}.dta`;
+		// DER KUGELSICHERE WEG: Speichern in 0_userdata.0
+		const targetId = '0_userdata.0';
+		const fileName = `luxtronik_backups/${filePrefix}_${timestamp}.dta`;
 
 		// Speichern im ioBroker-Dateisystem
 		await adapter.writeFileAsync(targetId, fileName, buffer);

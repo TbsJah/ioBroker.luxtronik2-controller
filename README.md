@@ -82,13 +82,12 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 
 - **Features & Improvements:**
     - Optimized the automated DTA backup process by directly utilizing the `/NewProc` file stream, eliminating unnecessary artificial delays and stabilizing the heat pump controller.
-    - Streamlined the backup configuration: Removed the custom file path input (`autoBackupPath`) to ensure strict compliance with the official ioBroker file system architecture.
-    - Added informational text to the Backup configuration tab, including a recommendation and link to use OpenDTA for file analysis.
+    - Streamlined the backup configuration: Removed the custom file path input to prevent file system conflicts. Backups are now securely stored in the universally accessible global `0_userdata.0/luxtronik_backups/` directory.
+    - Added a clear information box in the adapter configuration, explaining where to find the generated backup files within the ioBroker UI.
 
 - **Fixes:**
-    - Fixed the `not an object of type "meta"` crash during DTA backups by officially declaring the `backups` folder as a static `meta` object within `io-package.json`.
-    - Removed deprecated object creation methods (`setObjectNotExistsAsync`) in favor of static `instanceObjects` deployment.
-    - Corrected the dynamic file naming logic (`dta_live` vs. `dta_history`) to accurately reflect whether a live memory dump or a fallback history log was downloaded.
+    - Fixed the persistent `not an object of type "meta"` crash during DTA backups. The storage architecture was migrated away from isolated adapter namespaces to the robust, native `0_userdata.0` global storage, completely resolving folder creation permission issues on existing instances.
+    - Corrected the dynamic file naming logic (`dta_live_...` vs. `dta_history_...`) to accurately reflect whether a live memory dump or a fallback history log was downloaded.
 
 ### 0.10.2 (2026-09-21)
 
