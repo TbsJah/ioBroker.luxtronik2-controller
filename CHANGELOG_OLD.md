@@ -23,6 +23,15 @@
 ### 0.1.0 (2026-07-09)
 
 - initial release
+## 0.9.1 (2026-09-20)
+
+**🚀 Features & Improvements**
+
+- **(Added) Backup & Diagnostics Tab:** Introduced a new tab in the adapter settings for easy access to heat pump data. Added a recommendation and link for the OpenDTA project to help users analyze their downloaded .dta files.
+- **Automated DTA Backup:** Integrated a time-based background cron job to fully automate the retrieval and storage of DTA log files directly into the ioBroker file system.
+- **Admin UI Diagnostics:** Added a dedicated "Backup & Diagnostics" tab in the adapter settings featuring manual download buttons for DTA files and system logs, along with a recommendation link for the OpenDTA analysis tool.
+- **Intelligent Firmware Fallback:** Improved the DTA download logic to automatically detect the heat pump's firmware version. It seamlessly supports newer models (via `/NewProc`) while automatically falling back to legacy endpoints (`/proclog`, `/procdta`, or `/Webclient/procdta`) for older heat pumps.
+
 ## 0.9.0 (2026-09-20)
 
 **🐛 Bugfixes**

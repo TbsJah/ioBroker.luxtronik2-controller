@@ -77,8 +77,7 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
-
-### **WORK IN PROGRESS**
+### 0.10.3 (2026-09-21)
 
 - **Features & Improvements:**
     - Optimized the automated DTA backup process by directly utilizing the `/NewProc` file stream, eliminating unnecessary artificial delays and stabilizing the heat pump controller.
@@ -125,15 +124,6 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 
 - **DTA Backup Logic & UI:** Restructured the "Backup & Diagnostics" settings tab. Removed obsolete text log buttons (`procerr`, `procparam`) which are blocked on newer firmwares. Reclassified the DTA manual download buttons into "Live DTA" (forces a new memory flush via `/NewProc`) and "Existing DTA" (fetches the last auto-saved historical log via `/proclog` which might be 2-3 hours old).
 - **Automated Backup Naming:** The automated background backup job now dynamically prefixes the downloaded file as either `dta_live_[...]` or `dta_history_[...]` depending on which endpoint was successfully queried, clearly indicating the recency of the data.
-
-### 0.9.1 (2026-09-20)
-
-**🚀 Features & Improvements**
-
-- **(Added) Backup & Diagnostics Tab:** Introduced a new tab in the adapter settings for easy access to heat pump data. Added a recommendation and link for the OpenDTA project to help users analyze their downloaded .dta files.
-- **Automated DTA Backup:** Integrated a time-based background cron job to fully automate the retrieval and storage of DTA log files directly into the ioBroker file system.
-- **Admin UI Diagnostics:** Added a dedicated "Backup & Diagnostics" tab in the adapter settings featuring manual download buttons for DTA files and system logs, along with a recommendation link for the OpenDTA analysis tool.
-- **Intelligent Firmware Fallback:** Improved the DTA download logic to automatically detect the heat pump's firmware version. It seamlessly supports newer models (via `/NewProc`) while automatically falling back to legacy endpoints (`/proclog`, `/procdta`, or `/Webclient/procdta`) for older heat pumps.
 
 ## License
 
