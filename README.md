@@ -80,11 +80,15 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 
 ### **WORK IN PROGRESS**
 
+- **Features & Improvements:**
+    - Optimized the automated DTA backup process by directly utilizing the `/NewProc` file stream, eliminating unnecessary artificial delays and stabilizing the heat pump controller.
+    - Streamlined the backup configuration: Removed the custom file path input (`autoBackupPath`) to ensure strict compliance with the official ioBroker file system architecture.
+    - Added informational text to the Backup configuration tab, including a recommendation and link to use OpenDTA for file analysis.
+
 - **Fixes:**
-    - Fixed a crash during automated DTA backups caused by attempting to save files directly to the root adapter instance instead of a valid "meta" object.
-    - Added proper creation of a dedicated meta-directory for backups using `setObjectNotExistsAsync` to strictly comply with ioBroker file system requirements.
+    - Fixed the `not an object of type "meta"` crash during DTA backups by officially declaring the `backups` folder as a static `meta` object within `io-package.json`.
+    - Removed deprecated object creation methods (`setObjectNotExistsAsync`) in favor of static `instanceObjects` deployment.
     - Corrected the dynamic file naming logic (`dta_live` vs. `dta_history`) to accurately reflect whether a live memory dump or a fallback history log was downloaded.
-    - Resolved TypeScript deprecation warnings regarding legacy object creation methods (`setForeignObjectAsync`).
 
 ### 0.10.2 (2026-09-21)
 

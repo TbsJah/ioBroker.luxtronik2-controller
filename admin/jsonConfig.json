@@ -2998,20 +2998,9 @@
 					"lg": 4,
 					"xl": 4
 				},
-				"autoBackupPath": {
-					"type": "text",
-					"label": { "en": "Storage subfolder", "de": "Speicher-Unterordner" },
-					"help": {
-						"en": "Leave empty to save directly in the adapter's main directory, or type a subfolder name (e.g., 'backups').",
-						"de": "Leer lassen, um direkt im Hauptverzeichnis des Adapters zu speichern. Für Unterordner einfach den Namen eintippen (z.B. 'backups')."
-					},
-					"placeholder": "adapterDirPlaceholder",
-					"hidden": "!data.autoBackupActive",
-					"xs": 12,
-					"sm": 12,
-					"md": 4,
-					"lg": 4,
-					"xl": 4
+				"backupLocationInfo": {
+					"type": "staticText",
+					"text": "Die automatischen DTA-Backups werden sicher im ioBroker-Dateisystem abgelegt. Du findest sie im ioBroker-Hauptmenü unter dem Reiter 'Dateien' im Ordner 'luxtronik2-controller.0.backups'."
 				}
 			}
 		}
