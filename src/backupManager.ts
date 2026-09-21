@@ -36,6 +36,18 @@ export async function executeDtaBackup(adapter: AdapterInstance): Promise<void> 
 	}
 
 	try {
+		// --- SCHRITT 0: DER FIX FÜR BESTEHENDE INSTANZEN ---
+		// Zwingt ioBroker dazu, den "meta"-Speicherordner anzulegen, falls
+		// er (wie bei deiner .0 Instanz) noch fehlt.
+		await adapter.setObjectNotExistsAsync('backups', {
+			type: 'meta',
+			common: {
+				name: 'Luxtronik DTA Backups',
+				type: 'meta.user',
+			},
+			native: {},
+		} as any);
+
 		writeLog('Fetching live DTA file (/NewProc)...', 'debug');
 
 		let isLive = true;
@@ -56,6 +68,7 @@ export async function executeDtaBackup(adapter: AdapterInstance): Promise<void> 
 			}
 		}
 
+		// 3. Fallback für ältere Luxtronik-Anlagen (proclog statt procdta)
 		if (!arrayBuffer || arrayBuffer.byteLength < 1000) {
 			writeLog('/procdta not found. Falling back to /proclog...', 'debug');
 			response = await fetch(`http://${ip}/proclog`).catch(() => null);
@@ -65,17 +78,18 @@ export async function executeDtaBackup(adapter: AdapterInstance): Promise<void> 
 			}
 		}
 
+		// 4. Wenn immer noch nichts da ist: Abbruch
 		if (!arrayBuffer || arrayBuffer.byteLength < 1000) {
 			throw new Error(`HTTP Error - No valid DTA file found on heat pump webserver.`);
 		}
 
+		// 5. Speicher-Logik
 		const buffer = Buffer.from(arrayBuffer);
 		const now = new Date();
 		const timestamp = now.toISOString().replace(/[:.]/g, '-').substring(0, 19);
 		const filePrefix = isLive ? 'dta_live' : 'dta_history';
 
-		// WICHTIG: Das ist exakt die ID des meta-Objekts aus der io-package.json!
-		// Ergibt: "luxtronik2-controller.0.backups"
+		// Das Ziel ist nun unser garantiert existierender meta-Ordner
 		const targetId = `${adapter.namespace}.backups`;
 		const fileName = `${filePrefix}_${timestamp}.dta`;
 
