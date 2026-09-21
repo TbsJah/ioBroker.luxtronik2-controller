@@ -76,37 +76,28 @@ export async function executeDtaBackup(adapter: AdapterInstance): Promise<void> 
 			arrayBuffer = await response.arrayBuffer();
 		}
 
-		// 3. Speicherpfad säubern (Slashes und Leerzeichen durch Unterstriche ersetzen für gültige Objekt-ID)
+		// 3. Speicherpfad aus Config holen (als Unterordner innerhalb des Adapter-Meta-Speichers)
 		let basePath = config.autoBackupPath || 'backup';
 		basePath = basePath.replace(/[\x2F\\ ]/g, '_').trim();
 		if (basePath === '') {
 			basePath = 'backup';
 		}
 
-		// 4. Sicherstellen, dass das Zielverzeichnis als Meta-Objekt existiert (ohne Deprecated-Warnung!)
-		await adapter.setObjectNotExistsAsync(basePath, {
-			type: 'meta',
-			common: {
-				name: 'Luxtronik Backups',
-				type: 'meta.user',
-			},
-			native: {},
-		});
-
-		// 5. Konvertiere das Ergebnis in einen Node.js Buffer
+		// 4. Konvertiere das Ergebnis in einen Node.js Buffer
 		const buffer = Buffer.from(arrayBuffer);
 
-		// 6. Dateinamen mit aktuellem Zeitstempel generieren (WICHTIG: Hier keinen Pfad mehr voranstellen!)
+		// 5. Dateinamen generieren inkl. dem relativen Pfad (z.B. "backup/dta_live_....dta")
 		const now = new Date();
 		const timestamp = now.toISOString().replace(/[:.]/g, '-').substring(0, 19);
 		const filePrefix = isLive ? 'dta_live' : 'dta_history';
-		const fileName = `${filePrefix}_${timestamp}.dta`;
+		const fileName = `${basePath}/${filePrefix}_${timestamp}.dta`;
 
-		// 7. Im ioBroker-Dateisystem speichern (Ziel ist jetzt exakt das Meta-Objekt)
-		const metaObjId = `${adapter.namespace}.${basePath}`;
-		await adapter.writeFileAsync(metaObjId, fileName, buffer);
+		// 6. Im ioBroker-Dateisystem speichern
+		// WICHTIG: adapter.name ist "luxtronik2-controller" (das existiert zwingend als Meta-Objekt).
+		// adapter.namespace ("luxtronik2-controller.0") würde wieder den Fehler werfen!
+		await adapter.writeFileAsync(adapter.name, fileName, buffer);
 
-		adapter.log.info(`DTA Backup successfully saved as ${fileName} in folder ${metaObjId}.`);
+		adapter.log.info(`DTA Backup successfully saved as ${fileName} in ioBroker files under ${adapter.name}.`);
 	} catch (err: unknown) {
 		const msg = err instanceof Error ? err.message : String(err);
 		writeLog(`Failed to execute automated DTA backup: ${msg}`, 'error');
