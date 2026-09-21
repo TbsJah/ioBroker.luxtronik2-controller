@@ -54,8 +54,6 @@ It was and is being tested with an LWD50A (LD5) from Alpha Innotec.
 
 ## ⚠️ Disclaimer / Haftungsausschluss ⚠️
 
-Dieses Projekt steht in keinerlei Verbindung zu Alpha Innotec, Novelan, ait-deutschland GmbH oder anderen Herstellern. Es handelt sich um ein privates Open-Source-Projekt, das in der Freizeit entwickelt und gepflegt wird. Die Nutzung des Adapters geschieht auf eigene Gefahr.
-
 _This project is not affiliated with Alpha Innotec, Novelan, ait-deutschland GmbH, or any other company. It is a personal project that is maintained in spare time. Use at your own risk._
 
 ## Reporting Bugs & Contributing
