@@ -36,66 +36,76 @@ export async function executeDtaBackup(adapter: AdapterInstance): Promise<void> 
 	}
 
 	try {
-		writeLog('Triggering live DTA flush (/NewProc)...', 'debug');
-
-		// 1. Zwingt die Luxtronik, den aktuellen Arbeitsspeicher zu flushen
-		let response = await fetch(`http://${ip}/NewProc`).catch(() => null);
-		let arrayBuffer = response && response.ok ? await response.arrayBuffer() : null;
+		writeLog('Fetching live DTA file (/NewProc)...', 'debug');
 
 		let isLive = true;
+		let arrayBuffer: ArrayBuffer | null = null;
 
-		// 2. Wenn die Antwort sehr klein ist, handelt es sich nur um die leere Trigger-Seite
-		if (!arrayBuffer || arrayBuffer.byteLength < 1000) {
-			writeLog('Live dump triggered. Waiting 3 seconds for internal file generation...', 'debug');
-			await new Promise<void>(resolve => {
-				adapter.setTimeout(() => resolve(), 3000);
-			});
-
-			writeLog('Downloading generated live DTA file (/procdta)...', 'debug');
-			response = await fetch(`http://${ip}/procdta`).catch(() => null);
-
-			// 3. Fallback: Lade das letzte reguläre Log herunter
-			if (!response || !response.ok) {
-				writeLog('/procdta not found. Falling back to existing log (/proclog)...', 'debug');
-				response = await fetch(`http://${ip}/proclog`).catch(() => null);
-				isLive = false;
-			}
-
-			// 4. Letzter Fallback für alte Webclient-Strukturen
-			if (!response || !response.ok) {
-				writeLog('/proclog not found, trying fallback path /Webclient/procdta...', 'debug');
-				response = await fetch(`http://${ip}/Webclient/procdta`).catch(() => null);
-				isLive = false;
-			}
-
-			if (!response || !response.ok) {
-				throw new Error(`HTTP Error - File not found on heat pump webserver.`);
-			}
-
+		// 1. NewProc abrufen (liefert den Live-Dump direkt als Datei-Stream)
+		let response = await fetch(`http://${ip}/NewProc`).catch(() => null);
+		if (response && response.ok) {
 			arrayBuffer = await response.arrayBuffer();
 		}
 
-		// 3. Den gewünschten Unterordner-Namen auslesen (Sonderzeichen entfernen)
+		// 2. Fallback: Falls NewProc nicht existiert oder nur eine winzige (leere) Fehler-Seite liefert
+		if (!arrayBuffer || arrayBuffer.byteLength < 1000) {
+			writeLog('/NewProc did not return a valid file. Trying /procdta...', 'debug');
+			response = await fetch(`http://${ip}/procdta`).catch(() => null);
+			if (response && response.ok) {
+				arrayBuffer = await response.arrayBuffer();
+			}
+		}
+
+		// 3. Fallback: Lade das letzte reguläre Log herunter (ältere Luxtronik Versionen)
+		if (!arrayBuffer || arrayBuffer.byteLength < 1000) {
+			writeLog('/procdta not found. Falling back to existing log (/proclog)...', 'debug');
+			response = await fetch(`http://${ip}/proclog`).catch(() => null);
+			isLive = false;
+			if (response && response.ok) {
+				arrayBuffer = await response.arrayBuffer();
+			}
+		}
+
+		// 4. Letzter Fallback für uralte Webclient-Strukturen
+		if (!arrayBuffer || arrayBuffer.byteLength < 1000) {
+			writeLog('/proclog not found, trying fallback path /Webclient/procdta...', 'debug');
+			response = await fetch(`http://${ip}/Webclient/procdta`).catch(() => null);
+			isLive = false;
+			if (response && response.ok) {
+				arrayBuffer = await response.arrayBuffer();
+			}
+		}
+
+		// Wenn wir nach allen Versuchen keinen gültigen Puffer haben -> Abbruch
+		if (!arrayBuffer || arrayBuffer.byteLength < 1000) {
+			throw new Error(`HTTP Error - No valid DTA file found on heat pump webserver.`);
+		}
+
+		// --- Speicher-Logik ---
+
+		// 5. Den gewünschten Unterordner-Namen auslesen
 		let basePath = config.autoBackupPath || 'backup';
 		basePath = basePath.replace(/[\x2F\\ ]/g, '_').trim();
 		if (basePath === '') {
 			basePath = 'backup';
 		}
 
-		// 4. Konvertiere in Node.js Buffer
+		// 6. Konvertiere in Node.js Buffer
 		const buffer = Buffer.from(arrayBuffer);
 
-		// 5. Dateiname generieren. WICHTIG: Der Ordnername kommt HIER mit in den String!
+		// 7. Dateiname generieren
 		const now = new Date();
 		const timestamp = now.toISOString().replace(/[:.]/g, '-').substring(0, 19);
 		const filePrefix = isLive ? 'dta_live' : 'dta_history';
-		const fileName = `${basePath}/${filePrefix}_${timestamp}.dta`;
 
-		// 6. Im ioBroker-Dateisystem speichern
-		// WICHTIG: Das erste Argument MUSS adapter.name (ohne .0) sein!
-		await adapter.writeFileAsync(adapter.name, fileName, buffer);
+		// Gespeichert wird kugelsicher in 0_userdata.0
+		const targetId = '0_userdata.0';
+		const fileName = `luxtronik_backups/${basePath}/${filePrefix}_${timestamp}.dta`;
 
-		adapter.log.info(`DTA Backup successfully saved as ${fileName} in ioBroker folder ${adapter.name}.`);
+		// 8. Im ioBroker-Dateisystem speichern
+		await adapter.writeFileAsync(targetId, fileName, buffer);
+
+		adapter.log.info(`DTA Backup successfully saved as ${fileName} in folder ${targetId}.`);
 	} catch (err: unknown) {
 		const msg = err instanceof Error ? err.message : String(err);
 		writeLog(`Failed to execute automated DTA backup: ${msg}`, 'error');
