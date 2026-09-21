@@ -47,7 +47,7 @@ export async function executeDtaBackup(adapter: AdapterInstance): Promise<void> 
 		// 2. Wenn die Antwort sehr klein ist (< 1000 Bytes), handelt es sich nur um die leere Trigger-Seite
 		if (!arrayBuffer || arrayBuffer.byteLength < 1000) {
 			writeLog('Live dump triggered. Waiting 3 seconds for internal file generation...', 'debug');
-			await new Promise(resolve => setTimeout(resolve, 3000));
+			await new Promise(resolve => adapter.setTimeout(resolve, 3000));
 
 			writeLog('Downloading generated live DTA file (/procdta)...', 'debug');
 
