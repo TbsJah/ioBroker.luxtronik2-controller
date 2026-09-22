@@ -180,7 +180,5 @@
 	"Faktor (z.B. 0.1)": "Factor (e.g. 0.1)",
 	"Einheit (z.B. °C)": "Unit (e.g. °C)",
 	"Externe Rücklauftemperatur": "External return temperature",
-	"Standard TCP: 8889 | Firmware > 3.81 (WebSockets): 8214": "Standard TCP: 8889 | Firmware > 3.81 (WebSockets): 8214",
-	"adapterDirPlaceholder": "Empty = Adapter directory",
-	"Die automatischen DTA-Backups werden sicher im ioBroker-Dateisystem abgelegt. Du findest sie im ioBroker-Hauptmenü unter dem Reiter 'Dateien' im Ordner 'luxtronik2-controller.0.backups'.": "Automated DTA backups are safely stored in the ioBroker file system. You can find them in the main ioBroker menu under 'Files' in the folder 'luxtronik2-controller.0.backups'."
+	"Standard TCP: 8889 | Firmware > 3.81 (WebSockets): 8214": "Standard TCP: 8889 | Firmware > 3.81 (WebSockets): 8214"
 }
