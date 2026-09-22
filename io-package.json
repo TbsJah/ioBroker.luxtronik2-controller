@@ -1,289 +1,291 @@
 {
-	"common": {
-		"name": "luxtronik2-controller",
-		"version": "0.11.0",
-		"news": {
-			"0.11.0": {
-				"en": "**Improvements:**\nAdded global rounding to 2 decimal places for all calculated telemetry values (e.g., converting operating seconds to hours). This provides a cleaner ioBroker state tree and prevents excessively long floating-point numbers from cluttering history databases (like InfluxDB).",
-				"de": "**Verbesserungen: **\nAlle berechneten Telemetriewerte wurden global auf 2 Dezimalstellen gerundet (z. B. Betriebssekunden in Stunden). Das sorgt für einen saubereren ioBroker-Statusbaum und verhindert, dass zu lange Fließkommazahlen Historien überladen (wie InfluxDB).",
-				"ru": "**Улучшения: **\nДобавлено глобальное округление до 2 десятичных знаков для всех вычисленных значений телеметрии (например, преобразование рабочих секунд в часы). Это обеспечивает более четкое дерево состояний IOBroker и предотвращает загромождение исторических баз данных (например, InfluxDB) чрезмерно длинными числами с плавающей запятой.",
-				"pt": "**Melhorias: **\nFoi adicionado o arredondamento global a 2 casas decimais em todos os valores de telemetria (p. ex., segundos em horas). Isso fornece uma árvore de estados do IOBroker mais limpa e evita que números muito longos ocupem bancos de dados históricos (como o InfluxDB).",
-				"nl": "**Verbeteringen: **\nGlobale afronding op 2 cijfers achter de komma toegevoegd voor alle berekende telemetriewaarden (bijv. het omrekenen van bedrijfsseconden naar uren). Dit zorgt voor een schonere ioBroker-statusstructuur en voorkomt dat te lange getallen met drijvende komma de geschiedenisdatabases overbelasten (zoals InfluxDB).",
-				"fr": "**Améliorations :**\nAjout de l'arrondissement global à la 2 décimales pour toutes les valeurs de télémétrie calculées (par exemple, conversion des secondes en heures). Cela permet d'améliorer l'arbre d'état d'IOBroker et d'éviter que des nombres à virgule flottante trop longs n'encombrent les bases de données historiques (comme InfluxDB).",
-				"it": "**Migliorie: **\nAggiunto un arrotondamento globale a 2 decimali per tutti i valori di telemetria calcolati (es. secondi operativi in ore). Ciò fornisce un albero di stato IOBroker più pulito ed evita che numeri a virgola mobile troppo lunghi ingombrino i database storici (come InfluxDB).",
-				"es": "**Mejoras: **\nAñadió el redondeo global a 2 decimales para todos los valores de telemetría calculados (por ejemplo, convertir segundos de operación en horas). Esto proporciona un árbol de estados de ioBroker más limpio y evita que números de coma flotante demasiado largos abarroten las bases de datos históricas (como InfluxDB).",
-				"pl": "**Ulepszenia: **\nDodano globalne zaokrąglanie do 2 miejsc po przecinku dla wszystkich obliczonych wartości telemetrii (np. przeliczanie sekund roboczych na godziny). Zapewnia to czystsze drzewo stanów ioBroker i zapobiega nadmiernie długim liczbom zmiennoprzecinkowym zaśmiecaniu baz danych historii (takich jak InfluxDB).",
-				"uk": "**Покращення: **\nДодано глобальне округлення до 2 знаків після коми для всіх обчислених значень телеметрії (наприклад, перетворення робочих секунд у години). Це забезпечує більш чисте дерево станів IObroker і запобігає надмірно довгим числам з плаваючою комою захаращувати бази даних історії (наприклад, InfluxDB).",
-				"zh-cn": "**改进：**\n将所有计算出的遥测值的全局舍入到小数点后 2 位（例如，将操作秒数转换为小时）。这提供了更简洁的IOBroker状态树，并防止过长的浮点数使历史数据库（如InfluxDB）混乱。"
-			},
-			"0.10.4": {
-				"en": "Update Readme",
-				"de": "Aktualisierung Readme",
-				"ru": "Обновить файл Readme",
-				"pt": "Atualize o Readme",
-				"nl": "Readme bijwerken",
-				"fr": "Mettre à jour Readme",
-				"it": "Aggiornamento del file Readme",
-				"es": "Actualización del archivo «Readme»",
-				"pl": "Zaktualizuj Readme",
-				"uk": "Оновити Readme",
-				"zh-cn": "更新自述文件"
-			},
-			"0.10.3": {
-				"en": "**Features & Improvements:**\nOptimized the automated DTA backup process by directly utilizing the `/NewProc` file stream, eliminating unnecessary artificial delays and stabilizing the heat pump controller.\nStreamlined the backup configuration: Removed the custom file path input to prevent file system conflicts. Backups are now securely stored in the universally accessible global `0_userdata.0/luxtronik_backups/` directory.\nAdded a clear information box in the adapter configuration, explaining where to find the generated backup files within the ioBroker UI.\n\n**Fixes:**\nFixed the persistent `not an object of type \"meta\"` crash during DTA backups. The storage architecture was migrated away from isolated adapter namespaces to the robust, native `0_userdata.0` global storage, completely resolving folder creation permission issues on existing instances.\nCorrected the dynamic file naming logic (`dta_live_...` vs. `dta_history_...`) to accurately reflect whether a live memory dump or a fallback history log was downloaded.",
-				"de": "**Funktionen und Neuerungen: **\nOptimierte das automatische DTA-Backup durch direkte Nutzung des `/NewProc`-Dateistreams, vermeidet unnötige Verzögerungen und stabilisiert den Wärmepumpenregler.\nOptimierte Backup-Konfiguration: Pfadeingabe zur Vermeidung von Dateisystemkonflikten entfernt. Backups werden jetzt sicher im globalen Verzeichnis `0_userdata.0/luxtronik_backups/` gespeichert.\nIn der Adapterkonfiguration wurde ein Infofeld hinzugefügt, das erklärt, wo die generierten Backup-Dateien im ioBroker UI zu finden sind.\n\n**Fixes: **\nDauerhafter Absturz bei DTA-Backups ohne Objekt vom Typ „Meta“ behoben. Die Speicherarchitektur wurde von isolierten Adapter-Namespaces zum robusten, systemeigenen globalen Speicher `0_userdata.0` migriert, was Probleme bei der Ordnererstellung auf bestehenden Instanzen löst.\nDie dynamische Dateinamenlogik (`dta_live_... `vs. `dta_history_...`) wurde korrigiert, um genau zu erkennen, ob ein Live-Speicherabbild oder ein Fallback-Protokoll heruntergeladen wurde.",
-				"ru": "**Функции и улучшения: **\nОптимизирован автоматизированный процесс резервного копирования DTA за счет прямого использования файлового потока `/NewProc`, устранения ненужных искусственных задержек и стабилизации контроллера теплового насоса.\nУпрощена конфигурация резервного копирования: удален пользовательский ввод пути к файлу для предотвращения конфликтов файловой системы. Теперь резервные копии надежно хранятся в общедоступном глобальном каталоге 0_userdata.0/luxtronik_backups/.\nДобавлено четкое информационное окно в конфигурации адаптера, объясняющее, где найти сгенерированные файлы резервных копий в пользовательском интерфейсе IOBroker.\n\n**Исправления: **\nИсправлен постоянный сбой «не являющийся объектом типа «meta» во время резервного копирования DTA. Архитектура хранилища была перенесена из изолированных пространств имен адаптеров в надежное глобальное хранилище «0_userdata.0\", что полностью устранило проблемы с разрешениями на создание папок в существующих экземплярах.\nИсправлена логика динамического именования файлов (`dta_live_... `против `dta_history_...`), чтобы точно отразить, был ли загружен дамп оперативной памяти или журнал резервной истории.",
-				"pt": "**Recursos e melhorias: **\nOtimizou o processo de backup automático de DTA usando diretamente o fluxo de arquivos `/NewProc`, eliminando atrasos artificiais e estabilizando o controlador da bomba de calor.\nSimplificou a configuração de backup: removeu o caminho do arquivo para evitar conflitos no sistema. Os backups agora são armazenados com segurança no diretório global `0_userdata.0/luxtronik_backups/`.\nAdicionou uma caixa clara na configuração do adaptador, explicando onde encontrar os backups gerados na IU do IOBroker.\n\n**Fixa: **\nCorrigida a falha persistente do tipo “meta” durante backups de DTA. A arquitetura de armazenamento migrou de namespaces isolados para o robusto armazenamento global nativo `0_userdata.0`, resolvendo completamente os problemas de criação de pastas em instâncias existentes.\nA lógica de nomeação dinâmica de arquivos (`dta_live_... `vs. `dta_history_...`) foi corrigida para refletir se um dump de memória real ou um log de fallback foi baixado.",
-				"nl": "**Kenmerken en verbeteringen: **\nHet geautomatiseerde DTA-back-upproces is geoptimaliseerd door rechtstreeks gebruik te maken van de bestandsstream `/NewProc`, waardoor onnodige kunstmatige vertragingen werden voorkomen en de warmtepompregelaar werd gestabiliseerd.\nDe back-upconfiguratie gestroomlijnd: de aangepaste invoer voor het bestandspad is verwijderd om conflicten in het bestandssysteem te voorkomen. Back-ups worden nu veilig opgeslagen in de universeel toegankelijke wereldwijde map `0_userdata.0/luxtronik_backups/`.\nEr is een duidelijk informatievak toegevoegd in de adapterconfiguratie, waarin wordt uitgelegd waar de gegenereerde back-upbestanden in de gebruikersinterface van ioBroker te vinden zijn.\n\n**Correcties: **\nDe aanhoudende crash van `not an object van het type „meta\"` tijdens DTA-back-ups is opgelost. De opslagarchitectuur werd gemigreerd van geïsoleerde adapternaamruimten naar de robuuste, native wereldwijde opslag van `0_userdata.0`, waardoor problemen met de machtigingen voor het aanmaken van mappen bij bestaande instanties volledig zijn opgelost.\nDe dynamische naamgevingslogica van bestanden is gecorrigeerd (`dta_live_... `versus `dta_history_...`) om nauwkeurig weer te geven of er een live memorydump of een logboek met terugvalgeschiedenis is gedownload.",
-				"fr": "**Fonctionnalités et améliorations :**\nLe processus de sauvegarde automatique des DTA a été optimisé en utilisant directement le flux de fichiers « /NewProc », en éliminant les retards et en stabilisant le régulateur de la pompe à chaleur.\nConfiguration des sauvegardes simplifiée : suppression du chemin de fichier personnalisé pour éviter les conflits. Les sauvegardes sont désormais stockées en toute sécurité dans le répertoire global « 0_userdata.0/luxtronik_backups/».\nAjout d'un encadré clair dans la configuration de l'adaptateur, expliquant où trouver les fichiers de sauvegarde générés dans l'interface d'IObroker.\n\n**Correctifs :**\nCorrection du crash persistant « not an object of type « meta » » lors des sauvegardes DTA. L'architecture de stockage a été migrée des espaces de noms d'adaptateurs isolés vers le stockage global natif robuste « 0_userdata.0 », résolvant ainsi les problèmes de création de dossiers sur les instances existantes.\nCorrection de la logique de dénomination dynamique des fichiers (`dta_live_... `contre `dta_history_...`) pour indiquer avec précision si un vidage en direct ou un historique de secours avait été téléchargé.",
-				"it": "**Funzioni e migliorie: **\nHa ottimizzato il processo di backup automatico dei DTA utilizzando direttamente il flusso di file `/NewProc`, eliminando inutili ritardi e stabilizzando il controller della pompa di calore.\nConfigurazione di backup semplificata: rimosso il percorso personalizzato per evitare conflitti I backup sono ora archiviati in modo sicuro nella directory globale «0_userdata.0/luxtronik_backups/».\nAggiunto un riquadro chiaro nella configurazione dell'adattatore, dove trovare i file di backup generati nell'UI IOBroker.\n\n**Fix: **\nRisolto il crash persistente «non è un oggetto di tipo «meta» durante i backup DTA. L'architettura di storage è stata migrata da namespace isolati a uno storage globale robusto e nativo `0_userdata.0`, risolvendo completamente i problemi di autorizzazione alle cartelle esistenti.\nÈ stata corretta la logica di denominazione dinamica dei file (`dta_live_... `vs. `dta_history_...`) per indicare se è stato scaricato un dump di memoria attiva o un log di riserva.",
-				"es": "**Características y mejoras: **\nOptimizó el proceso automático de respaldo de datos utilizando directamente el flujo de archivos `/NewProc`, eliminando retrasos artificiales innecesarios y estabilizando el controlador de la bomba de calor.\nSimplificó la configuración de respaldo: se eliminó la ruta de archivo personalizada para evitar conflictos en el sistema Las copias de seguridad ahora se almacenan de forma segura en el directorio global `0_userdata.0/luxtronik_backups/` de acceso universal.\nSe ha añadido un recuadro claro en la configuración del adaptador que explica dónde encontrar los archivos de respaldo generados en la interfaz de IOBroker.\n\n**Correcciones: **\nSe corrigió el bloqueo persistente de «no es un objeto de tipo «meta» durante las copias de DTA. La arquitectura de almacenamiento pasó de los espacios de nombres de adaptadores aislados al sólido almacenamiento global nativo «0_userdata.0», lo que resolvió por completo los problemas de permisos de creación de carpetas en las instancias existentes.\nSe ha corregido la lógica de nomenclatura dinámica de los archivos (`dta_live_... `frente a `dta_history_...`) para reflejar con precisión si se descargó un volcado de memoria en vivo o uno alternativo.",
-				"pl": "**Funkcje i ulepszenia: **\nZoptymalizowano proces automatycznego tworzenia kopii zapasowych DTA poprzez bezpośrednie wykorzystanie strumienia plików `/NewProc`, eliminując niepotrzebne sztuczne opóźnienia i stabilizując sterownik pompy ciepła.\nUsprawniono konfigurację kopii zapasowej: usunięto niestandardową ścieżkę pliku, aby zapobiec konfliktom systemu plików. Kopie zapasowe są teraz bezpiecznie przechowywane w powszechnie dostępnym globalnym katalogu `0_userdata.0/luxtronik_backups/`.\nDodano wyraźne pole informacyjne w konfiguracji adaptera, wyjaśniające, gdzie znaleźć wygenerowane pliki kopii zapasowych w interfejsie użytkownika iOBroker.\n\n**Poprawki: **\nNaprawiono trwałą awarię „not an object” typu „meta” podczas tworzenia kopii zapasowych DTA. Architektura pamięci masowej została przeniesiona z izolowanych przestrzeni nazw adaptera do solidnej, natywnej globalnej pamięci masowej `0_userdata.0`, całkowicie rozwiązując problemy z uprawnieniami do tworzenia folderów na istniejących instancjach.\nPoprawiono dynamiczną logikę nazewnictwa plików (`dta_live_... `vs `dta_history_...`), aby dokładnie odzwierciedlić, czy pobrano zrzut pamięci aktywnej, czy dziennik historii zapasowej.",
-				"uk": "** Особливості та вдосконалення: **\nОптимізовано автоматизований процес резервного копіювання DTA шляхом безпосереднього використання файлового потоку `/NewProC`, усуваючи непотрібні штучні затримки та стабілізуючи контролер теплового насоса.\nВпорядковано конфігурацію резервного копіювання: Видалено введення власного шляху до файлу, щоб запобігти конфліктам файлової системи. Резервні копії тепер надійно зберігаються у загальнодоступному глобальному каталозі `0_userdata.0/luxtronik_backups/`.\nДодано чітке інформаційне поле в конфігурації адаптера, що пояснює, де знайти створені файли резервних копій в інтерфейсі користувача IObroker.\n\n**Виправлення: **\nВиправлено постійний збій `не об'єкта типу «meta» під час резервного копіювання DTA. Архітектура сховища була перенесена з ізольованих просторів імен адаптера до надійного, рідного глобального сховища `0_userdata.0`, що повністю вирішило проблеми з дозволами створення папок у існуючих екземплярах.\nВиправлено логіку динамічного іменування файлів (`dta_live_... `проти `dta_history_...`), щоб точно відобразити, чи було завантажено дамп живої пам'яті чи запасний журнал історії.",
-				"zh-cn": "**功能和改进：**\n通过直接利用 `/newProc` 文件流，优化了自动数据备份流程，消除了不必要的人为延迟，稳定了热泵控制器。\n简化了备份配置：删除了自定义文件路径输入以防止文件系统冲突。备份现在安全地存储在可普遍访问的全球 `0_userdata.0/luxtronik_backups/` 目录中。\n在适配器配置中添加了一个清晰的信息框，说明在 IOBroker 用户界面中何处可以找到生成的备份文件。\n\n**修复：**\n修复了 DTA 备份期间持续出现的 “不是 “meta” 类型的对象崩溃的问题。存储架构已从独立的适配器命名空间迁移到强大的本机 “0_userdata.0” 全局存储，完全解决了现有实例上的文件夹创建权限问题。\n更正了动态文件命名逻辑（`dta_live_... `与 `dta_history_...`），以准确反映是否下载了实时内存转储或备用历史日志。"
-			},
-			"0.10.2": {
-				"en": "**🚀 Features:**\nImplemented automated DTA file backup management with customizable cron schedules and automatic meta-directory creation in the ioBroker file system.\n\n**🛠 Chores / Under the Hood**\nEnhanced TypeScript type checking, resolved strict ESLint warnings, and upgraded Node.js type definitions to support Node.js version 22.\nOptimized image scaling and layout rendering in `jsonConfig.json` for cleaner adapter settings presentation.",
-				"de": "** 🚀 Merkmale: **\nAutomatisches DTA-Backup-Management mit anpassbaren Cron-Zeitplänen und automatischer Meta-Verzeichniserstellung im ioBroker-Dateisystem eingeführt.\n\n** 🛠 Haus/Unter der Haube**\nVerbesserte TypeScript-Typprüfung, Behebung strenger ESLint-Warnungen und Erweiterung der Typdefinitionen von Node.js auf Node.js 22.\nOptimierte Bildskalierung und Layout-Rendering in `JSONConfig.json` für übersichtlichere Adaptereinstellungen.",
-				"ru": "** 🚀 Особенности: **\nРеализовано автоматическое управление резервным копированием файлов DTA с настраиваемыми расписаниями cron и автоматическим созданием метакаталогов в файловой системе IOBroker.\n\n** 🛠 Работа по дому/Под капотом**\nУлучшена проверка типов TypeScript, устранены строгие предупреждения ESLint и обновлены определения типов Node.js для поддержки Node.js версии 22.\nОптимизировано масштабирование изображения и рендеринг макета в `JsonConfig.json` для более четкого представления настроек адаптера.",
-				"pt": "** 🚀 Funções: **\nImplementou o gerenciamento automatizado de backup de arquivos DTA com cronogramas cron e criação automática de meta-diretórios no IOBroker.\n\n** 🛠 Tarejas/Sob o capu**\nAprimorou a verificação de tipos do TypeScript, resolveu avisos ESLint estritos e atualizou o Node.js para suportar o Node.js versão 22.\nEscala de imagem e layout otimizados em `jsonConfig.json` para uma melhor apresentação do adaptador.",
-				"nl": "** 🚀 Kenmerken: **\nGeautomatiseerd beheer van DTA-bestanden geïmplementeerd met aanpasbare cron-schema's en automatische aanmaak van metamappen in het IOBroker-bestandssysteem.\n\n** 🛠 Klusjes/Onder de motorkap**\nVerbeterde TypeScript-typecontrole, strikte ESLint-waarschuwingen opgelost en de typedefinities van Node.js geüpgraded om Node.js versie 22 te ondersteunen.\nGeoptimaliseerde beeldschaling en weergave van de lay-out in `JSONConfig.json` voor een schonere presentatie van adapterinstellingen.",
-				"fr": "** 🚀 Fonctions :**\nMise en place d'une gestion automatisée des sauvegardes DTA avec des cron personnalisables et la création automatique de méta-répertoires dans le système de fichiers IObroker.\n\n** 🛠 Corvées/Sous le capot**\nVérification améliorée du type TypeScript, résolution des avertissements ESLint stricts et amélioration des définitions de type Node.js pour Node.js version 22.\nMise à l'échelle de l'image et rendu de mise en page optimisés dans « JSONConfig.json » pour une présentation plus claire.",
-				"it": "** 🚀 Funzioni: **\nGestione automatica dei backup dei file DTA implementata con piani cron personalizzabili e creazione automatica di metadirectory nel file system IOBroker.\n\n** 🛠 Facce/Under the Hood**\nControllo avanzato dei tipi TypeScript, risolti rigidi avvisi ESLint e aggiornato le definizioni dei tipi Node.js per Node.js 22.\nRidimensionamento e layout ottimizzati in `JsonConfig.json` per impostazioni dell'adattatore più chiare.",
-				"es": "** 🚀 Funciones: **\nImplantó la gestión automática de copias de seguridad de archivos DTA con crones personalizables y creación automática de metadirectorios en el sistema de archivos ioBroker.\n\n** 🛠 Tareas /Bajo el capó**\nSe mejoró la comprobación de tipos de TypeScript, se resolvieron los estrictos avisos de ESLint y se mejoraron las definiciones de tipos de Node.js para Node.js 22.\nSe optimizó el escalado de imágenes y el diseño en `JSONConfig.json` para una presentación más limpia de los ajustes del adaptador.",
-				"pl": "** 🚀 Funkcje: **\nZaimplementowano zautomatyzowane zarządzanie kopią zapasową plików DTA z konfigurowalnymi harmonogramami cron i automatycznym tworzeniem meta-katalogów w systemie plików iOBroker.\n\n** 🛠 Obowiązki domowe/ Pod kapturą**\nUlepszono sprawdzanie typu TypeScript, rozwiązano ścisłe ostrzeżenia eSlint i uaktualniono definicje typów Node.js w celu obsługi Node.js w wersji 22.\nZoptymalizowane skalowanie obrazu i renderowanie układu w `JSONConfig.json` dla czystszej prezentacji ustawień adaptera.",
-				"uk": "** 🚀 Особливості: **\nРеалізовано автоматичне керування резервним копіюванням файлів DTA з настроюваними графіками cron та автоматичним створенням мета-каталогів у файловій системі IObroker.\n\n** 🛠 Домашні клопоти/Під капюшоною**\nРозширена перевірка типів TypeScript, виправлено суворі попередження ESLint та оновлено визначення типів Node.js для підтримки Node.js версії 22.\nОптимізовано масштабування зображення та рендеринг макета в `JsonConfig.json` для більш чіткої презентації налаштувань адаптера.",
-				"zh-cn": "** 🚀 特点：**\n通过可自定义的 cron 计划和在 IOBroker 文件系统中自动创建元目录，实现了自动数据文件备份管理。\n\n** 🛠 杂务/在引擎盖下**\n增强了 TypeScript 类型检查，解决了严格的 ESLint 警告，并升级了 Node.js 类型定义以支持 Node.js 版本 22。\n在 `jsonConfig.json` 中优化了图像缩放和布局渲染，使适配器设置呈现得更简洁。"
-			},
-			"0.10.1": {
-				"en": "*🚀 Features & Improvements**\n\n**(Feature) Heating State String:** Added the configured heating curve parallel offset to the status string (e.g., \"Offset +3 °C\") for better transparency.\n\n*🐛 Bugfixes**\n\n**(Fixed) Heating State String:** Corrected a logic issue where the status incorrectly displayed \"Reduced 0 °C\" during a scheduled reduction window, even if the actual reduction delta was set to 0 K. It now correctly displays \"Normal (Timer)\".",
-				"de": "* 🚀 Funktionen und Verbesserungen**\n\n** (Feature) Heizstatus-String: ** Der Statusstring wurde der eingestellten Heizkennlinie hinzugefügt (z. B. „Offset +3 °C“) für mehr Transparenz.\n\n* 🐛 Bugfixes**\n\n** (Fest) Heizstatus-String: ** Es wurde ein Logikproblem behoben, bei dem in einem geplanten Reduktionsfenster fälschlicherweise „0 °C reduziert“ angezeigt wurde, obwohl das Delta 0 K war. Jetzt wird korrekt „Normal (Timer)“ angezeigt.",
-				"ru": "* 🚀 Функции и улучшения**\n\n** (Функция) Строка состояния нагрева: ** Добавлено настроенное параллельное смещение кривой нагрева к строке состояния (например, «Смещение +3 °C») для повышения прозрачности.\n\n* 🐛 Исправления ошибок**\n\n** (Исправлено) Строка состояния нагрева: ** Исправлена логическая ошибка, из-за которой во время запланированного периода снижения температуры отображалось некорректное состояние «Снижено на 0 °C», даже если фактическая дельта снижения была установлена на 0 К. Теперь корректно отображается «Нормально (таймер)».",
-				"pt": "* 🚀 Recursos e melhores**\n\n** (Recurso): ** Adicionou o deslocamento paralelo da curva de aquecimento configurado à string de status (por exemplo, “Offset +3 °C”) para maior transparência.\n\n* 🐛 Correções**\n\n** (Fixa) Sequência de estado de aquecimento: ** Corrigido um problema lógico em que o status exibia “Reduzido 0 °C” durante uma janela de redução programada, mesmo com o delta real definido como 0 K. Agora exibe “Normal (Timer)”.",
-				"nl": "* 🚀 Kenmerken en verbeteringen**\n\n** (Functie) Heating State String: ** De geconfigureerde verwarmingscurve met parallelle offset toegevoegd aan de statusreeks (bijvoorbeeld „Offset +3 °C”) voor een betere transparantie.\n\n* 🐛 Opgeloste fouten**\n\n** (Opgelost) Heating State String: ** Er is een logisch probleem opgelost waarbij in de status „0 °C verlaagd” verkeerd werd weergegeven tijdens een geplande reductieperiode, zelfs als de werkelijke reductiedelta was ingesteld op 0 K. Nu wordt „Normaal (timer)” correct weergegeven.",
-				"fr": "* 🚀 Fonctionnalités et améliorations**\n\n** (Fonctionnalité) Chaîne d'état de chauffage :** Ajout du décalage parallèle de la courbe de chauffage configuré à la chaîne d'état (par exemple, « Offset +3 °C ») pour plus de transparence.\n\n* 🐛 Bugcorrects**\n\n** (Corrigé) Chaîne d'état de chauffage :** Correction d'un problème logique qui affichait à tort « Réduction de 0 °C » pendant une fenêtre de réduction planifiée, même si le delta de réduction réel était réglé à 0 K. Il affiche désormais correctement « Normal (minuteur) ».",
-				"it": "* 🚀 Funzioni e migliorie**\n\n** (Funzione) Stringa di stato: ** Aggiunto l'offset parallelo della curva di riscaldamento configurata (ad es. «Offset +3 °C») per una maggiore trasparenza.\n\n* 🐛 Bugfix**\n\n** (Risolto) Stringa di stato di riscaldamento: ** Risolto un problema logico per cui lo stato indicava erroneamente «Ridotto 0 °C» durante una finestra di riduzione programmata, anche se il delta effettivo era impostato su 0 K.",
-				"es": "* 🚀 Funciones y mejoras**\n\n** Cadena de estados de calentamiento: ** Se ha añadido el desfase paralelo de la curva de calentamiento configurada a la cadena de estado (p. ej., «Offset +3 °C») para una mayor transparencia.\n\n* 🐛 Correcciones**\n\n** Cadena de estados de calefacción (fija): ** Se corrigió un problema lógico por el que el estado mostraba incorrectamente «0 °C reducido» durante un período de reducción programado, incluso si el delta de reducción real estaba fijado en 0 K. Ahora muestra correctamente «Normal (temporizador)».",
-				"pl": "* 🚀 Funkcje i ulepszenia**\n\n** (Funkcja) Ciąg stanu nagrzewania: ** Dodano skonfigurowane równoległe odsunięcie krzywej grzewczej do ciągu stanu (np. „Odsunięcie +3 °C”) dla lepszej przezroczystości.\n\n* 🐛 Poprawki błędów**\n\n** (Naprawiono) Ciąg stanu nagrzewania: ** Poprawiono błąd logiczny polegający na nieprawidłowym wyświetlaniu stanu „Zmniejszone 0 °C” podczas zaplanowanego okna redukcji, nawet jeśli rzeczywista delta redukcji została ustawiona na 0 K. Teraz poprawnie wyświetla „Normalny (Timer)”.",
-				"uk": "* 🚀 Особливості та вдосконалення**\n\n** (Функція) Рядок стану нагрівання: ** Додано налаштовану криву нагріву паралельне зміщення до рядка стану (наприклад, «Зсув +3°C») для кращої прозорості.\n\n* 🐛 Виправлення вадь**\n\n** (Виправлено) Рядок стану нагрівання: ** Виправлено логічну проблему, через яку неправильно відображався статус «Зменшено 0 °C» під час запланованого вікна зменшення, навіть якщо фактична дельта зменшення була встановлена на 0 К. Тепер він правильно відображає «Нормальний (Таймер)».",
-				"zh-cn": "* 🚀 功能和改进**\n\n**（功能）加热状态字符串：** 为状态字符串添加了配置的加热曲线平行偏移量（例如，“偏移量 +3 °C”），以提高透明度。\n\n* 🐛 错误修复**\n\n**（已修复）加热状态字符串：**更正了逻辑问题，即即使实际减少增量设置为 0 K，在预定减速窗口内，状态仍错误地显示 “降低 0 °C”。它现在可以正确显示 “正常（计时器）”。"
-			},
-			"0.10.0": {
-				"en": "*🚀 Features & Improvements**\n\n**(Added) Low Flow Outage Alerts:** Implemented active monitoring for \"low flow\" (Durchfluss) shutdowns in the outage history. The adapter now proactively sends a notification when the heat pump stops due to flow issues, as the controller usually treats these as soft outages rather than hard errors. Includes a 60-minute cooldown to prevent notification spam.\n**(Improved) Admin UI:** Integrated a direct recommendation link for the OpenDTA analysis tool into the description text of the Backup & Diagnostics tab.\n\n*🛠 Chores / Under the Hood**\n\n**(Fixed) ESLint Validation:** Added missing JSDoc comments in the backup manager to resolve code validation warnings during development.",
-				"de": "* 🚀 Funktionen und Verbesserungen**\n\n** (Hinzugefügt) Warnmeldungen bei Low Flow: ** Aktive Überwachung von Durchflussabschaltungen in der Ausfallhistorie implementiert. Der Adapter meldet nun proaktiv, wenn die Wärmepumpe aufgrund von Stromproblemen stoppt, da der Regler diese eher als sanfte als schwere Fehler behandelt. Enthält eine 60-minütige Abklingzeit vor Spam.\n** (Verbessert) Admin-UI: ** Direkter Empfehlungslink für das OpenDTA-Analysetool in den Beschreibungstext des Tabs Backup & Diagnostics integriert.\n\n* 🛠 Hausarbeit/Unter der Haube**\n\n** (Behoben) ESLint Validation: ** Fehlende JSDoc-Kommentare im Backup-Manager behoben.",
-				"ru": "* 🚀 Функции и улучшения**\n\n** (Добавлено) Оповещения об отключениях при низком расходе: ** Реализован активный мониторинг отключений при низком расходе (Durchfluss) в истории отключений. Теперь адаптер заблаговременно отправляет уведомление об остановке теплового насоса из-за проблем с потоком, поскольку контроллер обычно воспринимает такие перебои в работе, а не как серьезные ошибки. Предусмотрена 60-минутная перезарядка для предотвращения спама в уведомлениях.\n** (Улучшено) Пользовательский интерфейс администратора: ** Встроена прямая ссылка на рекомендации инструмента анализа OpenDTA в текст описания вкладки «Резервное копирование и диагностика».\n\n* 🛠 Работа по дому/Под капотом**\n\n** (Исправлено) Проверка ESLint: ** Добавлены недостающие комментарии JSDoc в диспетчере резервного копирования для устранения предупреждений о проверке кода во время разработки.",
-				"pt": "* 🚀 Recursos e melhores**\n\n** (Adicionados) Alertas de baixa vazão: ** Implementou o monitoramento ativo de paradas de “baixo fluxo” no histórico de interrupções. O adaptador agora envia um aviso proativo quando a bomba de calor para devido a problemas de fluxo, já que o controlador os trata como falhas leves em vez de erros graves. Inclui um tempo de espera de 60 minutos para evitar spam.\n** UI de administrador (aprimorada): ** Integrou um link de recomendação direta para a ferramenta OpenDTA na descrição da guia Backup e Diagnóstico.\n\n* 🛠 Tarejas/Sob o capu**\n\n** Validação ESLint (fixa): ** Foram adicionados comentários JSDoc ausentes no gerenciador de backup para resolver os avisos de desenvolvimento.",
-				"nl": "* 🚀 Kenmerken en verbeteringen**\n\n** (Toegevoegd) Waarschuwingen bij lage stroomuitval: ** Actieve monitoring geïmplementeerd voor uitschakelingen met een „laag debiet” (Durchfluss) in de geschiedenis van de storing. De adapter stuurt nu proactief een melding wanneer de warmtepomp stopt vanwege problemen met de stroming, omdat de controller dit gewoonlijk behandelt als zachte storingen in plaats van als harde fouten. Inclusief een afkoelperiode van 60 minuten om spam met meldingen te voorkomen.\n** (Verbeterd) Gebruikersinterface voor beheerders: ** Geïntegreerde een directe aanbevelingslink voor de OpenDTA-analysetool in de beschrijvingstekst van het tabblad Backup & Diagnostics.\n\n* 🛠 Klusjes/Onder de motorkap**\n\n** (Opgelost) ESLint-validatie: ** Ontbrekende JSDoc-opmerkingen toegevoegd in de back-upmanager om waarschuwingen voor codevalidatie tijdens de ontwikkeling op te lossen.",
-				"fr": "* 🚀 Fonctionnalités et améliorations**\n\n** Alertes de panne (ajoutées) :** Mise en place d'une surveillance active des arrêts « à faible débit » (Durchfluss) dans l'historique des pannes. L'adaptateur envoie désormais une notification en cas d'arrêt de la pompe à chaleur en raison d'un problème de débit, car le régulateur y voit des pannes légères. Inclut un temps de recharge de 60 minutes pour éviter les spams.\n** Interface d'administration (améliorée) :** Un lien de recommandation direct pour l'outil d'analyse OpenDTA a été intégré à la description de l'onglet Backup & Diagnostics.\n\n* 🛠 Corvées/Sous le capot**\n\n** (Corrigé) Validation ESLint :** Ajout de commentaires JSDoc manquants dans le gestionnaire de sauvegarde pour corriger le code en cours de développement.",
-				"it": "* 🚀 Funzioni e migliorie**\n\n** (Aggiunto) Avvisi per interruzioni a basso flusso: ** Monitoraggio attivo degli arresti «a basso flusso» (Durchfluss). L'adattatore ora invia una notifica proattiva quando la pompa di calore si ferma per problemi di flusso, poiché di solito li considera guasti lievi. Include un tempo di 60 minuti per evitare notifiche spam.\n** UI di amministrazione (migliorata): ** Ha integrato un link diretto per lo strumento di analisi OpenDTA nella scheda Backup & Diagnostics.\n\n* 🛠 Faccende /Under the Hood**\n\n** (Risolto) Convalida ESLint: ** Aggiunti commenti JSDoc mancanti nel backup manager per risolvere gli avvisi di convalida",
-				"es": "* 🚀 Funciones y mejoras**\n\n** (Añadido) Alertas de bajo flujo: ** Se implementó la monitorización activa de las paradas de «bajo flujo» (Durchfluss) en el historial de cortes. El adaptador ahora envía una notificación de forma proactiva cuando la bomba de calor se detiene por problemas de flujo, ya que el controlador suele tratarlos como cortes leves y no como errores graves. Incluye 60 minutos de espera para evitar el spam.\n** Interfaz de administración (mejorada): ** Se ha integrado un enlace de recomendación directa para la herramienta de análisis OpenDTA en la descripción de la pestaña Backup & Diagnostics.\n\n* 🛠 Tareas /Bajo el capó**\n\n** Validación de ESLint: ** Se han añadido los comentarios de JSDoc que faltaban en el gestor de copias de seguridad para resolver los avisos de validación del código",
-				"pl": "* 🚀 Funkcje i ulepszenia**\n\n** (Dodano) Alerty o niskim przepływie: ** Zaimplementowano aktywne monitorowanie wyłączeń „niskiego przepływu” (Durchfluss) w historii awarii. Adapter teraz proaktywnie wysyła powiadomienie, gdy pompa ciepła zatrzymuje się z powodu problemów z przepływem, ponieważ sterownik zwykle traktuje je jako miękkie awarie, a nie poważne błędy. Zawiera 60-minutowy czas odnowienia, aby zapobiec spamowi powiadomień.\n** (Ulepszony) Interfejs administratora: ** Zintegrowany bezpośredni link rekomendacji dla narzędzia analizy OpenDTA w tekście opisu karty Kopia zapasowa i diagnostyka.\n\n* 🛠 Obowiązki domowe/Pod kapturem**\n\n** (Naprawiono) Walidacja eSlint: ** Dodano brakujące komentarze JSDoc w menedżerze kopii zapasowych, aby rozwiązać ostrzeżenia o walidacji kodu podczas tworzenia.",
-				"uk": "* 🚀 Особливості та вдосконалення**\n\n** (Додано) Сповіщення про відключення низького потоку: ** Впроваджено активний моніторинг відключень «низького потоку» (Durchfluss) в історії відключень. Тепер адаптер активно надсилає сповіщення, коли тепловий насос зупиняється через проблеми з потоком, оскільки контролер зазвичай розглядає це як м'які відключення, а не як серйозні помилки. Включає 60-хвилинну зарядку для запобігання спаму сповіщень.\n** (Покращено) Інтерфейс адміністратора: ** Інтегрований прямий рекомендаційний посилання для інструмента аналізу OpenDTA у текст опису вкладки Резервне копіювання та діагностика.\n\n* 🛠 Домашні клопоти/Під капюшоною**\n\n** (Виправлено) Перевірка ESLint: ** Додано відсутні коментарі JSDoc у менеджері резервних копій для вирішення попереджень перевірки коду під час розробки.",
-				"zh-cn": "* 🚀 功能和改进**\n\n**（已添加）低流量停机警报：**对停电历史中的 “低流量”（Durchfluss）停机实施了主动监控。现在，当热泵因流量问题停止时，适配器会主动发送通知，因为控制器通常将其视为软中断而不是硬错误。包括 60 分钟的冷却时间，以防止垃圾通知。\n**（已改进）管理员用户界面：** 在 “备份和诊断” 选项卡的描述文本中集成了 OpenDTA 分析工具的直接推荐链接。\n\n* 🛠 杂务/在引擎盖下**\n\n**（已修复）ESLint 验证：** 在备份管理器中添加了缺失的 JSDoc 注释，以解决开发期间的代码验证警告。"
-			},
-			"0.9.2": {
-				"en": "*🛠 Refactoring & Under the Hood**\n\n**DTA Backup Logic & UI:** Restructured the \"Backup & Diagnostics\" settings tab. Removed obsolete text log buttons (`procerr`, `procparam`) which are blocked on newer firmwares. Reclassified the DTA manual download buttons into \"Live DTA\" (forces a new memory flush via `/NewProc`) and \"Existing DTA\" (fetches the last auto-saved historical log via `/proclog` which might be 2-3 hours old).\n**Automated Backup Naming:** The automated background backup job now dynamically prefixes the downloaded file as either `dta_live_[...]` or `dta_history_[...]` depending on which endpoint was successfully queried, clearly indicating the recency of the data.",
-				"de": "* 🛠 Umbau und Unterhaube**\n\n**DTA Backup Logic & UI: ** Das Tab „Backup & Diagnose“ neu strukturiert. Veraltete Log-Tasten (`procerr`, `procparam`) entfernt, die auf neueren Firmwares gesperrt sind. Die Buttons für manuelles Herunterladen von DTA wurden in „Live DTA“ (erzwingt neues Speicherleeren über `/NewProc`) und „Existing DTA“ (ruft das letzte, vielleicht 2-3 Stunden alte Protokoll ab) umklassifiziert.\n**Automatische Backup-Benennung: ** Der Backup-Job stellt der heruntergeladenen Datei nun dynamisch entweder `dta_live_ [...] `oder `dta_history_ [...]` als Präfix vor, je nachdem, welcher Endpunkt erfolgreich abgefragt wurde.",
-				"ru": "* 🛠 Рефакторинг и скрытый**\n\n**Логика и пользовательский интерфейс резервного копирования DTA: ** Переработана вкладка настроек «Резервное копирование и диагностика». Удалены устаревшие кнопки текстового журнала (`procerr`, `procparam`), которые заблокированы в новых прошивках. Кнопки загрузки вручную DTA реклассифицированы на «Live DTA» (принудительно очищает новую память с помощью `/NewProc`) и «Существующее DTA» (загружает последний автоматически сохраненный исторический журнал через `/proclog`, которому может быть 2-3 часа).\n**Автоматическое присвоение имен резервным копиям: ** Автоматическое фоновое задание резервного копирования теперь динамически добавляет к загруженному файлу префикс `dta_live_ [...] `или `dta_history_ [...]` в зависимости от того, к какой конечной точке был успешно запрошен, что четко указывает на актуальность данных.",
-				"pt": "* 🛠 Refatoração e oculto**\n\n**DTA Backup Logic & UI: ** Reestruturou a guia “Backup & Diagnostics”. Removidos botões de log de texto obsoletos (`procerr`, `procparam`) bloqueados em novos firmwares. Reclassificou os botões de download manual do DTA em “Live DTA” (força uma nova descarga de memória via `/newProc`) e “Existing DTA” (busca o último log histórico salvo automaticamente via `/proclog`, que pode ter 2 a 3 horas).\n**Nomeação automática de backup: ** A tarefa de backup automático em segundo plano agora prefixa dinamicamente o arquivo baixado como `dta_live_ [...] `ou `dta_history_ [...]` dependendo de qual endpoint foi consultado com sucesso, indicando claramente a atualidade dos dados.",
-				"nl": "* 🛠 Refactoring en onder de motorkap**\n\n**DTA Backup Logic & UI: ** Het instellingentabblad „Backup & Diagnostics” is geherstructureerd. Verouderde tekstlogknoppen (`procerr`, `procparam`) verwijderd die geblokkeerd zijn op nieuwere firmwares. De knoppen voor handmatig downloaden van de DTA zijn opnieuw ingedeeld in „Live DTA” (zorgt ervoor dat er een nieuw geheugen wordt leeggemaakt via `/NewProc`) en „Existing DTA” (haalt het laatst automatisch opgeslagen historische logboek op via `/proclog`, dat mogelijk 2-3 uur oud is).\n**Geautomatiseerde naamgeving van reservekopieën: ** Bij de geautomatiseerde backuptaak op de achtergrond wordt het gedownloade bestand nu dynamisch voorafgegaan door `dta_live_ [...] `of `dta_history_ [...]`, afhankelijk van welk eindpunt succesvol werd opgevraagd, waarbij duidelijk wordt aangegeven of de gegevens recent zijn.",
-				"fr": "* 🛠 Refactoring et sous le capot**\n\n**DTA Backup Logic & UI :** Restructuration de l'onglet « Backup & Diagnostics ». Suppression des boutons de journal de texte obsolètes (« procerr », « procparam ») bloqués sur les nouveaux firmwares. A reclassé les boutons de téléchargement manuel de la DTA en « Live DTA » (vide la mémoire via « /NewProc ») et « Existing DTA » (récupère le dernier historique enregistré automatiquement via « /proclog », vieux de 2 à 3 heures).\n**Dénomination automatique des sauvegardes :** La sauvegarde automatique en arrière-plan ajoute désormais au fichier téléchargé le préfixe « dta_live_ [...] » ou « dta_history_ [...] » selon le point de terminaison interrogé avec succès, ce qui indique clairement la récente date des données.",
-				"it": "* 🛠 Refactoring e Underho**\n\n**Logica e interfaccia utente DTA Backup: ** Ristrutturata la scheda «Backup e diagnosi». Rimossi i pulsanti obsoleti (`procerr`, `procparam`) bloccati sui nuovi firmware. I pulsanti di download manuale dei DTA sono stati riclassificati in «Live DTA» (svuotamento della memoria tramite `/NewProc`) e «Existing DTA» (recupera l'ultimo log storico salvato automaticamente via `/proclog` 2-3 ore).\n**Denominazione automatica del backup in background ora prefissa dinamicamente il file scaricato come `dta_live_ [...] `o `dta_history_ [...]` a seconda dell'endpoint interrogato con successo, indicando chiaramente la frequenza dei dati.",
-				"es": "* 🛠 Refactorización y encubridad**\n\n**Lógica e interfaz de usuario de DTA: ** Reestructuró la pestaña de ajustes de «Respaldo y diagnóstico». Se quitaron los botones de registro de texto obsoletos (`procerr`, `procparam`) que están bloqueados en los firmwares más nuevos. Reclasificó los botones de descarga manual de la DTA en «DTA en vivo» (obliga a vaciar la memoria mediante `/NewProc) y «DTA existente» (busca el último registro histórico guardado automáticamente mediante `/proclog`, que puede tener entre 2 y 3 horas).\n**Denominación automática de copias de seguridad: ** El trabajo automático de copia de seguridad en segundo plano ahora prefija dinámicamente el archivo descargado como `dta_live_ [...] `o `dta_history_ [...]` según el punto final que se haya consultado correctamente, indicando claramente la actualidad de los datos.",
-				"pl": "* 🛠 Refaktoryzacja i pod kapturą**\n\n**DTA Backup Logic & UI: ** Zmieniono strukturę ustawień „Kopia zapasowa i diagnostyka”. Usunięto przestarzałe przyciski dziennika tekstowego (`procerr`, `procparam`), które są blokowane na nowszym oprogramowaniu sprzętowym. Przeklasyfikowano przyciski ręcznego pobierania DTA na „Live DTA” (wymusza przepłukanie nowej pamięci przez `/NewProc`) i „Istniejące DTA” (pobiera ostatni automatycznie zapisany dziennik historyczny za pomocą `/proclog`, który może mieć 2-3 godziny).\n**Automatyczne nazywanie kopii zapasowych: ** Automatyczne zadanie tworzenia kopii zapasowych w tle dynamicznie prefiksuje pobrany plik jako `dta_live_ [...] `lub `dta_history_ [...]` w zależności od tego, który punkt końcowy został pomyślnie zapytany, co wyraźnie wskazuje aktualność danych.",
-				"uk": "* 🛠 Рефакторинг та під капюшоном**\n\n**Логіка та інтерфейс резервного копіювання DTA: ** Реструктуризував вкладку налаштувань «Резервне копіювання та діагностика». Вилучено застарілі кнопки журналу тексту (`procerr`, `procparam`), які заблоковані на новіших прошивках. Перекласифікували кнопки завантаження вручну DTA у «Live DTA» (примусово вимиває нову пам'ять через `/NewProc`) та «Існуючий DTA» (отримує останній автоматично збережений історичний журнал через `/proclog`, який може бути 2-3 години).\n**Автоматичне іменування резервних копій: ** Автоматичне завдання фонового резервного копіювання тепер динамічно фіксує завантажений файл як `dta_live_ [...] `або `dta_history_ [...]` залежно від того, яка кінцева точка була успішно запитана, чітко вказуючи на недавність даних.",
-				"zh-cn": "* 🛠 重构和幕后**\n\n**DTA 备份逻辑和用户界面：** 重构了 “备份和诊断” 设置选项卡。移除了在新固件上被屏蔽的过时文本日志按钮（`procerr`、`procparam`）。将 DTA 手动下载按钮重新分类为 “Live DTA”（通过 `/newProc` 强制刷新内存）和 “现有数据”（通过 `/proclog` 获取最近一次自动保存的历史日志，可能已有 2-3 小时了）。\n**自动备份命名：** 现在，自动后台备份作业会根据成功查询的端点，将下载的文件动态添加为 `dta_live_ [...] `或 `dt_history_ [...]` 前缀，清楚地表明数据的最新性。"
-			}
-		},
-		"titleLang": {
-			"en": "Luxtronik2 Controller",
-			"de": "Luxtronik2-Controller",
-			"ru": "Контроллер Luxtronik2",
-			"pt": "Controlador Luxtronik2",
-			"nl": "Luxtronik2-controller",
-			"fr": "Contrôleur Luxtronik2",
-			"it": "Controllore Luxtronik2",
-			"es": "Controlador Luxtronik2",
-			"pl": "Kontroler Luxtronik2",
-			"uk": "Контролер Luxtronik2",
-			"zh-cn": "Luxtronik2控制器"
-		},
-		"desc": {
-			"en": "Access and control of heat pumps with a Luxtronik 2.x controller",
-			"de": "Zugriff und Steuerung von Wärmepumpen mit einer Luxtronik 2.x Steuereinheit",
-			"ru": "Доступ и управление тепловыми насосами с контроллером Luxtronik 2.x",
-			"pt": "Acesso e controle de bombas de calor com um controlador Luxtronik 2.x",
-			"nl": "Toegang en controle van warmtepompen met een Luxtronik 2.x controller",
-			"fr": "Accès et contrôle des pompes à chaleur avec un contrôleur Luxtronik 2.x",
-			"it": "Accesso e controllo di pompe di calore con un controller Luxtronik 2.x",
-			"es": "Acceso y control de bombas de calor con un controlador Luxtronik 2.x",
-			"pl": "Dostęp i sterowanie pompami ciepła za pomocą sterownika Luxtronik 2.x",
-			"uk": "Доступ та управління тепловими насосами з контролером Luxtronik 2.x",
-			"zh-cn": "通过Luxtronik 2.x控制器访问和控制热泵"
-		},
-		"authors": ["TbsJah <github.tbsjah@googlemail.com>"],
-		"keywords": [
-			"Luxtronik2",
-			"LWD50",
-			"Luft Wärme Pumpe",
-			"Heizung",
-			"LWP",
-			"Alpha InnoTec AIT",
-			"Buderus",
-			"Novelan"
-		],
-		"licenseInformation": {
-			"type": "free",
-			"license": "MIT"
-		},
-		"platform": "Javascript/Node.js",
-		"icon": "luxtronik2-controller.png",
-		"enabled": true,
-		"extIcon": "https://raw.githubusercontent.com/TbsJah/ioBroker.luxtronik2-controller/main/admin/luxtronik2-controller.png",
-		"readme": "https://github.com/TbsJah/ioBroker.luxtronik2-controller/blob/main/README.md",
-		"loglevel": "info",
-		"tier": 3,
-		"mode": "daemon",
-		"type": "climate-control",
-		"compact": true,
-		"messagebox": true,
-		"connectionType": "local",
-		"dataSource": "poll",
-		"adminUI": {
-			"config": "json"
-		},
-		"dependencies": [
-			{
-				"js-controller": ">=6.0.11"
-			}
-		],
-		"globalDependencies": [
-			{
-				"admin": ">=7.8.23"
-			}
-		]
-	},
-	"native": {
-		"host": "192.168.178.81",
-		"port": 8889,
-		"interval": 30,
-		"fusspunkt": 21.7,
-		"endpunkt": 23,
-		"zip_aktiv_ww": 600,
-		"zip_aktiv": 120,
-		"sync_warmwater_target_temperature": 54,
-		"sync_hotwater_temperature_hysteresis": 10,
-		"sync_heating_system_circ_pump_voltage_minimal_heating": 3,
-		"sync_heating_system_circ_pump_voltage_nominal_heating": 7,
-		"sync_heating_system_circ_pump_voltage_minimal_water": 3,
-		"sync_heating_system_circ_pump_voltage_nominal_water": 10,
-		"sync_return_temperature_hysteresis": 1.5,
-		"zip_last_run_min": 600,
-		"regelung_aktiv": false,
-		"Heating_after_warmwater": true,
-		"telegram_enabled": false,
-		"notification_bell": false,
-		"telegram_receiver": "",
-		"telegram_instance": "",
-		"motionSensors": [],
-		"motion_sensors_aktiv": false
-	},
-	"notifications": [
-		{
-			"scope": "luxtronik2-controller",
-			"name": {
-				"en": "Luxtronik2-Controller",
-				"de": "Luxtronik2-Controller",
-				"ru": "Контроллер Luxtronik2",
-				"pt": "Controlador Luxtronik2",
-				"nl": "Luxtronik2-controller",
-				"fr": "Contrôleur Luxtronik2",
-				"it": "Controllore Luxtronik2",
-				"es": "Controlador Luxtronik2",
-				"pl": "Kontroler Luxtronik2",
-				"uk": "Контролер Luxtronik2",
-				"zh-cn": "Luxtronik2控制器"
-			},
-			"description": {
-				"en": "Notifications from the Luxtronik2-Controller adapter",
-				"de": "Benachrichtigungen vom Luxtronik2-Controller Adapter",
-				"ru": "Уведомления от адаптера Luxtronik2-Controller",
-				"pt": "Notificações do adaptador Luxtronik2-Controller",
-				"nl": "Meldingen van de Luxtronik2-Controller adapter",
-				"fr": "Notifications de l'adaptateur Luxtronik2-Controller",
-				"it": "Notifiche dall'adattatore Luxtronik2-Controller",
-				"es": "Notificaciones del adaptador Luxtronik2-Controller",
-				"pl": "Powiadomienia z adaptera Luxtronik2-Controller",
-				"uk": "Сповіщення від адаптера Luxtronik2-Controller",
-				"zh-cn": "来自 Luxtronik2-Controller 适配器的通知"
-			},
-			"categories": [
-				{
-					"category": "lwpError",
-					"name": {
-						"en": "Heat Pump Errors",
-						"de": "Wärmepumpen-Fehler",
-						"ru": "Ошибки теплового насоса",
-						"pt": "Erros da bomba de calor",
-						"nl": "Fouten warmtepomp",
-						"fr": "Erreurs de la pompe à chaleur",
-						"it": "Errori della pompa di calore",
-						"es": "Errores de la bomba de calor",
-						"pl": "Błędy pompy ciepła",
-						"uk": "Помилки теплового насоса",
-						"zh-cn": "热泵错误"
-					},
-					"severity": "alert",
-					"description": {
-						"en": "Error messages from the heating system",
-						"de": "Fehlermeldungen aus der Heizungsanlage",
-						"ru": "Сообщения об ошибках от системы отопления",
-						"pt": "Mensagens de erro do sistema de aquecimento",
-						"nl": "Foutmeldingen van het verwarmingssysteem",
-						"fr": "Messages d'erreur du système de chauffage",
-						"it": "Messaggi di errore dal sistema di riscaldamento",
-						"es": "Mensajes de error del sistema de calefacción",
-						"pl": "Komunikaty o błędach z systemu grzewczego",
-						"uk": "Повідомлення про помилки від системи опалення",
-						"zh-cn": "来自供暖系统的错误消息"
-					},
-					"regex": [],
-					"limit": 10
-				}
-			]
-		}
-	],
-	"objects": [],
-	"instanceObjects": [
-		{
-			"_id": "info",
-			"type": "channel",
-			"common": {
-				"name": "Information"
-			},
-			"native": {}
-		},
-		{
-			"_id": "backups",
-			"type": "meta",
-			"common": {
-				"name": "Luxtronik DTA Backups",
-				"type": "meta.user"
-			},
-			"native": {}
-		},
-		{
-			"_id": "info.connection",
-			"type": "state",
-			"common": {
-				"role": "indicator.connected",
-				"name": "Device or service connected",
-				"type": "boolean",
-				"read": true,
-				"write": false,
-				"def": false
-			},
-			"native": {}
-		}
-	]
+  "common": {
+    "name": "luxtronik2-controller",
+    "version": "0.11.1",
+    "news": {
+      "0.11.1": {
+        "en": "Resolve issues which are reported by repository checker",
+        "de": "Vom Repository-Checker gemeldete Probleme lösen",
+        "ru": "Устраните проблемы, о которых сообщает средство проверки репозитория",
+        "pt": "Resolva problemas relatados pelo Repository Checker",
+        "nl": "Problemen oplossen die door de repository-checker worden gemeld",
+        "fr": "Résoudre les problèmes signalés par Repository Checker",
+        "it": "Risolve i problemi segnalati da Repository Checker",
+        "es": "Resolver los problemas que informa Repository Checker",
+        "pl": "Rozwiązywanie problemów zgłaszanych przez moduł sprawdzający repozytorium",
+        "uk": "Вирішення проблем, про які повідомляє перевірка сховища",
+        "zh-cn": "解决存储库检查器报告的问题"
+      },
+      "0.11.0": {
+        "en": "**Improvements:**\nAdded global rounding to 2 decimal places for all calculated telemetry values (e.g., converting operating seconds to hours). This provides a cleaner ioBroker state tree and prevents excessively long floating-point numbers from cluttering history databases (like InfluxDB).",
+        "de": "**Verbesserungen: **\nAlle berechneten Telemetriewerte wurden global auf 2 Dezimalstellen gerundet (z. B. Betriebssekunden in Stunden). Das sorgt für einen saubereren ioBroker-Statusbaum und verhindert, dass zu lange Fließkommazahlen Historien überladen (wie InfluxDB).",
+        "ru": "**Улучшения: **\nДобавлено глобальное округление до 2 десятичных знаков для всех вычисленных значений телеметрии (например, преобразование рабочих секунд в часы). Это обеспечивает более четкое дерево состояний IOBroker и предотвращает загромождение исторических баз данных (например, InfluxDB) чрезмерно длинными числами с плавающей запятой.",
+        "pt": "**Melhorias: **\nFoi adicionado o arredondamento global a 2 casas decimais em todos os valores de telemetria (p. ex., segundos em horas). Isso fornece uma árvore de estados do IOBroker mais limpa e evita que números muito longos ocupem bancos de dados históricos (como o InfluxDB).",
+        "nl": "**Verbeteringen: **\nGlobale afronding op 2 cijfers achter de komma toegevoegd voor alle berekende telemetriewaarden (bijv. het omrekenen van bedrijfsseconden naar uren). Dit zorgt voor een schonere ioBroker-statusstructuur en voorkomt dat te lange getallen met drijvende komma de geschiedenisdatabases overbelasten (zoals InfluxDB).",
+        "fr": "**Améliorations :**\nAjout de l'arrondissement global à la 2 décimales pour toutes les valeurs de télémétrie calculées (par exemple, conversion des secondes en heures). Cela permet d'améliorer l'arbre d'état d'IOBroker et d'éviter que des nombres à virgule flottante trop longs n'encombrent les bases de données historiques (comme InfluxDB).",
+        "it": "**Migliorie: **\nAggiunto un arrotondamento globale a 2 decimali per tutti i valori di telemetria calcolati (es. secondi operativi in ore). Ciò fornisce un albero di stato IOBroker più pulito ed evita che numeri a virgola mobile troppo lunghi ingombrino i database storici (come InfluxDB).",
+        "es": "**Mejoras: **\nAñadió el redondeo global a 2 decimales para todos los valores de telemetría calculados (por ejemplo, convertir segundos de operación en horas). Esto proporciona un árbol de estados de ioBroker más limpio y evita que números de coma flotante demasiado largos abarroten las bases de datos históricas (como InfluxDB).",
+        "pl": "**Ulepszenia: **\nDodano globalne zaokrąglanie do 2 miejsc po przecinku dla wszystkich obliczonych wartości telemetrii (np. przeliczanie sekund roboczych na godziny). Zapewnia to czystsze drzewo stanów ioBroker i zapobiega nadmiernie długim liczbom zmiennoprzecinkowym zaśmiecaniu baz danych historii (takich jak InfluxDB).",
+        "uk": "**Покращення: **\nДодано глобальне округлення до 2 знаків після коми для всіх обчислених значень телеметрії (наприклад, перетворення робочих секунд у години). Це забезпечує більш чисте дерево станів IObroker і запобігає надмірно довгим числам з плаваючою комою захаращувати бази даних історії (наприклад, InfluxDB).",
+        "zh-cn": "**改进：**\n将所有计算出的遥测值的全局舍入到小数点后 2 位（例如，将操作秒数转换为小时）。这提供了更简洁的IOBroker状态树，并防止过长的浮点数使历史数据库（如InfluxDB）混乱。"
+      },
+      "0.10.4": {
+        "en": "Update Readme",
+        "de": "Aktualisierung Readme",
+        "ru": "Обновить файл Readme",
+        "pt": "Atualize o Readme",
+        "nl": "Readme bijwerken",
+        "fr": "Mettre à jour Readme",
+        "it": "Aggiornamento del file Readme",
+        "es": "Actualización del archivo «Readme»",
+        "pl": "Zaktualizuj Readme",
+        "uk": "Оновити Readme",
+        "zh-cn": "更新自述文件"
+      },
+      "0.10.3": {
+        "en": "**Features & Improvements:**\nOptimized the automated DTA backup process by directly utilizing the `/NewProc` file stream, eliminating unnecessary artificial delays and stabilizing the heat pump controller.\nStreamlined the backup configuration: Removed the custom file path input to prevent file system conflicts. Backups are now securely stored in the universally accessible global `0_userdata.0/luxtronik_backups/` directory.\nAdded a clear information box in the adapter configuration, explaining where to find the generated backup files within the ioBroker UI.\n\n**Fixes:**\nFixed the persistent `not an object of type \"meta\"` crash during DTA backups. The storage architecture was migrated away from isolated adapter namespaces to the robust, native `0_userdata.0` global storage, completely resolving folder creation permission issues on existing instances.\nCorrected the dynamic file naming logic (`dta_live_...` vs. `dta_history_...`) to accurately reflect whether a live memory dump or a fallback history log was downloaded.",
+        "de": "**Funktionen und Neuerungen: **\nOptimierte das automatische DTA-Backup durch direkte Nutzung des `/NewProc`-Dateistreams, vermeidet unnötige Verzögerungen und stabilisiert den Wärmepumpenregler.\nOptimierte Backup-Konfiguration: Pfadeingabe zur Vermeidung von Dateisystemkonflikten entfernt. Backups werden jetzt sicher im globalen Verzeichnis `0_userdata.0/luxtronik_backups/` gespeichert.\nIn der Adapterkonfiguration wurde ein Infofeld hinzugefügt, das erklärt, wo die generierten Backup-Dateien im ioBroker UI zu finden sind.\n\n**Fixes: **\nDauerhafter Absturz bei DTA-Backups ohne Objekt vom Typ „Meta“ behoben. Die Speicherarchitektur wurde von isolierten Adapter-Namespaces zum robusten, systemeigenen globalen Speicher `0_userdata.0` migriert, was Probleme bei der Ordnererstellung auf bestehenden Instanzen löst.\nDie dynamische Dateinamenlogik (`dta_live_... `vs. `dta_history_...`) wurde korrigiert, um genau zu erkennen, ob ein Live-Speicherabbild oder ein Fallback-Protokoll heruntergeladen wurde.",
+        "ru": "**Функции и улучшения: **\nОптимизирован автоматизированный процесс резервного копирования DTA за счет прямого использования файлового потока `/NewProc`, устранения ненужных искусственных задержек и стабилизации контроллера теплового насоса.\nУпрощена конфигурация резервного копирования: удален пользовательский ввод пути к файлу для предотвращения конфликтов файловой системы. Теперь резервные копии надежно хранятся в общедоступном глобальном каталоге 0_userdata.0/luxtronik_backups/.\nДобавлено четкое информационное окно в конфигурации адаптера, объясняющее, где найти сгенерированные файлы резервных копий в пользовательском интерфейсе IOBroker.\n\n**Исправления: **\nИсправлен постоянный сбой «не являющийся объектом типа «meta» во время резервного копирования DTA. Архитектура хранилища была перенесена из изолированных пространств имен адаптеров в надежное глобальное хранилище «0_userdata.0\", что полностью устранило проблемы с разрешениями на создание папок в существующих экземплярах.\nИсправлена логика динамического именования файлов (`dta_live_... `против `dta_history_...`), чтобы точно отразить, был ли загружен дамп оперативной памяти или журнал резервной истории.",
+        "pt": "**Recursos e melhorias: **\nOtimizou o processo de backup automático de DTA usando diretamente o fluxo de arquivos `/NewProc`, eliminando atrasos artificiais e estabilizando o controlador da bomba de calor.\nSimplificou a configuração de backup: removeu o caminho do arquivo para evitar conflitos no sistema. Os backups agora são armazenados com segurança no diretório global `0_userdata.0/luxtronik_backups/`.\nAdicionou uma caixa clara na configuração do adaptador, explicando onde encontrar os backups gerados na IU do IOBroker.\n\n**Fixa: **\nCorrigida a falha persistente do tipo “meta” durante backups de DTA. A arquitetura de armazenamento migrou de namespaces isolados para o robusto armazenamento global nativo `0_userdata.0`, resolvendo completamente os problemas de criação de pastas em instâncias existentes.\nA lógica de nomeação dinâmica de arquivos (`dta_live_... `vs. `dta_history_...`) foi corrigida para refletir se um dump de memória real ou um log de fallback foi baixado.",
+        "nl": "**Kenmerken en verbeteringen: **\nHet geautomatiseerde DTA-back-upproces is geoptimaliseerd door rechtstreeks gebruik te maken van de bestandsstream `/NewProc`, waardoor onnodige kunstmatige vertragingen werden voorkomen en de warmtepompregelaar werd gestabiliseerd.\nDe back-upconfiguratie gestroomlijnd: de aangepaste invoer voor het bestandspad is verwijderd om conflicten in het bestandssysteem te voorkomen. Back-ups worden nu veilig opgeslagen in de universeel toegankelijke wereldwijde map `0_userdata.0/luxtronik_backups/`.\nEr is een duidelijk informatievak toegevoegd in de adapterconfiguratie, waarin wordt uitgelegd waar de gegenereerde back-upbestanden in de gebruikersinterface van ioBroker te vinden zijn.\n\n**Correcties: **\nDe aanhoudende crash van `not an object van het type „meta\"` tijdens DTA-back-ups is opgelost. De opslagarchitectuur werd gemigreerd van geïsoleerde adapternaamruimten naar de robuuste, native wereldwijde opslag van `0_userdata.0`, waardoor problemen met de machtigingen voor het aanmaken van mappen bij bestaande instanties volledig zijn opgelost.\nDe dynamische naamgevingslogica van bestanden is gecorrigeerd (`dta_live_... `versus `dta_history_...`) om nauwkeurig weer te geven of er een live memorydump of een logboek met terugvalgeschiedenis is gedownload.",
+        "fr": "**Fonctionnalités et améliorations :**\nLe processus de sauvegarde automatique des DTA a été optimisé en utilisant directement le flux de fichiers « /NewProc », en éliminant les retards et en stabilisant le régulateur de la pompe à chaleur.\nConfiguration des sauvegardes simplifiée : suppression du chemin de fichier personnalisé pour éviter les conflits. Les sauvegardes sont désormais stockées en toute sécurité dans le répertoire global « 0_userdata.0/luxtronik_backups/».\nAjout d'un encadré clair dans la configuration de l'adaptateur, expliquant où trouver les fichiers de sauvegarde générés dans l'interface d'IObroker.\n\n**Correctifs :**\nCorrection du crash persistant « not an object of type « meta » » lors des sauvegardes DTA. L'architecture de stockage a été migrée des espaces de noms d'adaptateurs isolés vers le stockage global natif robuste « 0_userdata.0 », résolvant ainsi les problèmes de création de dossiers sur les instances existantes.\nCorrection de la logique de dénomination dynamique des fichiers (`dta_live_... `contre `dta_history_...`) pour indiquer avec précision si un vidage en direct ou un historique de secours avait été téléchargé.",
+        "it": "**Funzioni e migliorie: **\nHa ottimizzato il processo di backup automatico dei DTA utilizzando direttamente il flusso di file `/NewProc`, eliminando inutili ritardi e stabilizzando il controller della pompa di calore.\nConfigurazione di backup semplificata: rimosso il percorso personalizzato per evitare conflitti I backup sono ora archiviati in modo sicuro nella directory globale «0_userdata.0/luxtronik_backups/».\nAggiunto un riquadro chiaro nella configurazione dell'adattatore, dove trovare i file di backup generati nell'UI IOBroker.\n\n**Fix: **\nRisolto il crash persistente «non è un oggetto di tipo «meta» durante i backup DTA. L'architettura di storage è stata migrata da namespace isolati a uno storage globale robusto e nativo `0_userdata.0`, risolvendo completamente i problemi di autorizzazione alle cartelle esistenti.\nÈ stata corretta la logica di denominazione dinamica dei file (`dta_live_... `vs. `dta_history_...`) per indicare se è stato scaricato un dump di memoria attiva o un log di riserva.",
+        "es": "**Características y mejoras: **\nOptimizó el proceso automático de respaldo de datos utilizando directamente el flujo de archivos `/NewProc`, eliminando retrasos artificiales innecesarios y estabilizando el controlador de la bomba de calor.\nSimplificó la configuración de respaldo: se eliminó la ruta de archivo personalizada para evitar conflictos en el sistema Las copias de seguridad ahora se almacenan de forma segura en el directorio global `0_userdata.0/luxtronik_backups/` de acceso universal.\nSe ha añadido un recuadro claro en la configuración del adaptador que explica dónde encontrar los archivos de respaldo generados en la interfaz de IOBroker.\n\n**Correcciones: **\nSe corrigió el bloqueo persistente de «no es un objeto de tipo «meta» durante las copias de DTA. La arquitectura de almacenamiento pasó de los espacios de nombres de adaptadores aislados al sólido almacenamiento global nativo «0_userdata.0», lo que resolvió por completo los problemas de permisos de creación de carpetas en las instancias existentes.\nSe ha corregido la lógica de nomenclatura dinámica de los archivos (`dta_live_... `frente a `dta_history_...`) para reflejar con precisión si se descargó un volcado de memoria en vivo o uno alternativo.",
+        "pl": "**Funkcje i ulepszenia: **\nZoptymalizowano proces automatycznego tworzenia kopii zapasowych DTA poprzez bezpośrednie wykorzystanie strumienia plików `/NewProc`, eliminując niepotrzebne sztuczne opóźnienia i stabilizując sterownik pompy ciepła.\nUsprawniono konfigurację kopii zapasowej: usunięto niestandardową ścieżkę pliku, aby zapobiec konfliktom systemu plików. Kopie zapasowe są teraz bezpiecznie przechowywane w powszechnie dostępnym globalnym katalogu `0_userdata.0/luxtronik_backups/`.\nDodano wyraźne pole informacyjne w konfiguracji adaptera, wyjaśniające, gdzie znaleźć wygenerowane pliki kopii zapasowych w interfejsie użytkownika iOBroker.\n\n**Poprawki: **\nNaprawiono trwałą awarię „not an object” typu „meta” podczas tworzenia kopii zapasowych DTA. Architektura pamięci masowej została przeniesiona z izolowanych przestrzeni nazw adaptera do solidnej, natywnej globalnej pamięci masowej `0_userdata.0`, całkowicie rozwiązując problemy z uprawnieniami do tworzenia folderów na istniejących instancjach.\nPoprawiono dynamiczną logikę nazewnictwa plików (`dta_live_... `vs `dta_history_...`), aby dokładnie odzwierciedlić, czy pobrano zrzut pamięci aktywnej, czy dziennik historii zapasowej.",
+        "uk": "** Особливості та вдосконалення: **\nОптимізовано автоматизований процес резервного копіювання DTA шляхом безпосереднього використання файлового потоку `/NewProC`, усуваючи непотрібні штучні затримки та стабілізуючи контролер теплового насоса.\nВпорядковано конфігурацію резервного копіювання: Видалено введення власного шляху до файлу, щоб запобігти конфліктам файлової системи. Резервні копії тепер надійно зберігаються у загальнодоступному глобальному каталозі `0_userdata.0/luxtronik_backups/`.\nДодано чітке інформаційне поле в конфігурації адаптера, що пояснює, де знайти створені файли резервних копій в інтерфейсі користувача IObroker.\n\n**Виправлення: **\nВиправлено постійний збій `не об'єкта типу «meta» під час резервного копіювання DTA. Архітектура сховища була перенесена з ізольованих просторів імен адаптера до надійного, рідного глобального сховища `0_userdata.0`, що повністю вирішило проблеми з дозволами створення папок у існуючих екземплярах.\nВиправлено логіку динамічного іменування файлів (`dta_live_... `проти `dta_history_...`), щоб точно відобразити, чи було завантажено дамп живої пам'яті чи запасний журнал історії.",
+        "zh-cn": "**功能和改进：**\n通过直接利用 `/newProc` 文件流，优化了自动数据备份流程，消除了不必要的人为延迟，稳定了热泵控制器。\n简化了备份配置：删除了自定义文件路径输入以防止文件系统冲突。备份现在安全地存储在可普遍访问的全球 `0_userdata.0/luxtronik_backups/` 目录中。\n在适配器配置中添加了一个清晰的信息框，说明在 IOBroker 用户界面中何处可以找到生成的备份文件。\n\n**修复：**\n修复了 DTA 备份期间持续出现的 “不是 “meta” 类型的对象崩溃的问题。存储架构已从独立的适配器命名空间迁移到强大的本机 “0_userdata.0” 全局存储，完全解决了现有实例上的文件夹创建权限问题。\n更正了动态文件命名逻辑（`dta_live_... `与 `dta_history_...`），以准确反映是否下载了实时内存转储或备用历史日志。"
+      },
+      "0.10.2": {
+        "en": "**🚀 Features:**\nImplemented automated DTA file backup management with customizable cron schedules and automatic meta-directory creation in the ioBroker file system.\n\n**🛠 Chores / Under the Hood**\nEnhanced TypeScript type checking, resolved strict ESLint warnings, and upgraded Node.js type definitions to support Node.js version 22.\nOptimized image scaling and layout rendering in `jsonConfig.json` for cleaner adapter settings presentation.",
+        "de": "** 🚀 Merkmale: **\nAutomatisches DTA-Backup-Management mit anpassbaren Cron-Zeitplänen und automatischer Meta-Verzeichniserstellung im ioBroker-Dateisystem eingeführt.\n\n** 🛠 Haus/Unter der Haube**\nVerbesserte TypeScript-Typprüfung, Behebung strenger ESLint-Warnungen und Erweiterung der Typdefinitionen von Node.js auf Node.js 22.\nOptimierte Bildskalierung und Layout-Rendering in `JSONConfig.json` für übersichtlichere Adaptereinstellungen.",
+        "ru": "** 🚀 Особенности: **\nРеализовано автоматическое управление резервным копированием файлов DTA с настраиваемыми расписаниями cron и автоматическим созданием метакаталогов в файловой системе IOBroker.\n\n** 🛠 Работа по дому/Под капотом**\nУлучшена проверка типов TypeScript, устранены строгие предупреждения ESLint и обновлены определения типов Node.js для поддержки Node.js версии 22.\nОптимизировано масштабирование изображения и рендеринг макета в `JsonConfig.json` для более четкого представления настроек адаптера.",
+        "pt": "** 🚀 Funções: **\nImplementou o gerenciamento automatizado de backup de arquivos DTA com cronogramas cron e criação automática de meta-diretórios no IOBroker.\n\n** 🛠 Tarejas/Sob o capu**\nAprimorou a verificação de tipos do TypeScript, resolveu avisos ESLint estritos e atualizou o Node.js para suportar o Node.js versão 22.\nEscala de imagem e layout otimizados em `jsonConfig.json` para uma melhor apresentação do adaptador.",
+        "nl": "** 🚀 Kenmerken: **\nGeautomatiseerd beheer van DTA-bestanden geïmplementeerd met aanpasbare cron-schema's en automatische aanmaak van metamappen in het IOBroker-bestandssysteem.\n\n** 🛠 Klusjes/Onder de motorkap**\nVerbeterde TypeScript-typecontrole, strikte ESLint-waarschuwingen opgelost en de typedefinities van Node.js geüpgraded om Node.js versie 22 te ondersteunen.\nGeoptimaliseerde beeldschaling en weergave van de lay-out in `JSONConfig.json` voor een schonere presentatie van adapterinstellingen.",
+        "fr": "** 🚀 Fonctions :**\nMise en place d'une gestion automatisée des sauvegardes DTA avec des cron personnalisables et la création automatique de méta-répertoires dans le système de fichiers IObroker.\n\n** 🛠 Corvées/Sous le capot**\nVérification améliorée du type TypeScript, résolution des avertissements ESLint stricts et amélioration des définitions de type Node.js pour Node.js version 22.\nMise à l'échelle de l'image et rendu de mise en page optimisés dans « JSONConfig.json » pour une présentation plus claire.",
+        "it": "** 🚀 Funzioni: **\nGestione automatica dei backup dei file DTA implementata con piani cron personalizzabili e creazione automatica di metadirectory nel file system IOBroker.\n\n** 🛠 Facce/Under the Hood**\nControllo avanzato dei tipi TypeScript, risolti rigidi avvisi ESLint e aggiornato le definizioni dei tipi Node.js per Node.js 22.\nRidimensionamento e layout ottimizzati in `JsonConfig.json` per impostazioni dell'adattatore più chiare.",
+        "es": "** 🚀 Funciones: **\nImplantó la gestión automática de copias de seguridad de archivos DTA con crones personalizables y creación automática de metadirectorios en el sistema de archivos ioBroker.\n\n** 🛠 Tareas /Bajo el capó**\nSe mejoró la comprobación de tipos de TypeScript, se resolvieron los estrictos avisos de ESLint y se mejoraron las definiciones de tipos de Node.js para Node.js 22.\nSe optimizó el escalado de imágenes y el diseño en `JSONConfig.json` para una presentación más limpia de los ajustes del adaptador.",
+        "pl": "** 🚀 Funkcje: **\nZaimplementowano zautomatyzowane zarządzanie kopią zapasową plików DTA z konfigurowalnymi harmonogramami cron i automatycznym tworzeniem meta-katalogów w systemie plików iOBroker.\n\n** 🛠 Obowiązki domowe/ Pod kapturą**\nUlepszono sprawdzanie typu TypeScript, rozwiązano ścisłe ostrzeżenia eSlint i uaktualniono definicje typów Node.js w celu obsługi Node.js w wersji 22.\nZoptymalizowane skalowanie obrazu i renderowanie układu w `JSONConfig.json` dla czystszej prezentacji ustawień adaptera.",
+        "uk": "** 🚀 Особливості: **\nРеалізовано автоматичне керування резервним копіюванням файлів DTA з настроюваними графіками cron та автоматичним створенням мета-каталогів у файловій системі IObroker.\n\n** 🛠 Домашні клопоти/Під капюшоною**\nРозширена перевірка типів TypeScript, виправлено суворі попередження ESLint та оновлено визначення типів Node.js для підтримки Node.js версії 22.\nОптимізовано масштабування зображення та рендеринг макета в `JsonConfig.json` для більш чіткої презентації налаштувань адаптера.",
+        "zh-cn": "** 🚀 特点：**\n通过可自定义的 cron 计划和在 IOBroker 文件系统中自动创建元目录，实现了自动数据文件备份管理。\n\n** 🛠 杂务/在引擎盖下**\n增强了 TypeScript 类型检查，解决了严格的 ESLint 警告，并升级了 Node.js 类型定义以支持 Node.js 版本 22。\n在 `jsonConfig.json` 中优化了图像缩放和布局渲染，使适配器设置呈现得更简洁。"
+      },
+      "0.10.1": {
+        "en": "*🚀 Features & Improvements**\n\n**(Feature) Heating State String:** Added the configured heating curve parallel offset to the status string (e.g., \"Offset +3 °C\") for better transparency.\n\n*🐛 Bugfixes**\n\n**(Fixed) Heating State String:** Corrected a logic issue where the status incorrectly displayed \"Reduced 0 °C\" during a scheduled reduction window, even if the actual reduction delta was set to 0 K. It now correctly displays \"Normal (Timer)\".",
+        "de": "* 🚀 Funktionen und Verbesserungen**\n\n** (Feature) Heizstatus-String: ** Der Statusstring wurde der eingestellten Heizkennlinie hinzugefügt (z. B. „Offset +3 °C“) für mehr Transparenz.\n\n* 🐛 Bugfixes**\n\n** (Fest) Heizstatus-String: ** Es wurde ein Logikproblem behoben, bei dem in einem geplanten Reduktionsfenster fälschlicherweise „0 °C reduziert“ angezeigt wurde, obwohl das Delta 0 K war. Jetzt wird korrekt „Normal (Timer)“ angezeigt.",
+        "ru": "* 🚀 Функции и улучшения**\n\n** (Функция) Строка состояния нагрева: ** Добавлено настроенное параллельное смещение кривой нагрева к строке состояния (например, «Смещение +3 °C») для повышения прозрачности.\n\n* 🐛 Исправления ошибок**\n\n** (Исправлено) Строка состояния нагрева: ** Исправлена логическая ошибка, из-за которой во время запланированного периода снижения температуры отображалось некорректное состояние «Снижено на 0 °C», даже если фактическая дельта снижения была установлена на 0 К. Теперь корректно отображается «Нормально (таймер)».",
+        "pt": "* 🚀 Recursos e melhores**\n\n** (Recurso): ** Adicionou o deslocamento paralelo da curva de aquecimento configurado à string de status (por exemplo, “Offset +3 °C”) para maior transparência.\n\n* 🐛 Correções**\n\n** (Fixa) Sequência de estado de aquecimento: ** Corrigido um problema lógico em que o status exibia “Reduzido 0 °C” durante uma janela de redução programada, mesmo com o delta real definido como 0 K. Agora exibe “Normal (Timer)”.",
+        "nl": "* 🚀 Kenmerken en verbeteringen**\n\n** (Functie) Heating State String: ** De geconfigureerde verwarmingscurve met parallelle offset toegevoegd aan de statusreeks (bijvoorbeeld „Offset +3 °C”) voor een betere transparantie.\n\n* 🐛 Opgeloste fouten**\n\n** (Opgelost) Heating State String: ** Er is een logisch probleem opgelost waarbij in de status „0 °C verlaagd” verkeerd werd weergegeven tijdens een geplande reductieperiode, zelfs als de werkelijke reductiedelta was ingesteld op 0 K. Nu wordt „Normaal (timer)” correct weergegeven.",
+        "fr": "* 🚀 Fonctionnalités et améliorations**\n\n** (Fonctionnalité) Chaîne d'état de chauffage :** Ajout du décalage parallèle de la courbe de chauffage configuré à la chaîne d'état (par exemple, « Offset +3 °C ») pour plus de transparence.\n\n* 🐛 Bugcorrects**\n\n** (Corrigé) Chaîne d'état de chauffage :** Correction d'un problème logique qui affichait à tort « Réduction de 0 °C » pendant une fenêtre de réduction planifiée, même si le delta de réduction réel était réglé à 0 K. Il affiche désormais correctement « Normal (minuteur) ».",
+        "it": "* 🚀 Funzioni e migliorie**\n\n** (Funzione) Stringa di stato: ** Aggiunto l'offset parallelo della curva di riscaldamento configurata (ad es. «Offset +3 °C») per una maggiore trasparenza.\n\n* 🐛 Bugfix**\n\n** (Risolto) Stringa di stato di riscaldamento: ** Risolto un problema logico per cui lo stato indicava erroneamente «Ridotto 0 °C» durante una finestra di riduzione programmata, anche se il delta effettivo era impostato su 0 K.",
+        "es": "* 🚀 Funciones y mejoras**\n\n** Cadena de estados de calentamiento: ** Se ha añadido el desfase paralelo de la curva de calentamiento configurada a la cadena de estado (p. ej., «Offset +3 °C») para una mayor transparencia.\n\n* 🐛 Correcciones**\n\n** Cadena de estados de calefacción (fija): ** Se corrigió un problema lógico por el que el estado mostraba incorrectamente «0 °C reducido» durante un período de reducción programado, incluso si el delta de reducción real estaba fijado en 0 K. Ahora muestra correctamente «Normal (temporizador)».",
+        "pl": "* 🚀 Funkcje i ulepszenia**\n\n** (Funkcja) Ciąg stanu nagrzewania: ** Dodano skonfigurowane równoległe odsunięcie krzywej grzewczej do ciągu stanu (np. „Odsunięcie +3 °C”) dla lepszej przezroczystości.\n\n* 🐛 Poprawki błędów**\n\n** (Naprawiono) Ciąg stanu nagrzewania: ** Poprawiono błąd logiczny polegający na nieprawidłowym wyświetlaniu stanu „Zmniejszone 0 °C” podczas zaplanowanego okna redukcji, nawet jeśli rzeczywista delta redukcji została ustawiona na 0 K. Teraz poprawnie wyświetla „Normalny (Timer)”.",
+        "uk": "* 🚀 Особливості та вдосконалення**\n\n** (Функція) Рядок стану нагрівання: ** Додано налаштовану криву нагріву паралельне зміщення до рядка стану (наприклад, «Зсув +3°C») для кращої прозорості.\n\n* 🐛 Виправлення вадь**\n\n** (Виправлено) Рядок стану нагрівання: ** Виправлено логічну проблему, через яку неправильно відображався статус «Зменшено 0 °C» під час запланованого вікна зменшення, навіть якщо фактична дельта зменшення була встановлена на 0 К. Тепер він правильно відображає «Нормальний (Таймер)».",
+        "zh-cn": "* 🚀 功能和改进**\n\n**（功能）加热状态字符串：** 为状态字符串添加了配置的加热曲线平行偏移量（例如，“偏移量 +3 °C”），以提高透明度。\n\n* 🐛 错误修复**\n\n**（已修复）加热状态字符串：**更正了逻辑问题，即即使实际减少增量设置为 0 K，在预定减速窗口内，状态仍错误地显示 “降低 0 °C”。它现在可以正确显示 “正常（计时器）”。"
+      },
+      "0.10.0": {
+        "en": "*🚀 Features & Improvements**\n\n**(Added) Low Flow Outage Alerts:** Implemented active monitoring for \"low flow\" (Durchfluss) shutdowns in the outage history. The adapter now proactively sends a notification when the heat pump stops due to flow issues, as the controller usually treats these as soft outages rather than hard errors. Includes a 60-minute cooldown to prevent notification spam.\n**(Improved) Admin UI:** Integrated a direct recommendation link for the OpenDTA analysis tool into the description text of the Backup & Diagnostics tab.\n\n*🛠 Chores / Under the Hood**\n\n**(Fixed) ESLint Validation:** Added missing JSDoc comments in the backup manager to resolve code validation warnings during development.",
+        "de": "* 🚀 Funktionen und Verbesserungen**\n\n** (Hinzugefügt) Warnmeldungen bei Low Flow: ** Aktive Überwachung von Durchflussabschaltungen in der Ausfallhistorie implementiert. Der Adapter meldet nun proaktiv, wenn die Wärmepumpe aufgrund von Stromproblemen stoppt, da der Regler diese eher als sanfte als schwere Fehler behandelt. Enthält eine 60-minütige Abklingzeit vor Spam.\n** (Verbessert) Admin-UI: ** Direkter Empfehlungslink für das OpenDTA-Analysetool in den Beschreibungstext des Tabs Backup & Diagnostics integriert.\n\n* 🛠 Hausarbeit/Unter der Haube**\n\n** (Behoben) ESLint Validation: ** Fehlende JSDoc-Kommentare im Backup-Manager behoben.",
+        "ru": "* 🚀 Функции и улучшения**\n\n** (Добавлено) Оповещения об отключениях при низком расходе: ** Реализован активный мониторинг отключений при низком расходе (Durchfluss) в истории отключений. Теперь адаптер заблаговременно отправляет уведомление об остановке теплового насоса из-за проблем с потоком, поскольку контроллер обычно воспринимает такие перебои в работе, а не как серьезные ошибки. Предусмотрена 60-минутная перезарядка для предотвращения спама в уведомлениях.\n** (Улучшено) Пользовательский интерфейс администратора: ** Встроена прямая ссылка на рекомендации инструмента анализа OpenDTA в текст описания вкладки «Резервное копирование и диагностика».\n\n* 🛠 Работа по дому/Под капотом**\n\n** (Исправлено) Проверка ESLint: ** Добавлены недостающие комментарии JSDoc в диспетчере резервного копирования для устранения предупреждений о проверке кода во время разработки.",
+        "pt": "* 🚀 Recursos e melhores**\n\n** (Adicionados) Alertas de baixa vazão: ** Implementou o monitoramento ativo de paradas de “baixo fluxo” no histórico de interrupções. O adaptador agora envia um aviso proativo quando a bomba de calor para devido a problemas de fluxo, já que o controlador os trata como falhas leves em vez de erros graves. Inclui um tempo de espera de 60 minutos para evitar spam.\n** UI de administrador (aprimorada): ** Integrou um link de recomendação direta para a ferramenta OpenDTA na descrição da guia Backup e Diagnóstico.\n\n* 🛠 Tarejas/Sob o capu**\n\n** Validação ESLint (fixa): ** Foram adicionados comentários JSDoc ausentes no gerenciador de backup para resolver os avisos de desenvolvimento.",
+        "nl": "* 🚀 Kenmerken en verbeteringen**\n\n** (Toegevoegd) Waarschuwingen bij lage stroomuitval: ** Actieve monitoring geïmplementeerd voor uitschakelingen met een „laag debiet” (Durchfluss) in de geschiedenis van de storing. De adapter stuurt nu proactief een melding wanneer de warmtepomp stopt vanwege problemen met de stroming, omdat de controller dit gewoonlijk behandelt als zachte storingen in plaats van als harde fouten. Inclusief een afkoelperiode van 60 minuten om spam met meldingen te voorkomen.\n** (Verbeterd) Gebruikersinterface voor beheerders: ** Geïntegreerde een directe aanbevelingslink voor de OpenDTA-analysetool in de beschrijvingstekst van het tabblad Backup & Diagnostics.\n\n* 🛠 Klusjes/Onder de motorkap**\n\n** (Opgelost) ESLint-validatie: ** Ontbrekende JSDoc-opmerkingen toegevoegd in de back-upmanager om waarschuwingen voor codevalidatie tijdens de ontwikkeling op te lossen.",
+        "fr": "* 🚀 Fonctionnalités et améliorations**\n\n** Alertes de panne (ajoutées) :** Mise en place d'une surveillance active des arrêts « à faible débit » (Durchfluss) dans l'historique des pannes. L'adaptateur envoie désormais une notification en cas d'arrêt de la pompe à chaleur en raison d'un problème de débit, car le régulateur y voit des pannes légères. Inclut un temps de recharge de 60 minutes pour éviter les spams.\n** Interface d'administration (améliorée) :** Un lien de recommandation direct pour l'outil d'analyse OpenDTA a été intégré à la description de l'onglet Backup & Diagnostics.\n\n* 🛠 Corvées/Sous le capot**\n\n** (Corrigé) Validation ESLint :** Ajout de commentaires JSDoc manquants dans le gestionnaire de sauvegarde pour corriger le code en cours de développement.",
+        "it": "* 🚀 Funzioni e migliorie**\n\n** (Aggiunto) Avvisi per interruzioni a basso flusso: ** Monitoraggio attivo degli arresti «a basso flusso» (Durchfluss). L'adattatore ora invia una notifica proattiva quando la pompa di calore si ferma per problemi di flusso, poiché di solito li considera guasti lievi. Include un tempo di 60 minuti per evitare notifiche spam.\n** UI di amministrazione (migliorata): ** Ha integrato un link diretto per lo strumento di analisi OpenDTA nella scheda Backup & Diagnostics.\n\n* 🛠 Faccende /Under the Hood**\n\n** (Risolto) Convalida ESLint: ** Aggiunti commenti JSDoc mancanti nel backup manager per risolvere gli avvisi di convalida",
+        "es": "* 🚀 Funciones y mejoras**\n\n** (Añadido) Alertas de bajo flujo: ** Se implementó la monitorización activa de las paradas de «bajo flujo» (Durchfluss) en el historial de cortes. El adaptador ahora envía una notificación de forma proactiva cuando la bomba de calor se detiene por problemas de flujo, ya que el controlador suele tratarlos como cortes leves y no como errores graves. Incluye 60 minutos de espera para evitar el spam.\n** Interfaz de administración (mejorada): ** Se ha integrado un enlace de recomendación directa para la herramienta de análisis OpenDTA en la descripción de la pestaña Backup & Diagnostics.\n\n* 🛠 Tareas /Bajo el capó**\n\n** Validación de ESLint: ** Se han añadido los comentarios de JSDoc que faltaban en el gestor de copias de seguridad para resolver los avisos de validación del código",
+        "pl": "* 🚀 Funkcje i ulepszenia**\n\n** (Dodano) Alerty o niskim przepływie: ** Zaimplementowano aktywne monitorowanie wyłączeń „niskiego przepływu” (Durchfluss) w historii awarii. Adapter teraz proaktywnie wysyła powiadomienie, gdy pompa ciepła zatrzymuje się z powodu problemów z przepływem, ponieważ sterownik zwykle traktuje je jako miękkie awarie, a nie poważne błędy. Zawiera 60-minutowy czas odnowienia, aby zapobiec spamowi powiadomień.\n** (Ulepszony) Interfejs administratora: ** Zintegrowany bezpośredni link rekomendacji dla narzędzia analizy OpenDTA w tekście opisu karty Kopia zapasowa i diagnostyka.\n\n* 🛠 Obowiązki domowe/Pod kapturem**\n\n** (Naprawiono) Walidacja eSlint: ** Dodano brakujące komentarze JSDoc w menedżerze kopii zapasowych, aby rozwiązać ostrzeżenia o walidacji kodu podczas tworzenia.",
+        "uk": "* 🚀 Особливості та вдосконалення**\n\n** (Додано) Сповіщення про відключення низького потоку: ** Впроваджено активний моніторинг відключень «низького потоку» (Durchfluss) в історії відключень. Тепер адаптер активно надсилає сповіщення, коли тепловий насос зупиняється через проблеми з потоком, оскільки контролер зазвичай розглядає це як м'які відключення, а не як серйозні помилки. Включає 60-хвилинну зарядку для запобігання спаму сповіщень.\n** (Покращено) Інтерфейс адміністратора: ** Інтегрований прямий рекомендаційний посилання для інструмента аналізу OpenDTA у текст опису вкладки Резервне копіювання та діагностика.\n\n* 🛠 Домашні клопоти/Під капюшоною**\n\n** (Виправлено) Перевірка ESLint: ** Додано відсутні коментарі JSDoc у менеджері резервних копій для вирішення попереджень перевірки коду під час розробки.",
+        "zh-cn": "* 🚀 功能和改进**\n\n**（已添加）低流量停机警报：**对停电历史中的 “低流量”（Durchfluss）停机实施了主动监控。现在，当热泵因流量问题停止时，适配器会主动发送通知，因为控制器通常将其视为软中断而不是硬错误。包括 60 分钟的冷却时间，以防止垃圾通知。\n**（已改进）管理员用户界面：** 在 “备份和诊断” 选项卡的描述文本中集成了 OpenDTA 分析工具的直接推荐链接。\n\n* 🛠 杂务/在引擎盖下**\n\n**（已修复）ESLint 验证：** 在备份管理器中添加了缺失的 JSDoc 注释，以解决开发期间的代码验证警告。"
+      }
+    },
+    "titleLang": {
+      "en": "Luxtronik2 Controller",
+      "de": "Luxtronik2-Controller",
+      "ru": "Контроллер Luxtronik2",
+      "pt": "Controlador Luxtronik2",
+      "nl": "Luxtronik2-controller",
+      "fr": "Contrôleur Luxtronik2",
+      "it": "Controllore Luxtronik2",
+      "es": "Controlador Luxtronik2",
+      "pl": "Kontroler Luxtronik2",
+      "uk": "Контролер Luxtronik2",
+      "zh-cn": "Luxtronik2控制器"
+    },
+    "desc": {
+      "en": "Access and control of heat pumps with a Luxtronik 2.x controller",
+      "de": "Zugriff und Steuerung von Wärmepumpen mit einer Luxtronik 2.x Steuereinheit",
+      "ru": "Доступ и управление тепловыми насосами с контроллером Luxtronik 2.x",
+      "pt": "Acesso e controle de bombas de calor com um controlador Luxtronik 2.x",
+      "nl": "Toegang en controle van warmtepompen met een Luxtronik 2.x controller",
+      "fr": "Accès et contrôle des pompes à chaleur avec un contrôleur Luxtronik 2.x",
+      "it": "Accesso e controllo di pompe di calore con un controller Luxtronik 2.x",
+      "es": "Acceso y control de bombas de calor con un controlador Luxtronik 2.x",
+      "pl": "Dostęp i sterowanie pompami ciepła za pomocą sterownika Luxtronik 2.x",
+      "uk": "Доступ та управління тепловими насосами з контролером Luxtronik 2.x",
+      "zh-cn": "通过Luxtronik 2.x控制器访问和控制热泵"
+    },
+    "authors": [
+      "TbsJah <github.tbsjah@googlemail.com>"
+    ],
+    "keywords": [
+      "Luxtronik2",
+      "LWD50",
+      "Luft Wärme Pumpe",
+      "Heizung",
+      "LWP",
+      "Alpha InnoTec AIT",
+      "Buderus",
+      "Novelan"
+    ],
+    "licenseInformation": {
+      "type": "free",
+      "license": "MIT"
+    },
+    "platform": "Javascript/Node.js",
+    "icon": "luxtronik2-controller.png",
+    "enabled": true,
+    "extIcon": "https://raw.githubusercontent.com/TbsJah/ioBroker.luxtronik2-controller/main/admin/luxtronik2-controller.png",
+    "readme": "https://github.com/TbsJah/ioBroker.luxtronik2-controller/blob/main/README.md",
+    "loglevel": "info",
+    "tier": 3,
+    "mode": "daemon",
+    "type": "climate-control",
+    "compact": true,
+    "messagebox": true,
+    "connectionType": "local",
+    "dataSource": "poll",
+    "adminUI": {
+      "config": "json"
+    },
+    "dependencies": [
+      {
+        "js-controller": ">=6.0.11"
+      }
+    ],
+    "globalDependencies": [
+      {
+        "admin": ">=7.8.23"
+      }
+    ]
+  },
+  "native": {
+    "host": "192.168.178.81",
+    "port": 8889,
+    "interval": 30,
+    "fusspunkt": 21.7,
+    "endpunkt": 23,
+    "zip_aktiv_ww": 600,
+    "zip_aktiv": 120,
+    "sync_warmwater_target_temperature": 54,
+    "sync_hotwater_temperature_hysteresis": 10,
+    "sync_heating_system_circ_pump_voltage_minimal_heating": 3,
+    "sync_heating_system_circ_pump_voltage_nominal_heating": 7,
+    "sync_heating_system_circ_pump_voltage_minimal_water": 3,
+    "sync_heating_system_circ_pump_voltage_nominal_water": 10,
+    "sync_return_temperature_hysteresis": 1.5,
+    "zip_last_run_min": 600,
+    "regelung_aktiv": false,
+    "Heating_after_warmwater": true,
+    "telegram_enabled": false,
+    "notification_bell": false,
+    "telegram_receiver": "",
+    "telegram_instance": "",
+    "motionSensors": [],
+    "motion_sensors_aktiv": false
+  },
+  "notifications": [
+    {
+      "scope": "luxtronik2-controller",
+      "name": {
+        "en": "Luxtronik2-Controller",
+        "de": "Luxtronik2-Controller",
+        "ru": "Контроллер Luxtronik2",
+        "pt": "Controlador Luxtronik2",
+        "nl": "Luxtronik2-controller",
+        "fr": "Contrôleur Luxtronik2",
+        "it": "Controllore Luxtronik2",
+        "es": "Controlador Luxtronik2",
+        "pl": "Kontroler Luxtronik2",
+        "uk": "Контролер Luxtronik2",
+        "zh-cn": "Luxtronik2控制器"
+      },
+      "description": {
+        "en": "Notifications from the Luxtronik2-Controller adapter",
+        "de": "Benachrichtigungen vom Luxtronik2-Controller Adapter",
+        "ru": "Уведомления от адаптера Luxtronik2-Controller",
+        "pt": "Notificações do adaptador Luxtronik2-Controller",
+        "nl": "Meldingen van de Luxtronik2-Controller adapter",
+        "fr": "Notifications de l'adaptateur Luxtronik2-Controller",
+        "it": "Notifiche dall'adattatore Luxtronik2-Controller",
+        "es": "Notificaciones del adaptador Luxtronik2-Controller",
+        "pl": "Powiadomienia z adaptera Luxtronik2-Controller",
+        "uk": "Сповіщення від адаптера Luxtronik2-Controller",
+        "zh-cn": "来自 Luxtronik2-Controller 适配器的通知"
+      },
+      "categories": [
+        {
+          "category": "lwpError",
+          "name": {
+            "en": "Heat Pump Errors",
+            "de": "Wärmepumpen-Fehler",
+            "ru": "Ошибки теплового насоса",
+            "pt": "Erros da bomba de calor",
+            "nl": "Fouten warmtepomp",
+            "fr": "Erreurs de la pompe à chaleur",
+            "it": "Errori della pompa di calore",
+            "es": "Errores de la bomba de calor",
+            "pl": "Błędy pompy ciepła",
+            "uk": "Помилки теплового насоса",
+            "zh-cn": "热泵错误"
+          },
+          "severity": "alert",
+          "description": {
+            "en": "Error messages from the heating system",
+            "de": "Fehlermeldungen aus der Heizungsanlage",
+            "ru": "Сообщения об ошибках от системы отопления",
+            "pt": "Mensagens de erro do sistema de aquecimento",
+            "nl": "Foutmeldingen van het verwarmingssysteem",
+            "fr": "Messages d'erreur du système de chauffage",
+            "it": "Messaggi di errore dal sistema di riscaldamento",
+            "es": "Mensajes de error del sistema de calefacción",
+            "pl": "Komunikaty o błędach z systemu grzewczego",
+            "uk": "Повідомлення про помилки від системи опалення",
+            "zh-cn": "来自供暖系统的错误消息"
+          },
+          "regex": [],
+          "limit": 10
+        }
+      ]
+    }
+  ],
+  "objects": [],
+  "instanceObjects": [
+    {
+      "_id": "info",
+      "type": "channel",
+      "common": {
+        "name": "Information"
+      },
+      "native": {}
+    },
+    {
+      "_id": "backups",
+      "type": "meta",
+      "common": {
+        "name": "Luxtronik DTA Backups",
+        "type": "meta.user"
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.connection",
+      "type": "state",
+      "common": {
+        "role": "indicator.connected",
+        "name": "Device or service connected",
+        "type": "boolean",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {}
+    }
+  ]
 }

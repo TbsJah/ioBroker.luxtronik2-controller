@@ -75,8 +75,7 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
-
-### **WORK IN PROGRESS**
+### 0.11.1 (2026-09-22)
 
 - Resolve issues which are reported by repository checker
 
@@ -108,16 +107,6 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 - **🛠 Chores / Under the Hood**
     - Enhanced TypeScript type checking, resolved strict ESLint warnings, and upgraded Node.js type definitions to support Node.js version 22.
     - Optimized image scaling and layout rendering in `jsonConfig.json` for cleaner adapter settings presentation.
-
-### 0.10.1 (2026-09-20)
-
-**🚀 Features & Improvements**
-
-- **(Feature) Heating State String:** Added the configured heating curve parallel offset to the status string (e.g., "Offset +3 °C") for better transparency.
-
-**🐛 Bugfixes**
-
-- **(Fixed) Heating State String:** Corrected a logic issue where the status incorrectly displayed "Reduced 0 °C" during a scheduled reduction window, even if the actual reduction delta was set to 0 K. It now correctly displays "Normal (Timer)".
 
 ## License
 

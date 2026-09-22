@@ -23,6 +23,16 @@
 ### 0.1.0 (2026-07-09)
 
 - initial release
+## 0.10.1 (2026-09-20)
+
+**🚀 Features & Improvements**
+
+- **(Feature) Heating State String:** Added the configured heating curve parallel offset to the status string (e.g., "Offset +3 °C") for better transparency.
+
+**🐛 Bugfixes**
+
+- **(Fixed) Heating State String:** Corrected a logic issue where the status incorrectly displayed "Reduced 0 °C" during a scheduled reduction window, even if the actual reduction delta was set to 0 K. It now correctly displays "Normal (Timer)".
+
 ## 0.10.0 (2026-09-20)
 
 **🚀 Features & Improvements**
