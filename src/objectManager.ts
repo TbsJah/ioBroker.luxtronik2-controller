@@ -205,7 +205,7 @@ export async function cleanupStates(adapter: ExtendedAdapter): Promise<void> {
 
 	for (const [key, def] of Object.entries(STATE_MAPPING)) {
 		const definition = def as StateDefinition;
-		if (!isStateEnabled(key, definition, config, adapter.currentVisibilities || [])) {
+		if (isStateEnabled(key, definition, config)) {
 			activeStateIds.add(`${definition.folder}.${key}`);
 		}
 	}
@@ -213,7 +213,6 @@ export async function cleanupStates(adapter: ExtendedAdapter): Promise<void> {
 	try {
 		const objects = await adapter.getAdapterObjectsAsync();
 		let deletedCount = 0;
-		const deletions: Promise<void>[] = [];
 
 		for (const fullId in objects) {
 			const obj = objects[fullId];
@@ -223,16 +222,18 @@ export async function cleanupStates(adapter: ExtendedAdapter): Promise<void> {
 					continue;
 				}
 				if (!activeStateIds.has(localId)) {
-					deletions.push(
-						adapter.delStateAsync(localId).catch(() => {
-							void 0;
-						}),
-					);
-					deletions.push(
-						adapter.delObjectAsync(localId).catch(() => {
-							void 0;
-						}),
-					);
+					// SEQUENZIELLES LÖSCHEN (Schützt die ioBroker Datenbank vor Overload)
+					try {
+						await adapter.delStateAsync(localId);
+					} catch {
+						// Ignorieren, falls State bereits nicht mehr existiert
+					}
+					try {
+						await adapter.delObjectAsync(localId);
+					} catch {
+						// Ignorieren, falls Objekt bereits nicht mehr existiert
+					}
+
 					adapter.createdStates.delete(localId);
 					writeLog(`Datapoint '${localId}' rigorously removed.`, 'debug');
 					deletedCount++;
@@ -240,9 +241,6 @@ export async function cleanupStates(adapter: ExtendedAdapter): Promise<void> {
 			}
 		}
 
-		if (deletions.length > 0) {
-			await Promise.all(deletions);
-		}
 		if (deletedCount > 0) {
 			writeLog(`${deletedCount} old datapoints cleaned up.`, 'info');
 		}
@@ -280,7 +278,6 @@ export async function cleanupEmptyFolders(adapter: ExtendedAdapter): Promise<voi
 		}
 
 		let deletedCount = 0;
-		const deletions: Promise<void>[] = [];
 
 		for (const fullId of folderIds) {
 			if (fullId === adapter.namespace) {
@@ -289,19 +286,16 @@ export async function cleanupEmptyFolders(adapter: ExtendedAdapter): Promise<voi
 
 			if (!existingParents.has(fullId)) {
 				const localId = fullId.replace(`${adapter.namespace}.`, '');
-				deletions.push(
-					adapter.delObjectAsync(localId).catch(() => {
-						void 0;
-					}),
-				);
+				try {
+					await adapter.delObjectAsync(localId);
+				} catch {
+					// ignore
+				}
 				writeLog(`Empty folder '${localId}' cleaned up.`, 'debug');
 				deletedCount++;
 			}
 		}
 
-		if (deletions.length > 0) {
-			await Promise.all(deletions);
-		}
 		if (deletedCount > 0) {
 			writeLog(`${deletedCount} empty folders removed from object tree.`, 'info');
 		}
@@ -330,7 +324,6 @@ export async function cleanupCustomStates(adapter: ExtendedAdapter): Promise<voi
 	try {
 		const objects = await adapter.getAdapterObjectsAsync();
 		let deletedCount = 0;
-		const deletions: Promise<void>[] = [];
 
 		for (const id in objects) {
 			if (id.startsWith(`${adapter.namespace}.Custom.`)) {
@@ -340,16 +333,16 @@ export async function cleanupCustomStates(adapter: ExtendedAdapter): Promise<voi
 				}
 
 				if (!activeIds.has(shortId)) {
-					deletions.push(
-						adapter.delStateAsync(shortId).catch(() => {
-							void 0;
-						}),
-					);
-					deletions.push(
-						adapter.delObjectAsync(shortId).catch(() => {
-							void 0;
-						}),
-					);
+					try {
+						await adapter.delStateAsync(shortId);
+					} catch {
+						// ignore
+					}
+					try {
+						await adapter.delObjectAsync(shortId);
+					} catch {
+						// ignore
+					}
 					adapter.createdStates.delete(shortId);
 					writeLog(`Custom datapoint '${shortId}' removed.`, 'debug');
 					deletedCount++;
@@ -357,9 +350,6 @@ export async function cleanupCustomStates(adapter: ExtendedAdapter): Promise<voi
 			}
 		}
 
-		if (deletions.length > 0) {
-			await Promise.all(deletions);
-		}
 		if (deletedCount > 0) {
 			writeLog(`${deletedCount} custom values cleaned up.`, 'info');
 		}

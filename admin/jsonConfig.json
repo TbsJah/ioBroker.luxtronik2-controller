@@ -792,12 +792,12 @@
 				"filter_visibility": {
 					"type": "checkbox",
 					"label": {
-						"en": "Hide unsupported parameters (Recommended)",
-						"de": "Nicht unterstützte Parameter ausblenden (Empfohlen)"
+						"en": "Hide unsupported parameters (Requires FW V3.x)",
+						"de": "Nicht unterstützte Parameter ausblenden (Setzt FW V3.x voraus)"
 					},
 					"help": {
-						"en": "If enabled, the adapter uses the heat pump's internal visibility list to automatically hide parameters that are not supported by your specific hardware model.",
-						"de": "Wenn aktiviert, nutzt der Adapter die interne Sichtbarkeitsliste der Wärmepumpe, um Parameter automatisch auszublenden, die von deinem spezifischen Modell nicht unterstützt werden."
+						"en": "If enabled, the adapter uses the internal visibility list (Parameter 3005) to automatically hide unsupported datapoints. <b>IMPORTANT:</b> This only works on newer firmware versions. If you have an older system (e.g., V1/V2) and get timeout errors during adapter start, please disable this option!",
+						"de": "Wenn aktiviert, nutzt der Adapter die interne Sichtbarkeitsliste (Parameter 3005), um nicht unterstützte Datenpunkte automatisch auszublenden. <b>WICHTIG:</b> Dies funktioniert nur bei neueren Firmware-Versionen. Bei älteren Anlagen (z.B. V1/V2) kommt es hierdurch zu Timeout-Fehlern beim Start – in diesem Fall den Haken bitte entfernen!"
 					},
 					"default": true,
 					"xs": 12,

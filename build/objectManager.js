@@ -107,14 +107,13 @@ async function cleanupStates(adapter) {
   const activeStateIds = /* @__PURE__ */ new Set();
   for (const [key, def] of Object.entries(import_stateMapping.STATE_MAPPING)) {
     const definition = def;
-    if (!isStateEnabled(key, definition, config, adapter.currentVisibilities || [])) {
+    if (isStateEnabled(key, definition, config)) {
       activeStateIds.add(`${definition.folder}.${key}`);
     }
   }
   try {
     const objects = await adapter.getAdapterObjectsAsync();
     let deletedCount = 0;
-    const deletions = [];
     for (const fullId in objects) {
       const obj = objects[fullId];
       if (obj && obj.type === "state") {
@@ -123,22 +122,19 @@ async function cleanupStates(adapter) {
           continue;
         }
         if (!activeStateIds.has(localId)) {
-          deletions.push(
-            adapter.delStateAsync(localId).catch(() => {
-            })
-          );
-          deletions.push(
-            adapter.delObjectAsync(localId).catch(() => {
-            })
-          );
+          try {
+            await adapter.delStateAsync(localId);
+          } catch {
+          }
+          try {
+            await adapter.delObjectAsync(localId);
+          } catch {
+          }
           adapter.createdStates.delete(localId);
           (0, import_logger.writeLog)(`Datapoint '${localId}' rigorously removed.`, "debug");
           deletedCount++;
         }
       }
-    }
-    if (deletions.length > 0) {
-      await Promise.all(deletions);
     }
     if (deletedCount > 0) {
       (0, import_logger.writeLog)(`${deletedCount} old datapoints cleaned up.`, "info");
@@ -167,23 +163,19 @@ async function cleanupEmptyFolders(adapter) {
       }
     }
     let deletedCount = 0;
-    const deletions = [];
     for (const fullId of folderIds) {
       if (fullId === adapter.namespace) {
         continue;
       }
       if (!existingParents.has(fullId)) {
         const localId = fullId.replace(`${adapter.namespace}.`, "");
-        deletions.push(
-          adapter.delObjectAsync(localId).catch(() => {
-          })
-        );
+        try {
+          await adapter.delObjectAsync(localId);
+        } catch {
+        }
         (0, import_logger.writeLog)(`Empty folder '${localId}' cleaned up.`, "debug");
         deletedCount++;
       }
-    }
-    if (deletions.length > 0) {
-      await Promise.all(deletions);
     }
     if (deletedCount > 0) {
       (0, import_logger.writeLog)(`${deletedCount} empty folders removed from object tree.`, "info");
@@ -202,7 +194,6 @@ async function cleanupCustomStates(adapter) {
   try {
     const objects = await adapter.getAdapterObjectsAsync();
     let deletedCount = 0;
-    const deletions = [];
     for (const id in objects) {
       if (id.startsWith(`${adapter.namespace}.Custom.`)) {
         const shortId = id.replace(`${adapter.namespace}.`, "");
@@ -210,22 +201,19 @@ async function cleanupCustomStates(adapter) {
           continue;
         }
         if (!activeIds.has(shortId)) {
-          deletions.push(
-            adapter.delStateAsync(shortId).catch(() => {
-            })
-          );
-          deletions.push(
-            adapter.delObjectAsync(shortId).catch(() => {
-            })
-          );
+          try {
+            await adapter.delStateAsync(shortId);
+          } catch {
+          }
+          try {
+            await adapter.delObjectAsync(shortId);
+          } catch {
+          }
           adapter.createdStates.delete(shortId);
           (0, import_logger.writeLog)(`Custom datapoint '${shortId}' removed.`, "debug");
           deletedCount++;
         }
       }
-    }
-    if (deletions.length > 0) {
-      await Promise.all(deletions);
     }
     if (deletedCount > 0) {
       (0, import_logger.writeLog)(`${deletedCount} custom values cleaned up.`, "info");
