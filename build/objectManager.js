@@ -85,6 +85,9 @@ function isStateEnabled(key, definition, config, visibilities = []) {
       }
     }
   }
+  if (config[key] === false || config[`sync_${key}`] === false) {
+    return false;
+  }
   return true;
 }
 const CHAR_MAP = {

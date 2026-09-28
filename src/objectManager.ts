@@ -156,6 +156,13 @@ export function isStateEnabled(
 		}
 	}
 
+	// Manuelle Abwahl in den Adapter-Einstellungen prüfen.
+	// Wenn die Checkbox in der UI explizit abgewählt wurde, wird der Wert false.
+	// Wichtig: Das greift nur, wenn der Checkbox-Name in der jsonConfig exakt dem 'key' entspricht.
+	if (config[key] === false || config[`sync_${key}`] === false) {
+		return false;
+	}
+
 	return true;
 }
 
