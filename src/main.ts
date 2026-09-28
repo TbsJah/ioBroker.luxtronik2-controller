@@ -156,19 +156,25 @@ class Luxtronik2Controller extends utils.Adapter {
 		writeLog(`Connecting to heat pump at ${ip}:${port}...`, 'info');
 
 		// Visibilities einmalig beim Start abfragen für den intelligenten Objekt-Filter
-		try {
-			this.currentVisibilities = await readAllRaw(this, 3005);
-			if (this.isDebugLogActive) {
+		// (Wird nur ausgeführt, wenn der Nutzer die Funktion in den Settings nicht deaktiviert hat)
+		if (config.filter_visibility !== false) {
+			try {
+				this.currentVisibilities = await readAllRaw(this, 3005);
+				if (this.isDebugLogActive) {
+					writeLog(
+						`Successfully loaded ${this.currentVisibilities.length} visibility flags from heat pump.`,
+						'debug',
+					);
+				}
+			} catch (err: any) {
 				writeLog(
-					`Successfully loaded ${this.currentVisibilities.length} visibility flags from heat pump.`,
-					'debug',
+					`Could not load visibility flags (Command 3005). Assuming all parameters are visible. Error: ${err.message}`,
+					'warn',
 				);
+				this.currentVisibilities = [];
 			}
-		} catch (err: any) {
-			writeLog(
-				`Could not load visibility flags (Command 3005). Assuming all parameters are visible. Error: ${err.message}`,
-				'warn',
-			);
+		} else {
+			// Nutzer hat den Filter deaktiviert -> Array bleibt leer, alles wird angezeigt
 			this.currentVisibilities = [];
 		}
 

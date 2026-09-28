@@ -128,19 +128,23 @@ class Luxtronik2Controller extends utils.Adapter {
     const port = config.port || 8889;
     await this.setState("info.connection", { val: false, ack: true });
     (0, import_logger.writeLog)(`Connecting to heat pump at ${ip}:${port}...`, "info");
-    try {
-      this.currentVisibilities = await (0, import_rawFunctions.readAllRaw)(this, 3005);
-      if (this.isDebugLogActive) {
+    if (config.filter_visibility !== false) {
+      try {
+        this.currentVisibilities = await (0, import_rawFunctions.readAllRaw)(this, 3005);
+        if (this.isDebugLogActive) {
+          (0, import_logger.writeLog)(
+            `Successfully loaded ${this.currentVisibilities.length} visibility flags from heat pump.`,
+            "debug"
+          );
+        }
+      } catch (err) {
         (0, import_logger.writeLog)(
-          `Successfully loaded ${this.currentVisibilities.length} visibility flags from heat pump.`,
-          "debug"
+          `Could not load visibility flags (Command 3005). Assuming all parameters are visible. Error: ${err.message}`,
+          "warn"
         );
+        this.currentVisibilities = [];
       }
-    } catch (err) {
-      (0, import_logger.writeLog)(
-        `Could not load visibility flags (Command 3005). Assuming all parameters are visible. Error: ${err.message}`,
-        "warn"
-      );
+    } else {
       this.currentVisibilities = [];
     }
     await (0, import_objectManager.cleanupStates)(this);
