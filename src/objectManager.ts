@@ -35,6 +35,8 @@ export interface StateDefinition {
 	required?: boolean;
 	/** Steuert die interne Formatierung von rohen Sekunden zu HH:MM:SS */
 	isDurationFormat?: boolean;
+	/** Definiert die interne Herkunft der Daten für das Mapping */
+	dataSource?: 'raw_parameter' | 'raw_value' | 'parameter' | 'value' | 'additional';
 }
 
 /**
@@ -65,6 +67,8 @@ export interface ExtendedAdapter extends AdapterInstance {
 	config: ioBroker.AdapterConfig & Record<string, any>;
 	/** Set aller während der Laufzeit erstellten oder verifizierten Datenpunkt-IDs */
 	createdStates: Set<string>;
+	/** Speichert die 3005er Visibilities */
+	currentVisibilities?: number[];
 }
 
 /**
@@ -109,9 +113,15 @@ const PREFIX_MAPPING: [string, string][] = [
  * @param key Der Schlüssel des Datenpunkts aus dem Mapping.
  * @param definition Die Struktur-Definition des Datenpunkts.
  * @param config Die aktuelle Adapter-Konfiguration.
+ * @param visibilities Array der Sichtbarkeiten (Visibilities) via CMD 3005.
  * @returns True, wenn der Datenpunkt aktiviert ist und angelegt werden soll.
  */
-export function isStateEnabled(key: string, definition: StateDefinition, config: Record<string, any>): boolean {
+export function isStateEnabled(
+	key: string,
+	definition: StateDefinition,
+	config: Record<string, any>,
+	visibilities: number[] = [],
+): boolean {
 	if (definition.required) {
 		return true;
 	}
@@ -123,7 +133,26 @@ export function isStateEnabled(key: string, definition: StateDefinition, config:
 
 	for (const [prefix, mapKey] of PREFIX_MAPPING) {
 		if (key.startsWith(prefix)) {
-			return config[mapKey] !== false;
+			if (config[mapKey] === false) {
+				return false;
+			}
+		}
+	}
+
+	// Sichtbarkeits-Prüfung (Visibility Filter via CMD 3005)
+	if (config.filter_visibility !== false && visibilities.length > 0) {
+		// Die Visibility bezieht sich primär auf die Parameter (Ordner "Settings" oder raw_parameter)
+		const isParameter =
+			definition.dataSource === 'raw_parameter' ||
+			(definition.folder &&
+				definition.folder.startsWith('Settings') &&
+				/^\d+$/.test(String(definition.luxWriteId || key)));
+
+		if (isParameter) {
+			const luxId = parseInt(String(definition.luxWriteId || key), 10);
+			if (!isNaN(luxId) && visibilities[luxId] === 0) {
+				return false; // Anlage sagt: Dieser Parameter ist für dieses Hardware-Modell unsichtbar/nicht unterstützt!
+			}
 		}
 	}
 
@@ -169,7 +198,7 @@ export async function cleanupStates(adapter: ExtendedAdapter): Promise<void> {
 
 	for (const [key, def] of Object.entries(STATE_MAPPING)) {
 		const definition = def as StateDefinition;
-		if (isStateEnabled(key, definition, config)) {
+		if (!isStateEnabled(key, definition, config, adapter.currentVisibilities || [])) {
 			activeStateIds.add(`${definition.folder}.${key}`);
 		}
 	}
@@ -351,7 +380,7 @@ export async function ensureAllObjectsExist(adapter: ExtendedAdapter): Promise<v
 
 		for (const [key, def] of Object.entries(STATE_MAPPING)) {
 			const definition = def as StateDefinition;
-			if (!isStateEnabled(key, definition, config)) {
+			if (!isStateEnabled(key, definition, config, adapter.currentVisibilities || [])) {
 				continue;
 			}
 

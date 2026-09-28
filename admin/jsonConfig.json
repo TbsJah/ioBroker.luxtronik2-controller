@@ -789,6 +789,23 @@
 					"xl": 12,
 					"xs": 12
 				},
+				"filter_visibility": {
+					"type": "checkbox",
+					"label": {
+						"en": "Hide unsupported parameters (Recommended)",
+						"de": "Nicht unterstützte Parameter ausblenden (Empfohlen)"
+					},
+					"help": {
+						"en": "If enabled, the adapter uses the heat pump's internal visibility list to automatically hide parameters that are not supported by your specific hardware model.",
+						"de": "Wenn aktiviert, nutzt der Adapter die interne Sichtbarkeitsliste der Wärmepumpe, um Parameter automatisch auszublenden, die von deinem spezifischen Modell nicht unterstützt werden."
+					},
+					"default": true,
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
 				"panel_temperaturen": {
 					"type": "panel",
 					"label": {
@@ -2914,8 +2931,8 @@
 				"backupInfo": {
 					"type": "staticText",
 					"text": {
-						"en": "You can download the heat pump's internal logs (.dta) directly via its web interface.\n\n💡 Tip: To graphically analyze the .dta files on your PC, we recommend the free tool OpenDTA (https://sourceforge.net/projects/opendta/).\n\n• Live DTA (/NewProc): Generates a fresh log right now.\n• Existing DTA (/proclog): Downloads the last auto-saved log (can be 2-3 hours old).",
-						"de": "Über den internen Webserver der Luxtronik-Steuerung lassen sich System-Logs (.dta) direkt herunterladen.\n\n💡 Tipp: Zur grafischen Auswertung der .dta-Dateien am PC empfehlen wir das kostenlose Tool OpenDTA (https://sourceforge.net/projects/opendta/).\n\n• Live DTA (/NewProc): Zwingt die Anlage, sofort einen aktuellen Speicherabzug zu generieren.\n• Vorhandenes DTA (/proclog): Lädt die letzte automatisch gespeicherte Datei herunter (oft 2-3 Stunden alt)."
+						"en": "You can download the heat pump's internal logs (.dta) directly via its web interface.\n\n💡 Tip: To graphically analyze the .dta files on your PC, we recommend the free tool OpenDTA (<a href='https://sourceforge.net/projects/opendta/').\n\n• Live DTA (/NewProc): Generates a fresh log right now.\n• Existing DTA (/proclog): Downloads the last auto-saved log (can be 2-3 hours old).",
+						"de": "Über den internen Webserver der Luxtronik-Steuerung lassen sich System-Logs (.dta) direkt herunterladen.\n\n💡 Tipp: Zur grafischen Auswertung der .dta-Dateien am PC empfehlen wir das kostenlose Tool OpenDTA (<a href='https://sourceforge.net/projects/opendta/').\n\n• Live DTA (/NewProc): Zwingt die Anlage, sofort einen aktuellen Speicherabzug zu generieren.\n• Vorhandenes DTA (/proclog): Lädt die letzte automatisch gespeicherte Datei herunter (oft 2-3 Stunden alt)."
 					},
 					"style": { "marginBottom": "30px", "fontSize": "14px", "whiteSpace": "pre-wrap" },
 					"xs": 12,

@@ -18,6 +18,8 @@ const CONSTANTS = {
 	CMD_READ_PARAM: 3003,
 	/** Lese-Befehl für die Messwerteliste */
 	CMD_READ_VALUE: 3004,
+	/** Lese-Befehl für die Sichtbarkeiten (Visibilities) */
+	CMD_READ_VISIBILITY: 3005,
 	/** Standard-TCP-Port der Luxtronik */
 	PORT_TCP: 8889,
 	/** Standard-WebSocket-Port neuerer Firmwares */
@@ -430,6 +432,7 @@ export async function dumpAllRawToLog(adapter: AdapterInstance): Promise<void> {
 		await delay(adapter, CONSTANTS.DELAY_RECONNECT);
 		await dumpList(CONSTANTS.CMD_READ_PARAM, 'PARAMETERS');
 		await dumpList(CONSTANTS.CMD_READ_VALUE, 'VALUES');
+		await dumpList(CONSTANTS.CMD_READ_VISIBILITY, 'VISIBILITIES'); // <-- NEU: Sichtbarkeits-Log
 	} catch (err: unknown) {
 		const msg = err instanceof Error ? err.message : String(err);
 		writeLog(`Error executing raw dump: ${msg}`, 'error');

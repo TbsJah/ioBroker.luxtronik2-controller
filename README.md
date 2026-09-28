@@ -49,6 +49,16 @@ This project aims to protect your heat pump by restricting the configuration opt
 
 The integration allows you to monitor and control heat pumps with a Luxtronik2 controller. It works locally without internet access.
 It was and is being tested with an LWD50A (LD5) from Alpha Innotec.
+It is used by manufacturers such as:
+
+- Alpha Innotec,
+- Siemens,
+- Novelan,
+- Roth,
+- Elco,
+- Buderus,
+- Nibe,
+- Wolf Heiztechnik.
 
 ## ⚠️ Disclaimer ⚠️
 
@@ -75,6 +85,14 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
+
+### **WORK IN PROGRESS**
+
+- **Features & Improvements:**
+    - **Smart Parameter Filtering:** Added full support for the Luxtronik visibility registry (Network Command 3005). The adapter now automatically hides parameters in the ioBroker object tree that are physically not supported by your specific heat pump model (e.g., hiding defrost valves on brine-to-water pumps). This dramatically declutters the system.
+    - Added an "Expert Mode" toggle in the adapter configuration to optionally disable the visibility filter and force-show all parameters.
+    - Extended the "Dump Raw to Log" feature to include the visibility matrix (Command 3005).
+
 ### 0.11.1 (2026-09-22)
 
 - Resolve issues which are reported by repository checker

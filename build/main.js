@@ -45,6 +45,8 @@ class Luxtronik2Controller extends utils.Adapter {
   lastKnownErrorTimestamp = null;
   /** Determines whether verbose debugging output is enabled */
   isDebugLogActive = false;
+  //* Known Visibilities */
+  currentVisibilities = [];
   // Cache für den globalen Schreibschutz
   currentRawParams = [];
   /** ioBroker interval handle for the main data polling loop */
@@ -126,6 +128,21 @@ class Luxtronik2Controller extends utils.Adapter {
     const port = config.port || 8889;
     await this.setState("info.connection", { val: false, ack: true });
     (0, import_logger.writeLog)(`Connecting to heat pump at ${ip}:${port}...`, "info");
+    try {
+      this.currentVisibilities = await (0, import_rawFunctions.readAllRaw)(this, 3005);
+      if (this.isDebugLogActive) {
+        (0, import_logger.writeLog)(
+          `Successfully loaded ${this.currentVisibilities.length} visibility flags from heat pump.`,
+          "debug"
+        );
+      }
+    } catch (err) {
+      (0, import_logger.writeLog)(
+        `Could not load visibility flags (Command 3005). Assuming all parameters are visible. Error: ${err.message}`,
+        "warn"
+      );
+      this.currentVisibilities = [];
+    }
     await (0, import_objectManager.cleanupStates)(this);
     await (0, import_objectManager.cleanupCustomStates)(this);
     await (0, import_objectManager.cleanupEmptyFolders)(this);
@@ -511,7 +528,7 @@ class Luxtronik2Controller extends utils.Adapter {
         if (definition.isVirtual) {
           continue;
         }
-        if (!(0, import_objectManager.isStateEnabled)(key, definition, config)) {
+        if (!(0, import_objectManager.isStateEnabled)(key, definition, config, this.currentVisibilities)) {
           continue;
         }
         const luxId = definition.luxWriteId || key;

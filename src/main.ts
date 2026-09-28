@@ -57,6 +57,8 @@ class Luxtronik2Controller extends utils.Adapter {
 	public lastKnownErrorTimestamp: number | null = null;
 	/** Determines whether verbose debugging output is enabled */
 	public isDebugLogActive: boolean = false;
+	//* Known Visibilities */
+	public currentVisibilities: number[] = [];
 	// Cache für den globalen Schreibschutz
 	public currentRawParams: number[] = [];
 	/** ioBroker interval handle for the main data polling loop */
@@ -152,6 +154,23 @@ class Luxtronik2Controller extends utils.Adapter {
 
 		await this.setState('info.connection', { val: false, ack: true });
 		writeLog(`Connecting to heat pump at ${ip}:${port}...`, 'info');
+
+		// Visibilities einmalig beim Start abfragen für den intelligenten Objekt-Filter
+		try {
+			this.currentVisibilities = await readAllRaw(this, 3005);
+			if (this.isDebugLogActive) {
+				writeLog(
+					`Successfully loaded ${this.currentVisibilities.length} visibility flags from heat pump.`,
+					'debug',
+				);
+			}
+		} catch (err: any) {
+			writeLog(
+				`Could not load visibility flags (Command 3005). Assuming all parameters are visible. Error: ${err.message}`,
+				'warn',
+			);
+			this.currentVisibilities = [];
+		}
 
 		await cleanupStates(this);
 		await cleanupCustomStates(this);
@@ -613,7 +632,7 @@ class Luxtronik2Controller extends utils.Adapter {
 					continue;
 				}
 
-				if (!isStateEnabled(key, definition, config)) {
+				if (!isStateEnabled(key, definition, config, this.currentVisibilities)) {
 					continue;
 				}
 

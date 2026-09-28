@@ -61,7 +61,7 @@ const PREFIX_MAPPING = [
   ["Zirkulation_Samstag_", "sync_hotWaterCircPumpTimerTableDaySaturday"],
   ["Zirkulation_Sonntag_", "sync_hotWaterCircPumpTimerTableDaySunday"]
 ];
-function isStateEnabled(key, definition, config) {
+function isStateEnabled(key, definition, config, visibilities = []) {
   if (definition.required) {
     return true;
   }
@@ -71,7 +71,18 @@ function isStateEnabled(key, definition, config) {
   }
   for (const [prefix, mapKey] of PREFIX_MAPPING) {
     if (key.startsWith(prefix)) {
-      return config[mapKey] !== false;
+      if (config[mapKey] === false) {
+        return false;
+      }
+    }
+  }
+  if (config.filter_visibility !== false && visibilities.length > 0) {
+    const isParameter = definition.dataSource === "raw_parameter" || definition.folder && definition.folder.startsWith("Settings") && /^\d+$/.test(String(definition.luxWriteId || key));
+    if (isParameter) {
+      const luxId = parseInt(String(definition.luxWriteId || key), 10);
+      if (!isNaN(luxId) && visibilities[luxId] === 0) {
+        return false;
+      }
     }
   }
   return true;
@@ -93,7 +104,7 @@ async function cleanupStates(adapter) {
   const activeStateIds = /* @__PURE__ */ new Set();
   for (const [key, def] of Object.entries(import_stateMapping.STATE_MAPPING)) {
     const definition = def;
-    if (isStateEnabled(key, definition, config)) {
+    if (!isStateEnabled(key, definition, config, adapter.currentVisibilities || [])) {
       activeStateIds.add(`${definition.folder}.${key}`);
     }
   }
@@ -228,7 +239,7 @@ async function ensureAllObjectsExist(adapter) {
     const existingObjects = await adapter.getAdapterObjectsAsync();
     for (const [key, def] of Object.entries(import_stateMapping.STATE_MAPPING)) {
       const definition = def;
-      if (!isStateEnabled(key, definition, config)) {
+      if (!isStateEnabled(key, definition, config, adapter.currentVisibilities || [])) {
         continue;
       }
       const stateId = `${definition.folder}.${key}`;
