@@ -23,6 +23,10 @@
 ### 0.1.0 (2026-07-09)
 
 - initial release
+## 0.10.4 (2026-09-21)
+
+- Update Readme
+
 ## 0.10.3 (2026-09-21)
 
 - **Features & Improvements:**
