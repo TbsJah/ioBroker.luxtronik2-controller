@@ -77,7 +77,6 @@ async function safeRawWrite(
 		} else if (typeof state.val === 'number') {
 			currentRaw = state.val;
 		} else if (typeof state.val === 'string') {
-			// NEU: Frühjahrsputz! Nutzt die zentrale Funktion anstatt Inline-RegEx
 			currentRaw = timeStringToSeconds(state.val);
 		}
 
@@ -286,6 +285,12 @@ export async function stopZipAndDeaeration(adapter: ExtendedAdapter): Promise<vo
 			if (dpZip) {
 				await adapter.setOwnStateIfDifferent(dpZip, false, true);
 			}
+
+			// Virtuellen Status auf AUS setzen, wenn das Makro gestoppt wird
+			const virtualDp = getDpPath('Virtual_ZIP_Status');
+			if (virtualDp) {
+				await adapter.setStateChangedAsync(virtualDp, { val: false, ack: true });
+			}
 		}
 	} catch (err: unknown) {
 		const msg = err instanceof Error ? err.message : String(err);
@@ -385,6 +390,11 @@ export async function handleActivateZip(adapter: ExtendedAdapter, id: string, du
 		for (const actor of validActors) {
 			try {
 				await adapter.setForeignStateAsync(actor.zip_external_relay_id, true, false);
+				// Virtuellen Status auf AN setzen
+				const virtualDp = getDpPath('Virtual_ZIP_Status');
+				if (virtualDp) {
+					await adapter.setStateChangedAsync(virtualDp, { val: true, ack: true });
+				}
 			} catch (err) {
 				const msg = err instanceof Error ? err.message : String(err);
 				writeLog(`[ZIP] Error switching on ${actor.zip_external_relay_id}: ${msg}`, 'error');
@@ -399,6 +409,11 @@ export async function handleActivateZip(adapter: ExtendedAdapter, id: string, du
 			for (const actor of validActors) {
 				try {
 					await adapter.setForeignStateAsync(actor.zip_external_relay_id, false, false);
+					// Virtuellen Status auf AUS setzen
+					const virtualDp = getDpPath('Virtual_ZIP_Status');
+					if (virtualDp) {
+						await adapter.setStateChangedAsync(virtualDp, { val: false, ack: true });
+					}
 				} catch (err) {
 					const msg = err instanceof Error ? err.message : String(err);
 					writeLog(`[ZIP] Error switching off ${actor.zip_external_relay_id}: ${msg}`, 'error');
@@ -489,6 +504,12 @@ export async function handleActivateZip(adapter: ExtendedAdapter, id: string, du
 				await safeRawWrite(adapter, u.key, parseInt(def.luxWriteId, 10), u.raw);
 			}
 		}
+	}
+
+	// Virtuellen Status auf AN setzen (für das interne Luxtronik-Makro)
+	const virtualDp = getDpPath('Virtual_ZIP_Status');
+	if (virtualDp) {
+		await adapter.setStateChangedAsync(virtualDp, { val: true, ack: true });
 	}
 
 	adapter.zipTimer = adapter.setTimeout(async () => {

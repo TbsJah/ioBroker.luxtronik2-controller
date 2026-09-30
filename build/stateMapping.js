@@ -354,6 +354,16 @@ const STATE_MAPPING = {
     dataSource: "raw_value",
     required: true
   },
+  Virtual_ZIP_Status: {
+    name: { en: "Virtual ZIP Status (Adapter Logic)", de: "Virtueller ZIP Status (Adapter-Logik)" },
+    type: "boolean",
+    role: "indicator",
+    write: false,
+    def: false,
+    folder: "Information.03_Outputs",
+    isVirtual: true,
+    required: true
+  },
   ZUPout: {
     folder: "Information.03_Outputs",
     name: "Auxiliary circulation pump ZUP",
@@ -1429,16 +1439,6 @@ const STATE_MAPPING = {
     write: true,
     luxWriteId: "684",
     dataSource: "raw_parameter",
-    required: true
-  },
-  Activate_Zip: {
-    folder: "Settings.05_ZIP",
-    name: "Macro: Start ZIP",
-    role: "switch",
-    type: "boolean",
-    write: true,
-    luxWriteId: "Activate_Zip",
-    isVirtual: true,
     required: true
   },
   hotWaterCircPumpOnTime: {
@@ -4353,6 +4353,16 @@ const STATE_MAPPING = {
     isVirtual: true,
     write: true,
     def: false,
+    required: true
+  },
+  Activate_Zip: {
+    folder: "Settings.05_ZIP",
+    name: { en: "Activate Circulation Pump (ZIP)", de: "Zirkulationspumpe (ZIP) aktivieren" },
+    role: "switch",
+    type: "boolean",
+    write: true,
+    luxWriteId: "Activate_Zip",
+    isVirtual: true,
     required: true
   },
   connection: {

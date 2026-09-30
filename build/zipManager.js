@@ -201,6 +201,10 @@ async function stopZipAndDeaeration(adapter) {
       if (dpZip) {
         await adapter.setOwnStateIfDifferent(dpZip, false, true);
       }
+      const virtualDp = (0, import_stateMapping.getDpPath)("Virtual_ZIP_Status");
+      if (virtualDp) {
+        await adapter.setStateChangedAsync(virtualDp, { val: false, ack: true });
+      }
     }
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
@@ -280,6 +284,10 @@ async function handleActivateZip(adapter, id, durationSeconds) {
     for (const actor of validActors) {
       try {
         await adapter.setForeignStateAsync(actor.zip_external_relay_id, true, false);
+        const virtualDp2 = (0, import_stateMapping.getDpPath)("Virtual_ZIP_Status");
+        if (virtualDp2) {
+          await adapter.setStateChangedAsync(virtualDp2, { val: true, ack: true });
+        }
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
         (0, import_logger.writeLog)(`[ZIP] Error switching on ${actor.zip_external_relay_id}: ${msg}`, "error");
@@ -292,6 +300,10 @@ async function handleActivateZip(adapter, id, durationSeconds) {
       for (const actor of validActors) {
         try {
           await adapter.setForeignStateAsync(actor.zip_external_relay_id, false, false);
+          const virtualDp2 = (0, import_stateMapping.getDpPath)("Virtual_ZIP_Status");
+          if (virtualDp2) {
+            await adapter.setStateChangedAsync(virtualDp2, { val: false, ack: true });
+          }
         } catch (err) {
           const msg = err instanceof Error ? err.message : String(err);
           (0, import_logger.writeLog)(`[ZIP] Error switching off ${actor.zip_external_relay_id}: ${msg}`, "error");
@@ -368,6 +380,10 @@ async function handleActivateZip(adapter, id, durationSeconds) {
         await safeRawWrite(adapter, u.key, parseInt(def.luxWriteId, 10), u.raw);
       }
     }
+  }
+  const virtualDp = (0, import_stateMapping.getDpPath)("Virtual_ZIP_Status");
+  if (virtualDp) {
+    await adapter.setStateChangedAsync(virtualDp, { val: true, ack: true });
   }
   adapter.zipTimer = adapter.setTimeout(async () => {
     await stopZipAndDeaeration(adapter);
