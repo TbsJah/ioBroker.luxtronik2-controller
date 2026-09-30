@@ -23,6 +23,15 @@
 ### 0.1.0 (2026-07-09)
 
 - initial release
+## 0.10.2 (2026-09-21)
+
+- **🚀 Features:**
+    - Implemented automated DTA file backup management with customizable cron schedules and automatic meta-directory creation in the ioBroker file system.
+
+- **🛠 Chores / Under the Hood**
+    - Enhanced TypeScript type checking, resolved strict ESLint warnings, and upgraded Node.js type definitions to support Node.js version 22.
+    - Optimized image scaling and layout rendering in `jsonConfig.json` for cleaner adapter settings presentation.
+
 ## 0.10.1 (2026-09-20)
 
 **🚀 Features & Improvements**

@@ -85,8 +85,7 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
-
-### **WORK IN PROGRESS**
+### 0.11.2 (2026-09-30)
 
 - **Features & Improvements:**
     - **Smart Parameter Filtering:** Added full support for the Luxtronik visibility registry (Network Command 3005). The adapter now automatically hides parameters in the ioBroker object tree that are physically not supported by your specific heat pump model (e.g., hiding defrost valves on brine-to-water pumps). This dramatically declutters the system.
@@ -124,15 +123,6 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 - **Fixes:**
     - Fixed the persistent `not an object of type "meta"` crash during DTA backups. The storage architecture was migrated away from isolated adapter namespaces to the robust, native `0_userdata.0` global storage, completely resolving folder creation permission issues on existing instances.
     - Corrected the dynamic file naming logic (`dta_live_...` vs. `dta_history_...`) to accurately reflect whether a live memory dump or a fallback history log was downloaded.
-
-### 0.10.2 (2026-09-21)
-
-- **🚀 Features:**
-    - Implemented automated DTA file backup management with customizable cron schedules and automatic meta-directory creation in the ioBroker file system.
-
-- **🛠 Chores / Under the Hood**
-    - Enhanced TypeScript type checking, resolved strict ESLint warnings, and upgraded Node.js type definitions to support Node.js version 22.
-    - Optimized image scaling and layout rendering in `jsonConfig.json` for cleaner adapter settings presentation.
 
 ## License
 
