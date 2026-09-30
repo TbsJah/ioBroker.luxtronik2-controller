@@ -711,6 +711,9 @@ export async function updateSystemInfos(adapter: AdapterInstance, rawValues: num
 	try {
 		const firmwareBuf = rawValues.slice(81, 91);
 		const firmwareString = createFirmwareString(firmwareBuf);
+		// Firmware für andere Module global in der Adapter-Instanz ablegen
+		(adapter as any).systemFirmware = firmwareString;
+
 		await setChangedSystemState(adapter, 'firmware', firmwareString);
 
 		const ipAddress = int2ipAddress(rawValues[91]);

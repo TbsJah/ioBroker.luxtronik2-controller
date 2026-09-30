@@ -66,7 +66,7 @@ class Luxtronik2Controller extends utils.Adapter {
 	/** Cache for the last evaluated heat pump operating state code */
 	private lastBzVal: string = '';
 	/** Lock flag preventing concurrent execution of the polling updates */
-	private updateRunning: boolean = false;
+	public updateRunning: boolean = false;
 	/** Timestamp tracking the last dynamic pump voltage optimization execution */
 	private lastPumpOptimization: number = 0;
 
@@ -601,6 +601,17 @@ class Luxtronik2Controller extends utils.Adapter {
 		if (this.updateRunning) {
 			return;
 		}
+
+		// Schreibvorgänge haben absolute Priorität!
+		// Wenn gerade geschrieben wird, überspringen wir den Lese-Zyklus,
+		// um alte Anlagen vor abstürzenden Netzwerk-Sockets zu schützen.
+		if (this.isWriting) {
+			if (this.isDebugLogActive) {
+				this.log.debug('Skipping read cycle because a write operation is currently in progress.');
+			}
+			return;
+		}
+
 		this.updateRunning = true;
 		try {
 			const delayHelper = (ms: number): Promise<void> => new Promise(resolve => this.setTimeout(resolve, ms));

@@ -503,6 +503,12 @@ class Luxtronik2Controller extends utils.Adapter {
     if (this.updateRunning) {
       return;
     }
+    if (this.isWriting) {
+      if (this.isDebugLogActive) {
+        this.log.debug("Skipping read cycle because a write operation is currently in progress.");
+      }
+      return;
+    }
     this.updateRunning = true;
     try {
       const delayHelper = (ms) => new Promise((resolve) => this.setTimeout(resolve, ms));

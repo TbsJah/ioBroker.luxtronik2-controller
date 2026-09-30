@@ -463,6 +463,7 @@ async function updateSystemInfos(adapter, rawValues) {
   try {
     const firmwareBuf = rawValues.slice(81, 91);
     const firmwareString = createFirmwareString(firmwareBuf);
+    adapter.systemFirmware = firmwareString;
     await setChangedSystemState(adapter, "firmware", firmwareString);
     const ipAddress = int2ipAddress(rawValues[91]);
     await setChangedSystemState(adapter, "ip_address", ipAddress);

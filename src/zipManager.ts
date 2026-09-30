@@ -40,6 +40,8 @@ interface ExtendedAdapter extends AdapterInstance {
 	writeCyclesTotal: number;
 	writeQueue: (() => Promise<void>)[];
 	isWriting: boolean;
+	systemFirmware?: string;
+	updateRunning: boolean;
 }
 
 // =========================================================

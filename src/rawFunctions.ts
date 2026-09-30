@@ -62,7 +62,9 @@ export interface RawAdapter extends AdapterInstance {
  */
 export async function writePumpSafe(adapter: RawAdapter, cmd: string | number, val: any): Promise<void> {
 	const paramId = typeof cmd === 'string' ? parseInt(cmd, 10) : cmd;
-	let value = typeof val === 'string' ? parseInt(val, 10) : val;
+	// WICHTIG: Das ist der noch fehlende Teil von Schritt 2!
+	// Zwingendes Runden: Luxtronik V1.x stürzt bei Fließkommazahlen ab.
+	let value = typeof val === 'string' ? parseInt(val, 10) : typeof val === 'number' ? Math.round(val) : val;
 
 	if (typeof value === 'boolean') {
 		value = value ? 1 : 0;
@@ -485,6 +487,16 @@ export interface RawAdapter extends AdapterInstance {
 	 * TRUE, wenn gerade eine Schreibwarteschlange abgearbeitet wird.
 	 */
 	isWriting: boolean;
+
+	/**
+	 * Abruf Firmware ID
+	 */
+	systemFirmware?: string;
+
+	/**
+	 * True, wenn Update läuft
+	 */
+	updateRunning: boolean;
 }
 
 /**
@@ -522,14 +534,30 @@ async function processQueue(adapter: RawAdapter): Promise<void> {
 
 	adapter.isWriting = true;
 
+	// Wir prüfen, ob es sich um die instabile V1.x Hardware handelt
+	const isOldFirmware =
+		adapter.systemFirmware && (adapter.systemFirmware.startsWith('1.') || adapter.systemFirmware.startsWith('V1.'));
+
+	// Dynamische Pause: 500ms für alte Anlagen, schnelle 100ms für alle anderen
+	const delayBetweenWrites = isOldFirmware ? 500 : 100;
+
 	try {
 		while (adapter.writeQueue.length > 0) {
+			// Den Schreibvorgang NUR bei V1.x pausieren, falls gerade gelesen wird.
+			// Moderne Anlagen können das ohne Absturz abarbeiten.
+			if (isOldFirmware) {
+				while (adapter.updateRunning) {
+					await new Promise<void>(resolve => adapter.setTimeout(resolve, 250));
+				}
+			}
+
 			const task = adapter.writeQueue.shift();
 
 			if (task) {
 				try {
 					await task();
-					await new Promise<void>(resolve => adapter.setTimeout(resolve, 300));
+					// Dynamische Sicherheitspause nach jedem Schreibvorgang
+					await new Promise<void>(resolve => adapter.setTimeout(resolve, delayBetweenWrites));
 				} catch (taskError: any) {
 					writeLog(
 						`Error processing specific serial write task sequence in queue: ${taskError.message}`,

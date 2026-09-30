@@ -63,7 +63,7 @@ const CONSTANTS = {
 const TCP_PORTS = /* @__PURE__ */ new Set([8888, 8889]);
 async function writePumpSafe(adapter, cmd, val) {
   const paramId = typeof cmd === "string" ? parseInt(cmd, 10) : cmd;
-  let value = typeof val === "string" ? parseInt(val, 10) : val;
+  let value = typeof val === "string" ? parseInt(val, 10) : typeof val === "number" ? Math.round(val) : val;
   if (typeof value === "boolean") {
     value = value ? 1 : 0;
   }
@@ -334,13 +334,20 @@ async function processQueue(adapter) {
     return;
   }
   adapter.isWriting = true;
+  const isOldFirmware = adapter.systemFirmware && (adapter.systemFirmware.startsWith("1.") || adapter.systemFirmware.startsWith("V1."));
+  const delayBetweenWrites = isOldFirmware ? 500 : 100;
   try {
     while (adapter.writeQueue.length > 0) {
+      if (isOldFirmware) {
+        while (adapter.updateRunning) {
+          await new Promise((resolve) => adapter.setTimeout(resolve, 250));
+        }
+      }
       const task = adapter.writeQueue.shift();
       if (task) {
         try {
           await task();
-          await new Promise((resolve) => adapter.setTimeout(resolve, 300));
+          await new Promise((resolve) => adapter.setTimeout(resolve, delayBetweenWrites));
         } catch (taskError) {
           (0, import_logger.writeLog)(
             `Error processing specific serial write task sequence in queue: ${taskError.message}`,
