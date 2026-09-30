@@ -4356,7 +4356,7 @@ const STATE_MAPPING = {
     required: true
   },
   Activate_Zip: {
-    folder: "Actions.05_ZIP",
+    folder: "Actions",
     name: { en: "Activate Circulation Pump (ZIP)", de: "Zirkulationspumpe (ZIP) aktivieren" },
     role: "switch",
     type: "boolean",

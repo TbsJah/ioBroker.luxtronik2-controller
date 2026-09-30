@@ -170,6 +170,14 @@ class Luxtronik2Controller extends utils.Adapter {
     } catch (error) {
       this.log.error(`Initial data retrieval failed (device offline?): ${error.message}`);
     }
+    const dpActivateZip = (0, import_stateMapping.getDpPath)("Activate_Zip");
+    if (dpActivateZip) {
+      await this.setState(dpActivateZip, { val: false, ack: true });
+    }
+    const dpVirtualZipStatus = (0, import_stateMapping.getDpPath)("Virtual_ZIP_Status");
+    if (dpVirtualZipStatus) {
+      await this.setState(dpVirtualZipStatus, { val: false, ack: true });
+    }
     let intervalSeconds = this.config.interval ? Number(this.config.interval) : 45;
     if (intervalSeconds < 10) {
       intervalSeconds = 10;

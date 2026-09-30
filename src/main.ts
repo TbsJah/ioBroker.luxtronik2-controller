@@ -212,6 +212,17 @@ class Luxtronik2Controller extends utils.Adapter {
 			this.log.error(`Initial data retrieval failed (device offline?): ${error.message}`);
 		}
 
+		// Virtuelle ZIP-Datenpunkte beim Start initialisieren, um 'null' Werte zu vermeiden
+		const dpActivateZip = getDpPath('Activate_Zip');
+		if (dpActivateZip) {
+			await this.setState(dpActivateZip, { val: false, ack: true });
+		}
+
+		const dpVirtualZipStatus = getDpPath('Virtual_ZIP_Status');
+		if (dpVirtualZipStatus) {
+			await this.setState(dpVirtualZipStatus, { val: false, ack: true });
+		}
+
 		let intervalSeconds = this.config.interval ? Number(this.config.interval) : 45;
 		if (intervalSeconds < 10) {
 			intervalSeconds = 10;
