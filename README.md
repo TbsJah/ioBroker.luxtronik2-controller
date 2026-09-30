@@ -85,8 +85,7 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
-
-### **WORK IN PROGRESS**
+### 0.12.0 (2026-09-30)
 
 - **⚠️ BREAKING CHANGE:**
     - The datapoint to manually trigger the circulation pump macro (`Activate_Zip`) has been moved from the `Settings` folder to the `Actions` folder for better UX. If you use this state in your scripts or visualizations, please update the datapoint path!
@@ -121,17 +120,6 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ### 0.10.4 (2026-09-21)
 
 - Update Readme
-
-### 0.10.3 (2026-09-21)
-
-- **Features & Improvements:**
-    - Optimized the automated DTA backup process by directly utilizing the `/NewProc` file stream, eliminating unnecessary artificial delays and stabilizing the heat pump controller.
-    - Streamlined the backup configuration: Removed the custom file path input to prevent file system conflicts. Backups are now securely stored in the universally accessible global `0_userdata.0/luxtronik_backups/` directory.
-    - Added a clear information box in the adapter configuration, explaining where to find the generated backup files within the ioBroker UI.
-
-- **Fixes:**
-    - Fixed the persistent `not an object of type "meta"` crash during DTA backups. The storage architecture was migrated away from isolated adapter namespaces to the robust, native `0_userdata.0` global storage, completely resolving folder creation permission issues on existing instances.
-    - Corrected the dynamic file naming logic (`dta_live_...` vs. `dta_history_...`) to accurately reflect whether a live memory dump or a fallback history log was downloaded.
 
 ## License
 
