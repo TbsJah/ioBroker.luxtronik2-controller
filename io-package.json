@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "luxtronik2-controller",
-    "version": "0.13.0",
+    "version": "0.13.1",
     "news": {
+      "0.13.1": {
+        "en": "**Fix (Circulation/ZIP):** Fixed a bug where the `Virtual_ZIP_Status` datapoint would remain stuck on `true` when using external relays (e.g., Shelly), even though the hardware relay was correctly turned off. The state reset logic has been decoupled and is now guaranteed to execute, ensuring the ioBroker interface stays perfectly synchronized with the actual hardware state.",
+        "de": "**Fix (Circulation/ZIP) :** Es wurde ein Bug behoben, bei dem der Datenpunkt `Virtual_ZIP_Status` bei externen Relays (z. B. Shelly) auf `true` hängen blieb, obwohl das Hardware-Relay korrekt ausgeschaltet war. Die State-Reset-Logik wurde entkoppelt und läuft jetzt garantiert, dass das ioBroker-Interface perfekt mit dem Hardwarestatus synchronisiert ist.",
+        "ru": "**Исправлено (Circulation/zip) :** Исправлена ошибка, из-за которой точка данных `Virtual_zip_Status` зависала на уровне «true» при использовании внешних реле (например, Shelly), даже если аппаратное реле было правильно выключено. Логика восстановления состояния была разделена и теперь гарантированно выполняется, что обеспечивает идеальную синхронизацию интерфейса IOBroker с реальным состоянием оборудования.",
+        "pt": "**Fix (circulation/ZIP) :** Corrigido um bug em que o datapoint `virtual_ZIP_status` ficava preso em `true` ao usar relés externos (ex: Shelly), mesmo com o relé de hardware corretamente desligado. A lógica de redefinição de estado foi desacoplada e agora garante que a interface IOBroker fique perfeitamente sincronizada com o estado real do hardware.",
+        "nl": "**Fix (Circulation/zip) :** Probleem opgelost waarbij het datapunt van `Virtual_ZIP_Status` vast bleef zitten op `true` bij gebruik van externe relais (bijvoorbeeld Shelly), ook al was het hardwarerelais correct uitgeschakeld. De logica voor het opnieuw instellen van de status is ontkoppeld en wordt nu gegarandeerd uitgevoerd, zodat de IOBroker-interface perfect gesynchroniseerd blijft met de werkelijke hardwarestatus.",
+        "fr": "**Fix (Circulation/ZIP) :** Correction d'un bug qui bloquait le point de données « Virtual_ZIP_Status » sur « true » lors de l'utilisation de relais externes (Shelly, par exemple), alors que le relais matériel était correctement désactivé. La logique de réinitialisation a été découplée et son exécution est désormais garantie, afin que l'interface IObroker reste parfaitement synchronisée avec l'état réel du matériel.",
+        "it": "**Fix (Circulation/ZIP) :** Risolto un bug per cui il datapoint `Virtual_ZIP_STATUS` rimaneva bloccato su `true` quando si usavano relè esterni (es. Shelly), anche se il relè hardware era spento correttamente. La logica di ripristino dello stato è stata disaccoppiata e ora è garantita, garantendo la perfetta sincronizzazione dell'interfaccia IObroker.",
+        "es": "**Corrección (circulación/ZIP) :** Se ha corregido un error por el que el punto de datos `Virtual_ZIP_Status` permanecía atascado en «true» al utilizar relés externos (por ejemplo, Shelly), aunque el relé de hardware estaba correctamente apagado. La lógica de restablecimiento del estado se ha desacoplado y ahora se garantiza que la interfaz ioBroker se sincroniza perfectamente con el estado real del hardware.",
+        "pl": "**Poprawka (cyrkulacja/zip) :** Naprawiono błąd, który powodował, że punkt danych `Virtual_ZIP_Status` utknął na `true` podczas korzystania z zewnętrznych przekaźników (np. Shelly), mimo że przekaźnik sprzętowy był poprawnie wyłączony. Logika resetowania stanu została odłączona i jest teraz gwarantowana, zapewniając, że interfejs ioBroker pozostaje idealnie zsynchronizowany z rzeczywistym stanem sprzętu.",
+        "uk": "**Виправлено (циркуляція/ZIP) :** Виправлена помилка, коли точка даних `Virtual_zip_status` залишалася застряглою на `true` при використанні зовнішніх реле (наприклад, Shelly), навіть якщо апаратне реле було правильно вимкнено. Логіка скидання стану була роз'єднана і тепер гарантовано виконується, гарантуючи, що інтерфейс IObroker залишається ідеально синхронізованим з фактичним станом обладнання.",
+        "zh-cn": "**修复（循环/ZIP）：** 修复了在使用外部中继（例如 Shelly）时，即使硬件中继已正确关闭，“Virtual_ZIP_Status” 数据点仍会停留在 “真” 状态的错误。状态重置逻辑已解耦，现在可以保证执行，从而确保 IOBroker 接口与实际硬件状态保持完美同步。"
+      },
       "0.13.0": {
         "en": "**Bugfixes:**\n**Critical DHW Target Fix:** Fixed an issue where the hot water target temperature was incorrectly written to parameter 2 instead of 105. This resolves unexpected temperature jumps (e.g., to 65°C) and socket timeouts on various heat pump models.\n**Write Queue Timeout:** Added a maximum wait timeout to the write queue lock for legacy V1.x firmware to prevent potential infinite loops during read-write collisions.\n**Backup Manager Multi-Instance Fix:** The automated DTA backup cron job is now safely scoped to the specific adapter instance, preventing conflicts when running multiple heat pumps on the same ioBroker host.\n**Under the Hood / Refactoring:**\n**Centralized Typings:** Completely refactored the TypeScript architecture by introducing a centralized `LuxtronikAdapter` interface (`types.ts`). Replaced all fragmented, local interfaces across sub-modules to ensure strict, project-wide type safety and better maintainability.",
         "de": "**Bugfixes: **\n**Critical DHW Target Fix: ** Es wurde ein Fehler behoben, bei dem die Warmwasser-Zieltemperatur falsch angegeben wurde. Das behebt unerwartete Temperatursprünge (z. B. auf 65 °C) und Steckdosen bei Wärmepumpenmodellen.\n**Timeout für Schreibwarteschlange: ** Der Schreibwarteschleife für ältere V1.x-Firmware wurde hinzugefügt, um Endlosschleifen bei Lese-/Schreibkollisionen zu vermeiden.\n**Backup Manager Multi-Instance Fix: ** Der automatische DTA-Backup-Cron Job ist nun auf die Adapterinstanz beschränkt und verhindert Konflikte beim Betrieb mehrerer Wärmepumpen auf demselben ioBroker-Host.\n**Unter der Haube/ Refactoring: **\n**Zentralisierte Typisierung: ** Die TypeScript-Architektur wurde durch ein zentrales LuxtronikAdapter−Interface (`types.ts`) überarbeitet. Ersetzte alle fragmentierten lokalen Schnittstellen der Submodule für strikte, projektweite Typsicherheit und Wartung.",
@@ -80,19 +93,6 @@
         "pl": "**Ulepszenia: **\nDodano globalne zaokrąglanie do 2 miejsc po przecinku dla wszystkich obliczonych wartości telemetrii (np. przeliczanie sekund roboczych na godziny). Zapewnia to czystsze drzewo stanów ioBroker i zapobiega nadmiernie długim liczbom zmiennoprzecinkowym zaśmiecaniu baz danych historii (takich jak InfluxDB).",
         "uk": "**Покращення: **\nДодано глобальне округлення до 2 знаків після коми для всіх обчислених значень телеметрії (наприклад, перетворення робочих секунд у години). Це забезпечує більш чисте дерево станів IObroker і запобігає надмірно довгим числам з плаваючою комою захаращувати бази даних історії (наприклад, InfluxDB).",
         "zh-cn": "**改进：**\n将所有计算出的遥测值的全局舍入到小数点后 2 位（例如，将操作秒数转换为小时）。这提供了更简洁的IOBroker状态树，并防止过长的浮点数使历史数据库（如InfluxDB）混乱。"
-      },
-      "0.10.4": {
-        "en": "Update Readme",
-        "de": "Aktualisierung Readme",
-        "ru": "Обновить файл Readme",
-        "pt": "Atualize o Readme",
-        "nl": "Readme bijwerken",
-        "fr": "Mettre à jour Readme",
-        "it": "Aggiornamento del file Readme",
-        "es": "Actualización del archivo «Readme»",
-        "pl": "Zaktualizuj Readme",
-        "uk": "Оновити Readme",
-        "zh-cn": "更新自述文件"
       }
     },
     "titleLang": {
