@@ -270,16 +270,17 @@ export async function stopZipAndDeaeration(adapter: LuxtronikAdapter): Promise<v
 			if (dpZip) {
 				await adapter.setOwnStateIfDifferent(dpZip, false, true);
 			}
-
-			// Virtuellen Status auf AUS setzen, wenn das Makro gestoppt wird
-			const virtualDp = getDpPath('Virtual_ZIP_Status');
-			if (virtualDp) {
-				await adapter.setStateChangedAsync(virtualDp, { val: false, ack: true });
-			}
 		}
 	} catch (err: unknown) {
 		const msg = err instanceof Error ? err.message : String(err);
 		writeLog(`Error stopping ZIP/Deaeration: ${msg}`, 'error');
+	} finally {
+		// GARANTIERTER RESET: Virtueller Status wird immer auf AUS gesetzt,
+		// unabhängig davon, ob beim Senden der Befehle zuvor Fehler aufgetreten sind.
+		const virtualDp = getDpPath('Virtual_ZIP_Status');
+		if (virtualDp) {
+			await adapter.setStateChangedAsync(virtualDp, { val: false, ack: true });
+		}
 	}
 }
 
@@ -358,6 +359,12 @@ export async function handleActivateZip(adapter: LuxtronikAdapter, id: string, d
 						writeLog(`[ZIP] Error switching off relay: ${msg}`, 'error');
 					}
 				}
+
+				// Isolierter Reset
+				const virtualDp = getDpPath('Virtual_ZIP_Status');
+				if (virtualDp) {
+					await adapter.setStateChangedAsync(virtualDp, { val: false, ack: true });
+				}
 				await adapter.setState(localId, { val: false, ack: true }); // Reset Button
 			} else {
 				await stopZipAndDeaeration(adapter);
@@ -394,17 +401,19 @@ export async function handleActivateZip(adapter: LuxtronikAdapter, id: string, d
 			for (const actor of validActors) {
 				try {
 					await adapter.setForeignStateAsync(actor.zip_external_relay_id, false, false);
-					// Virtuellen Status auf AUS setzen
-					const virtualDp = getDpPath('Virtual_ZIP_Status');
-					if (virtualDp) {
-						await adapter.setStateChangedAsync(virtualDp, { val: false, ack: true });
-					}
 				} catch (err) {
 					const msg = err instanceof Error ? err.message : String(err);
 					writeLog(`[ZIP] Error switching off ${actor.zip_external_relay_id}: ${msg}`, 'error');
 				}
 			}
+
+			// Isolierter Reset, unberührt von evtl. Fehlern der externen Relais
+			const virtualDp = getDpPath('Virtual_ZIP_Status');
+			if (virtualDp) {
+				await adapter.setStateChangedAsync(virtualDp, { val: false, ack: true });
+			}
 			await adapter.setState(localId, { val: false, ack: true }); // Reset Button
+
 			if (adapter.isDebugLogActive) {
 				writeLog(`[ZIP] Timeout. External relays OFF.`, 'debug');
 			}

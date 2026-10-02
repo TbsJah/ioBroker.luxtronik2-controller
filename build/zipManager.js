@@ -201,14 +201,15 @@ async function stopZipAndDeaeration(adapter) {
       if (dpZip) {
         await adapter.setOwnStateIfDifferent(dpZip, false, true);
       }
-      const virtualDp = (0, import_stateMapping.getDpPath)("Virtual_ZIP_Status");
-      if (virtualDp) {
-        await adapter.setStateChangedAsync(virtualDp, { val: false, ack: true });
-      }
     }
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     (0, import_logger.writeLog)(`Error stopping ZIP/Deaeration: ${msg}`, "error");
+  } finally {
+    const virtualDp = (0, import_stateMapping.getDpPath)("Virtual_ZIP_Status");
+    if (virtualDp) {
+      await adapter.setStateChangedAsync(virtualDp, { val: false, ack: true });
+    }
   }
 }
 async function handleActivateZip(adapter, id, durationSeconds) {
@@ -270,6 +271,10 @@ async function handleActivateZip(adapter, id, durationSeconds) {
             (0, import_logger.writeLog)(`[ZIP] Error switching off relay: ${msg}`, "error");
           }
         }
+        const virtualDp2 = (0, import_stateMapping.getDpPath)("Virtual_ZIP_Status");
+        if (virtualDp2) {
+          await adapter.setStateChangedAsync(virtualDp2, { val: false, ack: true });
+        }
         await adapter.setState(localId, { val: false, ack: true });
       } else {
         await stopZipAndDeaeration(adapter);
@@ -300,14 +305,14 @@ async function handleActivateZip(adapter, id, durationSeconds) {
       for (const actor of validActors) {
         try {
           await adapter.setForeignStateAsync(actor.zip_external_relay_id, false, false);
-          const virtualDp2 = (0, import_stateMapping.getDpPath)("Virtual_ZIP_Status");
-          if (virtualDp2) {
-            await adapter.setStateChangedAsync(virtualDp2, { val: false, ack: true });
-          }
         } catch (err) {
           const msg = err instanceof Error ? err.message : String(err);
           (0, import_logger.writeLog)(`[ZIP] Error switching off ${actor.zip_external_relay_id}: ${msg}`, "error");
         }
+      }
+      const virtualDp2 = (0, import_stateMapping.getDpPath)("Virtual_ZIP_Status");
+      if (virtualDp2) {
+        await adapter.setStateChangedAsync(virtualDp2, { val: false, ack: true });
       }
       await adapter.setState(localId, { val: false, ack: true });
       if (adapter.isDebugLogActive) {

@@ -99,7 +99,7 @@ Zum Vergleich: Eine Aktivierung per Luxtronik2 Regler benötigt für das Entlüf
 
 In seltenen Fällen (insbesondere bei älteren Firmware-Versionen wie V1.x) kann es zu Verbindungsabbrüchen oder Timeouts beim Schreiben von Werten kommen (z.B. `Timeout writing TCP parameter 105`).
 
-Um herauszufinden, ob das Problem am Adapter oder an der Wärmepumpe selbst liegt, liegt diesem Repository ein isoliertes Test-Skript (`Test_Script.ts` im Ordner `Test_Script`) bei. Dieses Skript kommuniziert komplett am Adapter vorbei direkt über rohe TCP-Sockets mit der Luxtronik-Steuerung. Es testet den Schreib- und Lesezugriff, indem es den Warmwasser-Sollwert ausliest, ihn testweise minimal erhöht und sofort wieder den Originalwert herstellt.
+Um herauszufinden, ob das Problem am Adapter oder an der Wärmepumpe selbst liegt, liegt diesem Repository ein isoliertes Test-Skript (`Test_Script.ts` im Ordner `Scripte`) bei. Dieses Skript kommuniziert komplett am Adapter vorbei direkt über rohe TCP-Sockets mit der Luxtronik-Steuerung. Es testet den Schreib- und Lesezugriff, indem es den Warmwasser-Sollwert ausliest, ihn testweise minimal erhöht und sofort wieder den Originalwert herstellt.
 
 #### Ausführung im ioBroker:
 
