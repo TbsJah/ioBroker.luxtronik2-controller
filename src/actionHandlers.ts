@@ -1,19 +1,11 @@
-import type { AdapterInstance } from '@iobroker/adapter-core';
 import { writeLog } from './logger';
 import { getDpPath } from './stateMapping';
+import type { LuxtronikAdapter } from './types';
 import { getNumber } from './utils';
 
 // =========================================================
 // TYPEN & KONSTANTEN
 // =========================================================
-
-/**
- * Erweitert die ioBroker Adapter-Instanz um die spezifischen Methoden für Aktionen.
- */
-export interface ActionAdapter extends AdapterInstance {
-	/** Synchronisiert einen Wert mit der Wärmepumpe */
-	syncConfigValue: (key: string, value: any) => Promise<void>;
-}
 
 const CONSTANTS = {
 	/** Status-Code für den Ruhezustand der Anlage */
@@ -32,7 +24,7 @@ const CONSTANTS = {
  * @param adapter Die Instanz des ioBroker-Adapters.
  * @param id Die ID des auslösenden Datenpunkts.
  */
-export async function handleZwangswarmwasser(adapter: ActionAdapter, id: string): Promise<void> {
+export async function handleZwangswarmwasser(adapter: LuxtronikAdapter, id: string): Promise<void> {
 	try {
 		const localId = id.replace(`${adapter.namespace}.`, '');
 		await adapter.setState(localId, { val: false, ack: true });
@@ -69,7 +61,7 @@ export async function handleZwangswarmwasser(adapter: ActionAdapter, id: string)
 		forceSoll = Math.round(forceSoll * 10) / 10;
 
 		// Statt der Hysterese wird nun der Warmwasser-Sollwert überschrieben
-		await adapter.syncConfigValue('warmwater_temperature', forceSoll);
+		await adapter.syncConfigValue('temperature_hot_water_target', forceSoll);
 
 		writeLog(
 			`Forced hot water: Triggered - Actual (${wwIst}°C) < Target-1 (${wwSoll - 1}°C). Target temperature temporarily set to ${forceSoll}°C.`,
@@ -87,7 +79,7 @@ export async function handleZwangswarmwasser(adapter: ActionAdapter, id: string)
  * @param adapter Die Instanz des ioBroker-Adapters.
  * @param id Die ID des auslösenden Datenpunkts.
  */
-export async function handleZwangsheizen(adapter: ActionAdapter, id: string): Promise<void> {
+export async function handleZwangsheizen(adapter: LuxtronikAdapter, id: string): Promise<void> {
 	try {
 		const localId = id.replace(`${adapter.namespace}.`, '');
 		await adapter.setState(localId, { val: false, ack: true });

@@ -1,6 +1,6 @@
-import type { AdapterInstance } from '@iobroker/adapter-core';
 import { writeLog } from './logger';
 import { getDpPath } from './stateMapping';
+import type { LuxtronikAdapter } from './types';
 
 // =========================================================
 // TYPES & INTERFACES
@@ -18,20 +18,6 @@ export interface ErrorHistoryEntry {
 	datum: string;
 	/** The raw Unix timestamp */
 	timestamp?: number;
-}
-
-/**
- * Extended adapter interface to provide type safety for dynamic properties and methods.
- */
-export interface ExtendedAdapter extends AdapterInstance {
-	/** The adapter configuration from io-package.json combined with dynamic values */
-	config: ioBroker.AdapterConfig & Record<string, any>;
-	/** Stores the timestamp of the last reported error to prevent duplicate alerts */
-	lastKnownErrorTimestamp?: number | null;
-	/** Stores the timestamp of the last reported outage to prevent duplicate alerts */
-	lastKnownOutageTimestamp?: number | null;
-	/** Timestamp of the last sent flow warning (Spam protection cooldown) */
-	lastFlowNotificationTime?: number;
 }
 
 // =========================================================
@@ -60,7 +46,7 @@ function safeParse<T>(value: string): T | null {
  * @param message - The message text to send.
  * @returns A promise resolving to an array of successful delivery channel names.
  */
-async function sendNotification(adapter: ExtendedAdapter, message: string): Promise<string[]> {
+async function sendNotification(adapter: LuxtronikAdapter, message: string): Promise<string[]> {
 	const config = adapter.config;
 	const successMessages: string[] = [];
 
@@ -109,7 +95,7 @@ async function sendNotification(adapter: ExtendedAdapter, message: string): Prom
  * @param adapter - The extended adapter instance.
  * @param message - The message text to send.
  */
-export function sendTelegramNotification(adapter: ExtendedAdapter, message: string): void {
+export function sendTelegramNotification(adapter: LuxtronikAdapter, message: string): void {
 	void sendNotification(adapter, message);
 }
 
@@ -120,7 +106,7 @@ export function sendTelegramNotification(adapter: ExtendedAdapter, message: stri
  * @param obj - The standardized ioBroker message structure.
  * @returns A promise resolving when the test message has been processed.
  */
-export async function handleTestMessage(adapter: ExtendedAdapter, obj: ioBroker.Message): Promise<void> {
+export async function handleTestMessage(adapter: LuxtronikAdapter, obj: ioBroker.Message): Promise<void> {
 	try {
 		writeLog('Test button triggered!', 'info');
 		const config = adapter.config;
@@ -198,7 +184,7 @@ export async function handleTestMessage(adapter: ExtendedAdapter, obj: ioBroker.
  * @returns A promise resolving when the check finishes.
  */
 export async function checkAndSendErrorNotifications(
-	adapter: ExtendedAdapter,
+	adapter: LuxtronikAdapter,
 	oldFehlerVal: string | undefined,
 	newFehlerVal: string | undefined,
 ): Promise<void> {
@@ -245,7 +231,7 @@ export async function checkAndSendErrorNotifications(
  * @param newOutageVal - Der neue State der Abschaltungen (JSON).
  */
 export async function checkAndSendOutageNotifications(
-	adapter: ExtendedAdapter,
+	adapter: LuxtronikAdapter,
 	oldOutageVal: string | undefined,
 	newOutageVal: string | undefined,
 ): Promise<void> {

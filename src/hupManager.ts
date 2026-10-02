@@ -1,17 +1,5 @@
-import type { AdapterInstance } from '@iobroker/adapter-core';
 import { writeLog } from './logger';
-
-/**
- * Erweitertes ioBroker Adapter-Interface für den HUP-Manager.
- */
-export interface HupAdapter extends AdapterInstance {
-	/** Die Adapter-Konfiguration kombiniert mit dynamischen Werten. */
-	config: ioBroker.AdapterConfig & Record<string, any>;
-	/** Funktion zum Synchronisieren eines Wertes mit der Wärmepumpe. */
-	syncConfigValue: (key: string, value: any) => Promise<void>;
-	/** Gibt an, ob das erweiterte Debug-Logging aktiv ist. */
-	isDebugLogActive?: boolean;
-}
+import type { LuxtronikAdapter } from './types';
 
 /**
  * Übernimmt die dynamische Regelung der Heizungsumwälzpumpe (HUP) anhand der Spreizung.
@@ -24,7 +12,7 @@ export interface HupAdapter extends AdapterInstance {
  * @returns Den aktualisierten Timestamp der letzten Anpassung
  */
 export async function handleHupOptimization(
-	adapter: HupAdapter,
+	adapter: LuxtronikAdapter,
 	istHeizen: boolean,
 	spreizung: number,
 	hupAktiv: number,

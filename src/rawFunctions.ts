@@ -1,8 +1,8 @@
-import type { AdapterInstance } from '@iobroker/adapter-core';
 import * as net from 'node:net';
 import { WebSocket, type RawData } from 'ws';
 import { writeLog } from './logger';
 import { getDpPath } from './stateMapping';
+import type { LuxtronikAdapter } from './types';
 import { delay } from './utils';
 // =========================================================
 // KONSTANTEN
@@ -42,25 +42,13 @@ const TCP_PORTS = new Set([8888, 8889]);
 // =========================================================
 
 /**
- * Erweitertes Adapter-Interface für den Zugriff auf den Rohwert-Cache
- */
-export interface RawAdapter extends AdapterInstance {
-	/** Konfigurationsobjekt des Adapters */
-	config: any;
-	/** Array der aktuellen Rohwert-Parameter aus dem Cache */
-	currentRawParams?: number[];
-	/** Gibt an, ob das Debug-Logging aktiviert ist. */
-	isDebugLogActive?: boolean;
-}
-
-/**
  * Schreibt einen Wert nur dann über das Netzwerk, wenn er vom Ist-Zustand abweicht.
  *
  * @param adapter Die erweiterte ioBroker Adapter-Instanz
  * @param cmd Die Parameter-ID (Register)
  * @param val Der zu schreibende Wert
  */
-export async function writePumpSafe(adapter: RawAdapter, cmd: string | number, val: any): Promise<void> {
+export async function writePumpSafe(adapter: LuxtronikAdapter, cmd: string | number, val: any): Promise<void> {
 	const paramId = typeof cmd === 'string' ? parseInt(cmd, 10) : cmd;
 	// WICHTIG: Das ist der noch fehlende Teil von Schritt 2!
 	// Zwingendes Runden: Luxtronik V1.x stürzt bei Fließkommazahlen ab.
@@ -117,7 +105,7 @@ export async function writePumpSafe(adapter: RawAdapter, cmd: string | number, v
  * @param adapter Die Instanz des ioBroker-Adapters.
  * @returns True, wenn WebSocket genutzt werden soll (Port ungleich 8888/8889).
  */
-function shouldUseWs(adapter: AdapterInstance): boolean {
+function shouldUseWs(adapter: LuxtronikAdapter): boolean {
 	const port = adapter.config.port ? Number(adapter.config.port) : CONSTANTS.PORT_TCP;
 	return !TCP_PORTS.has(port);
 }
@@ -179,7 +167,7 @@ function parseRawResponse(responseData: Buffer, command: number): number[] | nul
 // =========================================================
 
 interface ConnectionContext<T> {
-	adapter: AdapterInstance;
+	adapter: LuxtronikAdapter;
 	socket: net.Socket | WebSocket;
 	timeout?: ioBroker.Timeout;
 	resolve: (val: T | PromiseLike<T>) => void;
@@ -237,14 +225,14 @@ function createFinisher<T>(ctx: ConnectionContext<T>): (err?: Error, data?: T) =
  * @param command The command number
  * @returns Promise with the raw data as number array
  */
-export function readAllRaw(adapter: AdapterInstance, command: number): Promise<number[]> {
+export function readAllRaw(adapter: LuxtronikAdapter, command: number): Promise<number[]> {
 	if (shouldUseWs(adapter)) {
 		return readAllRawWs(adapter, command);
 	}
 	return readAllRawTcp(adapter, command);
 }
 
-function readAllRawWs(adapter: AdapterInstance, command: number): Promise<number[]> {
+function readAllRawWs(adapter: LuxtronikAdapter, command: number): Promise<number[]> {
 	return new Promise<number[]>((resolve, reject) => {
 		const host = adapter.config.host || '127.0.0.1';
 		const port = adapter.config.port ? Number(adapter.config.port) : CONSTANTS.PORT_WS;
@@ -293,7 +281,7 @@ function readAllRawWs(adapter: AdapterInstance, command: number): Promise<number
 	});
 }
 
-function readAllRawTcp(adapter: AdapterInstance, command: number): Promise<number[]> {
+function readAllRawTcp(adapter: LuxtronikAdapter, command: number): Promise<number[]> {
 	return new Promise<number[]>((resolve, reject) => {
 		const host = adapter.config.host || '127.0.0.1';
 		const port = adapter.config.port ? Number(adapter.config.port) : CONSTANTS.PORT_TCP;
@@ -344,14 +332,14 @@ function readAllRawTcp(adapter: AdapterInstance, command: number): Promise<numbe
  * @param value - Value to write
  * @returns Promise that resolves when write completes
  */
-export function writeRawParameter(adapter: AdapterInstance, paramId: number, value: number): Promise<void> {
+export function writeRawParameter(adapter: LuxtronikAdapter, paramId: number, value: number): Promise<void> {
 	if (shouldUseWs(adapter)) {
 		return writeRawParameterWs(adapter, paramId, value);
 	}
 	return writeRawParameterTcp(adapter, paramId, value);
 }
 
-function writeRawParameterWs(adapter: AdapterInstance, paramId: number, value: number): Promise<void> {
+function writeRawParameterWs(adapter: LuxtronikAdapter, paramId: number, value: number): Promise<void> {
 	return new Promise<void>((resolve, reject) => {
 		const host = adapter.config.host || '127.0.0.1';
 		const port = adapter.config.port ? Number(adapter.config.port) : CONSTANTS.PORT_WS;
@@ -375,7 +363,7 @@ function writeRawParameterWs(adapter: AdapterInstance, paramId: number, value: n
 	});
 }
 
-function writeRawParameterTcp(adapter: AdapterInstance, paramId: number, value: number): Promise<void> {
+function writeRawParameterTcp(adapter: LuxtronikAdapter, paramId: number, value: number): Promise<void> {
 	return new Promise<void>((resolve, reject) => {
 		const host = adapter.config.host || '127.0.0.1';
 		const port = adapter.config.port ? Number(adapter.config.port) : CONSTANTS.PORT_TCP;
@@ -412,7 +400,7 @@ function writeRawParameterTcp(adapter: AdapterInstance, paramId: number, value: 
  *
  * @param adapter - The ioBroker adapter instance used for logging and timing.
  */
-export async function dumpAllRawToLog(adapter: AdapterInstance): Promise<void> {
+export async function dumpAllRawToLog(adapter: LuxtronikAdapter): Promise<void> {
 	const useWs = shouldUseWs(adapter);
 
 	try {
@@ -442,64 +430,6 @@ export async function dumpAllRawToLog(adapter: AdapterInstance): Promise<void> {
 }
 
 /**
- * Erweitertes ioBroker Adapter-Interface für den Rohdaten-Zugriff.
- * Stellt sicher, dass die in der Hauptklasse definierten Caches und
- * Zähler in den ausgelagerten Netzwerk-Funktionen typsicher zur Verfügung stehen.
- */
-export interface RawAdapter extends AdapterInstance {
-	/**
-	 * Die Adapter-Konfiguration aus der Benutzeroberfläche (io-package.json)
-	 * kombiniert mit dynamischen Werten.
-	 */
-	config: any;
-
-	/**
-	 * Globaler Cache der aktuellen Roh-Parameter (Befehl 3003) von der Wärmepumpe.
-	 * Wird als Referenz für die "Read-Before-Write" Logik verwendet, um
-	 * redundante Schreibvorgänge (Flash-Wear) zu blockieren.
-	 */
-	currentRawParams?: number[];
-
-	/**
-	 * Gibt an, ob das erweiterte Debug-Logging durch den Nutzer oder das System
-	 * aktuell aktiviert ist.
-	 */
-	isDebugLogActive?: boolean;
-
-	/**
-	 * Zähler für die physischen Schreibvorgänge auf den Flash-Speicher
-	 * am aktuellen Kalendertag. Wird jede Nacht um 00:00 Uhr auf 0 zurückgesetzt.
-	 */
-	writeCyclesToday: number;
-
-	/**
-	 * Fortlaufender Zähler für alle physischen Schreibvorgänge auf den Flash-Speicher
-	 * über die gesamte Lebensdauer des Adapters (seit dem letzten kompletten Reset).
-	 */
-	writeCyclesTotal: number;
-
-	/**
-	 * Interner Puffer für die zu verarbeitenden Schreibaufgaben.
-	 */
-	writeQueue: (() => Promise<void>)[];
-
-	/**
-	 * TRUE, wenn gerade eine Schreibwarteschlange abgearbeitet wird.
-	 */
-	isWriting: boolean;
-
-	/**
-	 * Abruf Firmware ID
-	 */
-	systemFirmware?: string;
-
-	/**
-	 * True, wenn Update läuft
-	 */
-	updateRunning: boolean;
-}
-
-/**
  * Pushes a hardware write task into a single-threaded execution queue to guarantee transmission safety.
  *
  * @param adapter - The adapter instance.
@@ -507,7 +437,7 @@ export interface RawAdapter extends AdapterInstance {
  * @param val - The value payload to map.
  * @returns A promise that completes once the queue executes this task.
  */
-export async function queueWrite(adapter: RawAdapter, cmd: string | number, val: any): Promise<void> {
+export async function queueWrite(adapter: LuxtronikAdapter, cmd: string | number, val: any): Promise<void> {
 	return new Promise((resolve, reject) => {
 		adapter.writeQueue.push(async () => {
 			try {
@@ -527,7 +457,7 @@ export async function queueWrite(adapter: RawAdapter, cmd: string | number, val:
  *
  * @param adapter - The adapter instance.
  */
-async function processQueue(adapter: RawAdapter): Promise<void> {
+async function processQueue(adapter: LuxtronikAdapter): Promise<void> {
 	if (adapter.isWriting || adapter.writeQueue.length === 0) {
 		return;
 	}
@@ -546,8 +476,14 @@ async function processQueue(adapter: RawAdapter): Promise<void> {
 			// Den Schreibvorgang NUR bei V1.x pausieren, falls gerade gelesen wird.
 			// Moderne Anlagen können das ohne Absturz abarbeiten.
 			if (isOldFirmware) {
-				while (adapter.updateRunning) {
+				let waitCounter = 0;
+				while (adapter.updateRunning && waitCounter < 20) {
+					// Max 5 Sekunden (20 * 250ms) warten
 					await new Promise<void>(resolve => adapter.setTimeout(resolve, 250));
+					waitCounter++;
+				}
+				if (waitCounter >= 20 && adapter.isDebugLogActive) {
+					writeLog('Queue wait timeout reached! Forcing write operation despite active read lock.', 'warn');
 				}
 			}
 

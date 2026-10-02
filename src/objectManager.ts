@@ -1,6 +1,6 @@
-import type { AdapterInstance } from '@iobroker/adapter-core';
 import { writeLog } from './logger';
 import { STATE_MAPPING } from './stateMapping';
+import type { LuxtronikAdapter } from './types';
 
 /**
  * Definition eines Datenpunktes für das dynamische Mapping.
@@ -57,18 +57,6 @@ export interface CustomStateConfig {
 	factor?: number | null;
 	/** Optionale physikalische Einheit */
 	unit?: string;
-}
-
-/**
- * Erweiterte Adapter-Instanz für Typsicherheit beim Zugriff auf interne Eigenschaften.
- */
-export interface ExtendedAdapter extends AdapterInstance {
-	/** Adapter-Konfiguration aus der Benutzeroberfläche kombiniert mit dynamischen Werten */
-	config: ioBroker.AdapterConfig & Record<string, any>;
-	/** Set aller während der Laufzeit erstellten oder verifizierten Datenpunkt-IDs */
-	createdStates: Set<string>;
-	/** Speichert die 3005er Visibilities */
-	currentVisibilities?: number[];
 }
 
 /**
@@ -199,7 +187,7 @@ export function sanitizeName(name: string): string {
  * @param adapter Die Instanz des ioBroker-Adapters.
  * @returns Ein Promise, das nach Abschluss der Bereinigung aufgelöst wird.
  */
-export async function cleanupStates(adapter: ExtendedAdapter): Promise<void> {
+export async function cleanupStates(adapter: LuxtronikAdapter): Promise<void> {
 	const config = adapter.config;
 	const activeStateIds = new Set<string>();
 
@@ -256,7 +244,7 @@ export async function cleanupStates(adapter: ExtendedAdapter): Promise<void> {
  * @param adapter Die Instanz des ioBroker-Adapters.
  * @returns Ein Promise, das nach Abschluss der Bereinigung aufgelöst wird.
  */
-export async function cleanupEmptyFolders(adapter: ExtendedAdapter): Promise<void> {
+export async function cleanupEmptyFolders(adapter: LuxtronikAdapter): Promise<void> {
 	try {
 		const objects = await adapter.getAdapterObjectsAsync();
 		const allIds = Object.keys(objects);
@@ -311,7 +299,7 @@ export async function cleanupEmptyFolders(adapter: ExtendedAdapter): Promise<voi
  * @param adapter Die Instanz des ioBroker-Adapters.
  * @returns Ein Promise, das nach Abschluss der Bereinigung aufgelöst wird.
  */
-export async function cleanupCustomStates(adapter: ExtendedAdapter): Promise<void> {
+export async function cleanupCustomStates(adapter: LuxtronikAdapter): Promise<void> {
 	const config = adapter.config;
 	const customStates = (config.custom_states as CustomStateConfig[]) || [];
 
@@ -366,7 +354,7 @@ export async function cleanupCustomStates(adapter: ExtendedAdapter): Promise<voi
  * @param adapter Die Instanz des ioBroker-Adapters.
  * @returns Ein Promise, das nach Abschluss der Erstellung aufgelöst wird.
  */
-export async function ensureAllObjectsExist(adapter: ExtendedAdapter): Promise<void> {
+export async function ensureAllObjectsExist(adapter: LuxtronikAdapter): Promise<void> {
 	const config = adapter.config;
 
 	// Sprachauswahl aus den Settings (Fallback auf 'en')
@@ -481,7 +469,7 @@ export async function ensureAllObjectsExist(adapter: ExtendedAdapter): Promise<v
  * @param adapter Die Instanz des ioBroker-Adapters.
  * @returns Ein Promise, das nach Abschluss der Erstellung aufgelöst wird.
  */
-export async function ensureCustomObjectsExist(adapter: ExtendedAdapter): Promise<void> {
+export async function ensureCustomObjectsExist(adapter: LuxtronikAdapter): Promise<void> {
 	const config = adapter.config;
 	const customStates = (config.custom_states as CustomStateConfig[]) || [];
 

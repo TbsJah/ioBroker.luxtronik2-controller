@@ -339,8 +339,13 @@ async function processQueue(adapter) {
   try {
     while (adapter.writeQueue.length > 0) {
       if (isOldFirmware) {
-        while (adapter.updateRunning) {
+        let waitCounter = 0;
+        while (adapter.updateRunning && waitCounter < 20) {
           await new Promise((resolve) => adapter.setTimeout(resolve, 250));
+          waitCounter++;
+        }
+        if (waitCounter >= 20 && adapter.isDebugLogActive) {
+          (0, import_logger.writeLog)("Queue wait timeout reached! Forcing write operation despite active read lock.", "warn");
         }
       }
       const task = adapter.writeQueue.shift();

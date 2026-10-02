@@ -56,7 +56,7 @@ async function handleZwangswarmwasser(adapter, id) {
       forceSoll = MAX_WW_TEMP;
     }
     forceSoll = Math.round(forceSoll * 10) / 10;
-    await adapter.syncConfigValue("warmwater_temperature", forceSoll);
+    await adapter.syncConfigValue("temperature_hot_water_target", forceSoll);
     (0, import_logger.writeLog)(
       `Forced hot water: Triggered - Actual (${wwIst}\xB0C) < Target-1 (${wwSoll - 1}\xB0C). Target temperature temporarily set to ${forceSoll}\xB0C.`,
       "info"

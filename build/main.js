@@ -303,7 +303,7 @@ class Luxtronik2Controller extends utils.Adapter {
         "heating_system_circ_pump_voltage_nominal",
         (_d = config.sync_heating_system_circ_pump_voltage_nominal_heating) != null ? _d : 7
       );
-      await this.syncConfigValue("warmwater_temperature", (_e = config.sync_warmwater_target_temperature) != null ? _e : 54);
+      await this.syncConfigValue("temperature_hot_water_target", (_e = config.sync_warmwater_target_temperature) != null ? _e : 54);
       await this.syncConfigValue("returnTemperatureHysteresis", (_f = config.sync_return_temperature_hysteresis) != null ? _f : 1.5);
       await this.syncConfigValue("zip_aktiv", (_g = config.zip_aktiv) != null ? _g : 0);
       await this.syncConfigValue("Heizen_nach_Wasser", (_h = config.Heating_after_warmwater) != null ? _h : false);
@@ -474,7 +474,7 @@ class Luxtronik2Controller extends utils.Adapter {
               forceSoll = 70;
             }
             forceSoll = Math.round(forceSoll * 10) / 10;
-            await this.syncConfigValue("warmwater_temperature", forceSoll);
+            await this.syncConfigValue("temperature_hot_water_target", forceSoll);
           }
         }
       }
@@ -684,7 +684,7 @@ class Luxtronik2Controller extends utils.Adapter {
       if (this.zipTimer) {
         clearTimeout(this.zipTimer);
       }
-      (0, import_backupManager.stopAutoBackup)();
+      (0, import_backupManager.stopAutoBackup)(this);
       if (this.midnightTimer) {
         this.clearTimeout(this.midnightTimer);
       }

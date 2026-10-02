@@ -1,8 +1,8 @@
-import type { AdapterInstance } from '@iobroker/adapter-core';
 import { timeStringToSeconds } from './convert';
 import { writeLog } from './logger';
 import { queueWrite } from './rawFunctions';
 import { getDpPath, STATE_MAPPING } from './stateMapping';
+import type { LuxtronikAdapter } from './types';
 // =========================================================
 // CONSTANTS
 // =========================================================
@@ -29,21 +29,6 @@ const LEGACY_DAYS = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 
 
 export type ZipConfig = Partial<Record<keyof typeof STATE_MAPPING, ioBroker.StateValue | null>>;
 
-interface ExtendedAdapter extends AdapterInstance {
-	config: ioBroker.AdapterConfig & Record<string, any>;
-	originalZipConfig?: ZipConfig | null;
-	zipTimer?: ioBroker.Timeout;
-	isDebugLogActive?: boolean;
-	syncConfigValue: (key: string, value: any) => Promise<void>;
-	setOwnStateIfDifferent: (dpPath: string, value: any, ack?: boolean) => Promise<void>;
-	writeCyclesToday: number;
-	writeCyclesTotal: number;
-	writeQueue: (() => Promise<void>)[];
-	isWriting: boolean;
-	systemFirmware?: string;
-	updateRunning: boolean;
-}
-
 // =========================================================
 // HELPER FUNCTIONS
 // =========================================================
@@ -57,7 +42,7 @@ interface ExtendedAdapter extends AdapterInstance {
  * @param rawValue The raw numeric value to write into the register
  */
 async function safeRawWrite(
-	adapter: ExtendedAdapter,
+	adapter: LuxtronikAdapter,
 	key: keyof typeof STATE_MAPPING,
 	luxId: number,
 	rawValue: number,
@@ -98,7 +83,7 @@ async function safeRawWrite(
 	});
 }
 
-function clearZipTimer(adapter: ExtendedAdapter): void {
+function clearZipTimer(adapter: LuxtronikAdapter): void {
 	if (!adapter.zipTimer) {
 		return;
 	}
@@ -111,7 +96,7 @@ function clearZipTimer(adapter: ExtendedAdapter): void {
  *
  * @param adapter - Instance of the adapter, used for reading states and configurations
  */
-async function isZipAllowedBySchedule(adapter: ExtendedAdapter): Promise<boolean> {
+async function isZipAllowedBySchedule(adapter: LuxtronikAdapter): Promise<boolean> {
 	const config = adapter.config;
 
 	// Korrektur: Nutzt nun den korrekten Key aus der UI (zip_lWP_aktiv)
@@ -186,7 +171,7 @@ async function isZipAllowedBySchedule(adapter: ExtendedAdapter): Promise<boolean
  * @param adapter - The extended adapter instance
  * @returns A promise resolving when the restoration completes
  */
-export async function restoreOriginalZipConfig(adapter: ExtendedAdapter): Promise<void> {
+export async function restoreOriginalZipConfig(adapter: LuxtronikAdapter): Promise<void> {
 	if (!adapter.originalZipConfig) {
 		return;
 	}
@@ -236,7 +221,7 @@ export async function restoreOriginalZipConfig(adapter: ExtendedAdapter): Promis
  * @param adapter - The extended adapter instance
  * @returns A promise resolving when the processes are stopped
  */
-export async function stopZipAndDeaeration(adapter: ExtendedAdapter): Promise<void> {
+export async function stopZipAndDeaeration(adapter: LuxtronikAdapter): Promise<void> {
 	const actors = adapter.config.actors || [];
 	const validActors = actors.filter((a: any) => a.zip_external_relay_id && a.zip_external_relay_id.trim() !== '');
 
@@ -306,7 +291,7 @@ export async function stopZipAndDeaeration(adapter: ExtendedAdapter): Promise<vo
  * @param durationSeconds - The duration in seconds to keep the process active
  * @returns A promise resolving when the activation sequence completes
  */
-export async function handleActivateZip(adapter: ExtendedAdapter, id: string, durationSeconds: number): Promise<void> {
+export async function handleActivateZip(adapter: LuxtronikAdapter, id: string, durationSeconds: number): Promise<void> {
 	const actors = adapter.config.actors || [];
 	const validActors = actors.filter((a: any) => a.zip_external_relay_id && a.zip_external_relay_id.trim() !== '');
 
@@ -523,7 +508,7 @@ export async function handleActivateZip(adapter: ExtendedAdapter, id: string, du
  *
  * @param adapter - Die erweiterte Adapter-Instanz
  */
-export function subscribeMotionSensors(adapter: ExtendedAdapter): void {
+export function subscribeMotionSensors(adapter: LuxtronikAdapter): void {
 	const config = adapter.config;
 	if (config.motion_sensors_aktiv && Array.isArray(config.motionSensors)) {
 		for (const sensor of config.motionSensors) {
@@ -547,7 +532,7 @@ export function subscribeMotionSensors(adapter: ExtendedAdapter): void {
  * @returns true, wenn das Event von einem Bewegungsmelder stammte (sodass onStateChange abbrechen kann)
  */
 export async function checkAndHandleMotionSensor(
-	adapter: ExtendedAdapter,
+	adapter: LuxtronikAdapter,
 	id: string,
 	state: ioBroker.State,
 ): Promise<boolean> {
@@ -611,7 +596,7 @@ export async function checkAndHandleMotionSensor(
  *
  * @param adapter - Die erweiterte Adapter-Instanz
  */
-export async function disableHardwareZipTimer(adapter: ExtendedAdapter): Promise<void> {
+export async function disableHardwareZipTimer(adapter: LuxtronikAdapter): Promise<void> {
 	const config = adapter.config;
 
 	// Korrektur: Nutzt nun den korrekten Key aus der UI (zip_lWP_aktiv)

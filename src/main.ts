@@ -24,6 +24,7 @@ import {
 import { dumpAllRawToLog, queueWrite, readAllRaw } from './rawFunctions';
 import { STATE_MAPPING, getDpPath } from './stateMapping';
 import { generateHeatCurveSVG } from './svgGenerator';
+import type { LuxtronikAdapter } from './types';
 import {
 	calculateTemperatureSpread,
 	calculateTotalEnergy,
@@ -46,7 +47,7 @@ import {
 /**
  * Main class for the Luxtronik2 Controller ioBroker Adapter.
  */
-class Luxtronik2Controller extends utils.Adapter {
+class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 	/** Set of all active namespaced state IDs created or managed by the adapter */
 	public createdStates: Set<string> = new Set<string>();
 	/** ioBroker timeout handle for the hot water circulation pump macro */
@@ -365,7 +366,7 @@ class Luxtronik2Controller extends utils.Adapter {
 				'heating_system_circ_pump_voltage_nominal',
 				config.sync_heating_system_circ_pump_voltage_nominal_heating ?? 7,
 			);
-			await this.syncConfigValue('warmwater_temperature', config.sync_warmwater_target_temperature ?? 54);
+			await this.syncConfigValue('temperature_hot_water_target', config.sync_warmwater_target_temperature ?? 54);
 			await this.syncConfigValue('returnTemperatureHysteresis', config.sync_return_temperature_hysteresis ?? 1.5);
 			await this.syncConfigValue('zip_aktiv', config.zip_aktiv ?? 0);
 			await this.syncConfigValue('Heizen_nach_Wasser', config.Heating_after_warmwater ?? false);
@@ -567,7 +568,7 @@ class Luxtronik2Controller extends utils.Adapter {
 						forceSoll = Math.round(forceSoll * 10) / 10;
 
 						// Statt Hysterese wird nun der Sollwert temporär erhöht, um den WW-Takt künstlich anzustoßen
-						await this.syncConfigValue('warmwater_temperature', forceSoll);
+						await this.syncConfigValue('temperature_hot_water_target', forceSoll);
 					}
 				}
 			}
@@ -841,7 +842,7 @@ class Luxtronik2Controller extends utils.Adapter {
 				clearTimeout(this.zipTimer);
 			}
 
-			stopAutoBackup();
+			stopAutoBackup(this);
 
 			if (this.midnightTimer) {
 				this.clearTimeout(this.midnightTimer);

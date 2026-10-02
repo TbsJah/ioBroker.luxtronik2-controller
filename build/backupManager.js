@@ -35,13 +35,12 @@ __export(backupManager_exports, {
 module.exports = __toCommonJS(backupManager_exports);
 var schedule = __toESM(require("node-schedule"));
 var import_logger = require("./logger");
-let backupJob = null;
 function initAutoBackup(adapter) {
   const config = adapter.config;
-  stopAutoBackup();
+  stopAutoBackup(adapter);
   if (config.autoBackupActive && config.autoBackupCron) {
     (0, import_logger.writeLog)(`Initializing automated DTA backup with cron schedule: ${config.autoBackupCron}`, "info");
-    backupJob = schedule.scheduleJob(config.autoBackupCron, async () => {
+    adapter.backupJob = schedule.scheduleJob(config.autoBackupCron, async () => {
       await executeDtaBackup(adapter);
     });
   }
@@ -90,10 +89,10 @@ async function executeDtaBackup(adapter) {
     (0, import_logger.writeLog)(`Failed to execute automated DTA backup: ${msg}`, "error");
   }
 }
-function stopAutoBackup() {
-  if (backupJob) {
-    backupJob.cancel();
-    backupJob = null;
+function stopAutoBackup(adapter) {
+  if (adapter.backupJob) {
+    adapter.backupJob.cancel();
+    adapter.backupJob = null;
     (0, import_logger.writeLog)("Automated DTA backup schedule stopped.", "debug");
   }
 }

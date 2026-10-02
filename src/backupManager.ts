@@ -1,21 +1,20 @@
-import type { AdapterInstance } from '@iobroker/adapter-core';
 import * as schedule from 'node-schedule';
 import { writeLog } from './logger';
-
-let backupJob: schedule.Job | null = null;
+import type { LuxtronikAdapter } from './types';
 
 /**
  * Initialisiert den automatischen Backup-Zeitplan basierend auf der ioBroker-Konfiguration.
  *
  * @param adapter Die ioBroker Adapter-Instanz
  */
-export function initAutoBackup(adapter: AdapterInstance): void {
-	const config = adapter.config as any;
-	stopAutoBackup();
+export function initAutoBackup(adapter: LuxtronikAdapter): void {
+	const config = adapter.config;
+	stopAutoBackup(adapter); // <- Adapter muss jetzt übergeben werden
 
 	if (config.autoBackupActive && config.autoBackupCron) {
 		writeLog(`Initializing automated DTA backup with cron schedule: ${config.autoBackupCron}`, 'info');
-		backupJob = schedule.scheduleJob(config.autoBackupCron, async () => {
+		// Den Job direkt IN der Adapter-Instanz speichern
+		adapter.backupJob = schedule.scheduleJob(config.autoBackupCron, async () => {
 			await executeDtaBackup(adapter);
 		});
 	}
@@ -29,8 +28,8 @@ export function initAutoBackup(adapter: AdapterInstance): void {
  * @param adapter Die ioBroker Adapter-Instanz (für Konfiguration, Logs und Dateisystemzugriff)
  * @returns Ein Promise, das nach Abschluss des Downloads aufgelöst wird
  */
-export async function executeDtaBackup(adapter: AdapterInstance): Promise<void> {
-	const config = adapter.config as any;
+export async function executeDtaBackup(adapter: LuxtronikAdapter): Promise<void> {
+	const config = adapter.config;
 	const ip = config.host;
 
 	if (!ip) {
@@ -91,11 +90,13 @@ export async function executeDtaBackup(adapter: AdapterInstance): Promise<void> 
 
 /**
  * Stoppt den laufenden Cronjob (wichtig für den Adapter-Neustart).
+ *
+ * @param adapter Die ioBroker Adapter-Instanz
  */
-export function stopAutoBackup(): void {
-	if (backupJob) {
-		backupJob.cancel();
-		backupJob = null;
+export function stopAutoBackup(adapter: LuxtronikAdapter): void {
+	if (adapter.backupJob) {
+		adapter.backupJob.cancel();
+		adapter.backupJob = null;
 		writeLog('Automated DTA backup schedule stopped.', 'debug');
 	}
 }
