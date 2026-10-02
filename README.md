@@ -95,6 +95,14 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 - **Under the Hood / Refactoring:**
     - **Centralized Typings:** Completely refactored the TypeScript architecture by introducing a centralized `LuxtronikAdapter` interface (`types.ts`). Replaced all fragmented, local interfaces across sub-modules to ensure strict, project-wide type safety and better maintainability.
 
+## 🛠 Troubleshooting / Error Analysis
+
+### Raw TCP Test Script (`Test_Script.ts`)
+
+In rare cases (especially with older firmware versions like V1.x), connection drops or timeouts can occur when writing values (e.g., `Timeout writing TCP parameter 105`).
+
+To determine whether the issue lies with the adapter or the heat pump itself, this repository includes an isolated test script (`Test_Script.ts` in the `Test_Script` folder). This script bypasses the adapter completely and communicates directly with the Luxtronik controller via raw TCP sockets. It tests read and write access by reading the hot water target value, slightly increasing it as a test, and immediately restoring the original value.
+
 ### 0.12.1 (2026-09-30)
 
 - **Bugfixes:**
