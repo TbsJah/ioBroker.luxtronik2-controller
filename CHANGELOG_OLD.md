@@ -23,6 +23,11 @@
 ### 0.1.0 (2026-07-09)
 
 - initial release
+## 0.11.0 (2026-09-21)
+
+- **Improvements:**
+    - Added global rounding to 2 decimal places for all calculated telemetry values (e.g., converting operating seconds to hours). This provides a cleaner ioBroker state tree and prevents excessively long floating-point numbers from cluttering history databases (like InfluxDB).
+
 ## 0.10.4 (2026-09-21)
 
 - Update Readme

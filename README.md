@@ -85,8 +85,7 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
-
-### **WORK IN PROGRESS**
+### 0.13.0 (2026-10-02)
 
 - **Bugfixes:**
     - **Critical DHW Target Fix:** Fixed an issue where the hot water target temperature was incorrectly written to parameter 2 instead of 105. This resolves unexpected temperature jumps (e.g., to 65°C) and socket timeouts on various heat pump models.
@@ -94,14 +93,6 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
     - **Backup Manager Multi-Instance Fix:** The automated DTA backup cron job is now safely scoped to the specific adapter instance, preventing conflicts when running multiple heat pumps on the same ioBroker host.
 - **Under the Hood / Refactoring:**
     - **Centralized Typings:** Completely refactored the TypeScript architecture by introducing a centralized `LuxtronikAdapter` interface (`types.ts`). Replaced all fragmented, local interfaces across sub-modules to ensure strict, project-wide type safety and better maintainability.
-
-## 🛠 Troubleshooting / Error Analysis
-
-### Raw TCP Test Script (`Test_Script.ts`)
-
-In rare cases (especially with older firmware versions like V1.x), connection drops or timeouts can occur when writing values (e.g., `Timeout writing TCP parameter 105`).
-
-To determine whether the issue lies with the adapter or the heat pump itself, this repository includes an isolated test script (`Test_Script.ts` in the `Test_Script` folder). This script bypasses the adapter completely and communicates directly with the Luxtronik controller via raw TCP sockets. It tests read and write access by reading the hot water target value, slightly increasing it as a test, and immediately restoring the original value.
 
 ### 0.12.1 (2026-09-30)
 
@@ -134,11 +125,6 @@ To determine whether the issue lies with the adapter or the heat pump itself, th
 ### 0.11.1 (2026-09-22)
 
 - Resolve issues which are reported by repository checker
-
-### 0.11.0 (2026-09-21)
-
-- **Improvements:**
-    - Added global rounding to 2 decimal places for all calculated telemetry values (e.g., converting operating seconds to hours). This provides a cleaner ioBroker state tree and prevents excessively long floating-point numbers from cluttering history databases (like InfluxDB).
 
 ## License
 
