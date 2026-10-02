@@ -1,0 +1,180 @@
+/**
+ * ==============================================================================
+ * Luxtronik 2 - Raw TCP Connection & Write Test
+ * ==============================================================================
+ *
+ * BESCHREIBUNG:
+ * Dieses Skript dient zur isolierten Fehlereingrenzung bei Netzwerk- oder
+ * Schreibproblemen mit der Luxtronik Wärmepumpe (z. B. "Timeout writing TCP
+ * parameter 105"). Es umgeht jegliche ioBroker-Adapter-Logik und kommuniziert
+ * direkt über reine TCP-Sockets mit der Steuerung.
+ *
+ * FUNKTIONSWEISE:
+ * 1. Verbindet sich direkt mit der Anlage (TCP Port 8889).
+ * 2. Liest den aktuellen Warmwasser-Sollwert (Parameter 105) aus.
+ * 3. Erhöht den Wert testweise um +0,5 °C und sendet den Schreibbefehl.
+ * 4. Wartet kurz und liest den Wert erneut, um die Übernahme zu verifizieren.
+ * 5. Schreibt den ursprünglichen Originalwert automatisch wieder zurück.
+ *
+ * ⚠️ WICHTIGE VORAUSSETZUNGEN VOR DEM START:
+ * - ALLE Luxtronik-Adapter (luxtronik2-controller.0, luxtronik.0 etc.) im ioBroker
+ *   MÜSSEN zwingend gestoppt (rot) sein! Ältere Firmware-Versionen (V1.x) erlauben
+ *   nur eine einzige parallele Verbindung. Läuft der Adapter im Hintergrund
+ *   weiter, blockiert er den Port und dieses Skript rennt in einen Timeout!
+ * - Die IP-Adresse in der Konstante `HOST` muss zwingend auf die eigene Anlage
+ *   angepasst werden.
+ * ==============================================================================
+ */
+
+import * as net from 'net';
+
+// ==========================================
+// ⚠️ HIER DIE IP DER WÄRMEPUMPE EINTRAGEN!
+// ==========================================
+const HOST = '192.168.178.x'; // <--- ANPASSEN
+const PORT = 8889;
+
+const CMD_READ = 3003;
+const CMD_WRITE = 3002;
+const PARAM_ID = 105; // Warmwasser-Sollwert
+
+// --- Hilfsfunktion zum Lesen ---
+function readParam105(): Promise<number> {
+	return new Promise((resolve, reject) => {
+		const client = new net.Socket();
+		let dataBuffer = Buffer.alloc(0);
+		let hasResolved = false;
+
+		// Anti-Hänge-Timeout (5 Sekunden)
+		const timeout = setTimeout(() => {
+			if (!hasResolved) {
+				console.error(
+					'❌ [READ TIMEOUT] Die Wärmepumpe antwortet nicht! Läuft der ioBroker Adapter noch im Hintergrund und blockiert den Port?',
+				);
+				client.destroy();
+				reject(new Error('Lese-Timeout'));
+			}
+		}, 5000);
+
+		client.connect(PORT, HOST, () => {
+			console.log('[READ] Verbunden. Sende Lese-Befehl (3003)...');
+			const buf = Buffer.alloc(8);
+			buf.writeInt32BE(CMD_READ, 0);
+			buf.writeInt32BE(0, 4); // Kein Wert beim Lesen
+			client.write(buf);
+		});
+
+		client.on('data', data => {
+			dataBuffer = Buffer.concat([dataBuffer, data]);
+
+			// Wir brauchen mindestens Header(8) + (Index * 4) Bytes (ca. 432 Bytes für ID 105)
+			if (dataBuffer.length >= 8 + (PARAM_ID + 1) * 4) {
+				const cmd = dataBuffer.readInt32BE(0);
+				if (cmd === CMD_READ) {
+					const rawValue = dataBuffer.readInt32BE(8 + PARAM_ID * 4);
+					hasResolved = true;
+					clearTimeout(timeout);
+					client.destroy();
+					resolve(rawValue);
+				}
+			}
+		});
+
+		client.on('error', err => {
+			console.error(`[READ ERROR] ${err.message}`);
+			hasResolved = true;
+			clearTimeout(timeout);
+			client.destroy();
+			reject(err);
+		});
+	});
+}
+
+// --- Hilfsfunktion zum Schreiben ---
+function writeParam(paramId: number, value: number): Promise<void> {
+	return new Promise((resolve, reject) => {
+		const client = new net.Socket();
+		let hasResolved = false;
+
+		client.connect(PORT, HOST, () => {
+			console.log(`[WRITE] Verbunden. Sende Schreib-Befehl (3002) für Parameter ${paramId} -> Wert: ${value}`);
+			const buf = Buffer.alloc(12);
+			buf.writeInt32BE(CMD_WRITE, 0);
+			buf.writeInt32BE(paramId, 4);
+			buf.writeInt32BE(value, 8);
+
+			client.write(buf, () => {
+				console.log('[WRITE] Paket gesendet. Warte auf ACK (Bestätigung)...');
+
+				// Fallback für alte V1.x Firmware, die manchmal kein ACK sendet
+				setTimeout(() => {
+					if (!hasResolved) {
+						console.log('[WRITE] Legacy-Timeout (500ms) erreicht. Schließe Verbindung.');
+						hasResolved = true;
+						client.destroy();
+						resolve();
+					}
+				}, 500);
+			});
+		});
+
+		client.on('data', data => {
+			if (data.length >= 4 && data.readInt32BE(0) === CMD_WRITE) {
+				console.log('[WRITE] Erfolgreiche Bestätigung (ACK) von der Luxtronik empfangen!');
+				hasResolved = true;
+				client.destroy();
+				resolve();
+			}
+		});
+
+		client.on('error', err => {
+			console.error(`[WRITE ERROR] ${err.message}`);
+			hasResolved = true;
+			client.destroy();
+			reject(err);
+		});
+	});
+}
+
+// --- Hauptablauf ---
+async function testLuxtronik() {
+	try {
+		console.log('=== START LUXTRONIK RAW TCP TEST ===');
+
+		// 1. Ist-Zustand lesen
+		const originalRaw = await readParam105();
+		console.log(`[TEST] Aktueller Wert Parameter 105: ${originalRaw} (${originalRaw / 10} °C)`);
+
+		// 2. Test-Wert generieren (+ 0,5 °C)
+		const testRaw = originalRaw + 5;
+		console.log(`[TEST] Versuche Testwert zu schreiben: ${testRaw} (${testRaw / 10} °C)`);
+
+		// 3. Test-Wert schreiben
+		await writeParam(PARAM_ID, testRaw);
+
+		// 4. Kurz warten, damit die CPU der Wärmepumpe das verarbeiten kann
+		console.log('[TEST] Warte 2 Sekunden auf interne Verarbeitung der Luxtronik...');
+		await new Promise(r => setTimeout(r, 2000));
+
+		// 5. Überprüfen, ob es geklappt hat
+		const checkRaw = await readParam105();
+		console.log(`[TEST] Neuer Wert Parameter 105 nach dem Schreiben: ${checkRaw} (${checkRaw / 10} °C)`);
+
+		if (checkRaw === testRaw) {
+			console.log('✅ ERFOLG! Die Anlage hat den Schreibbefehl auf Parameter 105 akzeptiert!');
+		} else {
+			console.log('❌ FEHLER! Die Anlage hat den Wert ignoriert und nicht gespeichert.');
+		}
+
+		// 6. Aufräumen: Originalwert wiederherstellen
+		console.log(`[TEST] Stelle ursprünglichen Wert wieder her: ${originalRaw} (${originalRaw / 10} °C)`);
+		await writeParam(PARAM_ID, originalRaw);
+
+		console.log('=== ENDE LUXTRONIK RAW TCP TEST ===');
+	} catch (e: any) {
+		console.error(`[TEST ABBRUCH] Skript fehlgeschlagen: ${e.message}`);
+	}
+}
+
+// Skript starten
+testLuxtronik();
