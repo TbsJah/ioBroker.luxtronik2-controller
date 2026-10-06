@@ -121,13 +121,19 @@ function parseRawResponse(responseData, command) {
   if (totalItems < 0 || totalItems > 1e4) {
     throw new Error(`Invalid element count (${totalItems}) in response ${command}`);
   }
-  const totalRequiredLength = headerSize + totalItems * 4;
+  const isVisibility = command === CONSTANTS.CMD_READ_VISIBILITY;
+  const bytesPerItem = isVisibility ? 1 : 4;
+  const totalRequiredLength = headerSize + totalItems * bytesPerItem;
   if (responseData.length < totalRequiredLength) {
     return null;
   }
   const allValues = new Array(totalItems);
   for (let i = 0; i < totalItems; i++) {
-    allValues[i] = responseData.readInt32BE(headerSize + i * 4);
+    if (isVisibility) {
+      allValues[i] = responseData.readInt8(headerSize + i);
+    } else {
+      allValues[i] = responseData.readInt32BE(headerSize + i * 4);
+    }
   }
   return allValues;
 }

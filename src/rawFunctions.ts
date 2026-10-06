@@ -126,10 +126,11 @@ function createCommandBuffer(...values: number[]): Buffer {
 
 /**
  * Gemeinsame Logik zum Parsen der rohen Binärdaten der Wärmepumpe.
- * Überprüft Header, Befehls-ID und Elementanzahl auf Gültigkeit.
+ * Überprüft Header, Befehls-ID und Elementanzahl auf Gültigkeit und
+ * unterscheidet dynamisch zwischen 4-Byte und 1-Byte Antworten.
  *
  * @param responseData Der vollständige Buffer mit den empfangenen Daten.
- * @param command Der erwartete Befehlscode (z.B. 3003 oder 3004).
+ * @param command Der erwartete Befehlscode (z.B. 3003 oder 3005).
  * @returns Ein Array mit den ausgelesenen Zahlenwerten oder null, falls noch Datenpakete (Chunks) fehlen.
  */
 function parseRawResponse(responseData: Buffer, command: number): number[] | null {
@@ -137,7 +138,7 @@ function parseRawResponse(responseData: Buffer, command: number): number[] | nul
 	const lengthOffset = command === CONSTANTS.CMD_READ_VALUE ? 8 : 4;
 
 	if (responseData.length < headerSize) {
-		return null;
+		return null; // Header noch nicht komplett empfangen
 	}
 
 	const responseCommand = responseData.readInt32BE(0);
@@ -150,18 +151,30 @@ function parseRawResponse(responseData: Buffer, command: number): number[] | nul
 		throw new Error(`Invalid element count (${totalItems}) in response ${command}`);
 	}
 
-	const totalRequiredLength = headerSize + totalItems * 4;
+	// NEU: Erkennen, ob es sich um Visibilities (1 Byte) oder Parameter/Werte (4 Byte) handelt
+	const isVisibility = command === CONSTANTS.CMD_READ_VISIBILITY;
+	const bytesPerItem = isVisibility ? 1 : 4;
+
+	// Gesamtgröße dynamisch berechnen
+	const totalRequiredLength = headerSize + totalItems * bytesPerItem;
+
 	if (responseData.length < totalRequiredLength) {
-		return null;
+		return null; // Es fehlen noch TCP-Chunks, weiter sammeln!
 	}
 
 	const allValues = new Array<number>(totalItems);
 	for (let i = 0; i < totalItems; i++) {
-		allValues[i] = responseData.readInt32BE(headerSize + i * 4);
+		if (isVisibility) {
+			// Visibilities sind nur 1 Byte groß (Boolean-Flags)
+			allValues[i] = responseData.readInt8(headerSize + i);
+		} else {
+			// Klassische Werte und Parameter sind 4 Byte (Int32BE) groß
+			allValues[i] = responseData.readInt32BE(headerSize + i * 4);
+		}
 	}
+
 	return allValues;
 }
-
 // =========================================================
 // ZENTRALER VERBINDUNGS-HANDLER (DRY-Prinzip)
 // =========================================================
