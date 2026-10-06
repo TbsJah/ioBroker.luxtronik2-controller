@@ -85,6 +85,31 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
+
+### **WORK IN PROGRESS**
+
+## 🚨 BREAKING CHANGE / IMPORTANT HARDWARE NOTICE 🚨
+
+**Critical Firmware Bug in Alpha Innotec / Novelan Controllers (V1.90.x & V2.90.x)**
+The manufacturer has introduced a massive bug in the local Luxtronik protocol (Port 8889) with the firmware releases **V1.90.0** and **V2.90.0**. Whenever a smart home system (ioBroker, Home Assistant, etc.) attempts to write a parameter value to the heat pump, the controller freezes and forces a **hard reboot** of the system after about 10 seconds. Read operations are not affected.
+
+👉 **Adapter Protective Measure:** To protect your hardware from continuous reboots and potential damage, a **protective shield (firewall)** has been implemented into the adapter.
+As soon as the adapter detects firmware V1.90.x or V2.90.x, **all write commands are strictly blocked**. Instead, a corresponding warning is printed to the ioBroker log.
+
+👉 **Solution for Affected Users:** Please contact the manufacturer's support or your installer to request an over-the-air (remote) downgrade to the previous stable version (**V1.89** or **V2.89**). If you still have the old firmware file saved locally, you can flash it via USB stick directly at the display. Once the system is running on V.89 again, the adapter will automatically release the write commands!
+
+---
+
+### ✨ New Features & Improvements
+
+- **Hardware Protection Shield implemented:** Dynamic firmware verification before every write operation to protect against the reboot bug present in firmware versions 1.90.x and 2.90.x.
+- **Visibilities completely overhauled:** The internal logic for command 3005 has been rewritten (dynamic detection of 1-byte and 4-byte arrays). The adapter now reads the visibility flags flawlessly across **all** firmware versions. Hiding non-existent hardware in the object tree now works perfectly for V1.x and V2.x systems without causing crashes or timeouts!
+
+### 🛠 Bugfixes & Refactoring
+
+- **Adapter Configuration (UI):** Removed outdated warning labels regarding the "Hide unsupported parameters" checkbox, as this feature is now completely stable across all controller generations.
+- **Network / WebSocket:** The experimental password transmission for port 8214 has been completely removed, as the communication issue was proven to be caused by the manufacturer's firmware bug. The WebSocket connection for genuine V3.x firmwares operates cleanly again using the proven standard handshake.
+
 ### 0.13.1 (2026-10-02)
 
 - **Fix (Circulation/ZIP):** Fixed a bug where the `Virtual_ZIP_Status` datapoint would remain stuck on `true` when using external relays (e.g., Shelly), even though the hardware relay was correctly turned off. The state reset logic has been decoupled and is now guaranteed to execute, ensuring the ioBroker interface stays perfectly synchronized with the actual hardware state.
