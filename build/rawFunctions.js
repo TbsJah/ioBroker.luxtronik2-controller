@@ -237,6 +237,7 @@ function readAllRawTcp(adapter, command) {
       client.write(createCommandBuffer(command, 0));
     });
     client.on("data", (chunk) => {
+      (0, import_logger.writeLog)(`Chunk empfangen, L\xE4nge: ${chunk.length}`, "debug");
       chunks.push(chunk);
       totalLength += chunk.length;
       try {
