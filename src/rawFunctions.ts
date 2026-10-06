@@ -249,7 +249,8 @@ function readAllRawWs(adapter: LuxtronikAdapter, command: number): Promise<numbe
 	return new Promise<number[]>((resolve, reject) => {
 		const host = adapter.config.host || '127.0.0.1';
 		const port = adapter.config.port ? Number(adapter.config.port) : CONSTANTS.PORT_WS;
-		const ws = new WebSocket(`ws://${host}:${port}`, 'luxnet');
+		const password = adapter.config.password || '9445';
+		const ws = new WebSocket(`ws://${host}:${port}`, ['luxnet', password]);
 		ws.binaryType = 'nodebuffer';
 
 		const ctx: ConnectionContext<number[]> = { adapter, socket: ws, resolve, reject };
@@ -357,7 +358,10 @@ function writeRawParameterWs(adapter: LuxtronikAdapter, paramId: number, value: 
 	return new Promise<void>((resolve, reject) => {
 		const host = adapter.config.host || '127.0.0.1';
 		const port = adapter.config.port ? Number(adapter.config.port) : CONSTANTS.PORT_WS;
-		const ws = new WebSocket(`ws://${host}:${port}`, 'luxnet');
+		const password = adapter.config.password || '9445';
+
+		// Übergabe beider Protokolle ('luxnet' UND das Passwort) als Array
+		const ws = new WebSocket(`ws://${host}:${port}`, ['luxnet', password]);
 		ws.binaryType = 'nodebuffer';
 
 		const ctx: ConnectionContext<void> = { adapter, socket: ws, resolve, reject };

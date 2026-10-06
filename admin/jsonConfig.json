@@ -47,6 +47,22 @@
 					"lg": 4,
 					"xl": 4
 				},
+				"password": {
+					"type": "password",
+					"label": {
+						"en": "Password (WebSocket only)",
+						"de": "Passwort (nur für WebSockets)"
+					},
+					"help": {
+						"en": "Mandatory for Firmware >= 2.90.x / 1.90.x (often 9445 or 123456).",
+						"de": "Wird ab Firmware 2.90.x / 1.90.x zwingend für den Verbindungsaufbau benötigt. (Oft das 9445 oder 123456)."
+					},
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"lg": 4,
+					"xl": 4
+				},
 				"interval": {
 					"type": "number",
 					"label": { "en": "Polling interval (seconds)", "de": "Abfrageintervall (Sekunden)" },
@@ -792,12 +808,12 @@
 				"filter_visibility": {
 					"type": "checkbox",
 					"label": {
-						"en": "Hide unsupported parameters (Requires FW V3.x)",
-						"de": "Nicht unterstützte Parameter ausblenden (Setzt FW V3.x voraus)"
+						"en": "Automatically hide unsupported hardware parameters",
+						"de": "Nicht unterstützte Hardware-Parameter automatisch ausblenden"
 					},
 					"help": {
-						"en": "If enabled, the adapter uses the internal visibility list (Parameter 3005) to automatically hide unsupported datapoints. <b>IMPORTANT:</b> This only works on newer firmware versions. If you have an older system (e.g., V1/V2) and get timeout errors during adapter start, please disable this option!",
-						"de": "Wenn aktiviert, nutzt der Adapter die interne Sichtbarkeitsliste (Parameter 3005), um nicht unterstützte Datenpunkte automatisch auszublenden. <b>WICHTIG:</b> Dies funktioniert nur bei neueren Firmware-Versionen. Bei älteren Anlagen (z.B. V1/V2) kommt es hierdurch zu Timeout-Fehlern beim Start – in diesem Fall den Haken bitte entfernen!"
+						"en": "If enabled, the adapter uses the heat pump's internal visibility list to automatically hide datapoints for hardware that is not physically present (e.g., missing swimming pool or cooling module).",
+						"de": "Wenn aktiviert, nutzt der Adapter die interne Sichtbarkeitsliste der Wärmepumpe, um Datenpunkte für physisch nicht vorhandene Hardware (z.B. fehlendes Schwimmbad oder Kühlmodul) im ioBroker automatisch auszublenden und die Ansicht sauber zu halten."
 					},
 					"default": true,
 					"xs": 12,
