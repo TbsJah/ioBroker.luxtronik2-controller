@@ -184,7 +184,7 @@ function readAllRawWs(adapter, command) {
   return new Promise((resolve, reject) => {
     const host = adapter.config.host || "127.0.0.1";
     const port = adapter.config.port ? Number(adapter.config.port) : CONSTANTS.PORT_WS;
-    const ws = new import_ws.WebSocket(`ws://${host}:${port}`, ["luxnet", "999999"]);
+    const ws = new import_ws.WebSocket(`ws://${host}:${port}`, "luxnet");
     ws.binaryType = "nodebuffer";
     const ctx = { adapter, socket: ws, resolve, reject };
     const finish = createFinisher(ctx);
@@ -262,7 +262,7 @@ function writeRawParameterWs(adapter, paramId, value) {
   return new Promise((resolve, reject) => {
     const host = adapter.config.host || "127.0.0.1";
     const port = adapter.config.port ? Number(adapter.config.port) : CONSTANTS.PORT_WS;
-    const ws = new import_ws.WebSocket(`ws://${host}:${port}`, ["luxnet", "999999"]);
+    const ws = new import_ws.WebSocket(`ws://${host}:${port}`, "luxnet");
     ws.binaryType = "nodebuffer";
     const ctx = { adapter, socket: ws, resolve, reject };
     const finish = createFinisher(ctx);
@@ -324,6 +324,14 @@ async function dumpAllRawToLog(adapter) {
   }
 }
 async function queueWrite(adapter, cmd, val) {
+  const fwState = await adapter.getStateAsync("Information.12_SystemInfo.firmware");
+  const fw = typeof (fwState == null ? void 0 : fwState.val) === "string" ? fwState.val : "";
+  if (fw.includes("1.90") || fw.includes("2.90")) {
+    adapter.log.warn(
+      `[PROTECTION] Write command to register ${cmd} blocked! Firmware ${fw} has a known manufacturer bug causing hardware crashes. Please downgrade to <= V X.89. | Schreibbefehl blockiert! Firmware ${fw} verursacht Systemabst\xFCrze. Bitte auf <= V X.89 downgraden.`
+    );
+    return;
+  }
   return new Promise((resolve, reject) => {
     adapter.writeQueue.push(async () => {
       try {

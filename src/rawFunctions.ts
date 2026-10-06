@@ -250,7 +250,7 @@ function readAllRawWs(adapter: LuxtronikAdapter, command: number): Promise<numbe
 		const host = adapter.config.host || '127.0.0.1';
 		const port = adapter.config.port ? Number(adapter.config.port) : CONSTANTS.PORT_WS;
 		//const pwd = adapter.config.password ? adapter.config.password.toString() : '999999';
-		const ws = new WebSocket(`ws://${host}:${port}`, ['luxnet', '999999']);
+		const ws = new WebSocket(`ws://${host}:${port}`, 'luxnet');
 		ws.binaryType = 'nodebuffer';
 
 		const ctx: ConnectionContext<number[]> = { adapter, socket: ws, resolve, reject };
@@ -361,7 +361,7 @@ function writeRawParameterWs(adapter: LuxtronikAdapter, paramId: number, value: 
 		//const pwd = adapter.config.password ? adapter.config.password.toString() : '999999';
 
 		// Übergabe beider Protokolle ('luxnet' UND das Passwort) als Array
-		const ws = new WebSocket(`ws://${host}:${port}`, ['luxnet', '999999']);
+		const ws = new WebSocket(`ws://${host}:${port}`, 'luxnet');
 		ws.binaryType = 'nodebuffer';
 
 		const ctx: ConnectionContext<void> = { adapter, socket: ws, resolve, reject };
@@ -456,6 +456,19 @@ export async function dumpAllRawToLog(adapter: LuxtronikAdapter): Promise<void> 
  * @returns A promise that completes once the queue executes this task.
  */
 export async function queueWrite(adapter: LuxtronikAdapter, cmd: string | number, val: any): Promise<void> {
+	// 1. Firmware-Schutzschild: Version aus ioBroker auslesen
+	const fwState = await adapter.getStateAsync('Information.12_SystemInfo.firmware');
+	const fw = typeof fwState?.val === 'string' ? fwState.val : '';
+
+	// 2. Prüfen, ob es sich um eine der fehlerhaften .90 Versionen handelt
+	if (fw.includes('1.90') || fw.includes('2.90')) {
+		adapter.log.warn(
+			`[PROTECTION] Write command to register ${cmd} blocked! Firmware ${fw} has a known manufacturer bug causing hardware crashes. Please downgrade to <= V X.89. | Schreibbefehl blockiert! Firmware ${fw} verursacht Systemabstürze. Bitte auf <= V X.89 downgraden.`,
+		);
+		return; // Bricht die Funktion hart ab!
+	}
+
+	// 3. Normaler Schreibvorgang für sichere Firmwares
 	return new Promise((resolve, reject) => {
 		adapter.writeQueue.push(async () => {
 			try {
