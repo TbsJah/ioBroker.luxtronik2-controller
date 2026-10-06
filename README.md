@@ -98,14 +98,12 @@ As soon as the adapter detects firmware V1.90.x or V2.90.x, **all write commands
 
 👉 **Solution for Affected Users:** Please contact the manufacturer's support or your installer to request an over-the-air (remote) downgrade to the previous stable version (**V1.89** or **V2.89**). If you still have the old firmware file saved locally, you can flash it via USB stick directly at the display. Once the system is running on V.89 again, the adapter will automatically release the write commands!
 
----
-
-### ✨ New Features & Improvements
+## ✨ New Features & Improvements
 
 - **Hardware Protection Shield implemented:** Dynamic firmware verification before every write operation to protect against the reboot bug present in firmware versions 1.90.x and 2.90.x.
 - **Visibilities completely overhauled:** The internal logic for command 3005 has been rewritten (dynamic detection of 1-byte and 4-byte arrays). The adapter now reads the visibility flags flawlessly across **all** firmware versions. Hiding non-existent hardware in the object tree now works perfectly for V1.x and V2.x systems without causing crashes or timeouts!
 
-### 🛠 Bugfixes & Refactoring
+## 🛠 Bugfixes & Refactoring
 
 - **Adapter Configuration (UI):** Removed outdated warning labels regarding the "Hide unsupported parameters" checkbox, as this feature is now completely stable across all controller generations.
 - **Network / WebSocket:** The experimental password transmission for port 8214 has been completely removed, as the communication issue was proven to be caused by the manufacturer's firmware bug. The WebSocket connection for genuine V3.x firmwares operates cleanly again using the proven standard handshake.
