@@ -317,7 +317,7 @@ function readAllRawTcp(adapter: LuxtronikAdapter, command: number): Promise<numb
 		});
 
 		client.on('data', (chunk: Buffer) => {
-			writeLog(`Chunk empfangen, Länge: ${chunk.length}`, 'debug');
+			//writeLog(`Chunk empfangen, Länge: ${chunk.length}`, 'debug');
 			chunks.push(chunk);
 			totalLength += chunk.length;
 
