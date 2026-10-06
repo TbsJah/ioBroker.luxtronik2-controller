@@ -166,7 +166,7 @@
 	"native": {
 		"host": "192.168.178.81",
 		"port": 8889,
-		"password": "9445",
+		"password": "999999",
 		"interval": 30,
 		"fusspunkt": 21.7,
 		"endpunkt": 23,

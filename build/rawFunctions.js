@@ -184,8 +184,7 @@ function readAllRawWs(adapter, command) {
   return new Promise((resolve, reject) => {
     const host = adapter.config.host || "127.0.0.1";
     const port = adapter.config.port ? Number(adapter.config.port) : CONSTANTS.PORT_WS;
-    const pwd = adapter.config.password ? adapter.config.password.toString() : "9445";
-    const ws = new import_ws.WebSocket(`ws://${host}:${port}`, ["luxnet", pwd]);
+    const ws = new import_ws.WebSocket(`ws://${host}:${port}`, ["luxnet", "999999"]);
     ws.binaryType = "nodebuffer";
     const ctx = { adapter, socket: ws, resolve, reject };
     const finish = createFinisher(ctx);
@@ -263,8 +262,7 @@ function writeRawParameterWs(adapter, paramId, value) {
   return new Promise((resolve, reject) => {
     const host = adapter.config.host || "127.0.0.1";
     const port = adapter.config.port ? Number(adapter.config.port) : CONSTANTS.PORT_WS;
-    const pwd = adapter.config.password ? adapter.config.password.toString() : "9445";
-    const ws = new import_ws.WebSocket(`ws://${host}:${port}`, ["luxnet", pwd]);
+    const ws = new import_ws.WebSocket(`ws://${host}:${port}`, ["luxnet", "999999"]);
     ws.binaryType = "nodebuffer";
     const ctx = { adapter, socket: ws, resolve, reject };
     const finish = createFinisher(ctx);
