@@ -85,6 +85,11 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
+
+### **WORK IN PROGRESS**
+
+- log entry for chunk reporting
+
 ### 0.14.0 (2026-10-06)
 
 **🚨 BREAKING CHANGE / IMPORTANT HARDWARE NOTICE 🚨**
