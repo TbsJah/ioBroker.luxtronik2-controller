@@ -453,13 +453,15 @@ class Luxtronik2Controller extends utils.Adapter {
             await this.syncConfigValue("heating_curve_parallel_offset", fallbackFusspunkt);
           }
         }
-        this.lastPumpOptimization = await (0, import_hupManager.handleHupOptimization)(
-          this,
-          istHeizen,
-          spreizung,
-          currentHupVolt,
-          this.lastPumpOptimization
-        );
+        if (aelterAls10 && vd1) {
+          this.lastPumpOptimization = await (0, import_hupManager.handleHupOptimization)(
+            this,
+            istHeizen,
+            spreizung,
+            currentHupVolt,
+            this.lastPumpOptimization
+          );
+        }
         if (isRegelungAktiv) {
           if (ruecklauf >= ruecklaufSoll + heizenHysterese - 0.1) {
             if (aelterAls10) {

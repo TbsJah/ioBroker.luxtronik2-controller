@@ -172,12 +172,13 @@ async function checkAndSendOutageNotifications(adapter, oldOutageVal, newOutageV
   const newestOutage = newList[0];
   const currentOutageTimestamp = newestOutage.timestamp;
   const currentOutageCode = newestOutage.code;
-  if (currentOutageTimestamp === void 0 || currentOutageCode === 0) {
+  if (currentOutageTimestamp === void 0 || currentOutageTimestamp <= 0) {
     return;
   }
   const descLower = newestOutage.beschreibung.toLowerCase();
   const isFlowIssue = descLower.includes("durchfluss") || descLower.includes("flow");
-  if (!isFlowIssue) {
+  const isMalfunction = descLower.includes("st\xF6rung") || descLower.includes("stoerung") || descLower.includes("wpst\xF6rung") || currentOutageCode === 0;
+  if (!isFlowIssue && !isMalfunction) {
     return;
   }
   if (adapter.lastKnownOutageTimestamp === void 0 || adapter.lastKnownOutageTimestamp === null) {
@@ -191,19 +192,31 @@ async function checkAndSendOutageNotifications(adapter, oldOutageVal, newOutageV
   const now = Date.now();
   if (adapter.lastFlowNotificationTime && now - adapter.lastFlowNotificationTime < 60 * 60 * 1e3) {
     adapter.lastKnownOutageTimestamp = currentOutageTimestamp;
-    (0, import_logger.writeLog)("Flow outage registered, but notification skipped due to 60-minute cooldown spam protection.", "info");
+    (0, import_logger.writeLog)("Outage registered, but notification skipped due to 60-minute cooldown spam protection.", "info");
     return;
   }
   adapter.lastKnownOutageTimestamp = currentOutageTimestamp;
   adapter.lastFlowNotificationTime = now;
-  const msg = `\u26A0\uFE0F *Warnung: Durchfluss-Problem!*
+  let msg = "";
+  if (isMalfunction) {
+    msg = `\u{1F6A8} *Alarm: W\xE4rmepumpen-Abschaltung (St\xF6rung)!*
+Die W\xE4rmepumpe hat sich wegen einer St\xF6rung abgeschaltet:
+
+*Grund:* ${newestOutage.beschreibung}
+*Code:* ${currentOutageCode}
+*Datum:* ${newestOutage.datum}
+
+_Hinweis: Bitte Fehlerspeicher und W\xE4rmepumpen-Status pr\xFCfen._`;
+  } else {
+    msg = `\u26A0\uFE0F *Warnung: Durchfluss-Problem!*
 Die W\xE4rmepumpe hat sich wegen geringem Durchfluss abgeschaltet:
 
-*Code:* ${currentOutageCode}
 *Grund:* ${newestOutage.beschreibung}
+*Code:* ${currentOutageCode}
 *Datum:* ${newestOutage.datum}
 
 _Hinweis: Die Anlage versucht meist einen Neustart. Bitte Heizkreis-Druck und Stellventile pr\xFCfen._`;
+  }
   await sendNotification(adapter, msg);
 }
 // Annotate the CommonJS export names for ESM import in node:

@@ -223,8 +223,8 @@ export async function checkAndSendErrorNotifications(
 }
 
 /**
- * Überwacht den Abschalt-Speicher gezielt auf kritische Durchfluss-Probleme,
- * die von der Wärmepumpe nicht sofort als "Fehler" gewertet werden.
+ * Überwacht den Abschalt-Speicher gezielt auf kritische Störungen und Durchfluss-Probleme,
+ * die von der Wärmepumpe registriert wurden.
  *
  * @param adapter - Die erweiterte Adapter-Instanz.
  * @param oldOutageVal - Der vorherige State der Abschaltungen (JSON).
@@ -248,15 +248,22 @@ export async function checkAndSendOutageNotifications(
 	const currentOutageTimestamp = newestOutage.timestamp;
 	const currentOutageCode = newestOutage.code;
 
-	if (currentOutageTimestamp === undefined || currentOutageCode === 0) {
+	// Timestamp muss vorhanden und valide sein.
+	// WICHTIG: currentOutageCode === 0 DARF HIER NICHT blockieren, da Code 0 = "Wärmepumpen-Störung" ist!
+	if (currentOutageTimestamp === undefined || currentOutageTimestamp <= 0) {
 		return;
 	}
 
-	// Wir filtern gezielt nach Durchfluss / Flow Problemen
+	// Filter für Störungen und Durchflussprobleme
 	const descLower = newestOutage.beschreibung.toLowerCase();
 	const isFlowIssue = descLower.includes('durchfluss') || descLower.includes('flow');
+	const isMalfunction =
+		descLower.includes('störung') ||
+		descLower.includes('stoerung') ||
+		descLower.includes('wpstörung') ||
+		currentOutageCode === 0;
 
-	if (!isFlowIssue) {
+	if (!isFlowIssue && !isMalfunction) {
 		return;
 	}
 
@@ -273,15 +280,20 @@ export async function checkAndSendOutageNotifications(
 	// Spam-Schutz: Max 1 Nachricht pro Stunde für denselben Abschalt-Typ
 	const now = Date.now();
 	if (adapter.lastFlowNotificationTime && now - adapter.lastFlowNotificationTime < 60 * 60 * 1000) {
-		adapter.lastKnownOutageTimestamp = currentOutageTimestamp; // Zeitstempel trotzdem merken
-		writeLog('Flow outage registered, but notification skipped due to 60-minute cooldown spam protection.', 'info');
+		adapter.lastKnownOutageTimestamp = currentOutageTimestamp;
+		writeLog('Outage registered, but notification skipped due to 60-minute cooldown spam protection.', 'info');
 		return;
 	}
 
 	adapter.lastKnownOutageTimestamp = currentOutageTimestamp;
 	adapter.lastFlowNotificationTime = now;
 
-	const msg = `⚠️ *Warnung: Durchfluss-Problem!*\nDie Wärmepumpe hat sich wegen geringem Durchfluss abgeschaltet:\n\n*Code:* ${currentOutageCode}\n*Grund:* ${newestOutage.beschreibung}\n*Datum:* ${newestOutage.datum}\n\n_Hinweis: Die Anlage versucht meist einen Neustart. Bitte Heizkreis-Druck und Stellventile prüfen._`;
+	let msg = '';
+	if (isMalfunction) {
+		msg = `🚨 *Alarm: Wärmepumpen-Abschaltung (Störung)!*\nDie Wärmepumpe hat sich wegen einer Störung abgeschaltet:\n\n*Grund:* ${newestOutage.beschreibung}\n*Code:* ${currentOutageCode}\n*Datum:* ${newestOutage.datum}\n\n_Hinweis: Bitte Fehlerspeicher und Wärmepumpen-Status prüfen._`;
+	} else {
+		msg = `⚠️ *Warnung: Durchfluss-Problem!*\nDie Wärmepumpe hat sich wegen geringem Durchfluss abgeschaltet:\n\n*Grund:* ${newestOutage.beschreibung}\n*Code:* ${currentOutageCode}\n*Datum:* ${newestOutage.datum}\n\n_Hinweis: Die Anlage versucht meist einen Neustart. Bitte Heizkreis-Druck und Stellventile prüfen._`;
+	}
 
 	await sendNotification(adapter, msg);
 }

@@ -537,14 +537,17 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 					}
 				}
 
-				// Ausgelagerte HUP-Optimierung aufrufen
-				this.lastPumpOptimization = await handleHupOptimization(
-					this,
-					istHeizen,
-					spreizung,
-					currentHupVolt,
-					this.lastPumpOptimization,
-				);
+				// FIX: HUP-Optimierung nur aufrufen, wenn die Anlage mindestens 10 Minuten heizt
+				// UND der Verdichter (vd1) läuft. Vorher ist die Spreizung physikalisch nicht aussagekräftig.
+				if (aelterAls10 && vd1) {
+					this.lastPumpOptimization = await handleHupOptimization(
+						this,
+						istHeizen,
+						spreizung,
+						currentHupVolt,
+						this.lastPumpOptimization,
+					);
+				}
 
 				if (isRegelungAktiv) {
 					// WICHTIG: Heizen_nach_Wasser Logik (Reset & Setzen)
