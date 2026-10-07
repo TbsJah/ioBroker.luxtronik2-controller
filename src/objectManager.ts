@@ -37,6 +37,8 @@ export interface StateDefinition {
 	isDurationFormat?: boolean;
 	/** Definiert die interne Herkunft der Daten für das Mapping */
 	dataSource?: 'raw_parameter' | 'raw_value' | 'parameter' | 'value' | 'additional';
+	/** Optionaler Index aus Befehl 3005 (Visibilities), der steuert, ob dieser Datenpunkt sichtbar ist */
+	visiIndex?: number;
 }
 
 /**
@@ -127,20 +129,20 @@ export function isStateEnabled(
 		}
 	}
 
-	// Sichtbarkeits-Prüfung (Visibility Filter via CMD 3005)
+	// =========================================================
+	// DYNAMISCHE SICHTBARKEITSPRÜFUNG (BENPRU 3005 MAPPING)
+	// =========================================================
 	if (config.filter_visibility !== false && visibilities.length > 0) {
-		// Die Visibility bezieht sich primär auf die Parameter (Ordner "Settings" oder raw_parameter)
-		const isParameter =
-			definition.dataSource === 'raw_parameter' ||
-			(definition.folder &&
-				definition.folder.startsWith('Settings') &&
-				/^\d+$/.test(String(definition.luxWriteId || key)));
-
-		if (isParameter) {
-			const luxId = parseInt(String(definition.luxWriteId || key), 10);
-			if (!isNaN(luxId) && visibilities[luxId] === 0) {
-				return false; // Anlage sagt: Dieser Parameter ist für dieses Hardware-Modell unsichtbar/nicht unterstützt!
+		// Wenn der Datenpunkt an einen Visi-Index gekoppelt ist und die Luxtronik 0 meldet -> Ausblenden!
+		if (definition.visiIndex !== undefined) {
+			if (visibilities[definition.visiIndex] === 0) {
+				return false;
 			}
+		}
+
+		// Fallback: Ganzen Kühlungs-Ordner pauschal kappen, falls bei einzelnen Punkten kein visiIndex steht
+		if (definition.folder && definition.folder.includes('Cooling') && visibilities[5] === 0) {
+			return false;
 		}
 	}
 
@@ -193,7 +195,8 @@ export async function cleanupStates(adapter: LuxtronikAdapter): Promise<void> {
 
 	for (const [key, def] of Object.entries(STATE_MAPPING)) {
 		const definition = def as StateDefinition;
-		if (isStateEnabled(key, definition, config)) {
+		// FIX: adapter.currentVisibilities übergeben, sonst greift der Filter beim Löschen nicht!
+		if (isStateEnabled(key, definition, config, adapter.currentVisibilities || [])) {
 			activeStateIds.add(`${definition.folder}.${key}`);
 		}
 	}

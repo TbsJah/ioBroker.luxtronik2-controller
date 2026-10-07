@@ -77,12 +77,13 @@ function isStateEnabled(key, definition, config, visibilities = []) {
     }
   }
   if (config.filter_visibility !== false && visibilities.length > 0) {
-    const isParameter = definition.dataSource === "raw_parameter" || definition.folder && definition.folder.startsWith("Settings") && /^\d+$/.test(String(definition.luxWriteId || key));
-    if (isParameter) {
-      const luxId = parseInt(String(definition.luxWriteId || key), 10);
-      if (!isNaN(luxId) && visibilities[luxId] === 0) {
+    if (definition.visiIndex !== void 0) {
+      if (visibilities[definition.visiIndex] === 0) {
         return false;
       }
+    }
+    if (definition.folder && definition.folder.includes("Cooling") && visibilities[5] === 0) {
+      return false;
     }
   }
   if (config[key] === false || config[`sync_${key}`] === false) {
@@ -107,7 +108,7 @@ async function cleanupStates(adapter) {
   const activeStateIds = /* @__PURE__ */ new Set();
   for (const [key, def] of Object.entries(import_stateMapping.STATE_MAPPING)) {
     const definition = def;
-    if (isStateEnabled(key, definition, config)) {
+    if (isStateEnabled(key, definition, config, adapter.currentVisibilities || [])) {
       activeStateIds.add(`${definition.folder}.${key}`);
     }
   }

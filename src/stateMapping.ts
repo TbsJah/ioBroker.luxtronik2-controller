@@ -4,7 +4,8 @@
  */
 export interface StateDefinition {
 	/** Name des Datenpunkts */
-	name: string | { en: string; de?: string }; /** ioBroker-Rolle des Datenpunkts */
+	name: string | { en: string; de?: string };
+	/** ioBroker-Rolle des Datenpunkts */
 	role: string;
 	/** Datentyp des Datenpunkts */
 	type: 'number' | 'string' | 'boolean' | 'json';
@@ -34,6 +35,8 @@ export interface StateDefinition {
 	states?: Record<string, Record<number, string>> | Record<number, string>;
 	/** Bestimmt explizit die exakte Datenquelle an der Luxtronik */
 	dataSource?: 'raw_value' | 'raw_parameter' | 'value' | 'parameter' | 'additional';
+	/** Optionaler Index aus Befehl 3005 (Visibilities), der steuert, ob dieser Datenpunkt sichtbar ist */
+	visiIndex?: number;
 }
 
 const switchStates = {
@@ -58,6 +61,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: '10',
 		factor: 10,
 		dataSource: 'raw_value',
+		visiIndex: 23, // ID_Visi_Temp_Vorlauf
 	},
 	temperature_return: {
 		folder: 'Information.01_Temperatures',
@@ -100,6 +104,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		factor: 10,
 		luxWriteId: '13',
 		dataSource: 'raw_value',
+		visiIndex: 24, // ID_Visi_Temp_Rucklauf
 	},
 	temperature_hot_gas: {
 		folder: 'Information.01_Temperatures',
@@ -110,6 +115,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: '14',
 		factor: 10,
 		dataSource: 'raw_value',
+		visiIndex: 27, // ID_Visi_Temp_Heissgas
 	},
 	temperature_outside: {
 		folder: 'Information.01_Temperatures',
@@ -144,6 +150,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		factor: 10,
 		dataSource: 'raw_value',
 		required: true,
+		visiIndex: 29, // ID_Visi_Temp_BW_Ist
 	},
 	Wamwassertemperatur_Soll: {
 		folder: 'Information.01_Temperatures',
@@ -186,6 +193,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: '177',
 		factor: 10,
 		dataSource: 'raw_value',
+		visiIndex: 290, // ID_Visi_LIN_VDH
 	},
 	temperature_overheating: {
 		folder: 'Information.01_Temperatures',
@@ -196,6 +204,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: '178',
 		factor: 10,
 		dataSource: 'raw_value',
+		visiIndex: 291, // ID_Visi_LIN_UH
 	},
 	temperature_intake_compressor1: {
 		folder: 'Information.01_Temperatures',
@@ -206,6 +215,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: '176',
 		factor: 10,
 		dataSource: 'raw_value',
+		visiIndex: 289, // ID_Visi_LIN_ANSAUG_VERDICHTER
 	},
 	temperature_intake_evaporation: {
 		folder: 'Information.01_Temperatures',
@@ -216,6 +226,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: '175',
 		factor: 10,
 		dataSource: 'raw_value',
+		visiIndex: 310, // ID_Visi_LIN_ANSAUG_VERDAMPFER
 	},
 
 	// Inputs
@@ -227,6 +238,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		states: switchStates,
 		luxWriteId: '29',
 		dataSource: 'raw_value',
+		visiIndex: 41, // ID_Visi_IN_ASD
 	},
 	EVUin: {
 		folder: 'Information.02_Inputs',
@@ -236,6 +248,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		states: switchStates,
 		luxWriteId: '31',
 		dataSource: 'raw_value',
+		visiIndex: 43, // ID_Visi_IN_EVU
 	},
 	HDin: {
 		folder: 'Information.02_Inputs',
@@ -254,6 +267,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		states: switchStates,
 		luxWriteId: '33',
 		dataSource: 'raw_value',
+		visiIndex: 45, // ID_Visi_IN_MOT
 	},
 	NDin: {
 		folder: 'Information.02_Inputs',
@@ -283,6 +297,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: '181',
 		factor: 100,
 		dataSource: 'raw_value',
+		visiIndex: 292, // ID_Visi_LIN_Druck
 	},
 	HDin_pressure: {
 		folder: 'Information.02_Inputs',
@@ -293,6 +308,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: '180',
 		factor: 100,
 		dataSource: 'raw_value',
+		visiIndex: 292, // ID_Visi_LIN_Druck
 	},
 	BWTin: {
 		folder: 'Information.02_Inputs',
@@ -324,6 +340,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		states: switchStates,
 		luxWriteId: '37',
 		dataSource: 'raw_value',
+		visiIndex: 49, // ID_Visi_OUT_Abtauventil
 	},
 	BUPout: {
 		folder: 'Information.03_Outputs',
@@ -333,6 +350,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		states: switchStates,
 		luxWriteId: '38',
 		dataSource: 'raw_value',
+		visiIndex: 50, // ID_Visi_OUT_BUP
 	},
 	HUPout: {
 		folder: 'Information.03_Outputs',
@@ -343,6 +361,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: '39',
 		dataSource: 'raw_value',
 		required: true,
+		visiIndex: 52, // ID_Visi_OUT_HUP
 	},
 	VENout: {
 		folder: 'Information.03_Outputs',
@@ -372,6 +391,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: '46',
 		dataSource: 'raw_value',
 		required: true,
+		visiIndex: 59, // ID_Visi_OUT_ZIP
 	},
 	Virtual_ZIP_Status: {
 		name: { en: 'Virtual ZIP Status (Adapter Logic)', de: 'Virtueller ZIP Status (Adapter-Logik)' },
@@ -391,6 +411,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		states: switchStates,
 		luxWriteId: '47',
 		dataSource: 'raw_value',
+		visiIndex: 60, // ID_Visi_OUT_ZUP
 	},
 	ZW1out: {
 		folder: 'Information.03_Outputs',
@@ -400,6 +421,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		states: switchStates,
 		luxWriteId: '48',
 		dataSource: 'raw_value',
+		visiIndex: 61, // ID_Visi_OUT_ZWE1
 	},
 	analogOut1: {
 		folder: 'Information.03_Outputs',
@@ -410,6 +432,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: '156',
 		dataSource: 'raw_value',
 		factor: 100,
+		visiIndex: 248, // ID_Visi_OUT_Analog_1
 	},
 	analogOut2: {
 		folder: 'Information.03_Outputs',
@@ -420,6 +443,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: '157',
 		dataSource: 'raw_value',
 		factor: 100,
+		visiIndex: 249, // ID_Visi_OUT_Analog_2
 	},
 	defrostValve: {
 		folder: 'Information.03_Outputs',
@@ -429,6 +453,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		states: switchStates,
 		luxWriteId: '37',
 		dataSource: 'raw_value',
+		visiIndex: 49,
 	},
 	hotWaterBoilerValve: {
 		folder: 'Information.03_Outputs',
@@ -438,6 +463,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		states: switchStates,
 		luxWriteId: '38',
 		dataSource: 'raw_value',
+		visiIndex: 50,
 	},
 	heatingSystemCircPump: {
 		folder: 'Information.03_Outputs',
@@ -447,6 +473,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		states: switchStates,
 		luxWriteId: '39',
 		dataSource: 'raw_value',
+		visiIndex: 52,
 	},
 	heatSourceMotor: {
 		folder: 'Information.03_Outputs',
@@ -474,6 +501,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		states: switchStates,
 		luxWriteId: '46',
 		dataSource: 'raw_value',
+		visiIndex: 59,
 	},
 
 	// Timers (Format HH:MM:SS mapped as 'text')
@@ -578,6 +606,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: '56',
 		factor: 3600,
 		dataSource: 'raw_value',
+		visiIndex: 80, // ID_Visi_Bst_BStdVD1
 	},
 	starts_compressor1: {
 		folder: 'Information.05_OperatingHours',
@@ -586,6 +615,27 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		type: 'number',
 		luxWriteId: '57',
 		dataSource: 'raw_value',
+		visiIndex: 81, // ID_Visi_Bst_ImpVD1
+	},
+	hours_compressor2: {
+		folder: 'Information.05_OperatingHours',
+		name: { en: 'Operating hours compressor 2', de: 'Betriebsstunden Verdichter 2' },
+		role: 'value',
+		type: 'number',
+		unit: 'h',
+		luxWriteId: '58',
+		factor: 3600,
+		dataSource: 'raw_value',
+		visiIndex: 83, // ID_Visi_Bst_BStdVD2
+	},
+	starts_compressor2: {
+		folder: 'Information.05_OperatingHours',
+		name: { en: 'Switch cycles compressor 2', de: 'Impulse Verdichter 2' },
+		role: 'value',
+		type: 'number',
+		luxWriteId: '59',
+		dataSource: 'raw_value',
+		visiIndex: 84, // ID_Visi_Bst_ImpVD2
 	},
 	hours_2nd_heat_source1: {
 		folder: 'Information.05_OperatingHours',
@@ -596,6 +646,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: '60',
 		factor: 3600,
 		dataSource: 'raw_value',
+		visiIndex: 86, // ID_Visi_Bst_BStdZWE1
 	},
 	hours_heatpump: {
 		folder: 'Information.05_OperatingHours',
@@ -636,6 +687,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: '66',
 		factor: 3600,
 		dataSource: 'raw_value',
+		visiIndex: 5, // ID_Visi_Kuhlung
 	},
 	// Error & Outage Logs (SYSTEMRELEVANT)
 	Fehlerspeicher: {
@@ -781,6 +833,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		unit: 'kWh',
 		dataSource: 'raw_parameter',
 		factor: 100,
+		visiIndex: 324, // ID_Visi_Waermemenge_ZWE
 	},
 	thermalenergy_total: {
 		folder: 'Information.09_ThermalEnergy',
@@ -817,10 +870,11 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		name: 'Energy second heat generator consumed',
 		role: 'value.energy.consumed',
 		type: 'number',
-		luxWriteId: '1059',
+		luxWriteId: '1059', // Behält die originale ID vom BenPru Mapping bei
 		unit: 'kWh',
 		dataSource: 'raw_parameter',
 		factor: 100,
+		visiIndex: 324, // ID_Visi_Waermemenge_ZWE
 	},
 	energy_total: {
 		folder: 'Information.10_Energy',
@@ -978,6 +1032,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: 'json',
 		type: 'json',
 		dataSource: 'parameter',
+		visiIndex: 11, // Zirkulations-Tabelle an Zirkulations-Visi binden
 	},
 	hotWaterCircPumpTimerTable52SatSun: {
 		folder: 'Information.11_Tables.Circulation',
@@ -985,6 +1040,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: 'json',
 		type: 'json',
 		dataSource: 'parameter',
+		visiIndex: 11,
 	},
 	hotWaterCircPumpTimerTableDayFriday: {
 		folder: 'Information.11_Tables.Circulation',
@@ -992,6 +1048,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: 'json',
 		type: 'json',
 		dataSource: 'parameter',
+		visiIndex: 11,
 	},
 	hotWaterCircPumpTimerTableDayMonday: {
 		folder: 'Information.11_Tables.Circulation',
@@ -999,6 +1056,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: 'json',
 		type: 'json',
 		dataSource: 'parameter',
+		visiIndex: 11,
 	},
 	hotWaterCircPumpTimerTableDaySaturday: {
 		folder: 'Information.11_Tables.Circulation',
@@ -1006,6 +1064,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: 'json',
 		type: 'json',
 		dataSource: 'parameter',
+		visiIndex: 11,
 	},
 	hotWaterCircPumpTimerTableDaySunday: {
 		folder: 'Information.11_Tables.Circulation',
@@ -1013,6 +1072,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: 'json',
 		type: 'json',
 		dataSource: 'parameter',
+		visiIndex: 11,
 	},
 	hotWaterCircPumpTimerTableDayThursday: {
 		folder: 'Information.11_Tables.Circulation',
@@ -1020,6 +1080,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: 'json',
 		type: 'json',
 		dataSource: 'parameter',
+		visiIndex: 11,
 	},
 	hotWaterCircPumpTimerTableDayTuesday: {
 		folder: 'Information.11_Tables.Circulation',
@@ -1027,6 +1088,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: 'json',
 		type: 'json',
 		dataSource: 'parameter',
+		visiIndex: 11,
 	},
 	hotWaterCircPumpTimerTableDayWednesday: {
 		folder: 'Information.11_Tables.Circulation',
@@ -1034,6 +1096,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: 'json',
 		type: 'json',
 		dataSource: 'parameter',
+		visiIndex: 11,
 	},
 	hotWaterCircPumpTimerTableWeek: {
 		folder: 'Information.11_Tables.Circulation',
@@ -1041,6 +1104,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: 'json',
 		type: 'json',
 		dataSource: 'parameter',
+		visiIndex: 11,
 	},
 
 	// 12_Systeminfo
@@ -1122,6 +1186,33 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		def: 0,
 		required: true,
 	},
+	pump_frequency: {
+		folder: 'Information.12_SystemInfo',
+		name: { en: 'Compressor frequency', de: 'Verdichterfrequenz' },
+		role: 'value',
+		type: 'number',
+		unit: 'Hz',
+		luxWriteId: '231',
+		dataSource: 'raw_value',
+	},
+	current_heat_output: {
+		folder: 'Information.12_SystemInfo',
+		name: { en: 'Current heat output', de: 'Aktuelle Wärmeleistung' },
+		role: 'value.power',
+		type: 'number',
+		unit: 'W',
+		luxWriteId: '257',
+		dataSource: 'raw_value',
+	},
+	current_power_consumption: {
+		folder: 'Information.12_SystemInfo',
+		name: { en: 'Current power consumption', de: 'Aktuelle Leistungsaufnahme' },
+		role: 'value.power.consumption',
+		type: 'number',
+		unit: 'W',
+		luxWriteId: '268',
+		dataSource: 'raw_value',
+	},
 	// ==========================================
 	// COOLING
 	// ==========================================
@@ -1137,6 +1228,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 			de: { 0: 'Aus', 1: 'Automatik' },
 		},
 		dataSource: 'raw_parameter',
+		visiIndex: 5,
 	},
 	cooling_status: {
 		folder: 'Information.13_Cooling',
@@ -1150,6 +1242,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 			de: { 0: 'Aus', 1: 'Keine Anforderung', 2: 'Anforderung', 3: 'Aktiv' },
 		},
 		dataSource: 'raw_value',
+		visiIndex: 5,
 	},
 	ID_WEB_FreigabKuehl: {
 		folder: 'Information.13_Cooling',
@@ -1159,6 +1252,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		write: false,
 		luxWriteId: '146',
 		dataSource: 'raw_value',
+		visiIndex: 5,
 	},
 	opStateCoolingString: {
 		folder: 'Information.08_OperatingState',
@@ -1166,6 +1260,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		role: 'text',
 		type: 'string',
 		dataSource: 'value',
+		visiIndex: 5,
 	},
 	cooling_configured: {
 		folder: 'Information.13_Cooling',
@@ -1179,6 +1274,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 			de: { 0: 'Nein', 1: 'Ja' },
 		},
 		dataSource: 'raw_value',
+		visiIndex: 5,
 	},
 	cooling_release: {
 		folder: 'Information.13_Cooling',
@@ -1192,6 +1288,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 			de: { 0: 'Nein', 1: 'Ja' },
 		},
 		dataSource: 'raw_value',
+		visiIndex: 5,
 	},
 	cooling_release_temp: {
 		folder: 'Information.13_Cooling',
@@ -1203,6 +1300,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: '110',
 		factor: 10,
 		dataSource: 'raw_parameter',
+		visiIndex: 5,
 	},
 	cooling_inlet_temp: {
 		folder: 'Information.13_Cooling',
@@ -1214,6 +1312,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: '132',
 		factor: 10,
 		dataSource: 'raw_parameter',
+		visiIndex: 5,
 	},
 	cooling_start_after_hours: {
 		folder: 'Information.13_Cooling',
@@ -1225,6 +1324,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: '850',
 		factor: 10,
 		dataSource: 'raw_parameter',
+		visiIndex: 5,
 	},
 	cooling_end_after_hours: {
 		folder: 'Information.13_Cooling',
@@ -1236,6 +1336,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: '851',
 		factor: 10,
 		dataSource: 'raw_parameter',
+		visiIndex: 5,
 	},
 	flow_rate_cooling: {
 		folder: 'Information.13_Cooling',
@@ -1247,6 +1348,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: '254',
 		factor: 1,
 		dataSource: 'raw_value',
+		visiIndex: 5,
 	},
 	// ==========================================
 	// SETTINGS & PARAMETERS (Writable)
@@ -1483,6 +1585,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: '697',
 		dataSource: 'raw_parameter',
 		required: true,
+		visiIndex: 11, // Nur sichtbar, wenn Zirkulation (Index 11) verbaut ist
 	},
 	hotWaterCircPumpOffTime: {
 		folder: 'Settings.05_ZIP',
@@ -1495,6 +1598,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: '698',
 		dataSource: 'raw_parameter',
 		required: true,
+		visiIndex: 11,
 	},
 	zip_aktiv: {
 		folder: 'Settings.05_ZIP',
@@ -1506,6 +1610,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		write: true,
 		def: 120,
 		required: true,
+		visiIndex: 11,
 	},
 
 	// System Settings
@@ -1595,6 +1700,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		write: true,
 		min: -20,
 		max: 20,
+		visiIndex: 61, // Sichtbar wenn ZWE1 vorhanden
 	},
 	temperature_hot_water_limit: {
 		folder: 'Settings.06_SystemSettings',
@@ -1663,6 +1769,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 			de: { 0: 'Woche (Mo-So)', 1: '5+2 (Mo-Fr, Sa-So)', 2: 'Tage (Mo, Di, ...)' },
 		},
 		required: true,
+		visiIndex: 11,
 	},
 	hotWaterOperationTimerTableSelected: {
 		folder: 'Settings.07_Tables',
@@ -3326,6 +3433,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: '507',
 		write: true,
 		required: true,
+		visiIndex: 11,
 	},
 	Zirkulation_MoSo_End1: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Mo-Su',
@@ -3337,6 +3445,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: '508',
 		write: true,
 		required: true,
+		visiIndex: 11,
 	},
 	Zirkulation_MoSo_Start2: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Mo-Su',
@@ -3348,6 +3457,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: '509',
 		write: true,
 		required: true,
+		visiIndex: 11,
 	},
 	Zirkulation_MoSo_End2: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Mo-Su',
@@ -3359,6 +3469,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: '510',
 		write: true,
 		required: true,
+		visiIndex: 11,
 	},
 	Zirkulation_MoSo_Start3: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Mo-Su',
@@ -3370,6 +3481,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: '511',
 		write: true,
 		required: true,
+		visiIndex: 11,
 	},
 	Zirkulation_MoSo_End3: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Mo-Su',
@@ -3381,6 +3493,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: '512',
 		write: true,
 		required: true,
+		visiIndex: 11,
 	},
 	Zirkulation_MoSo_Start4: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Mo-Su',
@@ -3392,6 +3505,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: '513',
 		write: true,
 		required: true,
+		visiIndex: 11,
 	},
 	Zirkulation_MoSo_End4: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Mo-Su',
@@ -3403,6 +3517,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: '514',
 		write: true,
 		required: true,
+		visiIndex: 11,
 	},
 	Zirkulation_MoSo_Start5: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Mo-Su',
@@ -3414,6 +3529,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: '515',
 		write: true,
 		required: true,
+		visiIndex: 11,
 	},
 	Zirkulation_MoSo_End5: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Mo-Su',
@@ -3425,6 +3541,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: '516',
 		write: true,
 		required: true,
+		visiIndex: 11,
 	},
 
 	// =========================================================
@@ -3439,6 +3556,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '517',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_MoFr_Ende1: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.52_MoFr_SaSu',
@@ -3449,6 +3567,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '518',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_MoFr_Start2: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.52_MoFr_SaSu',
@@ -3459,6 +3578,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '519',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_MoFr_Ende2: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.52_MoFr_SaSu',
@@ -3469,6 +3589,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '520',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_MoFr_Start3: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.52_MoFr_SaSu',
@@ -3479,6 +3600,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '521',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_MoFr_Ende3: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.52_MoFr_SaSu',
@@ -3489,6 +3611,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '522',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_MoFr_Start4: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.52_MoFr_SaSu',
@@ -3499,6 +3622,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '523',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_MoFr_Ende4: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.52_MoFr_SaSu',
@@ -3509,6 +3633,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '524',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_MoFr_Start5: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.52_MoFr_SaSu',
@@ -3519,6 +3644,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '525',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_MoFr_Ende5: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.52_MoFr_SaSu',
@@ -3529,6 +3655,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '526',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_SaSo_Start1: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.52_MoFr_SaSu',
@@ -3539,6 +3666,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '527',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_SaSo_Ende1: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.52_MoFr_SaSu',
@@ -3549,6 +3677,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '528',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_SaSo_Start2: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.52_MoFr_SaSu',
@@ -3559,6 +3688,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '529',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_SaSo_Ende2: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.52_MoFr_SaSu',
@@ -3569,6 +3699,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '530',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_SaSo_Start3: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.52_MoFr_SaSu',
@@ -3579,6 +3710,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '531',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_SaSo_Ende3: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.52_MoFr_SaSu',
@@ -3589,6 +3721,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '532',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_SaSo_Start4: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.52_MoFr_SaSu',
@@ -3599,6 +3732,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '533',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_SaSo_Ende4: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.52_MoFr_SaSu',
@@ -3609,6 +3743,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '534',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_SaSo_Start5: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.52_MoFr_SaSu',
@@ -3619,6 +3754,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '535',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_SaSo_Ende5: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.52_MoFr_SaSu',
@@ -3629,6 +3765,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '536',
 		write: true,
+		visiIndex: 11,
 	},
 
 	// =========================================================
@@ -3643,6 +3780,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '537',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Sonntag_Ende1: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Sunday',
@@ -3653,6 +3791,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '538',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Sonntag_Start2: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Sunday',
@@ -3663,6 +3802,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '539',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Sonntag_Ende2: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Sunday',
@@ -3673,6 +3813,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '540',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Sonntag_Start3: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Sunday',
@@ -3683,6 +3824,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '541',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Sonntag_Ende3: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Sunday',
@@ -3693,6 +3835,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '542',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Sonntag_Start4: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Sunday',
@@ -3703,6 +3846,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '543',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Sonntag_Ende4: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Sunday',
@@ -3713,6 +3857,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '544',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Sonntag_Start5: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Sunday',
@@ -3723,6 +3868,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '545',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Sonntag_Ende5: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Sunday',
@@ -3733,6 +3879,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '546',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Montag_Start1: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Monday',
@@ -3743,6 +3890,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '547',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Montag_Ende1: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Monday',
@@ -3753,6 +3901,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '548',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Montag_Start2: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Monday',
@@ -3763,6 +3912,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '549',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Montag_Ende2: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Monday',
@@ -3773,6 +3923,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '550',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Montag_Start3: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Monday',
@@ -3783,6 +3934,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '551',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Montag_Ende3: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Monday',
@@ -3793,6 +3945,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '552',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Montag_Start4: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Monday',
@@ -3803,6 +3956,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '553',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Montag_Ende4: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Monday',
@@ -3813,6 +3967,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '554',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Montag_Start5: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Monday',
@@ -3823,6 +3978,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '555',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Montag_Ende5: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Monday',
@@ -3833,6 +3989,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '556',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Dienstag_Start1: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Tuesday',
@@ -3843,6 +4000,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '557',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Dienstag_Ende1: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Tuesday',
@@ -3853,6 +4011,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '558',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Dienstag_Start2: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Tuesday',
@@ -3863,6 +4022,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '559',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Dienstag_Ende2: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Tuesday',
@@ -3873,6 +4033,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '560',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Dienstag_Start3: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Tuesday',
@@ -3883,6 +4044,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '561',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Dienstag_Ende3: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Tuesday',
@@ -3893,6 +4055,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '562',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Dienstag_Start4: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Tuesday',
@@ -3903,6 +4066,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '563',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Dienstag_Ende4: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Tuesday',
@@ -3913,6 +4077,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '564',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Dienstag_Start5: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Tuesday',
@@ -3923,6 +4088,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '565',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Dienstag_Ende5: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Tuesday',
@@ -3933,6 +4099,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '566',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Mittwoch_Start1: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Wednesday',
@@ -3943,6 +4110,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '567',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Mittwoch_Ende1: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Wednesday',
@@ -3953,6 +4121,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '568',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Mittwoch_Start2: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Wednesday',
@@ -3963,6 +4132,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '569',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Mittwoch_Ende2: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Wednesday',
@@ -3973,6 +4143,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '570',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Mittwoch_Start3: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Wednesday',
@@ -3983,6 +4154,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '571',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Mittwoch_Ende3: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Wednesday',
@@ -3993,6 +4165,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '572',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Mittwoch_Start4: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Wednesday',
@@ -4003,6 +4176,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '573',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Mittwoch_Ende4: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Wednesday',
@@ -4013,6 +4187,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '574',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Mittwoch_Start5: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Wednesday',
@@ -4023,6 +4198,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '575',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Mittwoch_Ende5: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Wednesday',
@@ -4033,6 +4209,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '576',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Donnerstag_Start1: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Thursday',
@@ -4043,6 +4220,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '577',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Donnerstag_Ende1: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Thursday',
@@ -4053,6 +4231,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '578',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Donnerstag_Start2: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Thursday',
@@ -4063,6 +4242,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '579',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Donnerstag_Ende2: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Thursday',
@@ -4073,6 +4253,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '580',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Donnerstag_Start3: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Thursday',
@@ -4083,6 +4264,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '581',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Donnerstag_Ende3: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Thursday',
@@ -4093,6 +4275,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '582',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Donnerstag_Start4: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Thursday',
@@ -4103,6 +4286,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '583',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Donnerstag_Ende4: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Thursday',
@@ -4113,6 +4297,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '584',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Donnerstag_Start5: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Thursday',
@@ -4123,6 +4308,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '585',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Donnerstag_Ende5: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Thursday',
@@ -4133,6 +4319,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '586',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Freitag_Start1: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Friday',
@@ -4143,6 +4330,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '587',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Freitag_Ende1: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Friday',
@@ -4153,6 +4341,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '588',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Freitag_Start2: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Friday',
@@ -4163,6 +4352,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '589',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Freitag_Ende2: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Friday',
@@ -4173,6 +4363,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '590',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Freitag_Start3: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Friday',
@@ -4183,6 +4374,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '591',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Freitag_Ende3: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Friday',
@@ -4193,6 +4385,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '592',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Freitag_Start4: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Friday',
@@ -4203,6 +4396,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '593',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Freitag_Ende4: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Friday',
@@ -4213,6 +4407,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '594',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Freitag_Start5: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Friday',
@@ -4223,6 +4418,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '595',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Freitag_Ende5: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Friday',
@@ -4233,6 +4429,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '596',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Samstag_Start1: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Saturday',
@@ -4243,6 +4440,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '597',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Samstag_Ende1: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Saturday',
@@ -4253,6 +4451,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '598',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Samstag_Start2: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Saturday',
@@ -4263,6 +4462,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '599',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Samstag_Ende2: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Saturday',
@@ -4273,6 +4473,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '600',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Samstag_Start3: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Saturday',
@@ -4283,6 +4484,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '601',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Samstag_Ende3: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Saturday',
@@ -4293,6 +4495,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '602',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Samstag_Start4: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Saturday',
@@ -4303,6 +4506,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '603',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Samstag_Ende4: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Saturday',
@@ -4313,6 +4517,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '604',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Samstag_Start5: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Saturday',
@@ -4323,6 +4528,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '605',
 		write: true,
+		visiIndex: 11,
 	},
 	Zirkulation_Samstag_Ende5: {
 		folder: 'Settings.07_Tables.Circulation.Parameter.Days.Saturday',
@@ -4333,6 +4539,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_parameter',
 		luxWriteId: '606',
 		write: true,
+		visiIndex: 11,
 	},
 
 	// ==========================================
@@ -4407,6 +4614,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: 'Activate_Zip',
 		isVirtual: true,
 		required: true,
+		visiIndex: 11,
 	},
 	connection: {
 		folder: 'info',
