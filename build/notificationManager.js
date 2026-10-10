@@ -25,7 +25,7 @@ __export(notificationManager_exports, {
 });
 module.exports = __toCommonJS(notificationManager_exports);
 var import_logger = require("./logger");
-var import_stateMapping = require("./stateMapping");
+var import_stateMapping_old = require("./stateMapping_old");
 function safeParse(value) {
   try {
     return JSON.parse(value);
@@ -86,7 +86,7 @@ async function handleTestMessage(adapter, obj) {
       }
       return;
     }
-    const errorPath = (0, import_stateMapping.getDpPath)("Fehlerspeicher");
+    const errorPath = (0, import_stateMapping_old.getDpPath)("Fehlerspeicher");
     const lastErrorState = errorPath ? await adapter.getStateAsync(errorPath) : null;
     let msg = "";
     if (lastErrorState && typeof lastErrorState.val === "string") {

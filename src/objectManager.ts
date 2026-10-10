@@ -1,5 +1,5 @@
 import { writeLog } from './logger';
-import { STATE_MAPPING } from './stateMapping';
+import { STATE_MAPPING } from './stateMapping_old';
 import type { LuxtronikAdapter } from './types';
 
 /**

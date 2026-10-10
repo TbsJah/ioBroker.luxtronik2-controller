@@ -1,0 +1,1469 @@
+"use strict";
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var info_exports = {};
+__export(info_exports, {
+  INFO_MAPPING: () => INFO_MAPPING
+});
+module.exports = __toCommonJS(info_exports);
+const switchStates = {
+  en: { 0: "Off", 1: "On" },
+  de: { 0: "Aus", 1: "Ein" }
+};
+const INFO_MAPPING = {
+  // ==========================================
+  // Information.01_Temperatures
+  // ==========================================
+  temperature_supply: {
+    folder: "Information.01_Temperatures",
+    name: { en: "Supply temperature", de: "Vorlauftemperatur" },
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C",
+    luxWriteId: "10",
+    factor: 10,
+    dataSource: "raw_value",
+    visiIndex: 23
+  },
+  temperature_return: {
+    folder: "Information.01_Temperatures",
+    name: { en: "Return temperature", de: "R\xFCcklauftemperatur" },
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C",
+    luxWriteId: "11",
+    factor: 10,
+    dataSource: "raw_value",
+    required: true
+  },
+  spreizung_vorlauf_ruecklauf: {
+    folder: "Information.01_Temperatures",
+    name: { en: "Temperature spread", de: "Spreizung Vorlauf-R\xFCcklauf" },
+    role: "value.temperature",
+    type: "number",
+    unit: "K",
+    isVirtual: true,
+    required: true
+  },
+  temperature_target_return: {
+    folder: "Information.01_Temperatures",
+    name: { en: "Target return temperature", de: "R\xFCcklauf Soll" },
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C",
+    luxWriteId: "12",
+    factor: 10,
+    dataSource: "raw_value",
+    required: true
+  },
+  temperature_extern_return: {
+    folder: "Information.01_Temperatures",
+    name: { en: "External return temperature", de: "R\xFCcklauf extern" },
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C",
+    luxWriteId: "13",
+    factor: 10,
+    dataSource: "raw_value",
+    visiIndex: 24
+  },
+  temperature_hot_gas: {
+    folder: "Information.01_Temperatures",
+    name: { en: "Hot gas temperature", de: "Hei\xDFgastemperatur" },
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C",
+    luxWriteId: "14",
+    factor: 10,
+    dataSource: "raw_value",
+    visiIndex: 27
+  },
+  temperature_outside: {
+    folder: "Information.01_Temperatures",
+    name: { en: "Outside temperature", de: "Au\xDFentemperatur" },
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C",
+    luxWriteId: "15",
+    factor: 10,
+    dataSource: "raw_value",
+    required: true
+  },
+  Mitteltemperatur: {
+    folder: "Information.01_Temperatures",
+    name: { en: "Average outside temperature", de: "Mitteltemperatur (24h)" },
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C",
+    luxWriteId: "16",
+    factor: 10,
+    dataSource: "raw_value"
+  },
+  Wamwassertemperatur_Ist: {
+    folder: "Information.01_Temperatures",
+    name: { en: "Hot water temperature actual", de: "Warmwassertemperatur Ist" },
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C",
+    luxWriteId: "17",
+    factor: 10,
+    dataSource: "raw_value",
+    required: true,
+    visiIndex: 29
+  },
+  Wamwassertemperatur_Soll: {
+    folder: "Information.01_Temperatures",
+    name: { en: "Hot water temperature target", de: "Warmwassertemperatur Soll" },
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C",
+    luxWriteId: "18",
+    factor: 10,
+    dataSource: "raw_value",
+    required: true
+  },
+  temperature_heat_source_in: {
+    folder: "Information.01_Temperatures",
+    name: { en: "Heat source inlet temperature", de: "W\xE4rmequelle Eintritt (TWE)" },
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C",
+    luxWriteId: "19",
+    factor: 10,
+    dataSource: "raw_value"
+  },
+  temperature_heat_source_out: {
+    folder: "Information.01_Temperatures",
+    name: { en: "Heat source outlet temperature", de: "W\xE4rmequelle Austritt (TWA)" },
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C",
+    luxWriteId: "20",
+    factor: 10,
+    dataSource: "raw_value"
+  },
+  temperature_intake_evaporation: {
+    folder: "Information.01_Temperatures",
+    name: { en: "Intake evaporator temperature", de: "Ansaug Verdampfer" },
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C",
+    luxWriteId: "175",
+    factor: 10,
+    dataSource: "raw_value",
+    visiIndex: 310
+  },
+  temperature_intake_compressor1: {
+    folder: "Information.01_Temperatures",
+    name: { en: "Intake compressor 1 temperature", de: "Ansaug Verdichter" },
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C",
+    luxWriteId: "176",
+    factor: 10,
+    dataSource: "raw_value",
+    visiIndex: 289
+  },
+  temperature_compressor1_heating: {
+    folder: "Information.01_Temperatures",
+    name: { en: "Compressor heating temperature", de: "Verdichterheizung (VDH)" },
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C",
+    luxWriteId: "177",
+    factor: 10,
+    dataSource: "raw_value",
+    visiIndex: 290
+  },
+  temperature_overheating: {
+    folder: "Information.01_Temperatures",
+    name: { en: "Overheating temperature", de: "\xDCberhitzung Ist" },
+    role: "value.temperature",
+    type: "number",
+    unit: "K",
+    luxWriteId: "178",
+    factor: 10,
+    dataSource: "raw_value",
+    visiIndex: 291
+  },
+  temperature_overheating_target: {
+    folder: "Information.01_Temperatures",
+    name: { en: "Target overheating temperature", de: "\xDCberhitzung Soll" },
+    role: "value.temperature",
+    type: "number",
+    unit: "K",
+    luxWriteId: "179",
+    factor: 10,
+    dataSource: "raw_value"
+  },
+  room_thermostat_temperature: {
+    folder: "Information.01_Temperatures",
+    name: { en: "Room thermostat temperature (RBE)", de: "Raumthermostat Ist" },
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C",
+    luxWriteId: "227",
+    factor: 10,
+    dataSource: "raw_value",
+    visiIndex: 122
+  },
+  room_thermostat_target: {
+    folder: "Information.01_Temperatures",
+    name: { en: "Room thermostat target (RBE)", de: "Raumthermostat Soll" },
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C",
+    luxWriteId: "228",
+    factor: 10,
+    dataSource: "raw_value",
+    visiIndex: 122
+  },
+  pump_flow_delta_target: {
+    folder: "Information.01_Temperatures",
+    name: { en: "Heat source flow delta target", de: "W\xE4rmequelle Spreizung Soll" },
+    role: "value.temperature",
+    type: "number",
+    unit: "K",
+    luxWriteId: "239",
+    factor: 10,
+    dataSource: "raw_value"
+  },
+  pump_flow_delta: {
+    folder: "Information.01_Temperatures",
+    name: { en: "Heat source flow delta actual", de: "W\xE4rmequelle Spreizung Ist" },
+    role: "value.temperature",
+    type: "number",
+    unit: "K",
+    luxWriteId: "240",
+    factor: 10,
+    dataSource: "raw_value"
+  },
+  circulation_pump_delta_target: {
+    folder: "Information.01_Temperatures",
+    name: { en: "Circulation pump delta target", de: "Heizung Spreizung Soll" },
+    role: "value.temperature",
+    type: "number",
+    unit: "K",
+    luxWriteId: "242",
+    factor: 10,
+    dataSource: "raw_value"
+  },
+  circulation_pump_delta: {
+    folder: "Information.01_Temperatures",
+    name: { en: "Circulation pump delta actual", de: "Heizung Spreizung Ist" },
+    role: "value.temperature",
+    type: "number",
+    unit: "K",
+    luxWriteId: "243",
+    factor: 10,
+    dataSource: "raw_value"
+  },
+  // ==========================================
+  // Information.02_Inputs
+  // ==========================================
+  ASDin: {
+    folder: "Information.02_Inputs",
+    name: "Defrost end switch ASD",
+    role: "value",
+    type: "number",
+    states: switchStates,
+    luxWriteId: "29",
+    dataSource: "raw_value",
+    visiIndex: 41
+  },
+  BWTin: {
+    folder: "Information.02_Inputs",
+    name: "Domestic hot water thermostat BWT",
+    role: "value",
+    type: "number",
+    states: switchStates,
+    luxWriteId: "30",
+    dataSource: "raw_value"
+  },
+  EVUin: {
+    folder: "Information.02_Inputs",
+    name: "Utility block EVU 1",
+    role: "value",
+    type: "number",
+    states: switchStates,
+    luxWriteId: "31",
+    dataSource: "raw_value",
+    visiIndex: 43
+  },
+  HDin: {
+    folder: "Information.02_Inputs",
+    name: "High pressure switch HD",
+    role: "value",
+    type: "number",
+    states: switchStates,
+    luxWriteId: "32",
+    dataSource: "raw_value"
+  },
+  MOTin: {
+    folder: "Information.02_Inputs",
+    name: "Motor protection MOT",
+    role: "value",
+    type: "number",
+    states: switchStates,
+    luxWriteId: "33",
+    dataSource: "raw_value",
+    visiIndex: 45
+  },
+  NDin: {
+    folder: "Information.02_Inputs",
+    name: "Low pressure switch ND",
+    role: "value",
+    type: "number",
+    states: switchStates,
+    luxWriteId: "34",
+    dataSource: "raw_value"
+  },
+  AnalogIn: {
+    folder: "Information.02_Inputs",
+    name: "Analog input 1",
+    role: "value",
+    type: "number",
+    unit: "V",
+    luxWriteId: "147",
+    factor: 100,
+    dataSource: "raw_value"
+  },
+  flow_rate_heat_source: {
+    folder: "Information.02_Inputs",
+    name: "Flow rate heat source (WQ)",
+    role: "value",
+    type: "number",
+    unit: "l/h",
+    luxWriteId: "173",
+    factor: 1,
+    dataSource: "raw_value"
+  },
+  HDin_pressure: {
+    folder: "Information.02_Inputs",
+    name: "High pressure sensor value",
+    role: "value.pressure",
+    type: "number",
+    unit: "bar",
+    luxWriteId: "180",
+    factor: 100,
+    dataSource: "raw_value",
+    visiIndex: 292
+  },
+  NDin_pressure: {
+    folder: "Information.02_Inputs",
+    name: "Low pressure sensor value",
+    role: "value.pressure",
+    type: "number",
+    unit: "bar",
+    luxWriteId: "181",
+    factor: 100,
+    dataSource: "raw_value",
+    visiIndex: 292
+  },
+  EVU2in: {
+    folder: "Information.02_Inputs",
+    name: "Utility block EVU 2 (SG Ready)",
+    role: "value",
+    type: "number",
+    states: switchStates,
+    luxWriteId: "185",
+    dataSource: "raw_value"
+  },
+  // ==========================================
+  // Information.03_Outputs
+  // ==========================================
+  AVout: {
+    folder: "Information.03_Outputs",
+    name: "Defrost valve AV",
+    role: "value",
+    type: "number",
+    states: switchStates,
+    luxWriteId: "37",
+    dataSource: "raw_value",
+    visiIndex: 49
+  },
+  BUPout: {
+    folder: "Information.03_Outputs",
+    name: "Hot water charging pump BUP",
+    role: "value",
+    type: "number",
+    states: switchStates,
+    luxWriteId: "38",
+    dataSource: "raw_value",
+    visiIndex: 50
+  },
+  HUPout: {
+    folder: "Information.03_Outputs",
+    name: "Heating circulation pump HUP",
+    role: "value",
+    type: "number",
+    states: switchStates,
+    luxWriteId: "39",
+    dataSource: "raw_value",
+    required: true,
+    visiIndex: 52
+  },
+  VENout: {
+    folder: "Information.03_Outputs",
+    name: "Fan VEN",
+    role: "value",
+    type: "number",
+    states: switchStates,
+    luxWriteId: "42",
+    dataSource: "raw_value"
+  },
+  VBOout: {
+    folder: "Information.03_Outputs",
+    name: "Pump flow heat source VBO",
+    role: "value",
+    type: "number",
+    states: switchStates,
+    luxWriteId: "43",
+    dataSource: "raw_value"
+  },
+  VD1out: {
+    folder: "Information.03_Outputs",
+    name: "Compressor 1 VD1",
+    role: "value",
+    type: "number",
+    states: switchStates,
+    luxWriteId: "44",
+    dataSource: "raw_value",
+    required: true
+  },
+  VD2out: {
+    folder: "Information.03_Outputs",
+    name: "Compressor 2 VD2",
+    role: "value",
+    type: "number",
+    states: switchStates,
+    luxWriteId: "45",
+    dataSource: "raw_value"
+  },
+  ZIPout: {
+    folder: "Information.03_Outputs",
+    name: "Circulation pump ZIP",
+    role: "value",
+    type: "number",
+    states: switchStates,
+    luxWriteId: "46",
+    dataSource: "raw_value",
+    required: true,
+    visiIndex: 59
+  },
+  Virtual_ZIP_Status: {
+    folder: "Information.03_Outputs",
+    name: { en: "Virtual ZIP Status (Adapter Logic)", de: "Virtueller ZIP Status (Adapter-Logik)" },
+    role: "indicator",
+    type: "boolean",
+    write: false,
+    def: false,
+    isVirtual: true,
+    required: true
+  },
+  ZUPout: {
+    folder: "Information.03_Outputs",
+    name: "Auxiliary circulation pump ZUP",
+    role: "value",
+    type: "number",
+    states: switchStates,
+    luxWriteId: "47",
+    dataSource: "raw_value",
+    visiIndex: 60
+  },
+  ZW1out: {
+    folder: "Information.03_Outputs",
+    name: "Second heat generator 1 ZWE1",
+    role: "value",
+    type: "number",
+    states: switchStates,
+    luxWriteId: "48",
+    dataSource: "raw_value",
+    visiIndex: 61
+  },
+  ZW2SSTout: {
+    folder: "Information.03_Outputs",
+    name: "Disturbance output ZW2SST",
+    role: "value",
+    type: "number",
+    states: switchStates,
+    luxWriteId: "49",
+    dataSource: "raw_value"
+  },
+  analogOut1: {
+    folder: "Information.03_Outputs",
+    name: "Analog output 1",
+    role: "value",
+    type: "number",
+    unit: "V",
+    luxWriteId: "156",
+    factor: 100,
+    dataSource: "raw_value",
+    visiIndex: 248
+  },
+  analogOut2: {
+    folder: "Information.03_Outputs",
+    name: "Analog output 2",
+    role: "value",
+    type: "number",
+    unit: "V",
+    luxWriteId: "157",
+    factor: 100,
+    dataSource: "raw_value",
+    visiIndex: 249
+  },
+  compressor_heater: {
+    folder: "Information.03_Outputs",
+    name: "Compressor heater VDH",
+    role: "value",
+    type: "number",
+    states: switchStates,
+    luxWriteId: "182",
+    dataSource: "raw_value"
+  },
+  pump_pwm: {
+    folder: "Information.03_Outputs",
+    name: { en: "Heat source pump PWM", de: "W\xE4rmequellenpumpe PWM" },
+    role: "value",
+    type: "number",
+    unit: "%",
+    luxWriteId: "183",
+    dataSource: "raw_value"
+  },
+  circulation_pump_pwm: {
+    folder: "Information.03_Outputs",
+    name: { en: "Circulation pump PWM", de: "Heizungsumw\xE4lzpumpe PWM" },
+    role: "value",
+    type: "number",
+    unit: "%",
+    luxWriteId: "241",
+    dataSource: "raw_value"
+  },
+  mixer1_opened: {
+    folder: "Information.03_Outputs",
+    name: { en: "Mixer 1 open", de: "Mischer 1 Auf" },
+    role: "sensor.switch",
+    type: "boolean",
+    luxWriteId: "40",
+    dataSource: "raw_value",
+    visiIndex: 7
+    // C0040
+  },
+  mixer1_closed: {
+    folder: "Information.03_Outputs",
+    name: { en: "Mixer 1 closed", de: "Mischer 1 Zu" },
+    role: "sensor.switch",
+    type: "boolean",
+    luxWriteId: "41",
+    dataSource: "raw_value",
+    visiIndex: 7
+    // C0041
+  },
+  mixer2_opened: {
+    folder: "Information.03_Outputs",
+    name: { en: "Mixer 2 open", de: "Mischer 2 Auf" },
+    role: "sensor.switch",
+    type: "boolean",
+    luxWriteId: "55",
+    dataSource: "raw_value",
+    visiIndex: 8
+    // C0055
+  },
+  mixer2_closed: {
+    folder: "Information.03_Outputs",
+    name: { en: "Mixer 2 closed", de: "Mischer 2 Zu" },
+    role: "sensor.switch",
+    type: "boolean",
+    luxWriteId: "54",
+    dataSource: "raw_value",
+    visiIndex: 8
+    // C0054
+  },
+  // ==========================================
+  // Information.04_Timers
+  // ==========================================
+  Time_WPein_akt: {
+    folder: "Information.04_Timers",
+    name: "Current switch-on time heat pump",
+    role: "text",
+    type: "string",
+    isDurationFormat: true,
+    luxWriteId: "67",
+    dataSource: "raw_value"
+  },
+  Time_ZWE1_akt: {
+    folder: "Information.04_Timers",
+    name: "Current runtime ZWE1",
+    role: "text",
+    type: "string",
+    isDurationFormat: true,
+    luxWriteId: "68",
+    dataSource: "raw_value"
+  },
+  Time_ZWE2_akt: {
+    folder: "Information.04_Timers",
+    name: "Current runtime ZWE2",
+    role: "text",
+    type: "string",
+    isDurationFormat: true,
+    luxWriteId: "69",
+    dataSource: "raw_value"
+  },
+  Timer_EinschVerz: {
+    folder: "Information.04_Timers",
+    name: "Switch-on delay remaining time",
+    role: "text",
+    type: "string",
+    isDurationFormat: true,
+    luxWriteId: "70",
+    dataSource: "raw_value"
+  },
+  Time_SSPAUS_akt: {
+    folder: "Information.04_Timers",
+    name: "Current lock time OFF",
+    role: "text",
+    type: "string",
+    isDurationFormat: true,
+    luxWriteId: "71",
+    dataSource: "raw_value"
+  },
+  Time_SSPEIN_akt: {
+    folder: "Information.04_Timers",
+    name: "Current lock time ON",
+    role: "text",
+    type: "string",
+    isDurationFormat: true,
+    luxWriteId: "72",
+    dataSource: "raw_value"
+  },
+  Time_VDStd_akt: {
+    folder: "Information.04_Timers",
+    name: "Current downtime compressor",
+    role: "text",
+    type: "string",
+    isDurationFormat: true,
+    luxWriteId: "73",
+    dataSource: "raw_value"
+  },
+  Time_HRM_akt: {
+    folder: "Information.04_Timers",
+    name: "Current time HRM",
+    role: "text",
+    type: "string",
+    isDurationFormat: true,
+    luxWriteId: "74",
+    dataSource: "raw_value"
+  },
+  Time_HRW_akt: {
+    folder: "Information.04_Timers",
+    name: "Current time HRW",
+    role: "text",
+    type: "string",
+    isDurationFormat: true,
+    luxWriteId: "75",
+    dataSource: "raw_value"
+  },
+  Time_LGS_akt: {
+    folder: "Information.04_Timers",
+    name: "Thermal desinfection timer",
+    role: "text",
+    type: "string",
+    isDurationFormat: true,
+    luxWriteId: "76",
+    dataSource: "raw_value"
+  },
+  Time_SBW_akt: {
+    folder: "Information.04_Timers",
+    name: "DHW Block timer",
+    role: "text",
+    type: "string",
+    isDurationFormat: true,
+    luxWriteId: "77",
+    dataSource: "raw_value"
+  },
+  Time_AbtIn: {
+    folder: "Information.04_Timers",
+    name: "Defrost timer",
+    role: "text",
+    type: "string",
+    isDurationFormat: true,
+    luxWriteId: "141",
+    dataSource: "raw_value"
+  },
+  Time_Heissgas: {
+    folder: "Information.04_Timers",
+    name: "Time hot gas monitoring",
+    role: "text",
+    type: "string",
+    isDurationFormat: true,
+    luxWriteId: "158",
+    dataSource: "raw_value"
+  },
+  // ==========================================
+  // Information.05_OperatingHours
+  // ==========================================
+  hours_compressor1: {
+    folder: "Information.05_OperatingHours",
+    name: "Operating hours compressor 1",
+    role: "value",
+    type: "number",
+    unit: "h",
+    luxWriteId: "56",
+    factor: 3600,
+    dataSource: "raw_value",
+    visiIndex: 80
+  },
+  starts_compressor1: {
+    folder: "Information.05_OperatingHours",
+    name: "Switch cycles compressor 1",
+    role: "value",
+    type: "number",
+    luxWriteId: "57",
+    dataSource: "raw_value",
+    visiIndex: 81
+  },
+  hours_compressor2: {
+    folder: "Information.05_OperatingHours",
+    name: "Operating hours compressor 2",
+    role: "value",
+    type: "number",
+    unit: "h",
+    luxWriteId: "58",
+    factor: 3600,
+    dataSource: "raw_value",
+    visiIndex: 83
+  },
+  starts_compressor2: {
+    folder: "Information.05_OperatingHours",
+    name: "Switch cycles compressor 2",
+    role: "value",
+    type: "number",
+    luxWriteId: "59",
+    dataSource: "raw_value",
+    visiIndex: 84
+  },
+  hours_2nd_heat_source1: {
+    folder: "Information.05_OperatingHours",
+    name: "Operating hours ZWE1",
+    role: "value",
+    type: "number",
+    unit: "h",
+    luxWriteId: "60",
+    factor: 3600,
+    dataSource: "raw_value",
+    visiIndex: 86
+  },
+  hours_2nd_heat_source2: {
+    folder: "Information.05_OperatingHours",
+    name: "Operating hours ZWE2",
+    role: "value",
+    type: "number",
+    unit: "h",
+    luxWriteId: "61",
+    factor: 3600,
+    dataSource: "raw_value",
+    visiIndex: 87
+  },
+  hours_heatpump: {
+    folder: "Information.05_OperatingHours",
+    name: "Operating hours heat pump total",
+    role: "value",
+    type: "number",
+    unit: "h",
+    luxWriteId: "63",
+    factor: 3600,
+    dataSource: "raw_value"
+  },
+  hours_heating: {
+    folder: "Information.05_OperatingHours",
+    name: "Operating hours heating",
+    role: "value",
+    type: "number",
+    unit: "h",
+    luxWriteId: "64",
+    factor: 3600,
+    dataSource: "raw_value"
+  },
+  hours_warmwater: {
+    folder: "Information.05_OperatingHours",
+    name: "Operating hours hot water",
+    role: "value",
+    type: "number",
+    unit: "h",
+    luxWriteId: "65",
+    factor: 3600,
+    dataSource: "raw_value"
+  },
+  // ==========================================
+  // Information.06_ErrorLog, 07_Outages, 08_OperatingState
+  // ==========================================
+  Fehlerspeicher: {
+    folder: "Information.06_ErrorLog",
+    name: "Error history (Last 5 errors)",
+    role: "json",
+    type: "json",
+    isVirtual: true,
+    required: true
+  },
+  Abschaltungen: {
+    folder: "Information.07_Outages",
+    name: "Outage history (Last 5 outages)",
+    role: "json",
+    type: "json",
+    isVirtual: true,
+    required: true
+  },
+  WP_BZ_akt: {
+    folder: "Information.08_OperatingState",
+    name: "Current operating state code",
+    role: "value",
+    type: "number",
+    states: {
+      en: {
+        0: "Heating",
+        1: "Hot water",
+        2: "Swimming pool",
+        3: "Utility block",
+        4: "Defrosting",
+        5: "Idle",
+        6: "Ext. heat source",
+        7: "Cooling"
+      },
+      de: {
+        0: "Heizung",
+        1: "Warmwasser",
+        2: "Schwimmbad",
+        3: "EVU-Sperre",
+        4: "Abtauen",
+        5: "Leerlauf",
+        6: "Zweiter W\xE4rmeerzeuger",
+        7: "K\xFChlung"
+      }
+    },
+    luxWriteId: "80",
+    dataSource: "raw_value",
+    required: true
+  },
+  heatpump_extendet_state_string: {
+    folder: "Information.08_OperatingState",
+    name: "Extended state text",
+    role: "text",
+    type: "string",
+    dataSource: "value"
+  },
+  opStateHeating: {
+    folder: "Information.08_OperatingState",
+    name: "Operating state heating",
+    role: "value",
+    type: "number",
+    states: {
+      en: { 0: "Reduced", 1: "Normal", 2: "Heating limit", 3: "Off", 4: "Frost protection" },
+      de: { 0: "Abgesenkt", 1: "Normal", 2: "Heizgrenze", 3: "Aus", 4: "Frostschutz" }
+    },
+    luxWriteId: "125",
+    dataSource: "raw_value"
+  },
+  opStateHeatingString: {
+    folder: "Information.08_OperatingState",
+    name: "Operating state heating text",
+    role: "text",
+    type: "string",
+    dataSource: "value",
+    required: true
+  },
+  opStateHotWaterString: {
+    folder: "Information.08_OperatingState",
+    name: "Operating state hot water text",
+    role: "text",
+    type: "string",
+    dataSource: "value"
+  },
+  bivalentLevel: {
+    folder: "Information.08_OperatingState",
+    name: "Bivalent level",
+    role: "value",
+    type: "number",
+    states: {
+      en: { 1: "One compressor allowed", 2: "Two compressors allowed", 3: "Additional heat generator allowed" },
+      de: { 1: "Ein Verdichter erlaubt", 2: "Zwei Verdichter erlaubt", 3: "Zusatzw\xE4rmeerzeuger erlaubt" }
+    },
+    luxWriteId: "79",
+    dataSource: "raw_value"
+  },
+  heatpump_duration: {
+    folder: "Information.08_OperatingState",
+    name: "Duration of current state",
+    role: "text",
+    type: "string",
+    isDurationFormat: true,
+    luxWriteId: "120",
+    dataSource: "raw_value"
+  },
+  heatpump_state_string: {
+    folder: "Information.08_OperatingState",
+    name: "Heat pump state text",
+    role: "text",
+    type: "string",
+    dataSource: "value"
+  },
+  // ==========================================
+  // Information.09_ThermalEnergy & 10_Energy
+  // ==========================================
+  thermalenergy_heating: {
+    folder: "Information.09_ThermalEnergy",
+    name: "Thermal energy heating generated",
+    role: "value.energy.consumed",
+    type: "number",
+    unit: "kWh",
+    luxWriteId: "151",
+    factor: 10,
+    dataSource: "raw_value"
+  },
+  thermalenergy_warmwater: {
+    folder: "Information.09_ThermalEnergy",
+    name: "Thermal energy hot water generated",
+    role: "value.energy.consumed",
+    type: "number",
+    unit: "kWh",
+    luxWriteId: "152",
+    factor: 10,
+    dataSource: "raw_value"
+  },
+  thermalenergy_swimmingpool: {
+    folder: "Information.09_ThermalEnergy",
+    name: "Thermal energy swimming pool generated",
+    role: "value.energy.consumed",
+    type: "number",
+    unit: "kWh",
+    luxWriteId: "153",
+    factor: 10,
+    dataSource: "raw_value",
+    visiIndex: 250
+  },
+  thermalenergy_total_live: {
+    folder: "Information.09_ThermalEnergy",
+    name: "Thermal energy total (live)",
+    role: "value.energy.consumed",
+    type: "number",
+    unit: "kWh",
+    luxWriteId: "154",
+    factor: 10,
+    dataSource: "raw_value"
+  },
+  heat_amount_counter_since: {
+    folder: "Information.09_ThermalEnergy",
+    name: { en: "Heat amount total (Since)", de: "W\xE4rmemenge Gesamt (Seit)" },
+    role: "value.energy.consumed",
+    type: "number",
+    unit: "kWh",
+    luxWriteId: "852",
+    factor: 100,
+    dataSource: "raw_parameter"
+  },
+  heat_amount_wq: {
+    folder: "Information.09_ThermalEnergy",
+    name: { en: "Heat amount heat source", de: "W\xE4rmemenge W\xE4rmequelle (WQ)" },
+    role: "value.energy.consumed",
+    type: "number",
+    unit: "kWh",
+    luxWriteId: "853",
+    factor: 100,
+    dataSource: "raw_parameter"
+  },
+  heat_amount_hz_param: {
+    folder: "Information.09_ThermalEnergy",
+    name: { en: "Heat amount heating (Parameter)", de: "W\xE4rmemenge Heizung (Parameter)" },
+    role: "value.energy.consumed",
+    type: "number",
+    unit: "kWh",
+    luxWriteId: "854",
+    factor: 100,
+    dataSource: "raw_parameter"
+  },
+  heat_amount_wq_ges: {
+    folder: "Information.09_ThermalEnergy",
+    name: { en: "Heat amount heat source total", de: "W\xE4rmemenge W\xE4rmequelle Gesamt" },
+    role: "value.energy.consumed",
+    type: "number",
+    unit: "kWh",
+    luxWriteId: "855",
+    factor: 100,
+    dataSource: "raw_parameter"
+  },
+  heat_amount_bw_param: {
+    folder: "Information.09_ThermalEnergy",
+    name: { en: "Heat amount DHW (Parameter)", de: "W\xE4rmemenge Warmwasser (Parameter)" },
+    role: "value.energy.consumed",
+    type: "number",
+    unit: "kWh",
+    luxWriteId: "878",
+    factor: 100,
+    dataSource: "raw_parameter"
+  },
+  heat_amount_sw_param: {
+    folder: "Information.09_ThermalEnergy",
+    name: { en: "Heat amount swimming pool", de: "W\xE4rmemenge Schwimmbad" },
+    role: "value.energy.consumed",
+    type: "number",
+    unit: "kWh",
+    luxWriteId: "879",
+    factor: 100,
+    dataSource: "raw_parameter",
+    visiIndex: 250
+  },
+  heat_amount_date: {
+    folder: "Information.09_ThermalEnergy",
+    name: { en: "Heat amount reference date", de: "W\xE4rmemenge Z\xE4hler-Startdatum" },
+    role: "date",
+    type: "string",
+    luxWriteId: "880",
+    dataSource: "raw_parameter"
+  },
+  thermalenergy_ZWE1: {
+    folder: "Information.09_ThermalEnergy",
+    name: "Thermal energy second heat generator generated",
+    role: "value.energy.consumed",
+    type: "number",
+    luxWriteId: "1059",
+    unit: "kWh",
+    factor: 100,
+    dataSource: "raw_parameter",
+    visiIndex: 324
+  },
+  heat_amount_heating_2: {
+    folder: "Information.09_ThermalEnergy",
+    name: { en: "Heat amount heating 2", de: "W\xE4rmemenge Heizung 2" },
+    role: "value.energy.consumed",
+    type: "number",
+    unit: "kWh",
+    luxWriteId: "1015",
+    factor: 100,
+    dataSource: "raw_parameter"
+    // P1015
+  },
+  heat_amount_dhw_2: {
+    folder: "Information.09_ThermalEnergy",
+    name: { en: "Heat amount DHW 2", de: "W\xE4rmemenge Warmwasser 2" },
+    role: "value.energy.consumed",
+    type: "number",
+    unit: "kWh",
+    luxWriteId: "1016",
+    factor: 100,
+    dataSource: "raw_parameter"
+    // P1016
+  },
+  heat_amount_pool_2: {
+    folder: "Information.09_ThermalEnergy",
+    name: { en: "Heat amount pool 2", de: "W\xE4rmemenge Schwimmbad 2" },
+    role: "value.energy.consumed",
+    type: "number",
+    unit: "kWh",
+    luxWriteId: "1017",
+    factor: 100,
+    dataSource: "raw_parameter",
+    visiIndex: 250
+    // P1017
+  },
+  heat_amount_counter_2: {
+    folder: "Information.09_ThermalEnergy",
+    name: { en: "Heat amount total 2", de: "W\xE4rmemenge Gesamt 2" },
+    role: "value.energy.consumed",
+    type: "number",
+    unit: "kWh",
+    luxWriteId: "1018",
+    factor: 100,
+    dataSource: "raw_parameter"
+    // P1018
+  },
+  energy_heating: {
+    folder: "Information.10_Energy",
+    name: "Energy heating consumed",
+    role: "value.energy.consumed",
+    luxWriteId: "1136",
+    type: "number",
+    unit: "kWh",
+    factor: 100,
+    dataSource: "raw_parameter"
+  },
+  energy_warmwater: {
+    folder: "Information.10_Energy",
+    name: "Energy hot water consumed",
+    role: "value.energy.consumed",
+    type: "number",
+    luxWriteId: "1137",
+    unit: "kWh",
+    factor: 100,
+    dataSource: "raw_parameter"
+  },
+  energy_swimmingpool: {
+    folder: "Information.10_Energy",
+    name: "Energy pool consumed",
+    role: "value.energy.consumed",
+    type: "number",
+    luxWriteId: "1138",
+    unit: "kWh",
+    factor: 100,
+    dataSource: "raw_parameter",
+    visiIndex: 250
+  },
+  // ==========================================
+  // ZUSATZ: Energie & Twin-Verbräuche
+  // ==========================================
+  energy_pool_input: {
+    folder: "Information.10_Energy",
+    name: { en: "Energy pool consumed", de: "Energieaufnahme Schwimmbad" },
+    role: "value.energy.consumed",
+    type: "number",
+    unit: "kWh",
+    luxWriteId: "1138",
+    factor: 100,
+    dataSource: "raw_parameter",
+    visiIndex: 250
+    // P1138
+  },
+  energy_cooling_input: {
+    folder: "Information.10_Energy",
+    name: { en: "Energy cooling consumed", de: "Energieaufnahme K\xFChlung" },
+    role: "value.energy.consumed",
+    type: "number",
+    unit: "kWh",
+    luxWriteId: "1139",
+    factor: 100,
+    dataSource: "raw_parameter",
+    visiIndex: 5
+    // P1139
+  },
+  energy_zwe1_input: {
+    folder: "Information.10_Energy",
+    name: { en: "Energy ZWE consumed", de: "Energieaufnahme Zweiter W\xE4rmeerzeuger" },
+    role: "value.energy.consumed",
+    type: "number",
+    unit: "kWh",
+    luxWriteId: "1140",
+    factor: 100,
+    dataSource: "raw_parameter"
+    // P1140
+  },
+  // ==========================================
+  // Information.12_SystemInfo
+  // ==========================================
+  heatpump_type: {
+    folder: "Information.12_SystemInfo",
+    name: "Heat pump type",
+    role: "text",
+    type: "string",
+    dataSource: "raw_value"
+  },
+  firmware: {
+    folder: "Information.12_SystemInfo",
+    name: "Firmware version",
+    role: "text",
+    type: "string",
+    luxWriteId: "81",
+    dataSource: "raw_value"
+  },
+  ip_address: {
+    folder: "Information.12_SystemInfo",
+    name: "Current IP address",
+    role: "info.ip",
+    type: "string",
+    dataSource: "raw_value"
+  },
+  subnet: {
+    folder: "Information.12_SystemInfo",
+    name: "Subnet mask",
+    role: "info.address",
+    type: "string",
+    dataSource: "raw_value"
+  },
+  broadcast_address: {
+    folder: "Information.12_SystemInfo",
+    name: "Broadcast address",
+    role: "info.address",
+    type: "string",
+    dataSource: "raw_value"
+  },
+  standard_gateway: {
+    folder: "Information.12_SystemInfo",
+    name: "Standard gateway",
+    role: "info.address",
+    type: "string",
+    dataSource: "raw_value"
+  },
+  LIN_exists: {
+    folder: "Information.12_SystemInfo",
+    name: "LIN bus available",
+    role: "indicator",
+    type: "boolean",
+    luxWriteId: "174",
+    dataSource: "raw_value"
+  },
+  deviceTime: {
+    folder: "Information.12_SystemInfo",
+    name: "Device time",
+    role: "date",
+    type: "string",
+    luxWriteId: "134",
+    dataSource: "raw_value"
+  },
+  write_cycles_today: {
+    folder: "Information.12_SystemInfo",
+    name: "Write cycles to flash (today)",
+    role: "value",
+    type: "number",
+    isVirtual: true,
+    required: true
+  },
+  write_cycles_total: {
+    folder: "Information.12_SystemInfo",
+    name: "Write cycles to flash (total)",
+    role: "value",
+    type: "number",
+    isVirtual: true,
+    required: true
+  },
+  pump_frequency: {
+    folder: "Information.12_SystemInfo",
+    name: { en: "Compressor frequency", de: "Verdichterfrequenz" },
+    role: "value",
+    type: "number",
+    unit: "Hz",
+    luxWriteId: "231",
+    dataSource: "raw_value"
+  },
+  current_heat_output: {
+    folder: "Information.12_SystemInfo",
+    name: { en: "Current heat output", de: "Aktuelle W\xE4rmeleistung" },
+    role: "value.power",
+    type: "number",
+    unit: "W",
+    luxWriteId: "257",
+    dataSource: "raw_value"
+  },
+  current_power_consumption: {
+    folder: "Information.12_SystemInfo",
+    name: { en: "Current power consumption", de: "Aktuelle Leistungsaufnahme" },
+    role: "value.power.consumption",
+    type: "number",
+    unit: "W",
+    luxWriteId: "268",
+    dataSource: "raw_value"
+  },
+  heat_amount_flow_rate: {
+    folder: "Information.12_SystemInfo",
+    name: { en: "Heat amount flow rate", de: "W\xE4rmemengenz\xE4hler Durchfluss" },
+    role: "value",
+    type: "number",
+    unit: "l/h",
+    luxWriteId: "155",
+    dataSource: "raw_value"
+  },
+  serial_number_date: {
+    folder: "Information.12_SystemInfo",
+    name: { en: "Serial Number (Date)", de: "Seriennummer (Datum)" },
+    role: "text",
+    type: "string",
+    luxWriteId: "874",
+    dataSource: "raw_parameter"
+  },
+  serial_number_hex: {
+    folder: "Information.12_SystemInfo",
+    name: { en: "Serial Number (Hex)", de: "Seriennummer (Hex)" },
+    role: "text",
+    type: "string",
+    luxWriteId: "875",
+    dataSource: "raw_parameter"
+  },
+  // ==========================================
+  // NACHTRAG: Hardware-Feedback (Calculations)
+  // ==========================================
+  model_code: {
+    folder: "Information.12_SystemInfo",
+    name: { en: "Heat pump model code", de: "W\xE4rmepumpen Modell-Code" },
+    role: "value",
+    type: "number",
+    luxWriteId: "78",
+    dataSource: "raw_value"
+    // C0078
+  },
+  rbe_version: {
+    folder: "Information.12_SystemInfo",
+    name: { en: "Room thermostat version", de: "RBE Version" },
+    role: "text",
+    type: "string",
+    luxWriteId: "258",
+    dataSource: "raw_value"
+    // C0258
+  },
+  // ==========================================
+  // Information.13_Cooling & 14_Solar & 15_Ventilation
+  // ==========================================
+  cooling_operation_mode: {
+    folder: "Information.13_Cooling",
+    name: "Cooling operation mode",
+    role: "level.mode.thermostat",
+    type: "number",
+    write: true,
+    luxWriteId: "108",
+    states: { en: { 0: "Off", 1: "Automatic" }, de: { 0: "Aus", 1: "Automatik" } },
+    dataSource: "raw_parameter",
+    visiIndex: 5
+  },
+  cooling_status: {
+    folder: "Information.13_Cooling",
+    name: "Cooling status",
+    role: "value",
+    type: "number",
+    write: false,
+    luxWriteId: "6",
+    states: {
+      en: { 0: "Off", 1: "no demand", 2: "Demand", 3: "active" },
+      de: { 0: "Aus", 1: "Keine Anforderung", 2: "Anforderung", 3: "Aktiv" }
+    },
+    dataSource: "raw_value",
+    visiIndex: 5
+  },
+  ID_WEB_FreigabKuehl: {
+    folder: "Information.13_Cooling",
+    name: "Cooling release",
+    role: "sensor.switch",
+    type: "boolean",
+    luxWriteId: "146",
+    dataSource: "raw_value",
+    visiIndex: 5
+  },
+  hours_cooling: {
+    folder: "Information.13_Cooling",
+    name: "Operating hours cooling",
+    role: "value",
+    type: "number",
+    unit: "h",
+    luxWriteId: "66",
+    factor: 3600,
+    dataSource: "raw_value",
+    visiIndex: 5
+  },
+  energy_cooling: {
+    folder: "Information.13_Cooling",
+    name: "Energy cooling consumed",
+    role: "value.energy.consumed",
+    type: "number",
+    luxWriteId: "1139",
+    unit: "kWh",
+    factor: 100,
+    dataSource: "raw_parameter",
+    visiIndex: 5
+  },
+  thermalenergy_cooling: {
+    folder: "Information.13_Cooling",
+    name: "Thermal energy cooling",
+    role: "value.energy.consumed",
+    type: "number",
+    luxWriteId: "1135",
+    unit: "kWh",
+    factor: 100,
+    dataSource: "raw_parameter",
+    visiIndex: 5
+  },
+  solar_collector_temperature: {
+    folder: "Information.14_Solar",
+    name: { en: "Solar collector temperature", de: "Solarkollektor Temperatur" },
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C",
+    luxWriteId: "26",
+    factor: 10,
+    dataSource: "raw_value",
+    visiIndex: 250
+  },
+  solar_buffer_temperature: {
+    folder: "Information.14_Solar",
+    name: { en: "Solar buffer temperature", de: "Solarspeicher Temperatur" },
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C",
+    luxWriteId: "27",
+    factor: 10,
+    dataSource: "raw_value",
+    visiIndex: 250
+  },
+  solar_pump_status: {
+    folder: "Information.14_Solar",
+    name: { en: "Solar pump status", de: "Solarpumpe SLP" },
+    role: "value",
+    type: "number",
+    states: switchStates,
+    luxWriteId: "52",
+    dataSource: "raw_value",
+    visiIndex: 250
+  },
+  hours_solar: {
+    folder: "Information.14_Solar",
+    name: { en: "Operating hours solar", de: "Betriebsstunden Solar" },
+    role: "value",
+    type: "number",
+    unit: "h",
+    luxWriteId: "882",
+    factor: 3600,
+    dataSource: "raw_parameter",
+    visiIndex: 250
+  },
+  ventilation_supply_air_temperature: {
+    folder: "Information.15_Ventilation",
+    name: { en: "Ventilation supply air", de: "L\xFCftung Zulufttemperatur" },
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C",
+    luxWriteId: "159",
+    factor: 10,
+    dataSource: "raw_value"
+  },
+  ventilation_exhaust_air_temperature: {
+    folder: "Information.15_Ventilation",
+    name: { en: "Ventilation exhaust air", de: "L\xFCftung Ablufttemperatur" },
+    role: "value.temperature",
+    type: "number",
+    unit: "\xB0C",
+    luxWriteId: "160",
+    factor: 10,
+    dataSource: "raw_value"
+  },
+  ventilation_supply_fan: {
+    folder: "Information.15_Ventilation",
+    name: { en: "Ventilation supply fan speed", de: "L\xFCftung Zuluft Ventilator" },
+    role: "value",
+    type: "number",
+    unit: "%",
+    luxWriteId: "164",
+    dataSource: "raw_value"
+  },
+  ventilation_exhaust_fan: {
+    folder: "Information.15_Ventilation",
+    name: { en: "Ventilation exhaust fan speed", de: "L\xFCftung Abluft Ventilator" },
+    role: "value",
+    type: "number",
+    unit: "%",
+    luxWriteId: "165",
+    dataSource: "raw_value"
+  }
+};
+// Annotate the CommonJS export names for ESM import in node:
+0 && (module.exports = {
+  INFO_MAPPING
+});
+//# sourceMappingURL=info.js.map

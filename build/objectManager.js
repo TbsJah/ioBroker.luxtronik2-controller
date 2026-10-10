@@ -28,7 +28,7 @@ __export(objectManager_exports, {
 });
 module.exports = __toCommonJS(objectManager_exports);
 var import_logger = require("./logger");
-var import_stateMapping = require("./stateMapping");
+var import_stateMapping_old = require("./stateMapping_old");
 const PREFIX_MAPPING = [
   ["HZ_MoSo_", "sync_heatingOperationTimerTableWeek"],
   ["HZ_MoFr_", "sync_heatingOperationTimerTable52MonFri"],
@@ -106,7 +106,7 @@ function sanitizeName(name) {
 async function cleanupStates(adapter) {
   const config = adapter.config;
   const activeStateIds = /* @__PURE__ */ new Set();
-  for (const [key, def] of Object.entries(import_stateMapping.STATE_MAPPING)) {
+  for (const [key, def] of Object.entries(import_stateMapping_old.STATE_MAPPING)) {
     const definition = def;
     if (isStateEnabled(key, definition, config, adapter.currentVisibilities || [])) {
       activeStateIds.add(`${definition.folder}.${key}`);
@@ -229,7 +229,7 @@ async function ensureAllObjectsExist(adapter) {
   const lang = config.language === "de" ? "de" : "en";
   try {
     const existingObjects = await adapter.getAdapterObjectsAsync();
-    for (const [key, def] of Object.entries(import_stateMapping.STATE_MAPPING)) {
+    for (const [key, def] of Object.entries(import_stateMapping_old.STATE_MAPPING)) {
       const definition = def;
       if (!isStateEnabled(key, definition, config, adapter.currentVisibilities || [])) {
         continue;

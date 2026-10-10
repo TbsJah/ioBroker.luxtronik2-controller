@@ -22,7 +22,7 @@ import {
 	isStateEnabled,
 } from './objectManager';
 import { dumpAllRawToLog, queueWrite, readAllRaw } from './rawFunctions';
-import { STATE_MAPPING, getDpPath } from './stateMapping';
+import { STATE_MAPPING, getDpPath } from './stateMapping_old';
 import { generateHeatCurveSVG } from './svgGenerator';
 import type { LuxtronikAdapter } from './types';
 import {
