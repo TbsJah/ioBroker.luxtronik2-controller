@@ -902,7 +902,15 @@ export const INFO_MAPPING: Record<string, StateDefinition> = {
 		type: 'string',
 		dataSource: 'value',
 	},
-
+	opStateCoolingString: {
+		folder: 'Information.08_OperatingState',
+		name: 'Operating state cooling text',
+		role: 'text',
+		type: 'string',
+		dataSource: 'value',
+		isVirtual: true,
+		required: true,
+	},
 	// ==========================================
 	// Information.09_ThermalEnergy & 10_Energy
 	// ==========================================
