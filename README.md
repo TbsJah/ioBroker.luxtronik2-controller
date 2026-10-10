@@ -88,14 +88,14 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 
 ### **WORK IN PROGRESS**
 
-### 🚀 Features
+##🚀 Features##
 
 - **Modularized State Mapping:** Restructured the massive `stateMapping.ts` into smaller, logically separated files (e.g., `info.ts`, `settings.ts`, `actions.ts`) to significantly improve code maintainability, readability, and scalability.
 - **Improved Admin UI (ZIP Control):** Added comprehensive, scenario-based documentation to the Circulation Pump (ZIP) settings in the Admin interface (`jsonConfig.json`). It now clearly differentiates between continuous power setups (Scenario A) and heat-pump-powered setups (Scenario B). This prevents users from accidentally cutting power to external Wi-Fi relays (like Shelly) when using the EEPROM hardware protection feature.
 - **New Telemetry Data added:** The adapter now automatically reads and creates crucial system values based on the BenPru standard: Compressor frequency (Index 231), Current heat output (Index 257), and Current power consumption (Index 268).
 - **Extended Shutdown Codes (Outage History):** The internal database for heat pump shutdowns has been massively expanded. The adapter now recognizes and translates all 32 official Luxtronik shutdown reasons (e.g., _Inverter pause_, _Hot gas pause_, _Limit power consumption_) into detailed clear text (English & German). This ensures much more precise troubleshooting in the object tree and highly informative Telegram alerts.
 
-### 🛠 Bugfixes & Enhancements
+##🛠 Bugfixes & Enhancements##
 
 - **Critical Startup Crashes Fixed:** Resolved multiple `UNCAUGHT_EXCEPTION` errors and communication aborts where the adapter crashed directly during initialization (`onReady`) or the polling loop. This was caused by missing hardcoded virtual data points (e.g., `Regelung_Aktiv`, `thermalenergy_total`, `energy_total`, `opStateCoolingString`) that were dropped during the state mapping modularization.
 - **ZIP Optimization Defaults:** Fixed an issue where the circulation pump (ZIP) was unintentionally shut down (Hardware timers forced to 0 ON / 60 OFF) directly after installation. The logic and default values for `zip_lWP_aktiv` have been clarified to ensure users relying on the Luxtronik's internal power supply do not experience unexpected offline states of their smart relays.
