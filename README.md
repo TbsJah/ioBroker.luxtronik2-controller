@@ -86,16 +86,16 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 
 // ### **WORK IN PROGRESS**
 
-### **WORK IN PROGRESS**
+### 0.15.0 (2026-10-10)
 
-**🚀 Features**
+####🚀 Features
 
 - **Modularized State Mapping:** Restructured the massive `stateMapping.ts` into smaller, logically separated files (e.g., `info.ts`, `settings.ts`, `actions.ts`) to significantly improve code maintainability, readability, and scalability.
 - **Improved Admin UI (ZIP Control):** Added comprehensive, scenario-based documentation to the Circulation Pump (ZIP) settings in the Admin interface (`jsonConfig.json`). It now clearly differentiates between continuous power setups (Scenario A) and heat-pump-powered setups (Scenario B). This prevents users from accidentally cutting power to external Wi-Fi relays (like Shelly) when using the EEPROM hardware protection feature.
 - **New Telemetry Data added:** The adapter now automatically reads and creates crucial system values based on the BenPru standard: Compressor frequency (Index 231), Current heat output (Index 257), and Current power consumption (Index 268).
 - **Extended Shutdown Codes (Outage History):** The internal database for heat pump shutdowns has been massively expanded. The adapter now recognizes and translates all 32 official Luxtronik shutdown reasons (e.g., _Inverter pause_, _Hot gas pause_, _Limit power consumption_) into detailed clear text (English & German). This ensures much more precise troubleshooting in the object tree and highly informative Telegram alerts.
 
-**🛠 Bugfixes & Enhancements**
+####🛠 Bugfixes & Enhancements
 
 - **Critical Startup Crashes Fixed:** Resolved multiple `UNCAUGHT_EXCEPTION` errors and communication aborts where the adapter crashed directly during initialization (`onReady`) or the polling loop. This was caused by missing hardcoded virtual data points (e.g., `Regelung_Aktiv`, `thermalenergy_total`, `energy_total`, `opStateCoolingString`) that were dropped during the state mapping modularization.
 - **ZIP Optimization Defaults:** Fixed an issue where the circulation pump (ZIP) was unintentionally shut down (Hardware timers forced to 0 ON / 60 OFF) directly after installation. The logic and default values for `zip_lWP_aktiv` have been clarified to ensure users relying on the Luxtronik's internal power supply do not experience unexpected offline states of their smart relays.
@@ -110,7 +110,7 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 
 ### 0.14.0 (2026-10-06)
 
-**🚨 BREAKING CHANGE / IMPORTANT HARDWARE NOTICE 🚨**
+####🚨 BREAKING CHANGE / IMPORTANT HARDWARE NOTICE 🚨
 
 **Critical Firmware Bug in Alpha Innotec / Novelan Controllers (V1.90.x & V2.90.x)**
 The manufacturer has introduced a massive bug in the local Luxtronik protocol (Port 8889) with the firmware releases **V1.90.0** and **V2.90.0**. Whenever a smart home system (ioBroker, Home Assistant, etc.) attempts to write a parameter value to the heat pump, the controller freezes and forces a **hard reboot** of the system after about 10 seconds. Read operations are not affected.
@@ -125,7 +125,7 @@ As soon as the adapter detects firmware V1.90.x or V2.90.x, **all write commands
 - **Hardware Protection Shield implemented:** Dynamic firmware verification before every write operation to protect against the reboot bug present in firmware versions 1.90.x and 2.90.x.
 - **Visibilities completely overhauled:** The internal logic for command 3005 has been rewritten (dynamic detection of 1-byte and 4-byte arrays). The adapter now reads the visibility flags flawlessly across **all** firmware versions. Hiding non-existent hardware in the object tree now works perfectly for V1.x and V2.x systems without causing crashes or timeouts!
 
-**🛠 Bugfixes & Refactoring**
+####🛠 Bugfixes & Refactoring
 
 - **Adapter Configuration (UI):** Removed outdated warning labels regarding the "Hide unsupported parameters" checkbox, as this feature is now completely stable across all controller generations.
 - **Network / WebSocket:** The experimental password transmission for port 8214 has been completely removed, as the communication issue was proven to be caused by the manufacturer's firmware bug. The WebSocket connection for genuine V3.x firmwares operates cleanly again using the proven standard handshake.
@@ -142,11 +142,6 @@ As soon as the adapter detects firmware V1.90.x or V2.90.x, **all write commands
     - **Backup Manager Multi-Instance Fix:** The automated DTA backup cron job is now safely scoped to the specific adapter instance, preventing conflicts when running multiple heat pumps on the same ioBroker host.
 - **Under the Hood / Refactoring:**
     - **Centralized Typings:** Completely refactored the TypeScript architecture by introducing a centralized `LuxtronikAdapter` interface (`types.ts`). Replaced all fragmented, local interfaces across sub-modules to ensure strict, project-wide type safety and better maintainability.
-
-### 0.12.1 (2026-09-30)
-
-- **Bugfixes:**
-    - **Fixed Null-Values on Startup:** Virtual states for the circulation pump logic (`Actions.Activate_Zip` and `03_Outputs.Virtual_ZIP_Status`) are now explicitly initialized to `false` during adapter startup. This prevents undefined `null` values in the object tree, ensuring immediate compatibility with visualizations and logic scripts (like Blockly) right from the first second.
 
 ## License
 
