@@ -23,7 +23,7 @@ __export(actionHandlers_exports, {
 });
 module.exports = __toCommonJS(actionHandlers_exports);
 var import_logger = require("./logger");
-var import_stateMapping_old = require("./stateMapping_old");
+var import_stateMapping = require("./stateMapping");
 var import_utils = require("./utils");
 const CONSTANTS = {
   /** Status-Code für den Ruhezustand der Anlage */
@@ -36,9 +36,9 @@ async function handleZwangswarmwasser(adapter, id) {
     const localId = id.replace(`${adapter.namespace}.`, "");
     await adapter.setState(localId, { val: false, ack: true });
     const [wwIstState, wwSollState, wwHystereseState] = await Promise.all([
-      adapter.getStateAsync((0, import_stateMapping_old.getDpPath)("Wamwassertemperatur_Ist")),
-      adapter.getStateAsync((0, import_stateMapping_old.getDpPath)("Wamwassertemperatur_Soll")),
-      adapter.getStateAsync((0, import_stateMapping_old.getDpPath)("hotWaterTemperatureHysteresis"))
+      adapter.getStateAsync((0, import_stateMapping.getDpPath)("Wamwassertemperatur_Ist")),
+      adapter.getStateAsync((0, import_stateMapping.getDpPath)("Wamwassertemperatur_Soll")),
+      adapter.getStateAsync((0, import_stateMapping.getDpPath)("hotWaterTemperatureHysteresis"))
     ]);
     const wwIst = (0, import_utils.getNumber)(wwIstState);
     const wwSoll = (0, import_utils.getNumber)(wwSollState);
@@ -71,10 +71,10 @@ async function handleZwangsheizen(adapter, id) {
     const localId = id.replace(`${adapter.namespace}.`, "");
     await adapter.setState(localId, { val: false, ack: true });
     const [bzState, ruecklaufState, ruecklaufSollState, hystereseState] = await Promise.all([
-      adapter.getStateAsync((0, import_stateMapping_old.getDpPath)("WP_BZ_akt")),
-      adapter.getStateAsync((0, import_stateMapping_old.getDpPath)("temperature_return")),
-      adapter.getStateAsync((0, import_stateMapping_old.getDpPath)("temperature_target_return")),
-      adapter.getStateAsync((0, import_stateMapping_old.getDpPath)("returnTemperatureHysteresis"))
+      adapter.getStateAsync((0, import_stateMapping.getDpPath)("WP_BZ_akt")),
+      adapter.getStateAsync((0, import_stateMapping.getDpPath)("temperature_return")),
+      adapter.getStateAsync((0, import_stateMapping.getDpPath)("temperature_target_return")),
+      adapter.getStateAsync((0, import_stateMapping.getDpPath)("returnTemperatureHysteresis"))
     ]);
     const bzVal = (0, import_utils.getNumber)(bzState, -1);
     const ruecklauf = (0, import_utils.getNumber)(ruecklaufState);

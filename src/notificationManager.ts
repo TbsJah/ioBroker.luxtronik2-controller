@@ -1,5 +1,5 @@
 import { writeLog } from './logger';
-import { getDpPath } from './stateMapping_old';
+import { getDpPath } from './stateMapping';
 import type { LuxtronikAdapter } from './types';
 
 // =========================================================

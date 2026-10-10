@@ -1,7 +1,7 @@
 import { timeStringToSeconds } from './convert';
 import { writeLog } from './logger';
 import { queueWrite } from './rawFunctions';
-import { getDpPath, STATE_MAPPING } from './stateMapping_old';
+import { getDpPath, STATE_MAPPING } from './stateMapping';
 import type { LuxtronikAdapter } from './types';
 // =========================================================
 // CONSTANTS

@@ -2,7 +2,7 @@ import type { AdapterInstance } from '@iobroker/adapter-core';
 import { ERROR_CODES, HP_TYPES, OUTAGE_CODES, STATE_HEATING, STATE_LINE_1, STATE_LINE_2, STATE_LINE_3 } from './codes';
 import { writeLog } from './logger';
 import { sanitizeName } from './objectManager';
-import { getDpPath, getLuxIdByKey } from './stateMapping_old';
+import { getDpPath, getLuxIdByKey } from './stateMapping';
 
 // ==========================================
 // CALCULATIONS (DRY-Principle)

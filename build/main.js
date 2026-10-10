@@ -30,7 +30,7 @@ var import_logger = require("./logger");
 var import_notificationManager = require("./notificationManager");
 var import_objectManager = require("./objectManager");
 var import_rawFunctions = require("./rawFunctions");
-var import_stateMapping_old = require("./stateMapping_old");
+var import_stateMapping = require("./stateMapping");
 var import_svgGenerator = require("./svgGenerator");
 var import_virtualStates = require("./virtualStates");
 var import_zipManager = require("./zipManager");
@@ -153,14 +153,14 @@ class Luxtronik2Controller extends utils.Adapter {
     await (0, import_objectManager.ensureAllObjectsExist)(this);
     await (0, import_objectManager.ensureCustomObjectsExist)(this);
     (0, import_backupManager.initAutoBackup)(this);
-    await this.setState((0, import_stateMapping_old.getDpPath)("Regelung_Aktiv"), { val: config.regelung_aktiv === true, ack: true });
-    const debugState = await this.getStateAsync((0, import_stateMapping_old.getDpPath)("Schreibe_Debug_Log"));
+    await this.setState((0, import_stateMapping.getDpPath)("Regelung_Aktiv"), { val: config.regelung_aktiv === true, ack: true });
+    const debugState = await this.getStateAsync((0, import_stateMapping.getDpPath)("Schreibe_Debug_Log"));
     this.isDebugLogActive = (debugState == null ? void 0 : debugState.val) === true;
     (0, import_logger.setCustomDebug)(this.isDebugLogActive);
     await (0, import_zipManager.disableHardwareZipTimer)(this);
-    const cycleTodayState = await this.getStateAsync((0, import_stateMapping_old.getDpPath)("write_cycles_today"));
+    const cycleTodayState = await this.getStateAsync((0, import_stateMapping.getDpPath)("write_cycles_today"));
     this.writeCyclesToday = cycleTodayState && typeof cycleTodayState.val === "number" ? cycleTodayState.val : 0;
-    const cycleTotalState = await this.getStateAsync((0, import_stateMapping_old.getDpPath)("write_cycles_total"));
+    const cycleTotalState = await this.getStateAsync((0, import_stateMapping.getDpPath)("write_cycles_total"));
     this.writeCyclesTotal = cycleTotalState && typeof cycleTotalState.val === "number" ? cycleTotalState.val : 0;
     this.scheduleMidnightReset();
     (0, import_zipManager.subscribeMotionSensors)(this);
@@ -170,11 +170,11 @@ class Luxtronik2Controller extends utils.Adapter {
     } catch (error) {
       this.log.error(`Initial data retrieval failed (device offline?): ${error.message}`);
     }
-    const dpActivateZip = (0, import_stateMapping_old.getDpPath)("Activate_Zip");
+    const dpActivateZip = (0, import_stateMapping.getDpPath)("Activate_Zip");
     if (dpActivateZip) {
       await this.setState(dpActivateZip, { val: false, ack: true });
     }
-    const dpVirtualZipStatus = (0, import_stateMapping_old.getDpPath)("Virtual_ZIP_Status");
+    const dpVirtualZipStatus = (0, import_stateMapping.getDpPath)("Virtual_ZIP_Status");
     if (dpVirtualZipStatus) {
       await this.setState(dpVirtualZipStatus, { val: false, ack: true });
     }
@@ -211,7 +211,7 @@ class Luxtronik2Controller extends utils.Adapter {
     const msToMidnight = night.getTime() - now.getTime();
     this.midnightTimer = this.setTimeout(() => {
       this.writeCyclesToday = 0;
-      void this.setState((0, import_stateMapping_old.getDpPath)("write_cycles_today"), { val: 0, ack: true });
+      void this.setState((0, import_stateMapping.getDpPath)("write_cycles_today"), { val: 0, ack: true });
       this.scheduleMidnightReset();
     }, msToMidnight);
   }
@@ -226,10 +226,10 @@ class Luxtronik2Controller extends utils.Adapter {
     if (val === void 0 || val === null) {
       return;
     }
-    const id = (0, import_stateMapping_old.getDpPath)(mappingKey);
+    const id = (0, import_stateMapping.getDpPath)(mappingKey);
     const state = await this.getStateAsync(id);
     if (!state || state.val !== val) {
-      const definition = import_stateMapping_old.STATE_MAPPING[mappingKey];
+      const definition = import_stateMapping.STATE_MAPPING[mappingKey];
       if (!definition) {
         return;
       }
@@ -319,7 +319,7 @@ class Luxtronik2Controller extends utils.Adapter {
   async istBetriebszustandAelterAls10Min() {
     var _a;
     try {
-      const state = await this.getStateAsync((0, import_stateMapping_old.getDpPath)("WP_BZ_akt"));
+      const state = await this.getStateAsync((0, import_stateMapping.getDpPath)("WP_BZ_akt"));
       const lastChange = (_a = state == null ? void 0 : state.lc) != null ? _a : 0;
       return (Date.now() - lastChange) / 6e4 >= 10;
     } catch {
@@ -336,9 +336,9 @@ class Luxtronik2Controller extends utils.Adapter {
     var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t;
     try {
       const config = this.config;
-      const bzState = await this.getStateAsync((0, import_stateMapping_old.getDpPath)("WP_BZ_akt"));
+      const bzState = await this.getStateAsync((0, import_stateMapping.getDpPath)("WP_BZ_akt"));
       const bzVal = bzState && bzState.val !== null ? String(bzState.val).trim() : "";
-      const regelungAktivState = await this.getStateAsync((0, import_stateMapping_old.getDpPath)("Regelung_Aktiv"));
+      const regelungAktivState = await this.getStateAsync((0, import_stateMapping.getDpPath)("Regelung_Aktiv"));
       const isRegelungAktiv = (regelungAktivState == null ? void 0 : regelungAktivState.val) === true;
       const istHeizen = bzVal === "0";
       const istWarmwasser = bzVal === "1";
@@ -382,7 +382,7 @@ class Luxtronik2Controller extends utils.Adapter {
                 );
               }
               await this.syncConfigValue("zip_aktiv", (_e = config.zip_aktiv_ww) != null ? _e : 120);
-              await this.setOwnStateIfDifferent((0, import_stateMapping_old.getDpPath)("Activate_Zip"), true, false);
+              await this.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)("Activate_Zip"), true, false);
             }
           }
           if (config.hup_optimierung_aktiv === true) {
@@ -415,20 +415,20 @@ class Luxtronik2Controller extends utils.Adapter {
         heatingLimitState,
         aelterAls10
       ] = await Promise.all([
-        this.getStateAsync((0, import_stateMapping_old.getDpPath)("Wamwassertemperatur_Soll")),
-        this.getStateAsync((0, import_stateMapping_old.getDpPath)("Wamwassertemperatur_Ist")),
-        this.getStateAsync((0, import_stateMapping_old.getDpPath)("temperature_return")),
-        this.getStateAsync((0, import_stateMapping_old.getDpPath)("spreizung_vorlauf_ruecklauf")),
-        this.getStateAsync((0, import_stateMapping_old.getDpPath)("opStateHeatingString")),
-        this.getStateAsync((0, import_stateMapping_old.getDpPath)("VD1out")),
-        this.getStateAsync((0, import_stateMapping_old.getDpPath)("hotWaterTemperatureHysteresis")),
-        this.getStateAsync((0, import_stateMapping_old.getDpPath)("temperature_target_return")),
-        this.getStateAsync((0, import_stateMapping_old.getDpPath)("heating_system_circ_pump_voltage_nominal")),
-        this.getStateAsync((0, import_stateMapping_old.getDpPath)("returnTemperatureHysteresis")),
-        this.getStateAsync((0, import_stateMapping_old.getDpPath)("Heizen_nach_Wasser")),
-        this.getStateAsync((0, import_stateMapping_old.getDpPath)("Mitteltemperatur")),
-        this.getStateAsync((0, import_stateMapping_old.getDpPath)("thresholdHeatingLimit")),
-        this.getStateAsync((0, import_stateMapping_old.getDpPath)("heatingLimit")),
+        this.getStateAsync((0, import_stateMapping.getDpPath)("Wamwassertemperatur_Soll")),
+        this.getStateAsync((0, import_stateMapping.getDpPath)("Wamwassertemperatur_Ist")),
+        this.getStateAsync((0, import_stateMapping.getDpPath)("temperature_return")),
+        this.getStateAsync((0, import_stateMapping.getDpPath)("spreizung_vorlauf_ruecklauf")),
+        this.getStateAsync((0, import_stateMapping.getDpPath)("opStateHeatingString")),
+        this.getStateAsync((0, import_stateMapping.getDpPath)("VD1out")),
+        this.getStateAsync((0, import_stateMapping.getDpPath)("hotWaterTemperatureHysteresis")),
+        this.getStateAsync((0, import_stateMapping.getDpPath)("temperature_target_return")),
+        this.getStateAsync((0, import_stateMapping.getDpPath)("heating_system_circ_pump_voltage_nominal")),
+        this.getStateAsync((0, import_stateMapping.getDpPath)("returnTemperatureHysteresis")),
+        this.getStateAsync((0, import_stateMapping.getDpPath)("Heizen_nach_Wasser")),
+        this.getStateAsync((0, import_stateMapping.getDpPath)("Mitteltemperatur")),
+        this.getStateAsync((0, import_stateMapping.getDpPath)("thresholdHeatingLimit")),
+        this.getStateAsync((0, import_stateMapping.getDpPath)("heatingLimit")),
         this.istBetriebszustandAelterAls10Min()
       ]);
       const wwSoll = (_h = wwSollState == null ? void 0 : wwSollState.val) != null ? _h : 0;
@@ -447,7 +447,7 @@ class Luxtronik2Controller extends utils.Adapter {
       const nachWasser = nachWasserState == null ? void 0 : nachWasserState.val;
       if (istHeizen) {
         if (isRegelungAktiv && aelterAls10 && vd1) {
-          const fusspunkt = (_s = await this.getStateAsync((0, import_stateMapping_old.getDpPath)("heating_curve_parallel_offset"))) == null ? void 0 : _s.val;
+          const fusspunkt = (_s = await this.getStateAsync((0, import_stateMapping.getDpPath)("heating_curve_parallel_offset"))) == null ? void 0 : _s.val;
           if (fusspunkt === 35) {
             const fallbackFusspunkt = (_t = config.fusspunkt) != null ? _t : 21.7;
             await this.syncConfigValue("heating_curve_parallel_offset", fallbackFusspunkt);
@@ -544,7 +544,7 @@ class Luxtronik2Controller extends utils.Adapter {
       await this.setState("info.connection", { val: true, ack: true });
       const statePromises = [];
       const config = this.config;
-      for (const [key, definition] of Object.entries(import_stateMapping_old.STATE_MAPPING)) {
+      for (const [key, definition] of Object.entries(import_stateMapping.STATE_MAPPING)) {
         if (definition.isVirtual) {
           continue;
         }
@@ -635,14 +635,14 @@ class Luxtronik2Controller extends utils.Adapter {
       await Promise.all(statePromises);
       await (0, import_virtualStates.calculateTotalThermalEnergy)(this);
       await (0, import_virtualStates.calculateTotalEnergy)(this);
-      const fehlerDp = (0, import_stateMapping_old.getDpPath)("Fehlerspeicher");
+      const fehlerDp = (0, import_stateMapping.getDpPath)("Fehlerspeicher");
       const oldFehlerState = fehlerDp ? await this.getStateAsync(fehlerDp) : null;
       const oldFehlerVal = oldFehlerState == null ? void 0 : oldFehlerState.val;
       await (0, import_virtualStates.updateErrorHistory)(this, rawValues);
       const newFehlerState = fehlerDp ? await this.getStateAsync(fehlerDp) : null;
       const newFehlerVal = newFehlerState == null ? void 0 : newFehlerState.val;
       await (0, import_notificationManager.checkAndSendErrorNotifications)(this, oldFehlerVal, newFehlerVal);
-      const abschaltungDp = (0, import_stateMapping_old.getDpPath)("Abschaltungen");
+      const abschaltungDp = (0, import_stateMapping.getDpPath)("Abschaltungen");
       const oldAbschaltungState = abschaltungDp ? await this.getStateAsync(abschaltungDp) : null;
       const oldAbschaltungVal = oldAbschaltungState == null ? void 0 : oldAbschaltungState.val;
       await (0, import_virtualStates.updateOutageHistory)(this, rawValues);
@@ -754,7 +754,7 @@ class Luxtronik2Controller extends utils.Adapter {
     if (!mappingKey) {
       return;
     }
-    const definition = import_stateMapping_old.STATE_MAPPING[mappingKey];
+    const definition = import_stateMapping.STATE_MAPPING[mappingKey];
     if (!definition) {
       return;
     }
@@ -798,7 +798,7 @@ class Luxtronik2Controller extends utils.Adapter {
       }
       if (mappingKey === "Activate_Zip") {
         if (state.val === true) {
-          const durationState = await this.getStateAsync((0, import_stateMapping_old.getDpPath)("zip_aktiv"));
+          const durationState = await this.getStateAsync((0, import_stateMapping.getDpPath)("zip_aktiv"));
           const durationSeconds = durationState && typeof durationState.val === "number" ? durationState.val : 120;
           await (0, import_zipManager.handleActivateZip)(this, id, durationSeconds);
         } else {

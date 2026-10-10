@@ -38,7 +38,7 @@ module.exports = __toCommonJS(rawFunctions_exports);
 var net = __toESM(require("node:net"));
 var import_ws = require("ws");
 var import_logger = require("./logger");
-var import_stateMapping_old = require("./stateMapping_old");
+var import_stateMapping = require("./stateMapping");
 var import_utils = require("./utils");
 const CONSTANTS = {
   /** Schreib-Befehl für einen Parameter */
@@ -86,8 +86,8 @@ async function writePumpSafe(adapter, cmd, val) {
   if (typeof adapter.writeCyclesToday === "number") {
     adapter.writeCyclesToday++;
     adapter.writeCyclesTotal++;
-    const dpToday = (0, import_stateMapping_old.getDpPath)("write_cycles_today");
-    const dpTotal = (0, import_stateMapping_old.getDpPath)("write_cycles_total");
+    const dpToday = (0, import_stateMapping.getDpPath)("write_cycles_today");
+    const dpTotal = (0, import_stateMapping.getDpPath)("write_cycles_total");
     if (dpToday) {
       void adapter.setState(dpToday, { val: adapter.writeCyclesToday, ack: true });
     }

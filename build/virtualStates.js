@@ -32,7 +32,7 @@ module.exports = __toCommonJS(virtualStates_exports);
 var import_codes = require("./codes");
 var import_logger = require("./logger");
 var import_objectManager = require("./objectManager");
-var import_stateMapping_old = require("./stateMapping_old");
+var import_stateMapping = require("./stateMapping");
 async function calculateSum(adapter, sourceId1, sourceId2, targetId, logName) {
   try {
     const [state1, state2] = await Promise.all([
@@ -50,18 +50,18 @@ async function calculateSum(adapter, sourceId1, sourceId2, targetId, logName) {
 async function calculateTotalThermalEnergy(adapter) {
   await calculateSum(
     adapter,
-    (0, import_stateMapping_old.getDpPath)("thermalenergy_heating"),
-    (0, import_stateMapping_old.getDpPath)("thermalenergy_warmwater"),
-    (0, import_stateMapping_old.getDpPath)("thermalenergy_total"),
+    (0, import_stateMapping.getDpPath)("thermalenergy_heating"),
+    (0, import_stateMapping.getDpPath)("thermalenergy_warmwater"),
+    (0, import_stateMapping.getDpPath)("thermalenergy_total"),
     "Total Thermal Energy"
   );
 }
 async function calculateTotalEnergy(adapter) {
   await calculateSum(
     adapter,
-    (0, import_stateMapping_old.getDpPath)("energy_heating"),
-    (0, import_stateMapping_old.getDpPath)("energy_warmwater"),
-    (0, import_stateMapping_old.getDpPath)("energy_total"),
+    (0, import_stateMapping.getDpPath)("energy_heating"),
+    (0, import_stateMapping.getDpPath)("energy_warmwater"),
+    (0, import_stateMapping.getDpPath)("energy_total"),
     "Total Energy"
   );
 }
@@ -107,7 +107,7 @@ async function updateHistory(adapter, rawValues, timeStartIndex, codeStartIndex,
 async function updateErrorHistory(adapter, rawValues) {
   const config = adapter.config;
   const lang = config.language === "de" ? "de" : "en";
-  const dpPath = (0, import_stateMapping_old.getDpPath)("Fehlerspeicher");
+  const dpPath = (0, import_stateMapping.getDpPath)("Fehlerspeicher");
   if (dpPath) {
     const fallback = lang === "de" ? "Unbekannter Fehler" : "Unknown error";
     const codeMap = import_codes.ERROR_CODES[lang] || import_codes.ERROR_CODES.en;
@@ -117,7 +117,7 @@ async function updateErrorHistory(adapter, rawValues) {
 async function updateOutageHistory(adapter, rawValues) {
   const config = adapter.config;
   const lang = config.language === "de" ? "de" : "en";
-  const dpPath = (0, import_stateMapping_old.getDpPath)("Abschaltungen");
+  const dpPath = (0, import_stateMapping.getDpPath)("Abschaltungen");
   if (dpPath) {
     const fallback = lang === "de" ? "Unbekannte Abschaltung" : "Unknown outage";
     const codeMap = import_codes.OUTAGE_CODES[lang] || import_codes.OUTAGE_CODES.en;
@@ -126,8 +126,8 @@ async function updateOutageHistory(adapter, rawValues) {
 }
 async function calculateTemperatureSpread(adapter) {
   try {
-    const vorlaufPath = (0, import_stateMapping_old.getDpPath)("temperature_supply");
-    const ruecklaufPath = (0, import_stateMapping_old.getDpPath)("temperature_return");
+    const vorlaufPath = (0, import_stateMapping.getDpPath)("temperature_supply");
+    const ruecklaufPath = (0, import_stateMapping.getDpPath)("temperature_return");
     if (!vorlaufPath || !ruecklaufPath) {
       return;
     }
@@ -137,7 +137,7 @@ async function calculateTemperatureSpread(adapter) {
     ]);
     if (vorlaufState && ruecklaufState && vorlaufState.val !== null && ruecklaufState.val !== null) {
       const spreizung = parseFloat((Number(vorlaufState.val) - Number(ruecklaufState.val)).toFixed(2));
-      const targetSpreadPath = (0, import_stateMapping_old.getDpPath)("spreizung_vorlauf_ruecklauf");
+      const targetSpreadPath = (0, import_stateMapping.getDpPath)("spreizung_vorlauf_ruecklauf");
       if (targetSpreadPath) {
         await adapter.setStateChangedAsync(targetSpreadPath, spreizung, true);
       }
@@ -157,7 +157,7 @@ async function updateStatusStrings(adapter, rawValues, rawParams) {
     const codeZ3 = rawValues[119];
     const isModernFirmware = (codeZ1 === void 0 || codeZ1 === 0) && (codeZ3 === void 0 || codeZ3 === 0);
     if (isModernFirmware && (zeitSec === void 0 || zeitSec === 0)) {
-      const bzState = await adapter.getStateAsync((0, import_stateMapping_old.getDpPath)("WP_BZ_akt"));
+      const bzState = await adapter.getStateAsync((0, import_stateMapping.getDpPath)("WP_BZ_akt"));
       if (bzState && bzState.lc) {
         zeitSec = Math.floor((Date.now() - bzState.lc) / 1e3);
       } else {
@@ -176,17 +176,17 @@ async function updateStatusStrings(adapter, rawValues, rawParams) {
     const line2Map = import_codes.STATE_LINE_2[lang] || import_codes.STATE_LINE_2.en;
     const line3Map = import_codes.STATE_LINE_3[lang] || import_codes.STATE_LINE_3.en;
     const stateHeatingMap = import_codes.STATE_HEATING[lang] || import_codes.STATE_HEATING.en;
-    const Absenkung = ((_a = rawParams[(0, import_stateMapping_old.getLuxIdByKey)("deltaHeatingReduction")]) != null ? _a : 0) / 10;
-    const AbsenkungMax = ((_b = rawParams[(0, import_stateMapping_old.getLuxIdByKey)("thresholdTemperatureSetBack")]) != null ? _b : 0) / 10;
-    const R\u00FCcklaufSollMin = ((_c = rawParams[(0, import_stateMapping_old.getLuxIdByKey)("returnTemperatureTargetMin")]) != null ? _c : 15) / 10;
-    const BetriebsartHeizung = (_d = rawParams[(0, import_stateMapping_old.getLuxIdByKey)("heating_operation_mode")]) != null ? _d : 0;
-    const Au\u00DFentemperatur = ((_e = rawValues[(0, import_stateMapping_old.getLuxIdByKey)("temperature_outside")]) != null ? _e : 0) / 10;
-    const HeatingLimit = (_f = rawParams[(0, import_stateMapping_old.getLuxIdByKey)("heatingLimit")]) != null ? _f : 0;
-    const opStateHeatingVal = (_g = rawValues[(0, import_stateMapping_old.getLuxIdByKey)("opStateHeating")]) != null ? _g : 3;
-    const Mitteltemperatur = ((_h = rawValues[(0, import_stateMapping_old.getLuxIdByKey)("Mitteltemperatur")]) != null ? _h : 15) / 10;
-    const thresholdHeatingLimit = ((_i = rawParams[(0, import_stateMapping_old.getLuxIdByKey)("thresholdHeatingLimit")]) != null ? _i : 15) / 10;
-    const temperature_target_return = ((_j = rawValues[(0, import_stateMapping_old.getLuxIdByKey)("temperature_target_return")]) != null ? _j : 15) / 10;
-    const Parallelverschiebung = ((_k = rawParams[(0, import_stateMapping_old.getLuxIdByKey)("heating_temperature")]) != null ? _k : 0) / 10;
+    const Absenkung = ((_a = rawParams[(0, import_stateMapping.getLuxIdByKey)("deltaHeatingReduction")]) != null ? _a : 0) / 10;
+    const AbsenkungMax = ((_b = rawParams[(0, import_stateMapping.getLuxIdByKey)("thresholdTemperatureSetBack")]) != null ? _b : 0) / 10;
+    const R\u00FCcklaufSollMin = ((_c = rawParams[(0, import_stateMapping.getLuxIdByKey)("returnTemperatureTargetMin")]) != null ? _c : 15) / 10;
+    const BetriebsartHeizung = (_d = rawParams[(0, import_stateMapping.getLuxIdByKey)("heating_operation_mode")]) != null ? _d : 0;
+    const Au\u00DFentemperatur = ((_e = rawValues[(0, import_stateMapping.getLuxIdByKey)("temperature_outside")]) != null ? _e : 0) / 10;
+    const HeatingLimit = (_f = rawParams[(0, import_stateMapping.getLuxIdByKey)("heatingLimit")]) != null ? _f : 0;
+    const opStateHeatingVal = (_g = rawValues[(0, import_stateMapping.getLuxIdByKey)("opStateHeating")]) != null ? _g : 3;
+    const Mitteltemperatur = ((_h = rawValues[(0, import_stateMapping.getLuxIdByKey)("Mitteltemperatur")]) != null ? _h : 15) / 10;
+    const thresholdHeatingLimit = ((_i = rawParams[(0, import_stateMapping.getLuxIdByKey)("thresholdHeatingLimit")]) != null ? _i : 15) / 10;
+    const temperature_target_return = ((_j = rawValues[(0, import_stateMapping.getLuxIdByKey)("temperature_target_return")]) != null ? _j : 15) / 10;
+    const Parallelverschiebung = ((_k = rawParams[(0, import_stateMapping.getLuxIdByKey)("heating_temperature")]) != null ? _k : 0) / 10;
     let heatingStr = stateHeatingMap[opStateHeatingVal] || `Unknown (${opStateHeatingVal})`;
     if (opStateHeatingVal === 2) {
       heatingStr += ` (Target ${R\u00FCcklaufSollMin} \xB0C)`;
@@ -220,7 +220,7 @@ async function updateStatusStrings(adapter, rawValues, rawParams) {
         heatingStr += ` (Offset ${vorzeichen}${Parallelverschiebung} \xB0C)`;
       }
     }
-    const dpHeating = (0, import_stateMapping_old.getDpPath)("opStateHeatingString");
+    const dpHeating = (0, import_stateMapping.getDpPath)("opStateHeatingString");
     if (dpHeating) {
       await adapter.setStateChangedAsync(dpHeating, heatingStr, true);
     }
@@ -255,26 +255,26 @@ async function updateStatusStrings(adapter, rawValues, rawParams) {
         7: "K\xFChlbetrieb"
       };
       const bzMap = lang === "de" ? bzMapDe : bzMapEn;
-      const currentStateCode2 = (_l = rawValues[(0, import_stateMapping_old.getLuxIdByKey)("WP_BZ_akt")]) != null ? _l : 5;
+      const currentStateCode2 = (_l = rawValues[(0, import_stateMapping.getLuxIdByKey)("WP_BZ_akt")]) != null ? _l : 5;
       stateStr = bzMap[currentStateCode2] || `Status ${currentStateCode2}`;
       const isRunning = [0, 1, 2, 4, 6, 7].includes(currentStateCode2);
       const line1Text = isRunning ? line1Map[0] || "Heat pump running" : line1Map[1] || "Heat pump idle";
       const line2Text = line2Map[0] || "since";
       extStateStr = `${line1Text} ${line2Text} ${zeitStringText}`;
-      const dpDuration = (0, import_stateMapping_old.getDpPath)("heatpump_duration");
+      const dpDuration = (0, import_stateMapping.getDpPath)("heatpump_duration");
       if (dpDuration) {
         await adapter.setStateChangedAsync(dpDuration, zeitStringDuration, true);
       }
     }
-    const dpExtState = (0, import_stateMapping_old.getDpPath)("heatpump_extendet_state_string");
+    const dpExtState = (0, import_stateMapping.getDpPath)("heatpump_extendet_state_string");
     if (dpExtState) {
       await adapter.setStateChangedAsync(dpExtState, stateStr, true);
     }
-    const dpState = (0, import_stateMapping_old.getDpPath)("heatpump_state_string");
+    const dpState = (0, import_stateMapping.getDpPath)("heatpump_state_string");
     if (dpState) {
       await adapter.setStateChangedAsync(dpState, extStateStr, true);
     }
-    const hotWaterBoilerValve = rawValues[(0, import_stateMapping_old.getLuxIdByKey)("hotWaterBoilerValve")] || 0;
+    const hotWaterBoilerValve = rawValues[(0, import_stateMapping.getLuxIdByKey)("hotWaterBoilerValve")] || 0;
     const opStateHotWaterOriginal = rawValues[124];
     let hotWaterStr = "Unknown";
     if (opStateHotWaterOriginal === 0) {
@@ -288,15 +288,15 @@ async function updateStatusStrings(adapter, rawValues, rawParams) {
     } else {
       hotWaterStr = `Unknown [${opStateHotWaterOriginal}/${hotWaterBoilerValve}]`;
     }
-    const dpHotWater = (0, import_stateMapping_old.getDpPath)("opStateHotWaterString");
+    const dpHotWater = (0, import_stateMapping.getDpPath)("opStateHotWaterString");
     if (dpHotWater) {
       await adapter.setStateChangedAsync(dpHotWater, hotWaterStr, true);
     }
-    const coolingOpMode = rawParams[(0, import_stateMapping_old.getLuxIdByKey)("cooling_operation_mode")];
-    const coolingReleaseTemp = ((_m = rawParams[(0, import_stateMapping_old.getLuxIdByKey)("cooling_release_temp")]) != null ? _m : 0) / 10;
-    const rawFreigabe = rawValues[(0, import_stateMapping_old.getLuxIdByKey)("cooling_release")];
+    const coolingOpMode = rawParams[(0, import_stateMapping.getLuxIdByKey)("cooling_operation_mode")];
+    const coolingReleaseTemp = ((_m = rawParams[(0, import_stateMapping.getLuxIdByKey)("cooling_release_temp")]) != null ? _m : 0) / 10;
+    const rawFreigabe = rawValues[(0, import_stateMapping.getLuxIdByKey)("cooling_release")];
     const isReleased = rawFreigabe === 1 || String(rawFreigabe).toLowerCase() === "true";
-    const currentStateCode = rawValues[(0, import_stateMapping_old.getLuxIdByKey)("WP_BZ_akt")];
+    const currentStateCode = rawValues[(0, import_stateMapping.getLuxIdByKey)("WP_BZ_akt")];
     let coolingStr = lang === "de" ? "Unbekannt" : "Unknown";
     if (coolingOpMode === 0) {
       coolingStr = lang === "de" ? "Aus" : "Off";
@@ -312,7 +312,7 @@ async function updateStatusStrings(adapter, rawValues, rawParams) {
         coolingStr = lang === "de" ? "Keine Anforderung / Bereit" : "No demand / Ready";
       }
     }
-    const dpCooling = (0, import_stateMapping_old.getDpPath)("opStateCoolingString");
+    const dpCooling = (0, import_stateMapping.getDpPath)("opStateCoolingString");
     if (dpCooling) {
       await adapter.setStateChangedAsync(dpCooling, coolingStr, true);
     }
@@ -329,7 +329,7 @@ async function updateTimerTables(adapter) {
         return timeCache.get(key) || "00:00";
       }
       try {
-        const dpPath = (0, import_stateMapping_old.getDpPath)(key);
+        const dpPath = (0, import_stateMapping.getDpPath)(key);
         if (!dpPath) {
           return "00:00";
         }
@@ -357,7 +357,7 @@ async function updateTimerTables(adapter) {
           ]);
           table.push({ on: onTime, off: offTime });
         }
-        const targetPath = (0, import_stateMapping_old.getDpPath)(targetKey);
+        const targetPath = (0, import_stateMapping.getDpPath)(targetKey);
         if (targetPath) {
           const jsonStr = JSON.stringify(table, null, 2);
           await adapter.setStateChangedAsync(targetPath, jsonStr, true);
@@ -454,7 +454,7 @@ async function updateCustomStates(adapter, rawValues, rawParams) {
   }
 }
 async function setChangedSystemState(adapter, key, value) {
-  const dp = (0, import_stateMapping_old.getDpPath)(key);
+  const dp = (0, import_stateMapping.getDpPath)(key);
   if (dp) {
     await adapter.setStateChangedAsync(dp, value, true);
   }

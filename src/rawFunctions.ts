@@ -1,7 +1,7 @@
 import * as net from 'node:net';
 import { WebSocket, type RawData } from 'ws';
 import { writeLog } from './logger';
-import { getDpPath } from './stateMapping_old';
+import { getDpPath } from './stateMapping';
 import type { LuxtronikAdapter } from './types';
 import { delay } from './utils';
 // =========================================================
