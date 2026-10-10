@@ -1121,6 +1121,15 @@ const INFO_MAPPING = {
     dataSource: "raw_parameter",
     visiIndex: 250
   },
+  energy_total: {
+    folder: "Information.10_Energy",
+    name: { en: "Total energy consumed", de: "Energieaufnahme Gesamt" },
+    role: "value.energy.consumed",
+    type: "number",
+    unit: "kWh",
+    isVirtual: true,
+    required: true
+  },
   // ==========================================
   // ZUSATZ: Energie & Twin-Verbräuche
   // ==========================================
