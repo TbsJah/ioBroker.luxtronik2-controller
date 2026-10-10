@@ -1,3 +1,4 @@
+import { ACTIONS_MAPPING } from './mapping/actions';
 import { INFO_MAPPING } from './mapping/info';
 import { SETTINGS_MAPPING } from './mapping/settings';
 import { TABLESINFO_MAPPING } from './mapping/tablesInfo';
@@ -52,6 +53,7 @@ export const STATE_MAPPING: Record<string, StateDefinition> = {
 	...SETTINGS_MAPPING,
 	...TABLESINFO_MAPPING,
 	...TABLESSETTINGS_MAPPING,
+	...ACTIONS_MAPPING,
 };
 
 // Runtime Injection für fehlende IDs

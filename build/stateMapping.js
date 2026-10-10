@@ -23,6 +23,7 @@ __export(stateMapping_exports, {
   getLuxIdByKey: () => getLuxIdByKey
 });
 module.exports = __toCommonJS(stateMapping_exports);
+var import_actions = require("./mapping/actions");
 var import_info = require("./mapping/info");
 var import_settings = require("./mapping/settings");
 var import_tablesInfo = require("./mapping/tablesInfo");
@@ -31,7 +32,8 @@ const STATE_MAPPING = {
   ...import_info.INFO_MAPPING,
   ...import_settings.SETTINGS_MAPPING,
   ...import_tablesInfo.TABLESINFO_MAPPING,
-  ...import_tablesSettings.TABLESSETTINGS_MAPPING
+  ...import_tablesSettings.TABLESSETTINGS_MAPPING,
+  ...import_actions.ACTIONS_MAPPING
 };
 for (const key of Object.keys(STATE_MAPPING)) {
   if (!STATE_MAPPING[key].luxWriteId) {
