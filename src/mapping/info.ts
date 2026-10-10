@@ -937,7 +937,7 @@ export const INFO_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_value',
 		visiIndex: 250,
 	},
-	thermalenergy_total_live: {
+	thermalenergy_total: {
 		folder: 'Information.09_ThermalEnergy',
 		name: 'Thermal energy total (live)',
 		role: 'value.energy.consumed',
