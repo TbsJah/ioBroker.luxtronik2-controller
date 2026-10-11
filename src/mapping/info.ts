@@ -909,7 +909,6 @@ export const INFO_MAPPING: Record<string, StateDefinition> = {
 		type: 'string',
 		dataSource: 'value',
 		isVirtual: true,
-		required: true,
 	},
 	// ==========================================
 	// Information.09_ThermalEnergy & 10_Energy

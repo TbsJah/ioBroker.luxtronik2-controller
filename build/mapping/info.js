@@ -927,8 +927,7 @@ const INFO_MAPPING = {
     role: "text",
     type: "string",
     dataSource: "value",
-    isVirtual: true,
-    required: true
+    isVirtual: true
   },
   // ==========================================
   // Information.09_ThermalEnergy & 10_Energy

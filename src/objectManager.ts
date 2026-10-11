@@ -113,14 +113,27 @@ export function isStateEnabled(
 	visibilities: number[] = [],
 ): boolean {
 	if (definition.required) {
-		return true;
+		return true; // Systemrelevante Datenpunkte müssen immer da sein
 	}
 
+	// 1. MASTER-KATEGORIE PRÜFEN (Dynamisch!)
+	// Erzeugt aus "Settings.02_Heating" -> "settings_02_heating"
+	const parts = definition.folder.split('.');
+	const mainCategory = parts.length > 1 ? `${parts[0]}.${parts[1]}` : parts[0];
+	const catId = mainCategory.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+
+	const masterKey = `sync_category_${catId}`;
+	if (config[masterKey] === false || String(config[masterKey]) === 'false') {
+		return false; // Wenn die Hauptkategorie aus ist, alles darunter verwerfen!
+	}
+
+	// 2. INDIVIDUELLEN DATENPUNKT PRÜFEN
 	const configKey = `sync_${key}`;
 	if (config[configKey] === false || String(config[configKey]) === 'false') {
-		return false;
+		return false; // Nutzer hat diesen speziellen Wert abgewählt
 	}
 
+	// 3. PREFIX MAPPING (deine bestehende Logik)
 	for (const [prefix, mapKey] of PREFIX_MAPPING) {
 		if (key.startsWith(prefix)) {
 			if (config[mapKey] === false) {
@@ -129,28 +142,14 @@ export function isStateEnabled(
 		}
 	}
 
-	// =========================================================
-	// DYNAMISCHE SICHTBARKEITSPRÜFUNG (BENPRU 3005 MAPPING)
-	// =========================================================
+	// 4. DYNAMISCHE SICHTBARKEITSPRÜFUNG (3005-Visibilities)
 	if (config.filter_visibility !== false && visibilities.length > 0) {
-		// Wenn der Datenpunkt an einen Visi-Index gekoppelt ist und die Luxtronik 0 meldet -> Ausblenden!
-		if (definition.visiIndex !== undefined) {
-			if (visibilities[definition.visiIndex] === 0) {
-				return false;
-			}
+		if (definition.visiIndex !== undefined && visibilities[definition.visiIndex] === 0) {
+			return false;
 		}
-
-		// Fallback: Ganzen Kühlungs-Ordner pauschal kappen, falls bei einzelnen Punkten kein visiIndex steht
 		if (definition.folder && definition.folder.includes('Cooling') && visibilities[5] === 0) {
 			return false;
 		}
-	}
-
-	// Manuelle Abwahl in den Adapter-Einstellungen prüfen.
-	// Wenn die Checkbox in der UI explizit abgewählt wurde, wird der Wert false.
-	// Wichtig: Das greift nur, wenn der Checkbox-Name in der jsonConfig exakt dem 'key' entspricht.
-	if (config[key] === false || config[`sync_${key}`] === false) {
-		return false;
 	}
 
 	return true;
