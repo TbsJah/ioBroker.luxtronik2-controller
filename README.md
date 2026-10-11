@@ -85,8 +85,7 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
-
-### **WORK IN PROGRESS**
+### 0.16.0 (2026-10-11)
 
 #### 🚀 Features
 
@@ -150,10 +149,6 @@ As soon as the adapter detects firmware V1.90.x or V2.90.x, **all write commands
 
 - **Adapter Configuration (UI):** Removed outdated warning labels regarding the "Hide unsupported parameters" checkbox, as this feature is now completely stable across all controller generations.
 - **Network / WebSocket:** The experimental password transmission for port 8214 has been completely removed, as the communication issue was proven to be caused by the manufacturer's firmware bug. The WebSocket connection for genuine V3.x firmwares operates cleanly again using the proven standard handshake.
-
-### 0.13.1 (2026-10-02)
-
-- **Fix (Circulation/ZIP):** Fixed a bug where the `Virtual_ZIP_Status` datapoint would remain stuck on `true` when using external relays (e.g., Shelly), even though the hardware relay was correctly turned off. The state reset logic has been decoupled and is now guaranteed to execute, ensuring the ioBroker interface stays perfectly synchronized with the actual hardware state.
 
 ## License
 
