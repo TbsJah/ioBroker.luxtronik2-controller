@@ -543,7 +543,7 @@ class Luxtronik2Controller extends utils.Adapter {
       }
       this.errorCount = 0;
       await this.setState("info.connection", { val: true, ack: true });
-      await this.setState("info.lastUpdate", { val: Date.now(), ack: true });
+      await this.setState("info.lastUpdate", { val: (/* @__PURE__ */ new Date()).toISOString(), ack: true });
       const statePromises = [];
       const config = this.config;
       for (const [key, definition] of Object.entries(import_stateMapping.STATE_MAPPING)) {

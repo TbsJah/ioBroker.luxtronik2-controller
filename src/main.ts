@@ -656,7 +656,7 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 
 			this.errorCount = 0;
 			await this.setState('info.connection', { val: true, ack: true });
-			await this.setState('info.lastUpdate', { val: Date.now(), ack: true });
+			await this.setState('info.lastUpdate', { val: new Date().toISOString(), ack: true });
 
 			const statePromises: Promise<any>[] = [];
 			const config = this.config as Record<string, any>;
