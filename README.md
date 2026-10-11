@@ -85,6 +85,13 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
+
+### **WORK IN PROGRESS**
+
+#### 🛠 Bugfixes & Enhancements
+
+- **Code Quality & CI/CD:** Fixed ESLint `no-prototype-builtins` pipeline failures in `objectManager.ts` by replacing direct `.hasOwnProperty()` calls with safe `Object.prototype.hasOwnProperty.call()` methods.
+
 ### 0.17.0 (2026-10-11)
 
 #### 🚀 Features

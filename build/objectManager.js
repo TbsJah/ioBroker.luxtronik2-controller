@@ -69,16 +69,16 @@ function isStateEnabled(key, definition, config, visibilities = []) {
   const mainCategory = parts.length > 1 ? `${parts[0]}.${parts[1]}` : parts[0];
   const catId = mainCategory.replace(/[^a-zA-Z0-9]/g, "_").toLowerCase();
   const masterKey = `sync_category_${catId}`;
-  if (config.hasOwnProperty(masterKey) && (config[masterKey] === false || String(config[masterKey]) === "false")) {
+  if (Object.prototype.hasOwnProperty.call(config, masterKey) && (config[masterKey] === false || String(config[masterKey]) === "false")) {
     return false;
   }
   const configKey = `sync_${key}`;
-  if (config.hasOwnProperty(configKey) && (config[configKey] === false || String(config[configKey]) === "false")) {
+  if (Object.prototype.hasOwnProperty.call(config, configKey) && (config[configKey] === false || String(config[configKey]) === "false")) {
     return false;
   }
   for (const [prefix, mapKey] of PREFIX_MAPPING) {
     if (key.startsWith(prefix)) {
-      if (config.hasOwnProperty(mapKey) && config[mapKey] === false) {
+      if (Object.prototype.hasOwnProperty.call(config, mapKey) && config[mapKey] === false) {
         return false;
       }
     }
@@ -93,7 +93,7 @@ function isStateEnabled(key, definition, config, visibilities = []) {
       return false;
     }
   }
-  if (config.hasOwnProperty(key) && (config[key] === false || config[`sync_${key}`] === false)) {
+  if (Object.prototype.hasOwnProperty.call(config, key) && (config[key] === false || config[`sync_${key}`] === false)) {
     return false;
   }
   return true;
