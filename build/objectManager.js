@@ -69,27 +69,32 @@ function isStateEnabled(key, definition, config, visibilities = []) {
   const mainCategory = parts.length > 1 ? `${parts[0]}.${parts[1]}` : parts[0];
   const catId = mainCategory.replace(/[^a-zA-Z0-9]/g, "_").toLowerCase();
   const masterKey = `sync_category_${catId}`;
-  if (config[masterKey] === false || String(config[masterKey]) === "false") {
+  if (config.hasOwnProperty(masterKey) && (config[masterKey] === false || String(config[masterKey]) === "false")) {
     return false;
   }
   const configKey = `sync_${key}`;
-  if (config[configKey] === false || String(config[configKey]) === "false") {
+  if (config.hasOwnProperty(configKey) && (config[configKey] === false || String(config[configKey]) === "false")) {
     return false;
   }
   for (const [prefix, mapKey] of PREFIX_MAPPING) {
     if (key.startsWith(prefix)) {
-      if (config[mapKey] === false) {
+      if (config.hasOwnProperty(mapKey) && config[mapKey] === false) {
         return false;
       }
     }
   }
   if (config.filter_visibility !== false && visibilities.length > 0) {
-    if (definition.visiIndex !== void 0 && visibilities[definition.visiIndex] === 0) {
-      return false;
+    if (definition.visiIndex !== void 0) {
+      if (visibilities[definition.visiIndex] === 0) {
+        return false;
+      }
     }
     if (definition.folder && definition.folder.includes("Cooling") && visibilities[5] === 0) {
       return false;
     }
+  }
+  if (config.hasOwnProperty(key) && (config[key] === false || config[`sync_${key}`] === false)) {
+    return false;
   }
   return true;
 }

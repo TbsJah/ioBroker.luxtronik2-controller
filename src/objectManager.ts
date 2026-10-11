@@ -113,43 +113,51 @@ export function isStateEnabled(
 	visibilities: number[] = [],
 ): boolean {
 	if (definition.required) {
-		return true; // Systemrelevante Datenpunkte müssen immer da sein
+		return true;
 	}
 
 	// 1. MASTER-KATEGORIE PRÜFEN (Dynamisch!)
-	// Erzeugt aus "Settings.02_Heating" -> "settings_02_heating"
 	const parts = definition.folder.split('.');
 	const mainCategory = parts.length > 1 ? `${parts[0]}.${parts[1]}` : parts[0];
 	const catId = mainCategory.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
 
 	const masterKey = `sync_category_${catId}`;
-	if (config[masterKey] === false || String(config[masterKey]) === 'false') {
-		return false; // Wenn die Hauptkategorie aus ist, alles darunter verwerfen!
+	if (config.hasOwnProperty(masterKey) && (config[masterKey] === false || String(config[masterKey]) === 'false')) {
+		return false;
 	}
 
 	// 2. INDIVIDUELLEN DATENPUNKT PRÜFEN
 	const configKey = `sync_${key}`;
-	if (config[configKey] === false || String(config[configKey]) === 'false') {
-		return false; // Nutzer hat diesen speziellen Wert abgewählt
+	if (config.hasOwnProperty(configKey) && (config[configKey] === false || String(config[configKey]) === 'false')) {
+		return false;
 	}
 
-	// 3. PREFIX MAPPING (deine bestehende Logik)
 	for (const [prefix, mapKey] of PREFIX_MAPPING) {
 		if (key.startsWith(prefix)) {
-			if (config[mapKey] === false) {
+			if (config.hasOwnProperty(mapKey) && config[mapKey] === false) {
 				return false;
 			}
 		}
 	}
 
-	// 4. DYNAMISCHE SICHTBARKEITSPRÜFUNG (3005-Visibilities)
+	// =========================================================
+	// DYNAMISCHE SICHTBARKEITSPRÜFUNG (BENPRU 3005 MAPPING)
+	// =========================================================
 	if (config.filter_visibility !== false && visibilities.length > 0) {
-		if (definition.visiIndex !== undefined && visibilities[definition.visiIndex] === 0) {
-			return false;
+		if (definition.visiIndex !== undefined) {
+			if (visibilities[definition.visiIndex] === 0) {
+				return false;
+			}
 		}
+
 		if (definition.folder && definition.folder.includes('Cooling') && visibilities[5] === 0) {
 			return false;
 		}
+	}
+
+	// Fallback Check
+	if (config.hasOwnProperty(key) && (config[key] === false || config[`sync_${key}`] === false)) {
+		return false;
 	}
 
 	return true;
@@ -194,7 +202,6 @@ export async function cleanupStates(adapter: LuxtronikAdapter): Promise<void> {
 
 	for (const [key, def] of Object.entries(STATE_MAPPING)) {
 		const definition = def as StateDefinition;
-		// FIX: adapter.currentVisibilities übergeben, sonst greift der Filter beim Löschen nicht!
 		if (isStateEnabled(key, definition, config, adapter.currentVisibilities || [])) {
 			activeStateIds.add(`${definition.folder}.${key}`);
 		}
