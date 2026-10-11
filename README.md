@@ -28,6 +28,7 @@ Innovations in this version: The luxtronik2-controller natively integrates TCP c
 ### Features
 
 - **Native TCP Communication:** Direct connection to the heat pump without any additional overhead.
+- **COP & JAZ (Efficiency Calculator):** The heat pump's efficiency can now be calculated and tracked directly within the adapter (Today, 7 Days, Month, Year). Live metrics are automatically split into Heating, Hot Water, and Total. You can either use the internal Luxtronik estimates or link high-precision external meters (e.g., Shelly 3EM) via Object IDs.
 - **Compressor Protection (Cycle Optimization):** Intelligent merging of heating and domestic hot water (DHW) cycles to significantly reduce compressor starts.
 - **Dynamic HUP Control:** Automatic voltage adjustment of the heating circulation pump (HUP) based on the flow and return temperature spread for maximum efficiency.
 - **Integrated Actions (Macros):** Pre-defined control logic for forced heating, DHW requests, and the circulation pump (ZIP) – including an automatic fallback to safe default values.
@@ -85,6 +86,7 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
+
 ### 0.17.2 (2026-10-11)
 
 #### 🛠 Bugfixes & Enhancements
