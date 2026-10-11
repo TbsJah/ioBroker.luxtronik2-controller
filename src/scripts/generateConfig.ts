@@ -83,11 +83,11 @@ for (const [key, def] of Object.entries(allMappings)) {
 		default: true,
 		// Wenn required, ist es ausgegraut. Ansonsten ist es abhängig vom Master-Schalter!
 		disabled: def.required ? true : `!data.sync_category_${catId}`,
-		xs: 12,
-		sm: 12,
-		md: 6,
-		lg: 6,
-		xl: 6,
+		xs: 12, // Smartphone: 1 untereinander (12/12)
+		sm: 6, // Tablet/kleine Fenster: 2 nebeneinander (6/12)
+		md: 3, // Desktop: 4 nebeneinander (3/12)
+		lg: 3, // Großer Monitor: 4 nebeneinander
+		xl: 3, // Ultrawide: 4 nebeneinander
 	};
 }
 
