@@ -81,6 +81,16 @@ async function processCopData(adapter, bzVal) {
   }
 }
 async function addDeltaToBucket(adapter, category, deltaPower, deltaThermal) {
+  await adapter.setObjectNotExistsAsync("hidden", {
+    type: "folder",
+    common: { name: "Hidden System Data" },
+    native: {}
+  });
+  await adapter.setObjectNotExistsAsync("hidden.cop_buckets", {
+    type: "folder",
+    common: { name: "COP Data Buckets" },
+    native: {}
+  });
   const powerId = `hidden.cop_buckets.${category}_power_today`;
   const thermalId = `hidden.cop_buckets.${category}_thermal_today`;
   await adapter.setObjectNotExistsAsync(powerId, {
@@ -97,8 +107,8 @@ async function addDeltaToBucket(adapter, category, deltaPower, deltaThermal) {
   const thermalState = await adapter.getStateAsync(thermalId);
   const currentBucketPower = powerState && typeof powerState.val === "number" ? powerState.val : 0;
   const currentBucketThermal = thermalState && typeof thermalState.val === "number" ? thermalState.val : 0;
-  await adapter.setStateAsync(powerId, { val: currentBucketPower + deltaPower, ack: true });
-  await adapter.setStateAsync(thermalId, { val: currentBucketThermal + deltaThermal, ack: true });
+  await adapter.setState(powerId, { val: currentBucketPower + deltaPower, ack: true });
+  await adapter.setState(thermalId, { val: currentBucketThermal + deltaThermal, ack: true });
 }
 async function calculateAndWriteCop(adapter, category, dpKey) {
   const powerId = `hidden.cop_buckets.${category}_power_today`;

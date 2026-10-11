@@ -102,6 +102,18 @@ async function addDeltaToBucket(
 	deltaPower: number,
 	deltaThermal: number,
 ): Promise<void> {
+	// Stelle sicher, dass die übergeordneten Ordner existieren
+	await adapter.setObjectNotExistsAsync('hidden', {
+		type: 'folder',
+		common: { name: 'Hidden System Data' },
+		native: {},
+	});
+	await adapter.setObjectNotExistsAsync('hidden.cop_buckets', {
+		type: 'folder',
+		common: { name: 'COP Data Buckets' },
+		native: {},
+	});
+
 	// Wir speichern die Werte in versteckten States, damit sie einen Adapter-Neustart überleben
 	const powerId = `hidden.cop_buckets.${category}_power_today`;
 	const thermalId = `hidden.cop_buckets.${category}_thermal_today`;
@@ -124,8 +136,8 @@ async function addDeltaToBucket(
 	const currentBucketPower = powerState && typeof powerState.val === 'number' ? powerState.val : 0;
 	const currentBucketThermal = thermalState && typeof thermalState.val === 'number' ? thermalState.val : 0;
 
-	await adapter.setStateAsync(powerId, { val: currentBucketPower + deltaPower, ack: true });
-	await adapter.setStateAsync(thermalId, { val: currentBucketThermal + deltaThermal, ack: true });
+	await adapter.setState(powerId, { val: currentBucketPower + deltaPower, ack: true });
+	await adapter.setState(thermalId, { val: currentBucketThermal + deltaThermal, ack: true });
 }
 
 /**
