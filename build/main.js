@@ -658,6 +658,7 @@ class Luxtronik2Controller extends utils.Adapter {
       await (0, import_virtualStates.updateSystemInfos)(this, rawValues);
       const bzState = await this.getStateAsync((0, import_stateMapping.getDpPath)("WP_BZ_akt"));
       const currentBzVal = bzState && bzState.val !== null ? String(bzState.val).trim() : "";
+      this.log.debug(`=> Rufe jetzt den COP Manager auf. BZ ist: ${currentBzVal}`);
       await (0, import_copManager.processCopData)(this, currentBzVal);
       await this.runOptimizationSchedule();
     } catch (err) {

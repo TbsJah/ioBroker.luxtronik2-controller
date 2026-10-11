@@ -817,6 +817,7 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 			const bzState = await this.getStateAsync(getDpPath('WP_BZ_akt'));
 			const currentBzVal = bzState && bzState.val !== null ? String(bzState.val).trim() : '';
 
+			this.log.debug(`=> Rufe jetzt den COP Manager auf. BZ ist: ${currentBzVal}`);
 			await processCopData(this, currentBzVal);
 
 			await this.runOptimizationSchedule();
