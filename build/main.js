@@ -25,6 +25,7 @@ var utils = __toESM(require("@iobroker/adapter-core"));
 var import_actionHandlers = require("./actionHandlers");
 var import_backupManager = require("./backupManager");
 var import_convert = require("./convert");
+var import_copManager = require("./copManager");
 var import_hupManager = require("./hupManager");
 var import_logger = require("./logger");
 var import_notificationManager = require("./notificationManager");
@@ -654,6 +655,9 @@ class Luxtronik2Controller extends utils.Adapter {
       await (0, import_virtualStates.updateCustomStates)(this, rawValues, rawParams);
       await (0, import_virtualStates.updateTimerTables)(this);
       await (0, import_virtualStates.updateSystemInfos)(this, rawValues);
+      const bzState = await this.getStateAsync((0, import_stateMapping.getDpPath)("WP_BZ_akt"));
+      const currentBzVal = bzState && bzState.val !== null ? String(bzState.val).trim() : "";
+      await (0, import_copManager.processCopData)(this, currentBzVal);
       await this.runOptimizationSchedule();
     } catch (err) {
       this.errorCount++;

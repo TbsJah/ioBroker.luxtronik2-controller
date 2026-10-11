@@ -5,6 +5,7 @@ import * as utils from '@iobroker/adapter-core';
 import { handleZwangsheizen, handleZwangswarmwasser } from './actionHandlers';
 import { initAutoBackup, stopAutoBackup } from './backupManager';
 import { formatTimerSecondsToTime, timeStringToSeconds } from './convert';
+import { processCopData } from './copManager';
 import { handleHupOptimization } from './hupManager';
 import { initLogger, setCustomDebug, writeLog } from './logger';
 import {
@@ -810,6 +811,13 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 			await updateCustomStates(this, rawValues, rawParams);
 			await updateTimerTables(this);
 			await updateSystemInfos(this, rawValues);
+
+			// Aktuellen Betriebszustand aus dem Cache oder live holen
+			const bzState = await this.getStateAsync(getDpPath('WP_BZ_akt'));
+			const currentBzVal = bzState && bzState.val !== null ? String(bzState.val).trim() : '';
+
+			await processCopData(this, currentBzVal);
+
 			await this.runOptimizationSchedule();
 		} catch (err: any) {
 			this.errorCount++;
