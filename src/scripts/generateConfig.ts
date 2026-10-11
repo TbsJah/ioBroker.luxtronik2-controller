@@ -125,10 +125,13 @@ const objectsSettings = {
 	},
 };
 
+// ... (oberer Teil mit den Schleifen für objectsSettings bleibt wie er ist) ...
+
 const copTab = {
 	type: 'panel',
 	label: { en: 'Efficiency / COP', de: 'Effizienz / COP' },
-	icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='currentColor' d='M16 11V3h-4v8H8l7 9l7-9h-4zm-4-6h2v4h-2V5zm-2.83 8H11v3.58L9.17 13z'/%3E%3C/svg%3E",
+	// Dein gewünschtes Icon:
+	icon: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMzIgMzIiPgoJPHBhdGggZD0iTTAgMGgzMnYzMkgweiIgZmlsbD0ibm9uZSIgLz4KCTxwYXRoIGZpbGw9ImN1cnJlbnRDb2xvciIgZD0iTTI4IDI4VjE1aC0ydjEzaC00VjE3aC0ydjExaC00di05aC0ydjloLTR2LTdIOHY3SDRWMkgydjI2YzAgMS4xLjkgMiAyIDJoMjZ2LTJ6bTAtMjR2N2gtMlY3LjQybC04LjI5IDguMjljLS4yLjE5LS40NS4yOS0uNzEuMjlzLS41MS0uMS0uNzEtLjI5TDEyIDExLjQxbC00LjI5IDQuM2wtMS40Mi0xLjQybDUtNWMuMzktLjM5IDEuMDMtLjM5IDEuNDIgMGw0LjI5IDQuM0wyNC41OCA2SDIxVjR6IiAvPgo8L3N2Zz4K',
 	items: {
 		infoCop: {
 			type: 'staticText',
@@ -247,23 +250,37 @@ const copTab = {
 };
 
 import * as path from 'path';
-
-// ... (dein restlicher Code für objectsSettings) ...
-
-// Pfad zur echten jsonConfig.json im admin-Ordner
 const configPath = path.resolve(process.cwd(), 'admin/jsonConfig.json');
 
 try {
-	// 1. Alte Config einlesen
 	const currentConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
 
-	// 2. Den "objectsSettings" Tab durch unseren neu generierten ersetzen
-	currentConfig.items.objectsSettings = objectsSettings;
-	currentConfig.items.copTab = copTab;
+	// Wir bauen ein komplett neues Objekt für die Tabs, um die Reihenfolge zu kontrollieren
+	const newItems: Record<string, any> = {};
 
-	// 3. Zurück in die Datei schreiben
+	for (const key of Object.keys(currentConfig.items)) {
+		// Sobald wir beim 3. Tab (Takt-Optimierung) ankommen, mogeln wir unseren COP-Tab davor!
+		if (key === 'cycleOptimizationTab') {
+			newItems.copTab = copTab;
+		}
+
+		if (key === 'objectsSettings') {
+			newItems[key] = objectsSettings; // Generierte Datenpunkte patchen
+		} else if (key !== 'copTab') {
+			// Alte Tabs rüberkopieren (verhindert Duplikate, falls copTab vorher am Ende stand)
+			newItems[key] = currentConfig.items[key];
+		}
+	}
+
+	// Falls 'cycleOptimizationTab' warum auch immer nicht existiert, hängen wir es sicherheitshalber an
+	if (!newItems.copTab) {
+		newItems.copTab = copTab;
+	}
+
+	currentConfig.items = newItems;
+
 	fs.writeFileSync(configPath, JSON.stringify(currentConfig, null, '\t'));
-	console.log('✅ admin/jsonConfig.json wurde erfolgreich automatisch gepatcht!');
+	console.log('✅ admin/jsonConfig.json wurde erfolgreich automatisch gepatcht und sortiert!');
 } catch (err) {
 	console.error('❌ Fehler beim Patchen der jsonConfig.json:', err);
 }
