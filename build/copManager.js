@@ -32,6 +32,7 @@ async function processCopData(adapter, bzVal) {
     return;
   }
   try {
+    (0, import_logger.writeLog)(`COP Manager gestartet. Modus: ${bzVal}`, "debug");
     let currentPower = 0;
     if (config.cop_source_power === "external" && config.cop_oid_power_total) {
       const state = await adapter.getForeignStateAsync(config.cop_oid_power_total);
@@ -84,6 +85,7 @@ async function processCopData(adapter, bzVal) {
   }
 }
 async function handleTimeRollover(adapter) {
+  (0, import_logger.writeLog)(`Pr\xFCfe Tageswechsel und lege Ordner an...`, "debug");
   const dateStateId = "hidden.cop_buckets.last_date";
   await adapter.setObjectNotExistsAsync("hidden", {
     type: "folder",

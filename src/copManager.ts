@@ -21,6 +21,7 @@ export async function processCopData(adapter: LuxtronikAdapter, bzVal: string): 
 	}
 
 	try {
+		writeLog(`COP Manager gestartet. Modus: ${bzVal}`, 'debug');
 		// 1. STROMVERBRAUCH ABRUFEN
 		let currentPower = 0;
 		if (config.cop_source_power === 'external' && config.cop_oid_power_total) {
@@ -97,6 +98,7 @@ export async function processCopData(adapter: LuxtronikAdapter, bzVal: string): 
  * @param adapter Die Instanz des ioBroker-Adapters.
  */
 async function handleTimeRollover(adapter: LuxtronikAdapter): Promise<void> {
+	writeLog(`Prüfe Tageswechsel und lege Ordner an...`, 'debug');
 	const dateStateId = 'hidden.cop_buckets.last_date';
 	await adapter.setObjectNotExistsAsync('hidden', {
 		type: 'folder',
