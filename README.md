@@ -88,8 +88,6 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 
 ### **WORK IN PROGRESS**
 
-### 0.16.1 (2026-10-11)
-
 #### 🚀 Features
 
 - **Enhanced UI Layout:** Improved the "Datapoints" settings tab layout to display up to 4 items side-by-side on larger screens for a better overview and improved usability.
