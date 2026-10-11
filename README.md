@@ -85,8 +85,7 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
-
-### **WORK IN PROGRESS**
+### 0.17.2 (2026-10-11)
 
 #### 🛠 Bugfixes & Enhancements
 
@@ -140,14 +139,6 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 
 - **Cycle Optimization Logic (Hot Water):** Fixed a logic flaw where the adapter erroneously applied an artificial hot water target temperature increase while the heat pump was already actively running a hot water cycle. The trigger is now strictly limited to the end of regular heating cycles.
 - **Build Process Optimized:** Integrated the UI generation script (`generateConfig.ts`) seamlessly into the NPM `prebuild` lifecycle, automatically patching the `jsonConfig.json` before typescript compilation.
-
-### 0.15.1 (2026-10-10)
-
-#### 🛠 Bugfixes & Enhancements
-
-- **Admin UI (ZIP Control):** Completely revised the explanatory text for the Circulation Pump (ZIP) settings in `jsonConfig.json`. Clarified the exact behavior of the "Disable base ZIP values" (`zip_lWP_aktiv`) option to prevent unintentional power cuts to external Wi-Fi relays (like Shelly) while maintaining EEPROM hardware protection.
-- **Testing Framework:** Updated `@iobroker/testing` to version 6.3.0 to meet current repository standards.
-- **Changelog Formatting:** Fixed Markdown header formatting to comply with ioBroker "Test and Release" requirements.
 
 ## License
 

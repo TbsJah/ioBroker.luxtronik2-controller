@@ -23,6 +23,14 @@
 ### 0.1.0 (2026-07-09)
 
 - initial release
+## 0.15.1 (2026-10-10)
+
+#### 🛠 Bugfixes & Enhancements
+
+- **Admin UI (ZIP Control):** Completely revised the explanatory text for the Circulation Pump (ZIP) settings in `jsonConfig.json`. Clarified the exact behavior of the "Disable base ZIP values" (`zip_lWP_aktiv`) option to prevent unintentional power cuts to external Wi-Fi relays (like Shelly) while maintaining EEPROM hardware protection.
+- **Testing Framework:** Updated `@iobroker/testing` to version 6.3.0 to meet current repository standards.
+- **Changelog Formatting:** Fixed Markdown header formatting to comply with ioBroker "Test and Release" requirements.
+
 ## 0.15.0 (2026-10-10)
 
 ####🚀 Features
