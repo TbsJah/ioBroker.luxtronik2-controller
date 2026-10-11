@@ -23,6 +23,10 @@
 ### 0.1.0 (2026-07-09)
 
 - initial release
+## 0.14.1 (2026-10-06)
+
+- remove log entry for chunk reporting
+
 ## 0.14.0 (2026-10-06)
 
 ####🚨 BREAKING CHANGE / IMPORTANT HARDWARE NOTICE 🚨
