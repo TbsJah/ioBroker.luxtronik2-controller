@@ -105,6 +105,17 @@ const ACTIONS_MAPPING = {
     write: false,
     def: false,
     required: true
+  },
+  lastUpdate: {
+    folder: "info",
+    name: { en: "Last update", de: "Letzter Abruf" },
+    role: "date",
+    type: "number",
+    // ioBroker erwartet für 'date' meist einen Unix-Timestamp in Millisekunden
+    isVirtual: true,
+    write: false,
+    def: 0,
+    required: true
   }
 };
 // Annotate the CommonJS export names for ESM import in node:

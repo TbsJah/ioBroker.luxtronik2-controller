@@ -85,6 +85,23 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
+
+### **WORK IN PROGRESS**
+
+#### 🚀 Features
+
+- **COP & Efficiency Calculator:** Introduced a comprehensive COP (Coefficient of Performance) calculation engine to track heat pump efficiency.
+- **External Smart Meter Support:** Users can now choose to use internal Luxtronik estimates or link high-precision external sensors (e.g., Shelly 3EM or M-Bus heat meters) via ioBroker Object IDs for power consumption and thermal energy generation.
+- **Granular Live Metrics:** The adapter now dynamically analyzes the active operating state to split and calculate live daily COP values for "Total", "Heating", and "Hot Water" independently.
+- **Dedicated Efficiency UI:** Added a new "Efficiency / COP" configuration tab to easily manage energy data sources and toggle the calculation engine.
+- **Connection & Polling Status:** Added a new system datapoint `info.lastUpdate`. This state continuously tracks the exact timestamp of the last successful data retrieval, making it easy to monitor the adapter's health and polling activity in visualisations like VIS or Lovelace.
+
+#### 🛠 Bugfixes & Enhancements
+
+- **State Properties & Code Quality:** Resolved strict TypeScript and ESLint warnings (missing JSDoc annotations, missing read/write object definitions) in the new COP manager.
+- **Config UI Sorting:** Ensured the newly generated configuration tabs maintain a logical and consistent order across rebuilds.
+- **Internal Mapping:** Restructured the `info` folder mapping to cleanly accommodate adapter-level metadata alongside hardware telemetry.
+
 ### 0.16.1 (2026-10-11)
 
 #### 🚀 Features
