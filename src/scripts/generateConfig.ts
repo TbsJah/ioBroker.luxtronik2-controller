@@ -125,6 +125,127 @@ const objectsSettings = {
 	},
 };
 
+const copTab = {
+	type: 'panel',
+	label: { en: 'Efficiency / COP', de: 'Effizienz / COP' },
+	icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='currentColor' d='M16 11V3h-4v8H8l7 9l7-9h-4zm-4-6h2v4h-2V5zm-2.83 8H11v3.58L9.17 13z'/%3E%3C/svg%3E",
+	items: {
+		infoCop: {
+			type: 'staticText',
+			text: {
+				en: 'Calculate the Coefficient of Performance (COP / JAZ) of your heat pump over various timeframes (24h, 7d, 1m, 1y). You can use the internal heat pump meters or link accurate external smart meters (e.g. Shelly 3EM).',
+				de: 'Berechne die Arbeitszahl (COP / JAZ) deiner Wärmepumpe über verschiedene Zeiträume (Heute, 7 Tage, Monat, Jahr). Du kannst dafür die internen Schätzwerte der Anlage nutzen oder hochpräzise externe Zähler (z.B. Shelly 3EM) verlinken.',
+			},
+			style: { marginBottom: '20px', fontSize: '14px' },
+			xs: 12,
+			sm: 12,
+			md: 12,
+			lg: 12,
+			xl: 12,
+		},
+		cop_calculation_active: {
+			type: 'checkbox',
+			label: { en: 'Enable COP / Efficiency calculation', de: 'COP / Effizienz-Berechnung aktivieren' },
+			default: false,
+			xs: 12,
+			sm: 12,
+			md: 12,
+			lg: 12,
+			xl: 12,
+		},
+		divider_cop1: {
+			type: 'divider',
+			color: 'primary',
+			style: { marginBottom: '15px', marginTop: '15px' },
+			xs: 12,
+			sm: 12,
+			md: 12,
+			lg: 12,
+			xl: 12,
+		},
+		headerPower: {
+			type: 'header',
+			text: { en: '1. Electrical Energy (Power Consumption)', de: '1. Elektrische Energie (Stromverbrauch)' },
+			size: 4,
+			xs: 12,
+			sm: 12,
+			md: 12,
+			lg: 12,
+			xl: 12,
+		},
+		cop_source_power: {
+			type: 'select',
+			label: { en: 'Data source for power consumption', de: 'Datenquelle für Stromverbrauch' },
+			disabled: '!data.cop_calculation_active',
+			options: [
+				{
+					label: { en: 'Internal (Luxtronik estimates)', de: 'Intern (Luxtronik Schätzwerte)' },
+					value: 'internal',
+				},
+				{
+					label: { en: 'External Object ID (e.g. Shelly)', de: 'Externe Objekt-ID (z.B. Shelly)' },
+					value: 'external',
+				},
+			],
+			xs: 12,
+			sm: 12,
+			md: 6,
+			lg: 6,
+			xl: 6,
+		},
+		cop_oid_power_total: {
+			type: 'objectId',
+			label: { en: 'Select External Meter OID (Total kWh)', de: 'Externen Zähler OID wählen (Gesamt kWh)' },
+			hidden: "data.cop_source_power !== 'external'",
+			disabled: '!data.cop_calculation_active',
+			xs: 12,
+			sm: 12,
+			md: 6,
+			lg: 6,
+			xl: 6,
+		},
+		headerThermal: {
+			type: 'header',
+			text: { en: '2. Thermal Energy (Heat Generation)', de: '2. Thermische Energie (Wärmeerzeugung)' },
+			size: 4,
+			style: { marginTop: '20px' },
+			xs: 12,
+			sm: 12,
+			md: 12,
+			lg: 12,
+			xl: 12,
+		},
+		cop_source_thermal: {
+			type: 'select',
+			label: { en: 'Data source for thermal generation', de: 'Datenquelle für Wärmeerzeugung' },
+			disabled: '!data.cop_calculation_active',
+			options: [
+				{ label: { en: 'Internal (Luxtronik meters)', de: 'Intern (Luxtronik Zähler)' }, value: 'internal' },
+				{
+					label: { en: 'External Object ID (e.g. M-Bus meter)', de: 'Externe Objekt-ID (z.B. M-Bus Zähler)' },
+					value: 'external',
+				},
+			],
+			xs: 12,
+			sm: 12,
+			md: 6,
+			lg: 6,
+			xl: 6,
+		},
+		cop_oid_thermal_total: {
+			type: 'objectId',
+			label: { en: 'Select External Heat Meter OID (Total kWh)', de: 'Externen WMZ OID wählen (Gesamt kWh)' },
+			hidden: "data.cop_source_thermal !== 'external'",
+			disabled: '!data.cop_calculation_active',
+			xs: 12,
+			sm: 12,
+			md: 6,
+			lg: 6,
+			xl: 6,
+		},
+	},
+};
+
 import * as path from 'path';
 
 // ... (dein restlicher Code für objectsSettings) ...
@@ -138,6 +259,7 @@ try {
 
 	// 2. Den "objectsSettings" Tab durch unseren neu generierten ersetzen
 	currentConfig.items.objectsSettings = objectsSettings;
+	currentConfig.items.copTab = copTab;
 
 	// 3. Zurück in die Datei schreiben
 	fs.writeFileSync(configPath, JSON.stringify(currentConfig, null, '\t'));

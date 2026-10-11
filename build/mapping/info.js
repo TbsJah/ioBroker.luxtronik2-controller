@@ -1477,6 +1477,96 @@ const INFO_MAPPING = {
     unit: "%",
     luxWriteId: "165",
     dataSource: "raw_value"
+  },
+  // ==========================================
+  // Information.16_Efficiency (COP & JAZ)
+  // ==========================================
+  // --- TOTAL ---
+  cop_total_today: {
+    folder: "Information.16_Efficiency.Total",
+    name: { en: "COP Total (Today)", de: "COP Gesamt (Heute)" },
+    role: "value",
+    type: "number",
+    isVirtual: true
+  },
+  cop_total_7d: {
+    folder: "Information.16_Efficiency.Total",
+    name: { en: "COP Total (Last 7 Days)", de: "COP Gesamt (Letzte 7 Tage)" },
+    role: "value",
+    type: "number",
+    isVirtual: true
+  },
+  cop_total_month: {
+    folder: "Information.16_Efficiency.Total",
+    name: { en: "COP Total (Current Month)", de: "COP Gesamt (Aktueller Monat)" },
+    role: "value",
+    type: "number",
+    isVirtual: true
+  },
+  cop_total_year: {
+    folder: "Information.16_Efficiency.Total",
+    name: { en: "JAZ Total (Current Year)", de: "JAZ Gesamt (Aktuelles Jahr)" },
+    role: "value",
+    type: "number",
+    isVirtual: true
+  },
+  // --- HEATING ---
+  cop_heating_today: {
+    folder: "Information.16_Efficiency.Heating",
+    name: { en: "COP Heating (Today)", de: "COP Heizen (Heute)" },
+    role: "value",
+    type: "number",
+    isVirtual: true
+  },
+  cop_heating_7d: {
+    folder: "Information.16_Efficiency.Heating",
+    name: { en: "COP Heating (Last 7 Days)", de: "COP Heizen (Letzte 7 Tage)" },
+    role: "value",
+    type: "number",
+    isVirtual: true
+  },
+  cop_heating_month: {
+    folder: "Information.16_Efficiency.Heating",
+    name: { en: "COP Heating (Current Month)", de: "COP Heizen (Aktueller Monat)" },
+    role: "value",
+    type: "number",
+    isVirtual: true
+  },
+  cop_heating_year: {
+    folder: "Information.16_Efficiency.Heating",
+    name: { en: "JAZ Heating (Current Year)", de: "JAZ Heizen (Aktuelles Jahr)" },
+    role: "value",
+    type: "number",
+    isVirtual: true
+  },
+  // --- HOT WATER ---
+  cop_water_today: {
+    folder: "Information.16_Efficiency.HotWater",
+    name: { en: "COP Hot Water (Today)", de: "COP Warmwasser (Heute)" },
+    role: "value",
+    type: "number",
+    isVirtual: true
+  },
+  cop_water_7d: {
+    folder: "Information.16_Efficiency.HotWater",
+    name: { en: "COP Hot Water (Last 7 Days)", de: "COP Warmwasser (Letzte 7 Tage)" },
+    role: "value",
+    type: "number",
+    isVirtual: true
+  },
+  cop_water_month: {
+    folder: "Information.16_Efficiency.HotWater",
+    name: { en: "COP Hot Water (Current Month)", de: "COP Warmwasser (Aktueller Monat)" },
+    role: "value",
+    type: "number",
+    isVirtual: true
+  },
+  cop_water_year: {
+    folder: "Information.16_Efficiency.HotWater",
+    name: { en: "JAZ Hot Water (Current Year)", de: "JAZ Warmwasser (Aktuelles Jahr)" },
+    role: "value",
+    type: "number",
+    isVirtual: true
   }
 };
 // Annotate the CommonJS export names for ESM import in node:
