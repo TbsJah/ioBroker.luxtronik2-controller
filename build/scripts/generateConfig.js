@@ -27,6 +27,7 @@ var import_info = require("../mapping/info");
 var import_settings = require("../mapping/settings");
 var import_tablesInfo = require("../mapping/tablesInfo");
 var import_tablesSettings = require("../mapping/tablesSettings");
+var path = __toESM(require("path"));
 const allMappings = {
   ...import_info.INFO_MAPPING,
   ...import_settings.SETTINGS_MAPPING,
@@ -132,6 +133,13 @@ const objectsSettings = {
     // Fügt alle generierten Panels ein
   }
 };
-fs.writeFileSync("objectsSettings_OUTPUT.json", JSON.stringify(objectsSettings, null, "	"));
-console.log("\u2705 objectsSettings_OUTPUT.json erfolgreich generiert!");
+const configPath = path.resolve(process.cwd(), "admin/jsonConfig.json");
+try {
+  const currentConfig = JSON.parse(fs.readFileSync(configPath, "utf8"));
+  currentConfig.items.objectsSettings = objectsSettings;
+  fs.writeFileSync(configPath, JSON.stringify(currentConfig, null, "	"));
+  console.log("\u2705 admin/jsonConfig.json wurde erfolgreich automatisch gepatcht!");
+} catch (err) {
+  console.error("\u274C Fehler beim Patchen der jsonConfig.json:", err);
+}
 //# sourceMappingURL=generateConfig.js.map

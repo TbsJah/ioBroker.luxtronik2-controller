@@ -125,5 +125,23 @@ const objectsSettings = {
 	},
 };
 
-fs.writeFileSync('objectsSettings_OUTPUT.json', JSON.stringify(objectsSettings, null, '\t'));
-console.log('✅ objectsSettings_OUTPUT.json erfolgreich generiert!');
+import * as path from 'path';
+
+// ... (dein restlicher Code für objectsSettings) ...
+
+// Pfad zur echten jsonConfig.json im admin-Ordner
+const configPath = path.resolve(process.cwd(), 'admin/jsonConfig.json');
+
+try {
+	// 1. Alte Config einlesen
+	const currentConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+
+	// 2. Den "objectsSettings" Tab durch unseren neu generierten ersetzen
+	currentConfig.items.objectsSettings = objectsSettings;
+
+	// 3. Zurück in die Datei schreiben
+	fs.writeFileSync(configPath, JSON.stringify(currentConfig, null, '\t'));
+	console.log('✅ admin/jsonConfig.json wurde erfolgreich automatisch gepatcht!');
+} catch (err) {
+	console.error('❌ Fehler beim Patchen der jsonConfig.json:', err);
+}
