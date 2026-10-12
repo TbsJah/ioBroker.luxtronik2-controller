@@ -35,13 +35,18 @@ var import_objectManager = require("./objectManager");
 var import_stateMapping = require("./stateMapping");
 async function calculateSum(adapter, sourceId1, sourceId2, targetId, logName) {
   try {
-    const [state1, state2] = await Promise.all([
+    const [state1, state2, currentState] = await Promise.all([
       adapter.getStateAsync(sourceId1),
-      adapter.getStateAsync(sourceId2)
+      adapter.getStateAsync(sourceId2),
+      adapter.getStateAsync(targetId)
     ]);
     const val1 = state1 && typeof state1.val === "number" ? state1.val : 0;
     const val2 = state2 && typeof state2.val === "number" ? state2.val : 0;
-    await adapter.setStateChangedAsync(targetId, val1 + val2, true);
+    const newSum = val1 + val2;
+    const currentVal = currentState && typeof currentState.val === "number" ? currentState.val : 0;
+    if (newSum >= currentVal) {
+      await adapter.setStateChangedAsync(targetId, newSum, true);
+    }
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     (0, import_logger.writeLog)(`Error calculating ${logName}: ${msg}`, "error");

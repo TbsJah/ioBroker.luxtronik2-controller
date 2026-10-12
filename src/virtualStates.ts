@@ -26,15 +26,24 @@ async function calculateSum(
 	logName: string,
 ): Promise<void> {
 	try {
-		const [state1, state2] = await Promise.all([
+		// Wir lesen zusätzlich den ZIEL-Datenpunkt (den bisherigen Höchststand) mit aus
+		const [state1, state2, currentState] = await Promise.all([
 			adapter.getStateAsync(sourceId1),
 			adapter.getStateAsync(sourceId2),
+			adapter.getStateAsync(targetId),
 		]);
 
 		const val1 = state1 && typeof state1.val === 'number' ? state1.val : 0;
 		const val2 = state2 && typeof state2.val === 'number' ? state2.val : 0;
+		const newSum = val1 + val2;
 
-		await adapter.setStateChangedAsync(targetId, val1 + val2, true);
+		const currentVal = currentState && typeof currentState.val === 'number' ? currentState.val : 0;
+
+		// ROOT-CAUSE-FIX: Ein Energiezähler darf niemals schrumpfen!
+		// Fällt ein Luxtronik-Zähler kurzzeitig auf 0, ist newSum kleiner als currentVal und wird knallhart ignoriert.
+		if (newSum >= currentVal) {
+			await adapter.setStateChangedAsync(targetId, newSum, true);
+		}
 	} catch (err: unknown) {
 		const msg = err instanceof Error ? err.message : String(err);
 		writeLog(`Error calculating ${logName}: ${msg}`, 'error');
