@@ -2,10 +2,7 @@ import { writeLog } from './logger';
 import { getDpPath } from './stateMapping';
 import type { LuxtronikAdapter } from './types';
 
-// Lokaler Cache für den Zählerstand des letzten Pollings
-let lastPowerTotal = 0;
-let lastThermalTotal = 0;
-let isInitialized = false; // NEU: Sicheres Flag für den Start
+let isInitialized = false;
 
 /**
  * Verarbeitet die COP-Daten und berechnet Live-Werte anhand von absoluten Zählern und Snapshots.
@@ -22,58 +19,81 @@ export async function processCopData(adapter: LuxtronikAdapter, bzVal: string): 
 
 	try {
 		writeLog(`COP Manager gestartet. Modus: ${bzVal}`, 'debug');
+
 		// 1. STROMVERBRAUCH ABRUFEN
 		let currentPower = 0;
 		if (config.cop_source_power === 'external' && config.cop_oid_power_total) {
 			const state = await adapter.getForeignStateAsync(config.cop_oid_power_total);
-			if (state && typeof state.val === 'number') {
-				currentPower = state.val;
-			}
+			if (state && typeof state.val === 'number') currentPower = state.val;
 		} else {
 			const state = await adapter.getStateAsync(getDpPath('energy_total'));
-			if (state && typeof state.val === 'number') {
-				currentPower = state.val;
-			}
+			if (state && typeof state.val === 'number') currentPower = state.val;
 		}
 
 		// 2. WÄRMEMENGE ABRUFEN
 		let currentThermal = 0;
 		if (config.cop_source_thermal === 'external' && config.cop_oid_thermal_total) {
 			const state = await adapter.getForeignStateAsync(config.cop_oid_thermal_total);
-			if (state && typeof state.val === 'number') {
-				currentThermal = state.val;
-			}
+			if (state && typeof state.val === 'number') currentThermal = state.val;
 		} else {
 			const state = await adapter.getStateAsync(getDpPath('thermalenergy_total'));
-			if (state && typeof state.val === 'number') {
-				currentThermal = state.val;
-			}
+			if (state && typeof state.val === 'number') currentThermal = state.val;
 		}
 
-		// Initialisierung beim ersten Durchlauf
+		// --- NEU: ABSOLUT SICHERE INITIALISIERUNG AUS DER DATENBANK ---
+		const rawPowerId = 'hidden.cop_buckets.last_raw_power';
+		const rawThermalId = 'hidden.cop_buckets.last_raw_thermal';
+
 		if (!isInitialized) {
-			lastPowerTotal = currentPower;
-			lastThermalTotal = currentThermal;
+			await adapter.setObjectNotExistsAsync(rawPowerId, {
+				type: 'state',
+				common: { name: 'Last Raw Power', type: 'number', role: 'value', read: true, write: false },
+				native: {},
+			});
+			await adapter.setObjectNotExistsAsync(rawThermalId, {
+				type: 'state',
+				common: { name: 'Last Raw Thermal', type: 'number', role: 'value', read: true, write: false },
+				native: {},
+			});
+
+			const lastPowerStateInit = await adapter.getStateAsync(rawPowerId);
+			const lastThermalStateInit = await adapter.getStateAsync(rawThermalId);
+
+			// Wenn noch nie was gespeichert wurde, nimm den aktuellen Wert
+			if (!lastPowerStateInit || lastPowerStateInit.val === null)
+				await adapter.setState(rawPowerId, { val: currentPower, ack: true });
+			if (!lastThermalStateInit || lastThermalStateInit.val === null)
+				await adapter.setState(rawThermalId, { val: currentThermal, ack: true });
+
 			isInitialized = true;
-			// WICHTIG: Beim ersten Start prüfen wir direkt, ob wir Tageswechsel anstoßen müssen
 			await handleTimeRollover(adapter);
 			return;
 		}
 
-		// 3. DELTA BERECHNEN (Zuwachs seit letztem Polling in kWh)
-		const deltaPower = currentPower - lastPowerTotal;
+		// 3. LETZTE ZÄHLERSTÄNDE AUS DER DATENBANK LADEN (Überlebt jeden Neustart!)
+		const lastPowerState = await adapter.getStateAsync(rawPowerId);
+		const lastThermalState = await adapter.getStateAsync(rawThermalId);
 
+		const lastPowerTotal =
+			lastPowerState && typeof lastPowerState.val === 'number' ? lastPowerState.val : currentPower;
+		const lastThermalTotal =
+			lastThermalState && typeof lastThermalState.val === 'number' ? lastThermalState.val : currentThermal;
+
+		// 4. DELTA BERECHNEN
+		const deltaPower = currentPower - lastPowerTotal;
 		const deltaThermal = currentThermal - lastThermalTotal;
 
-		lastPowerTotal = currentPower;
-		lastThermalTotal = currentThermal;
+		// 5. NEUE ZÄHLERSTÄNDE SOFORT FÜR DEN NÄCHSTEN DURCHLAUF IN DB SPEICHERN
+		if (deltaPower > 0 || deltaThermal > 0) {
+			await adapter.setState(rawPowerId, { val: currentPower, ack: true });
+			await adapter.setState(rawThermalId, { val: currentThermal, ack: true });
+		}
 
-		// 4. ZEITWECHSEL PRÜFEN (Hat ein neuer Tag/Monat/Jahr begonnen?)
+		// 6. ZEITWECHSEL PRÜFEN (Hat ein neuer Tag/Monat/Jahr begonnen?)
 		await handleTimeRollover(adapter);
 
-		// Wenn sich die Zähler nicht bewegt haben, keine Eimer füllen
+		// 7. WERTE IN DIE ENDLOS-ZÄHLER VERTEILEN
 		if (deltaPower > 0 || deltaThermal > 0) {
-			// 5. WERTE IN DIE ENDLOS-ZÄHLER VERTEILEN
 			await addDeltaToBucket(adapter, 'Total', deltaPower, deltaThermal);
 
 			if (bzVal === '0') {
@@ -83,7 +103,7 @@ export async function processCopData(adapter: LuxtronikAdapter, bzVal: string): 
 			}
 		}
 
-		// 6. LIVE COP BERECHNEN UND SCHREIBEN (Endloszähler minus Snapshot)
+		// 8. LIVE COP BERECHNEN UND SCHREIBEN
 		await calculateAndWriteCop(adapter, 'Total');
 		await calculateAndWriteCop(adapter, 'Heating');
 		await calculateAndWriteCop(adapter, 'HotWater');
