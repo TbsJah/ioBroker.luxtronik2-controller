@@ -770,7 +770,26 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 					}
 
 					const stateId = `${definition.folder}.${key}`;
-					statePromises.push(this.setState(stateId, { val: value, ack: true }));
+
+					// ANTI-FLAPPING-SCHUTZ: Verhindert, dass die Hauptschleife Energiezähler auf 0 stürzen lässt
+					if (
+						typeof value === 'number' &&
+						(key.toLowerCase().includes('energy') ||
+							key.toLowerCase().includes('wärme') ||
+							key.toLowerCase().includes('power'))
+					) {
+						statePromises.push(
+							(async () => {
+								const oldState = await this.getStateAsync(stateId);
+								if (oldState && typeof oldState.val === 'number' && value < oldState.val) {
+									return; // Türsteher: Der neue Wert ist kleiner als der alte -> Ignorieren!
+								}
+								await this.setState(stateId, { val: value, ack: true });
+							})(),
+						);
+					} else {
+						statePromises.push(this.setState(stateId, { val: value, ack: true }));
+					}
 				}
 			}
 

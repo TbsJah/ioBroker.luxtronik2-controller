@@ -631,7 +631,19 @@ class Luxtronik2Controller extends utils.Adapter {
             value = Boolean(value);
           }
           const stateId = `${definition.folder}.${key}`;
-          statePromises.push(this.setState(stateId, { val: value, ack: true }));
+          if (typeof value === "number" && (key.toLowerCase().includes("energy") || key.toLowerCase().includes("w\xE4rme") || key.toLowerCase().includes("power"))) {
+            statePromises.push(
+              (async () => {
+                const oldState = await this.getStateAsync(stateId);
+                if (oldState && typeof oldState.val === "number" && value < oldState.val) {
+                  return;
+                }
+                await this.setState(stateId, { val: value, ack: true });
+              })()
+            );
+          } else {
+            statePromises.push(this.setState(stateId, { val: value, ack: true }));
+          }
         }
       }
       await Promise.all(statePromises);
