@@ -88,8 +88,6 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 // ### **WORK IN PROGRESS**
 **WORK IN PROGRESS**
 
-### **Changelog (Work in Progress)**
-
 **🚀 Features & Enhancements**
 
 - **Persistent COP Counters:** Raw energy counters (`last_raw_power`, `last_raw_thermal`) are now safely stored in the ioBroker database (`hidden.cop_buckets`) instead of volatile RAM. Consumption data is no longer lost during adapter instance or ioBroker host restarts, ensuring seamless and continuous delta calculation.
