@@ -86,8 +86,7 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
-
-### **WORK IN PROGRESS**
+### 0.18.0 (2026-10-12)
 
 **🚀 Features & Enhancements**
 
@@ -141,16 +140,6 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 - **Modernized ioBroker API:** Replaced deprecated `setStateAsync` method calls with the modern, promise-based `setState` standard across the COP calculation engine.
 - **Config UI Sorting:** Ensured the newly generated configuration tabs maintain a logical and consistent order across rebuilds.
 - **Internal Mapping:** Restructured the `info` folder mapping to cleanly accommodate adapter-level metadata alongside hardware telemetry.
-
-### 0.16.1 (2026-10-11)
-
-#### 🚀 Features
-
-- **Enhanced UI Layout:** Improved the "Datapoints" settings tab layout to display up to 4 items side-by-side on larger screens for a better overview and improved usability.
-
-#### 🛠 Bugfixes & Enhancements
-
-- **State Cleanup Logic Fixed:** Resolved an issue where unchecked datapoints (e.g., Room Thermostats) were not removed from the ioBroker object tree. The `isStateEnabled` logic now correctly handles `undefined` config states for dynamically generated checkboxes.
 
 ## License
 
