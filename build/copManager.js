@@ -34,18 +34,26 @@ async function processCopData(adapter, bzVal) {
     let currentPower = 0;
     if (config.cop_source_power === "external" && config.cop_oid_power_total) {
       const state = await adapter.getForeignStateAsync(config.cop_oid_power_total);
-      if (state && typeof state.val === "number") currentPower = state.val;
+      if (state && typeof state.val === "number") {
+        currentPower = state.val;
+      }
     } else {
       const state = await adapter.getStateAsync((0, import_stateMapping.getDpPath)("energy_total"));
-      if (state && typeof state.val === "number") currentPower = state.val;
+      if (state && typeof state.val === "number") {
+        currentPower = state.val;
+      }
     }
     let currentThermal = 0;
     if (config.cop_source_thermal === "external" && config.cop_oid_thermal_total) {
       const state = await adapter.getForeignStateAsync(config.cop_oid_thermal_total);
-      if (state && typeof state.val === "number") currentThermal = state.val;
+      if (state && typeof state.val === "number") {
+        currentThermal = state.val;
+      }
     } else {
       const state = await adapter.getStateAsync((0, import_stateMapping.getDpPath)("thermalenergy_total"));
-      if (state && typeof state.val === "number") currentThermal = state.val;
+      if (state && typeof state.val === "number") {
+        currentThermal = state.val;
+      }
     }
     const rawPowerId = "hidden.cop_buckets.last_raw_power";
     const rawThermalId = "hidden.cop_buckets.last_raw_thermal";
@@ -62,10 +70,12 @@ async function processCopData(adapter, bzVal) {
       });
       const lastPowerStateInit = await adapter.getStateAsync(rawPowerId);
       const lastThermalStateInit = await adapter.getStateAsync(rawThermalId);
-      if (!lastPowerStateInit || lastPowerStateInit.val === null)
+      if (!lastPowerStateInit || lastPowerStateInit.val === null) {
         await adapter.setState(rawPowerId, { val: currentPower, ack: true });
-      if (!lastThermalStateInit || lastThermalStateInit.val === null)
+      }
+      if (!lastThermalStateInit || lastThermalStateInit.val === null) {
         await adapter.setState(rawThermalId, { val: currentThermal, ack: true });
+      }
       isInitialized = true;
       await handleTimeRollover(adapter);
       return;
