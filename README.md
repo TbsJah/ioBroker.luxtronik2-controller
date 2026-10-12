@@ -86,8 +86,7 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
-
-### **WORK IN PROGRESS**
+### 0.17.3 (2026-10-12)
 
 **🚀 Features & Enhancements**
 
@@ -141,19 +140,6 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 #### 🛠 Bugfixes & Enhancements
 
 - **State Cleanup Logic Fixed:** Resolved an issue where unchecked datapoints (e.g., Room Thermostats) were not removed from the ioBroker object tree. The `isStateEnabled` logic now correctly handles `undefined` config states for dynamically generated checkboxes.
-
-### 0.16.0 (2026-10-11)
-
-#### 🚀 Features
-
-- **Dynamic Admin UI Generation:** The "Datapoints / Objects" configuration tab in the adapter settings is now fully auto-generated during the build process (`prebuild`). This ensures the UI is always 100% in sync with the underlying TypeScript state mappings.
-- **Category Master Switches:** Added master toggle switches to the adapter settings. Users can now enable or disable entire hardware categories (e.g., Solar, Cooling, Ventilation) with a single click. This keeps the ioBroker object tree clean and significantly reduces unnecessary polling for unused features.
-- **Dynamic Protection for Critical States:** System-critical datapoints are now protected dynamically via a `required: true` flag in the codebase. They are permanently locked (grayed out) in the UI and cannot be accidentally deleted or disabled by the user or the visibility filter.
-
-#### 🛠 Bugfixes & Enhancements
-
-- **Cycle Optimization Logic (Hot Water):** Fixed a logic flaw where the adapter erroneously applied an artificial hot water target temperature increase while the heat pump was already actively running a hot water cycle. The trigger is now strictly limited to the end of regular heating cycles.
-- **Build Process Optimized:** Integrated the UI generation script (`generateConfig.ts`) seamlessly into the NPM `prebuild` lifecycle, automatically patching the `jsonConfig.json` before typescript compilation.
 
 ## License
 
