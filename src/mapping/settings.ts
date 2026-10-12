@@ -342,6 +342,8 @@ export const SETTINGS_MAPPING: Record<string, StateDefinition> = {
 		factor: 100,
 		dataSource: 'raw_parameter',
 		required: true,
+		min: 0,
+		max: 10,
 	},
 	heating_system_circ_pump_voltage_minimal: {
 		folder: 'Settings.04_HUP',
@@ -354,6 +356,8 @@ export const SETTINGS_MAPPING: Record<string, StateDefinition> = {
 		factor: 100,
 		dataSource: 'raw_parameter',
 		required: true,
+		min: 0,
+		max: 10,
 	},
 	heating_max_circ_pump_speed: {
 		folder: 'Settings.04_HUP',

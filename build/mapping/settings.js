@@ -376,7 +376,9 @@ const SETTINGS_MAPPING = {
     luxWriteId: "867",
     factor: 100,
     dataSource: "raw_parameter",
-    required: true
+    required: true,
+    min: 0,
+    max: 10
   },
   heating_system_circ_pump_voltage_minimal: {
     folder: "Settings.04_HUP",
@@ -388,7 +390,9 @@ const SETTINGS_MAPPING = {
     luxWriteId: "868",
     factor: 100,
     dataSource: "raw_parameter",
-    required: true
+    required: true,
+    min: 0,
+    max: 10
   },
   heating_max_circ_pump_speed: {
     folder: "Settings.04_HUP",

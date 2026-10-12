@@ -22,11 +22,22 @@ __export(hupManager_exports, {
 });
 module.exports = __toCommonJS(hupManager_exports);
 var import_logger = require("./logger");
+var import_stateMapping = require("./stateMapping");
 async function handleHupOptimization(adapter, istHeizen, spreizung, hupAktiv, lastPumpOptimization) {
   var _a, _b, _c, _d, _e, _f;
   const config = adapter.config;
   if (!istHeizen || config.hup_optimierung_aktiv !== true) {
     return lastPumpOptimization;
+  }
+  try {
+    const maxPwmState = await adapter.getStateAsync((0, import_stateMapping.getDpPath)("heating_max_circ_pump_speed"));
+    if (maxPwmState && typeof maxPwmState.val === "number" && maxPwmState.val > 0) {
+      if (adapter.isDebugLogActive) {
+        (0, import_logger.writeLog)("HUP: PWM-Pumpe erkannt (max_speed > 0). 0-10V Optimierung wird \xFCbersprungen.", "debug");
+      }
+      return lastPumpOptimization;
+    }
+  } catch {
   }
   const now = Date.now();
   const checkIntervalMs = ((_a = config.hup_interval_min) != null ? _a : 10) * 6e4;

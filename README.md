@@ -86,6 +86,17 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
+
+### **WORK IN PROGRESS**
+
+**🚀 Features & Enhancements**
+
+- **Smart PWM Pump Detection:** The `hupManager` now automatically detects whether the heating circulation pump (HUP) is controlled via a PWM signal (verified by checking if `heating_max_circ_pump_speed > 0%`). If this is the case, the obsolete dynamic 0-10V voltage optimization is automatically bypassed. This saves system resources and prevents unnecessary write commands to the Luxtronik controller.
+
+**🐛 Bugfixes**
+
+- **HUP Voltage Validation Fixed:** Fixed an issue where ioBroker threw a warning ("nur zwischen 3 und 10 V erlaubt") in the log for HUP voltage values below 3V. The object definitions for minimum and nominal voltage have been explicitly updated to `min: 0` and `max: 10`. This successfully overwrites lingering cache limits in the ioBroker database and allows the pump to transition into 0V standby mode without throwing errors.
+
 ### 0.17.3 (2026-10-12)
 
 **🚀 Features & Enhancements**

@@ -1,4 +1,5 @@
 import { writeLog } from './logger';
+import { getDpPath } from './stateMapping';
 import type { LuxtronikAdapter } from './types';
 
 /**
@@ -23,6 +24,20 @@ export async function handleHupOptimization(
 	// Abbruch, wenn nicht geheizt wird oder das Feature deaktiviert ist
 	if (!istHeizen || config.hup_optimierung_aktiv !== true) {
 		return lastPumpOptimization;
+	}
+
+	// Erkennung einer PWM-Pumpe. Wenn Max-Speed > 0 konfiguriert ist,
+	// handelt es sich um eine PWM-Pumpe. Die 0-10V Optimierung ist hier nutzlos!
+	try {
+		const maxPwmState = await adapter.getStateAsync(getDpPath('heating_max_circ_pump_speed'));
+		if (maxPwmState && typeof maxPwmState.val === 'number' && maxPwmState.val > 0) {
+			if (adapter.isDebugLogActive) {
+				writeLog('HUP: PWM-Pumpe erkannt (max_speed > 0). 0-10V Optimierung wird übersprungen.', 'debug');
+			}
+			return lastPumpOptimization; // Abbruch!
+		}
+	} catch {
+		// Fehler beim Lesen ignorieren und sicherheitshalber weitermachen
 	}
 
 	const now = Date.now();
