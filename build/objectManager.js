@@ -126,7 +126,7 @@ async function cleanupStates(adapter) {
       const obj = objects[fullId];
       if (obj && obj.type === "state") {
         const localId = fullId.replace(`${adapter.namespace}.`, "");
-        if (localId.startsWith("Custom.")) {
+        if (localId.startsWith("Custom.") || localId.startsWith("hidden.")) {
           continue;
         }
         if (!activeStateIds.has(localId)) {

@@ -224,7 +224,8 @@ export async function cleanupStates(adapter: LuxtronikAdapter): Promise<void> {
 			const obj = objects[fullId];
 			if (obj && obj.type === 'state') {
 				const localId = fullId.replace(`${adapter.namespace}.`, '');
-				if (localId.startsWith('Custom.')) {
+				// 'hidden.' Ordner vom Löschen ausschließen (schützt unsere COP-Datenbank)
+				if (localId.startsWith('Custom.') || localId.startsWith('hidden.')) {
 					continue;
 				}
 				if (!activeStateIds.has(localId)) {

@@ -86,6 +86,13 @@ Bug reports, compatibility notes for specific firmware versions, or feature requ
 ## Changelog
 
 // ### **WORK IN PROGRESS**
+
+### **WORK IN PROGRESS**
+
+**🐛 Bugfixes**
+
+- **COP Database Persistence:** Fixed a critical bug in the object manager's cleanup routine (`cleanupStates`). The internal database folder (`hidden.cop_buckets`) was missing from the exclusion list and got aggressively deleted upon every adapter restart, resulting in wiped COP histories and `(null)` values. The hidden states are now strictly protected against the cleanup process, ensuring long-term persistence for energy calculations.
+
 ### 0.18.0 (2026-10-12)
 
 **🚀 Features & Enhancements**
