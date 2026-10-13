@@ -23,6 +23,26 @@
 ### 0.1.0 (2026-07-09)
 
 - initial release
+## 0.17.0 (2026-10-11)
+
+#### 🚀 Features
+
+- **COP & Efficiency Calculator:** Introduced a comprehensive COP (Coefficient of Performance) calculation engine to track heat pump efficiency.
+- **External Smart Meter Support:** Users can now choose to use internal Luxtronik estimates or link high-precision external sensors (e.g., Shelly 3EM or M-Bus heat meters) via ioBroker Object IDs for power consumption and thermal energy generation.
+- **Granular Live Metrics:** The adapter now dynamically analyzes the active operating state to split and calculate live daily COP values for "Total", "Heating", and "Hot Water" independently.
+- **Persistent Time Rollovers:** Implemented a robust "snapshot" system with absolute virtual counters. The adapter automatically detects day, month, and year rollovers to persist data and guarantee accurate long-term calculations, even across adapter restarts or ioBroker reboots.
+- **Dedicated Efficiency UI:** Added a new "Efficiency / COP" configuration tab to easily manage energy data sources and toggle the calculation engine.
+- **Connection & Polling Status:** Added a new system datapoint `info.lastUpdate`. This state continuously tracks the exact timestamp of the last successful data retrieval, making it easy to monitor the adapter's health and polling activity in visualisations like VIS or Lovelace.
+
+#### 🛠 Bugfixes & Enhancements
+
+- **Object Tree Creation:** Fixed an issue where hidden data buckets for the COP calculation were not created because parent directories were missing.
+- **Timestamp Formatting:** Resolved a strict type mismatch error in the ioBroker log by correctly formatting `info.lastUpdate` as an ISO string instead of a numeric timestamp.
+- **State Properties & Code Quality:** Resolved strict TypeScript and ESLint warnings (missing JSDoc annotations, missing read/write object definitions) in the new COP manager.
+- **Modernized ioBroker API:** Replaced deprecated `setStateAsync` method calls with the modern, promise-based `setState` standard across the COP calculation engine.
+- **Config UI Sorting:** Ensured the newly generated configuration tabs maintain a logical and consistent order across rebuilds.
+- **Internal Mapping:** Restructured the `info` folder mapping to cleanly accommodate adapter-level metadata alongside hardware telemetry.
+
 ## 0.16.1 (2026-10-11)
 
 #### 🚀 Features
