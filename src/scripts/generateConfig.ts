@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import * as fs from 'node:fs';
 import { ACTIONS_MAPPING } from '../mapping/actions';
 import { INFO_MAPPING } from '../mapping/info';
 import { SETTINGS_MAPPING } from '../mapping/settings';
@@ -249,7 +249,7 @@ const copTab = {
 	},
 };
 
-import * as path from 'path';
+import * as path from 'node:path';
 const configPath = path.resolve(process.cwd(), 'admin/jsonConfig.json');
 
 try {

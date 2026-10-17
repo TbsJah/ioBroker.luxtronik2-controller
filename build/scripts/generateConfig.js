@@ -21,13 +21,13 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
   mod
 ));
-var fs = __toESM(require("fs"));
+var fs = __toESM(require("node:fs"));
 var import_actions = require("../mapping/actions");
 var import_info = require("../mapping/info");
 var import_settings = require("../mapping/settings");
 var import_tablesInfo = require("../mapping/tablesInfo");
 var import_tablesSettings = require("../mapping/tablesSettings");
-var path = __toESM(require("path"));
+var path = __toESM(require("node:path"));
 const allMappings = {
   ...import_info.INFO_MAPPING,
   ...import_settings.SETTINGS_MAPPING,
