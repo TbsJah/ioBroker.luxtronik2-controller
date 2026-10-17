@@ -23,6 +23,12 @@
 ### 0.1.0 (2026-07-09)
 
 - initial release
+## 0.17.1 (2026-10-11)
+
+#### 🛠 Bugfixes & Enhancements
+
+- **Code Quality & CI/CD:** Fixed ESLint `no-prototype-builtins` pipeline failures in `objectManager.ts` by replacing direct `.hasOwnProperty()` calls with safe `Object.prototype.hasOwnProperty.call()` methods.
+
 ## 0.17.0 (2026-10-11)
 
 #### 🚀 Features
