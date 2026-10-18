@@ -155,6 +155,391 @@
 				}
 			}
 		},
+		"modbusTab": {
+			"type": "panel",
+			"label": {
+				"en": "Modbus (Hybrid)",
+				"de": "Modbus (Hybrid)"
+			},
+			"icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMjQgMjQiPgoJPHBhdGggZD0iTTIyIDEyaC00YTUuOTggNS45OCAwIDAgMC0xLjU0LTQuMDVsMi44My0yLjgyYTEgMSAwIDAgMC0xLjQxLTEuNDFsLTIuODIgMi44M0E1Ljk4IDUuOTggMCAwIDAgMTEgNmwtLjAyLTMuOTlhMSAxIDAgMCAwLTIgMGwuMDIgM0E1Ljk5IDUuOTkgMCAwIDAgMyA5bC0zIC4wMWExIDEgMCAwIDAgMCAybDMgLjAxYTUuOTggNS45OCAwIDAgMCAxLjUzIDQuMDZsLTIuODMgMi44MmExIDEgMCAxIDAgMS40MSAxLjQxbDIuODItMi44M2E1Ljk4IDUuOTggMCAwIDAgNC4wNiAxLjUzbC4wMSAzYTEgMSAwIDAgMCAyIDBsLS4wMS0zYTUuOTggNS45OCAwIDAgMCA0LjA2LTEuNTNsMi44MiAyLjgzYTEgMSAwIDAgMCAxLjQxLTEuNDFsLTIuODItMi44M2E1Ljk4IDUuOTggMCAwIDAgMS41My00LjA2bDMtLjAxYTEgMSAwIDAgMCAwLTIiem0tMTAgNGMtMi4yIDAtNC0xLjgtNC00czEuOC00IDgtNCA0IDEuOCA0IDQtMS44IDQtNCA0IDEuOCA0 NHoiIGZpbGw9ImN1cnJlbnRDb2xvciIgLz4KPC9zdmc+Cg==",
+			"items": {
+				"modbusInfo": {
+					"type": "staticText",
+					"text": {
+						"en": "<b>Hybrid Mode: Modbus TCP</b><br>Use Modbus TCP to write volatile parameters (like target temperatures or SmartGrid) directly into the RAM without causing wear to the EEPROM flash memory. Sensor data is still reliably read via the native port 8889.",
+						"de": "<b>Hybrid-Modus: Modbus TCP</b><br>Nutze Modbus TCP, um flüchtige Parameter (wie PV-Sollwerte oder SmartGrid) direkt in den Arbeitsspeicher zu schreiben, ohne den EEPROM-Flashspeicher der Anlage zu verschleißen. Sensordaten werden weiterhin detailliert über den nativen Port 8889 gelesen."
+					},
+					"style": {
+						"marginBottom": "20px",
+						"fontSize": "14px"
+					},
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
+				"modbus_active": {
+					"type": "checkbox",
+					"label": {
+						"en": "Enable Modbus TCP",
+						"de": "Modbus TCP aktivieren"
+					},
+					"default": false,
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"lg": 4,
+					"xl": 4
+				},
+				"modbus_port": {
+					"type": "number",
+					"label": {
+						"en": "Modbus Port",
+						"de": "Modbus Port"
+					},
+					"default": 502,
+					"disabled": "!data.modbus_active",
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"lg": 4,
+					"xl": 4
+				},
+				"divider_modbus_holdings": {
+					"type": "divider",
+					"color": "primary",
+					"style": {
+						"marginBottom": "15px",
+						"marginTop": "15px"
+					},
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
+				"headerModbusHoldings": {
+					"type": "header",
+					"text": {
+						"en": "Select Holding Registers (Parameters)",
+						"de": "Holding-Register (Parameter) auswählen"
+					},
+					"size": 4,
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
+				"sync_modbus_holding_0": {
+					"type": "checkbox",
+					"label": {
+						"en": "Outside temp (Holding 0)",
+						"de": "Außentemperatur (Holding 0)"
+					},
+					"default": false,
+					"disabled": "!data.modbus_active",
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"lg": 3,
+					"xl": 3
+				},
+				"sync_modbus_holding_1": {
+					"type": "checkbox",
+					"label": {
+						"en": "Return target temp (Holding 1)",
+						"de": "Rücklauf-Soll (Holding 1)"
+					},
+					"default": false,
+					"disabled": "!data.modbus_active",
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"lg": 3,
+					"xl": 3
+				},
+				"sync_modbus_holding_5": {
+					"type": "checkbox",
+					"label": {
+						"en": "Hot water target temp (Holding 5)",
+						"de": "Warmwasser-Soll (Holding 5)"
+					},
+					"default": false,
+					"disabled": "!data.modbus_active",
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"lg": 3,
+					"xl": 3
+				},
+				"sync_modbus_holding_6": {
+					"type": "checkbox",
+					"label": {
+						"en": "Heat pump release (Holding 6)",
+						"de": "Freigabe Wärmepumpe (Holding 6)"
+					},
+					"default": false,
+					"disabled": "!data.modbus_active",
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"lg": 3,
+					"xl": 3
+				},
+				"sync_modbus_holding_7": {
+					"type": "checkbox",
+					"label": {
+						"en": "Heating mode (Holding 7)",
+						"de": "Betriebsart Heizen (Holding 7)"
+					},
+					"default": false,
+					"disabled": "!data.modbus_active",
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"lg": 3,
+					"xl": 3
+				},
+				"sync_modbus_holding_8": {
+					"type": "checkbox",
+					"label": {
+						"en": "Hot water mode (Holding 8)",
+						"de": "Betriebsart Warmwasser (Holding 8)"
+					},
+					"default": false,
+					"disabled": "!data.modbus_active",
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"lg": 3,
+					"xl": 3
+				},
+				"sync_modbus_holding_14": {
+					"type": "checkbox",
+					"label": {
+						"en": "SmartGrid (Holding 14)",
+						"de": "SmartGrid (Holding 14)"
+					},
+					"default": false,
+					"disabled": "!data.modbus_active",
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"lg": 3,
+					"xl": 3
+				},
+				"divider_modbus_coils": {
+					"type": "divider",
+					"color": "primary",
+					"style": {
+						"marginBottom": "15px",
+						"marginTop": "15px"
+					},
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
+				"headerModbusCoils": {
+					"type": "header",
+					"text": {
+						"en": "Select Coils (Switches)",
+						"de": "Coils (Schalter) auswählen"
+					},
+					"size": 4,
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
+				"sync_modbus_coil_0": {
+					"type": "checkbox",
+					"label": {
+						"en": "Error reset (Coil 0)",
+						"de": "Fehlerreset (Coil 0)"
+					},
+					"default": false,
+					"disabled": "!data.modbus_active",
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"lg": 3,
+					"xl": 3
+				},
+				"sync_modbus_coil_2": {
+					"type": "checkbox",
+					"label": {
+						"en": "HUP (Coil 2)",
+						"de": "HUP (Coil 2)"
+					},
+					"default": false,
+					"disabled": "!data.modbus_active",
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"lg": 3,
+					"xl": 3
+				},
+				"sync_modbus_coil_3": {
+					"type": "checkbox",
+					"label": {
+						"en": "Ventilation (Coil 3)",
+						"de": "Ventilation (Coil 3)"
+					},
+					"default": false,
+					"disabled": "!data.modbus_active",
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"lg": 3,
+					"xl": 3
+				},
+				"sync_modbus_coil_4": {
+					"type": "checkbox",
+					"label": {
+						"en": "ZUP (Coil 4)",
+						"de": "ZUP (Coil 4)"
+					},
+					"default": false,
+					"disabled": "!data.modbus_active",
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"lg": 3,
+					"xl": 3
+				},
+				"sync_modbus_coil_5": {
+					"type": "checkbox",
+					"label": {
+						"en": "BUP (Coil 5)",
+						"de": "BUP (Coil 5)"
+					},
+					"default": false,
+					"disabled": "!data.modbus_active",
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"lg": 3,
+					"xl": 3
+				},
+				"sync_modbus_coil_6": {
+					"type": "checkbox",
+					"label": {
+						"en": "Ventil.-BOSUP (Coil 6)",
+						"de": "Ventil.-BOSUP (Coil 6)"
+					},
+					"default": false,
+					"disabled": "!data.modbus_active",
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"lg": 3,
+					"xl": 3
+				},
+				"sync_modbus_coil_7": {
+					"type": "checkbox",
+					"label": {
+						"en": "ZIP (Coil 7)",
+						"de": "ZIP (Coil 7)"
+					},
+					"default": false,
+					"disabled": "!data.modbus_active",
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"lg": 3,
+					"xl": 3
+				},
+				"sync_modbus_coil_8": {
+					"type": "checkbox",
+					"label": {
+						"en": "FUP 1 (Coil 8)",
+						"de": "FUP 1 (Coil 8)"
+					},
+					"default": false,
+					"disabled": "!data.modbus_active",
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"lg": 3,
+					"xl": 3
+				},
+				"sync_modbus_coil_9": {
+					"type": "checkbox",
+					"label": {
+						"en": "FUP 3 (Coil 9)",
+						"de": "FUP 3 (Coil 9)"
+					},
+					"default": false,
+					"disabled": "!data.modbus_active",
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"lg": 3,
+					"xl": 3
+				},
+				"sync_modbus_coil_10": {
+					"type": "checkbox",
+					"label": {
+						"en": "SLP (Coil 10)",
+						"de": "SLP (Coil 10)"
+					},
+					"default": false,
+					"disabled": "!data.modbus_active",
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"lg": 3,
+					"xl": 3
+				},
+				"sync_modbus_coil_11": {
+					"type": "checkbox",
+					"label": {
+						"en": "SUP (Coil 11)",
+						"de": "SUP (Coil 11)"
+					},
+					"default": false,
+					"disabled": "!data.modbus_active",
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"lg": 3,
+					"xl": 3
+				},
+				"sync_modbus_coil_12": {
+					"type": "checkbox",
+					"label": {
+						"en": "VSK (Coil 12)",
+						"de": "VSK (Coil 12)"
+					},
+					"default": false,
+					"disabled": "!data.modbus_active",
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"lg": 3,
+					"xl": 3
+				},
+				"sync_modbus_coil_13": {
+					"type": "checkbox",
+					"label": {
+						"en": "FRH (Coil 13)",
+						"de": "FRH (Coil 13)"
+					},
+					"default": false,
+					"disabled": "!data.modbus_active",
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"lg": 3,
+					"xl": 3
+				}
+			}
+		},
 		"idleTab": {
 			"type": "panel",
 			"label": {
@@ -2000,6 +2385,104 @@
 							"label": {
 								"en": "Mixer 2 closed",
 								"de": "Mischer 2 Zu"
+							},
+							"default": true,
+							"disabled": "!data.sync_category_information_03_outputs",
+							"xs": 12,
+							"sm": 6,
+							"md": 3,
+							"lg": 3,
+							"xl": 3
+						},
+						"sync_BOSUPout": {
+							"type": "checkbox",
+							"label": {
+								"en": "Ventil.-BOSUP",
+								"de": "Ventil.-BOSUP"
+							},
+							"default": true,
+							"disabled": "!data.sync_category_information_03_outputs",
+							"xs": 12,
+							"sm": 6,
+							"md": 3,
+							"lg": 3,
+							"xl": 3
+						},
+						"sync_FUP1out": {
+							"type": "checkbox",
+							"label": {
+								"en": "FUP 1",
+								"de": "FUP 1"
+							},
+							"default": true,
+							"disabled": "!data.sync_category_information_03_outputs",
+							"xs": 12,
+							"sm": 6,
+							"md": 3,
+							"lg": 3,
+							"xl": 3
+						},
+						"sync_FUP3out": {
+							"type": "checkbox",
+							"label": {
+								"en": "FUP 3",
+								"de": "FUP 3"
+							},
+							"default": true,
+							"disabled": "!data.sync_category_information_03_outputs",
+							"xs": 12,
+							"sm": 6,
+							"md": 3,
+							"lg": 3,
+							"xl": 3
+						},
+						"sync_SLP_out": {
+							"type": "checkbox",
+							"label": {
+								"en": "Solarpump SLP",
+								"de": "Solarpump SLP"
+							},
+							"default": true,
+							"disabled": "!data.sync_category_information_03_outputs",
+							"xs": 12,
+							"sm": 6,
+							"md": 3,
+							"lg": 3,
+							"xl": 3
+						},
+						"sync_SUP_out": {
+							"type": "checkbox",
+							"label": {
+								"en": "SUP",
+								"de": "SUP"
+							},
+							"default": true,
+							"disabled": "!data.sync_category_information_03_outputs",
+							"xs": 12,
+							"sm": 6,
+							"md": 3,
+							"lg": 3,
+							"xl": 3
+						},
+						"sync_VSK_out": {
+							"type": "checkbox",
+							"label": {
+								"en": "VSK",
+								"de": "VSK"
+							},
+							"default": true,
+							"disabled": "!data.sync_category_information_03_outputs",
+							"xs": 12,
+							"sm": 6,
+							"md": 3,
+							"lg": 3,
+							"xl": 3
+						},
+						"sync_FRH_out": {
+							"type": "checkbox",
+							"label": {
+								"en": "FRH",
+								"de": "FRH"
 							},
 							"default": true,
 							"disabled": "!data.sync_category_information_03_outputs",
@@ -5857,6 +6340,20 @@
 							},
 							"default": true,
 							"disabled": true,
+							"xs": 12,
+							"sm": 6,
+							"md": 3,
+							"lg": 3,
+							"xl": 3
+						},
+						"sync_error_reset": {
+							"type": "checkbox",
+							"label": {
+								"en": "Reset Error (Modbus)",
+								"de": "Reset Error (Modbus)"
+							},
+							"default": true,
+							"disabled": "!data.sync_category_actions",
 							"xs": 12,
 							"sm": 6,
 							"md": 3,

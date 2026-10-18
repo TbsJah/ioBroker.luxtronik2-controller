@@ -95,4 +95,14 @@ export const ACTIONS_MAPPING: Record<string, StateDefinition> = {
 		def: 0,
 		required: true,
 	},
+	error_reset: {
+		// Entspricht Coil 0 (Fehlerreset)
+		folder: 'Actions',
+		name: 'Reset Error (Modbus)',
+		role: 'button',
+		type: 'boolean',
+		write: true,
+		luxWriteId: '3000', // Platzhalter für nativen Port
+		isVirtual: true,
+	},
 };

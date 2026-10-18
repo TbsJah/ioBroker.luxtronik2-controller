@@ -572,6 +572,69 @@ export const INFO_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_value',
 		visiIndex: 8, // C0054
 	},
+	BOSUPout: {
+		folder: 'Information.03_Outputs',
+		name: 'Ventil.-BOSUP',
+		role: 'switch',
+		type: 'boolean',
+		write: true,
+		luxWriteId: '9991', // Platzhalter
+		dataSource: 'raw_value',
+	},
+	FUP1out: {
+		folder: 'Information.03_Outputs',
+		name: 'FUP 1',
+		role: 'switch',
+		type: 'boolean',
+		write: true,
+		luxWriteId: '9992', // Platzhalter
+		dataSource: 'raw_value',
+	},
+	FUP3out: {
+		folder: 'Information.03_Outputs',
+		name: 'FUP 3',
+		role: 'switch',
+		type: 'boolean',
+		write: true,
+		luxWriteId: '9993', // Platzhalter
+		dataSource: 'raw_value',
+	},
+	SLP_out: {
+		folder: 'Information.03_Outputs',
+		name: 'Solarpump SLP',
+		role: 'switch',
+		type: 'boolean',
+		write: true,
+		luxWriteId: '9994', // Platzhalter
+		dataSource: 'raw_value',
+	},
+	SUP_out: {
+		folder: 'Information.03_Outputs',
+		name: 'SUP',
+		role: 'switch',
+		type: 'boolean',
+		write: true,
+		luxWriteId: '9995', // Platzhalter
+		dataSource: 'raw_value',
+	},
+	VSK_out: {
+		folder: 'Information.03_Outputs',
+		name: 'VSK',
+		role: 'switch',
+		type: 'boolean',
+		write: true,
+		luxWriteId: '9996', // Platzhalter
+		dataSource: 'raw_value',
+	},
+	FRH_out: {
+		folder: 'Information.03_Outputs',
+		name: 'FRH',
+		role: 'switch',
+		type: 'boolean',
+		write: true,
+		luxWriteId: '9997', // Platzhalter
+		dataSource: 'raw_value',
+	},
 
 	// ==========================================
 	// Information.04_Timers

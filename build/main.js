@@ -28,6 +28,7 @@ var import_convert = require("./convert");
 var import_copManager = require("./copManager");
 var import_hupManager = require("./hupManager");
 var import_logger = require("./logger");
+var import_modbusManager = require("./modbusManager");
 var import_notificationManager = require("./notificationManager");
 var import_objectManager = require("./objectManager");
 var import_rawFunctions = require("./rawFunctions");
@@ -69,6 +70,8 @@ class Luxtronik2Controller extends utils.Adapter {
   writeCyclesToday = 0;
   writeCyclesTotal = 0;
   midnightTimer;
+  /** Modbus Manager für hybride Schreibvorgänge (SmartGrid / Vorlauf) */
+  modbusManager;
   /**
    * Initializes a new instance of the Luxtronik2Controller class.
    *
@@ -193,6 +196,11 @@ class Luxtronik2Controller extends utils.Adapter {
         "Configured polling interval exceeded maximum boundary. Restricted to 3600 seconds to prevent overflow issues.",
         "warn"
       );
+    }
+    this.modbusManager = new import_modbusManager.ModbusManager(this);
+    if (config.modbus_active) {
+      (0, import_logger.writeLog)("Checking Modbus TCP availability for hybrid write operations...", "info");
+      await this.modbusManager.checkAvailability();
     }
     this.pollingInterval = this.setInterval(async () => {
       try {
@@ -838,8 +846,92 @@ class Luxtronik2Controller extends utils.Adapter {
       if (definition.unit === "\xB0C" && typeof state.val === "number" && !definition.factor) {
         valueToWrite = state.val * 10;
       }
-      const targetWriteId = definition.luxWriteId;
-      await (0, import_rawFunctions.queueWrite)(this, parseInt(targetWriteId, 10), valueToWrite);
+      const targetWriteId = parseInt(definition.luxWriteId, 10);
+      if (this.modbusManager && this.modbusManager.isAvailable) {
+        const config = this.config;
+        let writeViaModbus = false;
+        let modbusRegister = -1;
+        let isCoil = false;
+        if (mappingKey === "temperature_outside" && config.sync_modbus_holding_0) {
+          writeViaModbus = true;
+          modbusRegister = 0;
+        } else if (mappingKey === "temperature_target_return" && config.sync_modbus_holding_1) {
+          writeViaModbus = true;
+          modbusRegister = 1;
+        } else if ((mappingKey === "warmwater_temperature" || mappingKey === "temperature_hot_water_target") && config.sync_modbus_holding_5) {
+          writeViaModbus = true;
+          modbusRegister = 5;
+        } else if (mappingKey === "Freigabe_Waermepumpe" && config.sync_modbus_holding_6) {
+          writeViaModbus = true;
+          modbusRegister = 6;
+        } else if (mappingKey === "heating_operation_mode" && config.sync_modbus_holding_7) {
+          writeViaModbus = true;
+          modbusRegister = 7;
+        } else if (mappingKey === "warmwater_operation_mode" && config.sync_modbus_holding_8) {
+          writeViaModbus = true;
+          modbusRegister = 8;
+        } else if ((mappingKey === "SmartGrid" || mappingKey === "smart_grid_switch") && config.sync_modbus_holding_14) {
+          writeViaModbus = true;
+          modbusRegister = 14;
+        } else if (mappingKey === "error_reset" && config.sync_modbus_coil_0) {
+          writeViaModbus = true;
+          modbusRegister = 0;
+          isCoil = true;
+        } else if (mappingKey === "HUPout" && config.sync_modbus_coil_2) {
+          writeViaModbus = true;
+          modbusRegister = 2;
+          isCoil = true;
+        } else if (mappingKey === "VENout" && config.sync_modbus_coil_3) {
+          writeViaModbus = true;
+          modbusRegister = 3;
+          isCoil = true;
+        } else if (mappingKey === "ZUPout" && config.sync_modbus_coil_4) {
+          writeViaModbus = true;
+          modbusRegister = 4;
+          isCoil = true;
+        } else if (mappingKey === "BUPout" && config.sync_modbus_coil_5) {
+          writeViaModbus = true;
+          modbusRegister = 5;
+          isCoil = true;
+        } else if (mappingKey === "BOSUPout" && config.sync_modbus_coil_6) {
+          writeViaModbus = true;
+          modbusRegister = 6;
+          isCoil = true;
+        } else if ((mappingKey === "ZIPout" || mappingKey === "Activate_Zip") && config.sync_modbus_coil_7) {
+          writeViaModbus = true;
+          modbusRegister = 7;
+          isCoil = true;
+        } else if (mappingKey === "FUP1out" && config.sync_modbus_coil_8) {
+          writeViaModbus = true;
+          modbusRegister = 8;
+          isCoil = true;
+        } else if (mappingKey === "FUP3out" && config.sync_modbus_coil_9) {
+          writeViaModbus = true;
+          modbusRegister = 9;
+          isCoil = true;
+        } else if (mappingKey === "SLP_out" && config.sync_modbus_coil_10) {
+          writeViaModbus = true;
+          modbusRegister = 10;
+          isCoil = true;
+        } else if (mappingKey === "SUP_out" && config.sync_modbus_coil_11) {
+          writeViaModbus = true;
+          modbusRegister = 11;
+          isCoil = true;
+        } else if (mappingKey === "VSK_out" && config.sync_modbus_coil_12) {
+          writeViaModbus = true;
+          modbusRegister = 12;
+          isCoil = true;
+        } else if (mappingKey === "FRH_out" && config.sync_modbus_coil_13) {
+          writeViaModbus = true;
+          modbusRegister = 13;
+          isCoil = true;
+        }
+        if (writeViaModbus) {
+          await this.modbusManager.writeRegister(modbusRegister, valueToWrite, isCoil);
+          return;
+        }
+      }
+      await (0, import_rawFunctions.queueWrite)(this, targetWriteId, valueToWrite);
     } catch (err) {
       (0, import_logger.writeLog)(
         `Failed to finalize downstream state change command event pipeline execution loop: ${err.message}`,

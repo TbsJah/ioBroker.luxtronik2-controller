@@ -116,6 +116,17 @@ const ACTIONS_MAPPING = {
     write: false,
     def: 0,
     required: true
+  },
+  error_reset: {
+    // Entspricht Coil 0 (Fehlerreset)
+    folder: "Actions",
+    name: "Reset Error (Modbus)",
+    role: "button",
+    type: "boolean",
+    write: true,
+    luxWriteId: "3000",
+    // Platzhalter für nativen Port
+    isVirtual: true
   }
 };
 // Annotate the CommonJS export names for ESM import in node:
