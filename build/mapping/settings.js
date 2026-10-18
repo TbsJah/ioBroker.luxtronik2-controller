@@ -36,7 +36,8 @@ const SETTINGS_MAPPING = {
       en: { 0: "Automatic", 1: "Second heat gen.", 2: "Party", 3: "Holidays", 4: "Off" },
       de: { 0: "Automatik", 1: "Zweiter Erzeuger", 2: "Party", 3: "Urlaub", 4: "Aus" }
     },
-    dataSource: "raw_parameter"
+    dataSource: "raw_parameter",
+    modbus: { type: "holding", register: 7, configKey: "sync_modbus_holding_7" }
   },
   warmwater_operation_mode: {
     folder: "Settings.01_OperatingMode",
@@ -49,7 +50,8 @@ const SETTINGS_MAPPING = {
       en: { 0: "Automatic", 1: "Second heat gen.", 2: "Party", 3: "Holidays", 4: "Off" },
       de: { 0: "Automatik", 1: "Zweiter Erzeuger", 2: "Party", 3: "Urlaub", 4: "Aus" }
     },
-    dataSource: "raw_parameter"
+    dataSource: "raw_parameter",
+    modbus: { type: "holding", register: 8, configKey: "sync_modbus_holding_8" }
   },
   heating_curve_end_point: {
     folder: "Settings.02_Heating",
@@ -249,7 +251,8 @@ const SETTINGS_MAPPING = {
     luxWriteId: "2",
     factor: 10,
     dataSource: "raw_parameter",
-    required: true
+    required: true,
+    modbus: { type: "holding", register: 5, configKey: "sync_modbus_holding_5" }
   },
   temperature_hot_water_target: {
     folder: "Settings.03_HotWater",
@@ -261,7 +264,8 @@ const SETTINGS_MAPPING = {
     luxWriteId: "105",
     factor: 10,
     dataSource: "raw_parameter",
-    required: true
+    required: true,
+    modbus: { type: "holding", register: 5, configKey: "sync_modbus_holding_5" }
   },
   hotWaterTemperatureHysteresis: {
     folder: "Settings.03_HotWater",

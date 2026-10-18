@@ -104,5 +104,6 @@ export const ACTIONS_MAPPING: Record<string, StateDefinition> = {
 		write: true,
 		luxWriteId: '3000', // Platzhalter für nativen Port
 		isVirtual: true,
+		modbus: { type: 'coil', register: 0, configKey: 'sync_modbus_coil_0' },
 	},
 };

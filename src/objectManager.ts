@@ -1,45 +1,6 @@
 import { writeLog } from './logger';
-import { STATE_MAPPING } from './stateMapping';
+import { STATE_MAPPING, type StateDefinition } from './stateMapping';
 import type { LuxtronikAdapter } from './types';
-
-/**
- * Definition eines Datenpunktes für das dynamische Mapping.
- * Steuert, wie Objekte im ioBroker-Baum angelegt werden.
- */
-export interface StateDefinition {
-	/** Der Klartext-Name des Datenpunkts */
-	name: string | { en: string; de?: string };
-	/** Der ioBroker-Datentyp (z. B. 'number', 'string', 'boolean' oder 'json') */
-	type: ioBroker.CommonType | 'json';
-	/** Die ioBroker-Rolle (z. B. 'value.temperature', 'button', 'text') */
-	role: string;
-	/** Optionale physikalische Einheit (z. B. '°C', 'kWh', 's') */
-	unit?: string;
-	/** Gibt an, ob der Datenpunkt vom ioBroker gelesen werden kann */
-	read?: boolean;
-	/** Gibt an, ob der Datenpunkt vom ioBroker beschreibbar ist */
-	write?: boolean;
-	/** Optionaler minimal zulässiger Wert */
-	min?: number;
-	/** Optionaler maximal zulässiger Wert */
-	max?: number;
-	/** Optionaler Standardwert bei Neuerstellung des Datenpunkts */
-	def?: any;
-	/** Optionales Werte-Mapping für Status-Texte (unterstützt nun i18n) */
-	states?: Record<string, Record<number, string>> | Record<number, string>;
-	/** Das Verzeichnis/Ordnerstruktur im ioBroker-Objektbaum */
-	folder: string;
-	/** Die ID oder der Index, die zum Schreiben/Lesen an die Luxtronik gesendet wird */
-	luxWriteId?: string | number;
-	/** Gibt an, ob dieser Datenpunkt systemrelevant und zwingend erforderlich ist */
-	required?: boolean;
-	/** Steuert die interne Formatierung von rohen Sekunden zu HH:MM:SS */
-	isDurationFormat?: boolean;
-	/** Definiert die interne Herkunft der Daten für das Mapping */
-	dataSource?: 'raw_parameter' | 'raw_value' | 'parameter' | 'value' | 'additional';
-	/** Optionaler Index aus Befehl 3005 (Visibilities), der steuert, ob dieser Datenpunkt sichtbar ist */
-	visiIndex?: number;
-}
 
 /**
  * Konfiguration eines benutzerdefinierten Datenpunktes aus den Adapter-Einstellungen.
@@ -209,8 +170,7 @@ export async function cleanupStates(adapter: LuxtronikAdapter): Promise<void> {
 	const config = adapter.config;
 	const activeStateIds = new Set<string>();
 
-	for (const [key, def] of Object.entries(STATE_MAPPING)) {
-		const definition = def as StateDefinition;
+	for (const [key, definition] of Object.entries(STATE_MAPPING)) {
 		if (isStateEnabled(key, definition, config, adapter.currentVisibilities || [])) {
 			activeStateIds.add(`${definition.folder}.${key}`);
 		}
@@ -382,8 +342,7 @@ export async function ensureAllObjectsExist(adapter: LuxtronikAdapter): Promise<
 	try {
 		const existingObjects = await adapter.getAdapterObjectsAsync();
 
-		for (const [key, def] of Object.entries(STATE_MAPPING)) {
-			const definition = def as StateDefinition;
+		for (const [key, definition] of Object.entries(STATE_MAPPING)) {
 			if (!isStateEnabled(key, definition, config, adapter.currentVisibilities || [])) {
 				continue;
 			}
@@ -407,8 +366,25 @@ export async function ensureAllObjectsExist(adapter: LuxtronikAdapter): Promise<
 				}
 			}
 
+			// =========================================================
+			// MODBUS NAMENS-ZUSATZ (TRANSPARENZ IM OBJEKTBAUM)
+			// =========================================================
+			let finalName = definition.name;
+
+			// Ist Modbus aktiv, der Datenpunkt Modbus-fähig und in der GUI angekreuzt?
+			if (config.modbus_active && definition.modbus && config[definition.modbus.configKey] === true) {
+				if (typeof finalName === 'string') {
+					finalName = `${finalName} (Modbus)`;
+				} else {
+					finalName = {
+						en: `${finalName.en} (Modbus)`,
+						de: finalName.de ? `${finalName.de} (Modbus)` : `${finalName.en} (Modbus)`,
+					};
+				}
+			}
+
 			const commonDef: ioBroker.StateCommon = {
-				name: definition.name,
+				name: finalName,
 				type: targetType,
 				role: definition.role,
 				unit: definition.unit || '',

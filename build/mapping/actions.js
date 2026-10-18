@@ -126,7 +126,8 @@ const ACTIONS_MAPPING = {
     write: true,
     luxWriteId: "3000",
     // Platzhalter für nativen Port
-    isVirtual: true
+    isVirtual: true,
+    modbus: { type: "coil", register: 0, configKey: "sync_modbus_coil_0" }
   }
 };
 // Annotate the CommonJS export names for ESM import in node:

@@ -113,8 +113,7 @@ function sanitizeName(name) {
 async function cleanupStates(adapter) {
   const config = adapter.config;
   const activeStateIds = /* @__PURE__ */ new Set();
-  for (const [key, def] of Object.entries(import_stateMapping.STATE_MAPPING)) {
-    const definition = def;
+  for (const [key, definition] of Object.entries(import_stateMapping.STATE_MAPPING)) {
     if (isStateEnabled(key, definition, config, adapter.currentVisibilities || [])) {
       activeStateIds.add(`${definition.folder}.${key}`);
     }
@@ -236,8 +235,7 @@ async function ensureAllObjectsExist(adapter) {
   const lang = config.language === "de" ? "de" : "en";
   try {
     const existingObjects = await adapter.getAdapterObjectsAsync();
-    for (const [key, def] of Object.entries(import_stateMapping.STATE_MAPPING)) {
-      const definition = def;
+    for (const [key, definition] of Object.entries(import_stateMapping.STATE_MAPPING)) {
       if (!isStateEnabled(key, definition, config, adapter.currentVisibilities || [])) {
         continue;
       }
@@ -255,8 +253,19 @@ async function ensureAllObjectsExist(adapter) {
           resolvedStates = definition.states;
         }
       }
+      let finalName = definition.name;
+      if (config.modbus_active && definition.modbus && config[definition.modbus.configKey] === true) {
+        if (typeof finalName === "string") {
+          finalName = `${finalName} (Modbus)`;
+        } else {
+          finalName = {
+            en: `${finalName.en} (Modbus)`,
+            de: finalName.de ? `${finalName.de} (Modbus)` : `${finalName.en} (Modbus)`
+          };
+        }
+      }
       const commonDef = {
-        name: definition.name,
+        name: finalName,
         type: targetType,
         role: definition.role,
         unit: definition.unit || "",

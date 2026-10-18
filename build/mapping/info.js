@@ -69,7 +69,8 @@ const INFO_MAPPING = {
     luxWriteId: "12",
     factor: 10,
     dataSource: "raw_value",
-    required: true
+    required: true,
+    modbus: { type: "holding", register: 1, configKey: "sync_modbus_holding_1" }
   },
   temperature_extern_return: {
     folder: "Information.01_Temperatures",
@@ -102,7 +103,8 @@ const INFO_MAPPING = {
     luxWriteId: "15",
     factor: 10,
     dataSource: "raw_value",
-    required: true
+    required: true,
+    modbus: { type: "holding", register: 0, configKey: "sync_modbus_holding_0" }
   },
   Mitteltemperatur: {
     folder: "Information.01_Temperatures",
@@ -405,7 +407,8 @@ const INFO_MAPPING = {
     states: switchStates,
     luxWriteId: "38",
     dataSource: "raw_value",
-    visiIndex: 50
+    visiIndex: 50,
+    modbus: { type: "coil", register: 5, configKey: "sync_modbus_coil_5" }
   },
   HUPout: {
     folder: "Information.03_Outputs",
@@ -416,7 +419,8 @@ const INFO_MAPPING = {
     luxWriteId: "39",
     dataSource: "raw_value",
     required: true,
-    visiIndex: 52
+    visiIndex: 52,
+    modbus: { type: "coil", register: 2, configKey: "sync_modbus_coil_2" }
   },
   VENout: {
     folder: "Information.03_Outputs",
@@ -425,7 +429,8 @@ const INFO_MAPPING = {
     type: "number",
     states: switchStates,
     luxWriteId: "42",
-    dataSource: "raw_value"
+    dataSource: "raw_value",
+    modbus: { type: "coil", register: 3, configKey: "sync_modbus_coil_3" }
   },
   VBOout: {
     folder: "Information.03_Outputs",
@@ -464,7 +469,8 @@ const INFO_MAPPING = {
     luxWriteId: "46",
     dataSource: "raw_value",
     required: true,
-    visiIndex: 59
+    visiIndex: 59,
+    modbus: { type: "coil", register: 7, configKey: "sync_modbus_coil_7" }
   },
   Virtual_ZIP_Status: {
     folder: "Information.03_Outputs",
@@ -484,7 +490,8 @@ const INFO_MAPPING = {
     states: switchStates,
     luxWriteId: "47",
     dataSource: "raw_value",
-    visiIndex: 60
+    visiIndex: 60,
+    modbus: { type: "coil", register: 4, configKey: "sync_modbus_coil_4" }
   },
   ZW1out: {
     folder: "Information.03_Outputs",
@@ -602,7 +609,8 @@ const INFO_MAPPING = {
     write: true,
     luxWriteId: "9991",
     // Platzhalter
-    dataSource: "raw_value"
+    dataSource: "raw_value",
+    modbus: { type: "coil", register: 6, configKey: "sync_modbus_coil_6" }
   },
   FUP1out: {
     folder: "Information.03_Outputs",
@@ -612,7 +620,8 @@ const INFO_MAPPING = {
     write: true,
     luxWriteId: "9992",
     // Platzhalter
-    dataSource: "raw_value"
+    dataSource: "raw_value",
+    modbus: { type: "coil", register: 8, configKey: "sync_modbus_coil_8" }
   },
   FUP3out: {
     folder: "Information.03_Outputs",
@@ -622,7 +631,8 @@ const INFO_MAPPING = {
     write: true,
     luxWriteId: "9993",
     // Platzhalter
-    dataSource: "raw_value"
+    dataSource: "raw_value",
+    modbus: { type: "coil", register: 9, configKey: "sync_modbus_coil_9" }
   },
   SLP_out: {
     folder: "Information.03_Outputs",
@@ -632,7 +642,8 @@ const INFO_MAPPING = {
     write: true,
     luxWriteId: "9994",
     // Platzhalter
-    dataSource: "raw_value"
+    dataSource: "raw_value",
+    modbus: { type: "coil", register: 10, configKey: "sync_modbus_coil_10" }
   },
   SUP_out: {
     folder: "Information.03_Outputs",
@@ -642,7 +653,8 @@ const INFO_MAPPING = {
     write: true,
     luxWriteId: "9995",
     // Platzhalter
-    dataSource: "raw_value"
+    dataSource: "raw_value",
+    modbus: { type: "coil", register: 11, configKey: "sync_modbus_coil_11" }
   },
   VSK_out: {
     folder: "Information.03_Outputs",
@@ -652,7 +664,8 @@ const INFO_MAPPING = {
     write: true,
     luxWriteId: "9996",
     // Platzhalter
-    dataSource: "raw_value"
+    dataSource: "raw_value",
+    modbus: { type: "coil", register: 12, configKey: "sync_modbus_coil_12" }
   },
   FRH_out: {
     folder: "Information.03_Outputs",
@@ -662,7 +675,8 @@ const INFO_MAPPING = {
     write: true,
     luxWriteId: "9997",
     // Platzhalter
-    dataSource: "raw_value"
+    dataSource: "raw_value",
+    modbus: { type: "coil", register: 13, configKey: "sync_modbus_coil_13" }
   },
   // ==========================================
   // Information.04_Timers

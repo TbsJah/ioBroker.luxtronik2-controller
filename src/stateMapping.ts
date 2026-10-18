@@ -43,6 +43,15 @@ export interface StateDefinition {
 	dataSource?: 'raw_value' | 'raw_parameter' | 'value' | 'parameter' | 'additional';
 	/** Optionaler Index aus Befehl 3005 (Visibilities), der steuert, ob dieser Datenpunkt sichtbar ist */
 	visiIndex?: number;
+	/** Optional: Definition für flüchtiges Schreiben über Modbus TCP */
+	modbus?: {
+		/** Handelt es sich um ein Holding-Register oder Coil? */
+		type: 'holding' | 'coil';
+		/** Die Registernummer laut Alpha Innotec Doku */
+		register: number;
+		/** Der Name der Checkbox aus der jsonConfig.json */
+		configKey: string;
+	};
 }
 
 /**

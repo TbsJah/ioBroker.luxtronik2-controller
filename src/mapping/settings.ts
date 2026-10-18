@@ -16,6 +16,7 @@ export const SETTINGS_MAPPING: Record<string, StateDefinition> = {
 			de: { 0: 'Automatik', 1: 'Zweiter Erzeuger', 2: 'Party', 3: 'Urlaub', 4: 'Aus' },
 		},
 		dataSource: 'raw_parameter',
+		modbus: { type: 'holding', register: 7, configKey: 'sync_modbus_holding_7' },
 	},
 	warmwater_operation_mode: {
 		folder: 'Settings.01_OperatingMode',
@@ -29,6 +30,7 @@ export const SETTINGS_MAPPING: Record<string, StateDefinition> = {
 			de: { 0: 'Automatik', 1: 'Zweiter Erzeuger', 2: 'Party', 3: 'Urlaub', 4: 'Aus' },
 		},
 		dataSource: 'raw_parameter',
+		modbus: { type: 'holding', register: 8, configKey: 'sync_modbus_holding_8' },
 	},
 	heating_curve_end_point: {
 		folder: 'Settings.02_Heating',
@@ -222,6 +224,7 @@ export const SETTINGS_MAPPING: Record<string, StateDefinition> = {
 		factor: 10,
 		dataSource: 'raw_parameter',
 		required: true,
+		modbus: { type: 'holding', register: 5, configKey: 'sync_modbus_holding_5' },
 	},
 	temperature_hot_water_target: {
 		folder: 'Settings.03_HotWater',
@@ -234,6 +237,7 @@ export const SETTINGS_MAPPING: Record<string, StateDefinition> = {
 		factor: 10,
 		dataSource: 'raw_parameter',
 		required: true,
+		modbus: { type: 'holding', register: 5, configKey: 'sync_modbus_holding_5' },
 	},
 	hotWaterTemperatureHysteresis: {
 		folder: 'Settings.03_HotWater',
