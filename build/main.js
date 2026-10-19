@@ -128,6 +128,33 @@ class Luxtronik2Controller extends utils.Adapter {
    */
   async onReady() {
     const config = this.config;
+    let configUpdated = false;
+    if (config.zip_control_mode === void 0) {
+      let migratedMode = "controller";
+      const actors = config.actors || [];
+      const validActors = actors.filter(
+        (a) => a.zip_external_relay_id && a.zip_external_relay_id.trim() !== ""
+      );
+      if (validActors.length > 0) {
+        migratedMode = "actor";
+      } else if (config.modbus_active && config.sync_modbus_coil_7) {
+        migratedMode = "modbus";
+      }
+      config.zip_control_mode = migratedMode;
+      configUpdated = true;
+      (0, import_logger.writeLog)(`[Migration] Updated zip_control_mode to '${migratedMode}' based on legacy settings.`, "info");
+    }
+    if (configUpdated) {
+      try {
+        const obj = await this.getForeignObjectAsync(`system.adapter.${this.namespace}`);
+        if (obj && obj.native) {
+          obj.native.zip_control_mode = config.zip_control_mode;
+          await this.setForeignObject(`system.adapter.${this.namespace}`, obj);
+        }
+      } catch (err) {
+        (0, import_logger.writeLog)(`[Migration] Failed to save updated config: ${err.message}`, "error");
+      }
+    }
     const ip = config.host;
     const port = config.port || 8889;
     await this.setState("info.connection", { val: false, ack: true });

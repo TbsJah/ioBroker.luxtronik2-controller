@@ -152,7 +152,46 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 	 * @returns A promise that resolves when initialization completes.
 	 */
 	private async onReady(): Promise<void> {
+		// 1. Config als Record casten, um TypeScript-Fehler zu vermeiden
 		const config = this.config as Record<string, any>;
+
+		// =========================================================
+		// MIGRATION: ZIP Control Mode (Bestandsnutzer abfangen)
+		// =========================================================
+		let configUpdated = false;
+		if (config.zip_control_mode === undefined) {
+			let migratedMode = 'controller'; // Default
+
+			const actors = config.actors || [];
+			const validActors = actors.filter(
+				(a: any) => a.zip_external_relay_id && a.zip_external_relay_id.trim() !== '',
+			);
+
+			if (validActors.length > 0) {
+				migratedMode = 'actor';
+			} else if (config.modbus_active && config.sync_modbus_coil_7) {
+				migratedMode = 'modbus';
+			}
+
+			config.zip_control_mode = migratedMode;
+			configUpdated = true;
+			writeLog(`[Migration] Updated zip_control_mode to '${migratedMode}' based on legacy settings.`, 'info');
+		}
+
+		// Falls migriert wurde -> direkt in der ioBroker-Datenbank speichern
+		if (configUpdated) {
+			try {
+				const obj = await this.getForeignObjectAsync(`system.adapter.${this.namespace}`);
+				if (obj && obj.native) {
+					obj.native.zip_control_mode = config.zip_control_mode;
+					await this.setForeignObject(`system.adapter.${this.namespace}`, obj);
+				}
+			} catch (err: any) {
+				writeLog(`[Migration] Failed to save updated config: ${err.message}`, 'error');
+			}
+		}
+		// =========================================================
+
 		const ip = config.host;
 		const port = config.port || 8889;
 
