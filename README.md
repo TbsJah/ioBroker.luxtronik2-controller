@@ -91,8 +91,7 @@ You might see red error messages in the installation log related to `node-gyp`, 
 ## Changelog
 
 // ### **WORK IN PROGRESS**
-
-### **WORK IN PROGRESS**
+### 0.19.0 (2026-10-19)
 
 **🚀 Features & UX Improvements**
 
@@ -147,12 +146,6 @@ You might see red error messages in the installation log related to `node-gyp`, 
 - **COP Operating State Recognition:** The COP script no longer ignores energy increments for heating and hot water. The evaluation of the operating state (`WP_BZ_akt`) has been improved to reliably parse text strings with parentheses (e.g., `"Warmwasser(1)"` or `"Heizbetrieb(0)"`), correctly sorting the calculated deltas into their respective buckets (`Heating` / `HotWater`).
 - **CI/CD & Code Quality:** Resolved strict ESLint rule violations (`curly`) in the `copManager` by adding block braces to single-line `if` conditions, allowing the GitHub Actions build pipeline to pass successfully.
 - **Core Anti-Flapping Protection for Energy Counters:** Fixed a critical timing and raw data glitch where the heat pump occasionally transmits `0 kWh` for cumulative energy counters. A strict validation gate was implemented directly into the core polling loop (`main.ts`). All incoming updates for energy, thermal, and power states are now intercepted and discarded if they are lower than the currently persisted ioBroker state. This prevents faulty zero-drops from ever reaching the database and ensures clean, continuously rising graphs in history adapters like InfluxDB.
-
-### 0.17.2 (2026-10-11)
-
-#### 🛠 Bugfixes & Enhancements
-
-- **Log copManager:** Fixed an issue regarding the log output in the COP calculation engine.
 
 ## License
 

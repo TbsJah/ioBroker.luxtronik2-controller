@@ -23,6 +23,12 @@
 ### 0.1.0 (2026-07-09)
 
 - initial release
+## 0.17.2 (2026-10-11)
+
+#### 🛠 Bugfixes & Enhancements
+
+- **Log copManager:** Fixed an issue regarding the log output in the COP calculation engine.
+
 ## 0.17.1 (2026-10-11)
 
 #### 🛠 Bugfixes & Enhancements
