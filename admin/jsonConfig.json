@@ -10847,7 +10847,7 @@
 					"command": "testTelegram",
 					"color": "primary",
 					"variant": "outlined",
-					"icon": "notifications",
+					"icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iY3VycmVudENvbG9yIj48cGF0aCBkPSJNMi4wMSAyMUwyMyAxMiAyLjAxIDMgMiAxMGwxNSAyLTE1IDJ6Ii8+PC9zdmc+",
 					"xs": 12,
 					"sm": 12,
 					"md": 3,
