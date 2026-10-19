@@ -232,25 +232,11 @@
 					"lg": 12,
 					"xl": 12
 				},
-				"sync_modbus_holding_0": {
-					"type": "checkbox",
-					"label": {
-						"en": "Outside temp (Holding 0)",
-						"de": "Außentemperatur (Holding 0)"
-					},
-					"default": false,
-					"disabled": "!data.modbus_active",
-					"xs": 12,
-					"sm": 6,
-					"md": 4,
-					"lg": 3,
-					"xl": 3
-				},
 				"sync_modbus_holding_1": {
 					"type": "checkbox",
 					"label": {
-						"en": "Return target temp (Holding 1)",
-						"de": "Rücklauf-Soll (Holding 1)"
+						"en": "Target return temperature (Holding 1)",
+						"de": "Rücklauf Soll (Holding 1)"
 					},
 					"default": false,
 					"disabled": "!data.modbus_active",
@@ -260,25 +246,11 @@
 					"lg": 3,
 					"xl": 3
 				},
-				"sync_modbus_holding_5": {
+				"sync_modbus_holding_0": {
 					"type": "checkbox",
 					"label": {
-						"en": "Hot water target temp (Holding 5)",
-						"de": "Warmwasser-Soll (Holding 5)"
-					},
-					"default": false,
-					"disabled": "!data.modbus_active",
-					"xs": 12,
-					"sm": 6,
-					"md": 4,
-					"lg": 3,
-					"xl": 3
-				},
-				"sync_modbus_holding_6": {
-					"type": "checkbox",
-					"label": {
-						"en": "Heat pump release (Holding 6)",
-						"de": "Freigabe Wärmepumpe (Holding 6)"
+						"en": "Outside temperature (Holding 0)",
+						"de": "Außentemperatur (Holding 0)"
 					},
 					"default": false,
 					"disabled": "!data.modbus_active",
@@ -291,8 +263,8 @@
 				"sync_modbus_holding_7": {
 					"type": "checkbox",
 					"label": {
-						"en": "Heating mode (Holding 7)",
-						"de": "Betriebsart Heizen (Holding 7)"
+						"en": "Operating mode heating (Holding 7)",
+						"de": "Operating mode heating (Holding 7)"
 					},
 					"default": false,
 					"disabled": "!data.modbus_active",
@@ -305,8 +277,8 @@
 				"sync_modbus_holding_8": {
 					"type": "checkbox",
 					"label": {
-						"en": "Hot water mode (Holding 8)",
-						"de": "Betriebsart Warmwasser (Holding 8)"
+						"en": "Operating mode hot water (Holding 8)",
+						"de": "Operating mode hot water (Holding 8)"
 					},
 					"default": false,
 					"disabled": "!data.modbus_active",
@@ -316,11 +288,53 @@
 					"lg": 3,
 					"xl": 3
 				},
-				"sync_modbus_holding_14": {
+				"sync_modbus_holding_15": {
 					"type": "checkbox",
 					"label": {
-						"en": "SmartGrid (Holding 14)",
-						"de": "SmartGrid (Holding 14)"
+						"en": "Heating curve end point (Return) (Holding 15)",
+						"de": "Heating curve end point (Return) (Holding 15)"
+					},
+					"default": false,
+					"disabled": "!data.modbus_active",
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"lg": 3,
+					"xl": 3
+				},
+				"sync_modbus_holding_16": {
+					"type": "checkbox",
+					"label": {
+						"en": "Heating curve parallel offset (Holding 16)",
+						"de": "Heating curve parallel offset (Holding 16)"
+					},
+					"default": false,
+					"disabled": "!data.modbus_active",
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"lg": 3,
+					"xl": 3
+				},
+				"sync_modbus_holding_23": {
+					"type": "checkbox",
+					"label": {
+						"en": "Heating target temp offset (Holding 23)",
+						"de": "Heating target temp offset (Holding 23)"
+					},
+					"default": false,
+					"disabled": "!data.modbus_active",
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"lg": 3,
+					"xl": 3
+				},
+				"sync_modbus_holding_5": {
+					"type": "checkbox",
+					"label": {
+						"en": "Hot water target (Wunschwert) (Holding 5)",
+						"de": "Hot water target (Wunschwert) (Holding 5)"
 					},
 					"default": false,
 					"disabled": "!data.modbus_active",
@@ -356,11 +370,11 @@
 					"lg": 12,
 					"xl": 12
 				},
-				"sync_modbus_coil_0": {
+				"sync_modbus_coil_5": {
 					"type": "checkbox",
 					"label": {
-						"en": "Error reset (Coil 0)",
-						"de": "Fehlerreset (Coil 0)"
+						"en": "Hot water charging pump BUP (Coil 5)",
+						"de": "Hot water charging pump BUP (Coil 5)"
 					},
 					"default": false,
 					"disabled": "!data.modbus_active",
@@ -373,8 +387,8 @@
 				"sync_modbus_coil_2": {
 					"type": "checkbox",
 					"label": {
-						"en": "HUP (Coil 2)",
-						"de": "HUP (Coil 2)"
+						"en": "Heating circulation pump HUP (Coil 2)",
+						"de": "Heating circulation pump HUP (Coil 2)"
 					},
 					"default": false,
 					"disabled": "!data.modbus_active",
@@ -387,8 +401,22 @@
 				"sync_modbus_coil_3": {
 					"type": "checkbox",
 					"label": {
-						"en": "Ventilation (Coil 3)",
-						"de": "Ventilation (Coil 3)"
+						"en": "Fan VEN (Coil 3)",
+						"de": "Fan VEN (Coil 3)"
+					},
+					"default": false,
+					"disabled": "!data.modbus_active",
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"lg": 3,
+					"xl": 3
+				},
+				"sync_modbus_coil_7": {
+					"type": "checkbox",
+					"label": {
+						"en": "Circulation pump ZIP (Coil 7)",
+						"de": "Circulation pump ZIP (Coil 7)"
 					},
 					"default": false,
 					"disabled": "!data.modbus_active",
@@ -401,22 +429,8 @@
 				"sync_modbus_coil_4": {
 					"type": "checkbox",
 					"label": {
-						"en": "ZUP (Coil 4)",
-						"de": "ZUP (Coil 4)"
-					},
-					"default": false,
-					"disabled": "!data.modbus_active",
-					"xs": 12,
-					"sm": 6,
-					"md": 4,
-					"lg": 3,
-					"xl": 3
-				},
-				"sync_modbus_coil_5": {
-					"type": "checkbox",
-					"label": {
-						"en": "BUP (Coil 5)",
-						"de": "BUP (Coil 5)"
+						"en": "Auxiliary circulation pump ZUP (Coil 4)",
+						"de": "Auxiliary circulation pump ZUP (Coil 4)"
 					},
 					"default": false,
 					"disabled": "!data.modbus_active",
@@ -431,20 +445,6 @@
 					"label": {
 						"en": "Ventil.-BOSUP (Coil 6)",
 						"de": "Ventil.-BOSUP (Coil 6)"
-					},
-					"default": false,
-					"disabled": "!data.modbus_active",
-					"xs": 12,
-					"sm": 6,
-					"md": 4,
-					"lg": 3,
-					"xl": 3
-				},
-				"sync_modbus_coil_7": {
-					"type": "checkbox",
-					"label": {
-						"en": "ZIP (Coil 7)",
-						"de": "ZIP (Coil 7)"
 					},
 					"default": false,
 					"disabled": "!data.modbus_active",
@@ -485,8 +485,8 @@
 				"sync_modbus_coil_10": {
 					"type": "checkbox",
 					"label": {
-						"en": "SLP (Coil 10)",
-						"de": "SLP (Coil 10)"
+						"en": "Solarpump SLP (Coil 10)",
+						"de": "Solarpump SLP (Coil 10)"
 					},
 					"default": false,
 					"disabled": "!data.modbus_active",
@@ -529,6 +529,34 @@
 					"label": {
 						"en": "FRH (Coil 13)",
 						"de": "FRH (Coil 13)"
+					},
+					"default": false,
+					"disabled": "!data.modbus_active",
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"lg": 3,
+					"xl": 3
+				},
+				"sync_modbus_coil_1": {
+					"type": "checkbox",
+					"label": {
+						"en": "Watchdog Modbus (Coil 1)",
+						"de": "Watchdog Modbus (Coil 1)"
+					},
+					"default": false,
+					"disabled": "!data.modbus_active",
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"lg": 3,
+					"xl": 3
+				},
+				"sync_modbus_coil_0": {
+					"type": "checkbox",
+					"label": {
+						"en": "Reset Error (Modbus) (Coil 0)",
+						"de": "Reset Error (Modbus) (Coil 0)"
 					},
 					"default": false,
 					"disabled": "!data.modbus_active",

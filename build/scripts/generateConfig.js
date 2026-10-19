@@ -138,6 +138,120 @@ const objectsSettings = {
     // Fügt alle generierten Panels ein
   }
 };
+const modbusHoldings = {};
+const modbusCoils = {};
+for (const [, def] of Object.entries(allMappings)) {
+  if (def.modbus) {
+    const nameEn = typeof def.name === "string" ? def.name : def.name.en;
+    const nameDe = typeof def.name === "string" ? def.name : def.name.de || def.name.en;
+    const isCoil = def.modbus.type === "coil";
+    const regType = isCoil ? "Coil" : "Holding";
+    const checkboxItem = {
+      type: "checkbox",
+      label: {
+        en: `${nameEn} (${regType} ${def.modbus.register})`,
+        de: `${nameDe} (${regType} ${def.modbus.register})`
+      },
+      default: false,
+      disabled: "!data.modbus_active",
+      xs: 12,
+      sm: 6,
+      md: 4,
+      lg: 3,
+      xl: 3
+    };
+    if (isCoil) {
+      modbusCoils[def.modbus.configKey] = checkboxItem;
+    } else {
+      modbusHoldings[def.modbus.configKey] = checkboxItem;
+    }
+  }
+}
+const modbusTab = {
+  type: "panel",
+  label: { en: "Modbus (Hybrid)", de: "Modbus (Hybrid)" },
+  icon: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMjQgMjQiPgoJPHBhdGggZD0iTTIyIDEyaC00YTUuOTggNS45OCAwIDAgMC0xLjU0LTQuMDVsMi44My0yLjgyYTEgMSAwIDAgMC0xLjQxLTEuNDFsLTIuODIgMi44M0E1Ljk4IDUuOTggMCAwIDAgMTEgNmwtLjAyLTMuOTlhMSAxIDAgMCAwLTIgMGwuMDIgM0E1Ljk5IDUuOTkgMCAwIDAgMyA5bC0zIC4wMWExIDEgMCAwIDAgMCAybDMgLjAxYTUuOTggNS45OCAwIDAgMCAxLjUzIDQuMDZsLTIuODMgMi44MmExIDEgMCAxIDAgMS40MSAxLjQxbDIuODItMi44M2E1Ljk4IDUuOTggMCAwIDAgNC4wNiAxLjUzbC4wMSAzYTEgMSAwIDAgMCAyIDBsLS4wMS0zYTUuOTggNS45OCAwIDAgMCA0LjA2LTEuNTNsMi44MiAyLjgzYTEgMSAwIDAgMCAxLjQxLTEuNDFsLTIuODItMi44M2E1Ljk4IDUuOTggMCAwIDAgMS41My00LjA2bDMtLjAxYTEgMSAwIDAgMCAwLTIiem0tMTAgNGMtMi4yIDAtNC0xLjgtNC00czEuOC00IDgtNCA0IDEuOCA0IDQtMS44IDQtNCA0IDEuOCA0 NHoiIGZpbGw9ImN1cnJlbnRDb2xvciIgLz4KPC9zdmc+Cg==",
+  items: {
+    modbusInfo: {
+      type: "staticText",
+      text: {
+        en: "<b>Hybrid Mode: Modbus TCP</b><br>Use Modbus TCP to write volatile parameters (like target temperatures or SmartGrid) directly into the RAM without causing wear to the EEPROM flash memory. Sensor data is still reliably read via the native port 8889.",
+        de: "<b>Hybrid-Modus: Modbus TCP</b><br>Nutze Modbus TCP, um fl\xFCchtige Parameter (wie PV-Sollwerte oder SmartGrid) direkt in den Arbeitsspeicher zu schreiben, ohne den EEPROM-Flashspeicher der Anlage zu verschlei\xDFen. Sensordaten werden weiterhin detailliert \xFCber den nativen Port 8889 gelesen."
+      },
+      style: { marginBottom: "20px", fontSize: "14px" },
+      xs: 12,
+      sm: 12,
+      md: 12,
+      lg: 12,
+      xl: 12
+    },
+    modbus_active: {
+      type: "checkbox",
+      label: { en: "Enable Modbus TCP", de: "Modbus TCP aktivieren" },
+      default: false,
+      xs: 12,
+      sm: 6,
+      md: 4,
+      lg: 4,
+      xl: 4
+    },
+    modbus_port: {
+      type: "number",
+      label: { en: "Modbus Port", de: "Modbus Port" },
+      default: 502,
+      disabled: "!data.modbus_active",
+      xs: 12,
+      sm: 6,
+      md: 4,
+      lg: 4,
+      xl: 4
+    },
+    divider_modbus_holdings: {
+      type: "divider",
+      color: "primary",
+      style: { marginBottom: "15px", marginTop: "15px" },
+      xs: 12,
+      sm: 12,
+      md: 12,
+      lg: 12,
+      xl: 12
+    },
+    headerModbusHoldings: {
+      type: "header",
+      text: { en: "Select Holding Registers (Parameters)", de: "Holding-Register (Parameter) ausw\xE4hlen" },
+      size: 4,
+      xs: 12,
+      sm: 12,
+      md: 12,
+      lg: 12,
+      xl: 12
+    },
+    ...modbusHoldings,
+    // Dynamisch alle Holdings einfügen
+    divider_modbus_coils: {
+      type: "divider",
+      color: "primary",
+      style: { marginBottom: "15px", marginTop: "15px" },
+      xs: 12,
+      sm: 12,
+      md: 12,
+      lg: 12,
+      xl: 12
+    },
+    headerModbusCoils: {
+      type: "header",
+      text: { en: "Select Coils (Switches)", de: "Coils (Schalter) ausw\xE4hlen" },
+      size: 4,
+      xs: 12,
+      sm: 12,
+      md: 12,
+      lg: 12,
+      xl: 12
+    },
+    ...modbusCoils
+    // Dynamisch alle Coils einfügen
+  }
+};
 const copTab = {
   type: "panel",
   label: { en: "Efficiency / COP", de: "Effizienz / COP" },
@@ -264,12 +378,15 @@ try {
   const currentConfig = JSON.parse(fs.readFileSync(configPath, "utf8"));
   const newItems = {};
   for (const key of Object.keys(currentConfig.items)) {
+    if (key === "idleTab") {
+      newItems.modbusTab = modbusTab;
+    }
     if (key === "cycleOptimizationTab") {
       newItems.copTab = copTab;
     }
     if (key === "objectsSettings") {
       newItems[key] = objectsSettings;
-    } else if (key !== "copTab") {
+    } else if (key !== "copTab" && key !== "modbusTab") {
       newItems[key] = currentConfig.items[key];
     }
   }
