@@ -303,16 +303,16 @@ async function ensureAllObjectsExist(adapter) {
         adapter.subscribeStates(stateId);
       }
       adapter.createdStates.add(stateId);
-      if (definition.folder === "Actions") {
+      if (definition.def !== void 0 || definition.folder === "Actions") {
         const currentState = await adapter.getStateAsync(stateId);
-        if (!currentState) {
-          await adapter.setStateAsync(stateId, {
+        if (!currentState || currentState.val === null) {
+          await adapter.setState(stateId, {
             val: definition.def !== void 0 ? definition.def : false,
             ack: true
           });
-        } else if (currentState.ack === false) {
+        } else if (definition.folder === "Actions" && currentState.ack === false) {
           const valToSet = definition.role === "button" ? false : currentState.val;
-          await adapter.setStateAsync(stateId, { val: valToSet, ack: true });
+          await adapter.setState(stateId, { val: valToSet, ack: true });
         }
       }
     }

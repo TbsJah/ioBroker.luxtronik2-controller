@@ -439,16 +439,20 @@ export async function ensureAllObjectsExist(adapter: LuxtronikAdapter): Promise<
 
 			adapter.createdStates.add(stateId);
 
-			if (definition.folder === 'Actions') {
+			// Standardwerte (def) beim ersten Anlegen initialisieren
+			if (definition.def !== undefined || definition.folder === 'Actions') {
 				const currentState = await adapter.getStateAsync(stateId);
-				if (!currentState) {
-					await adapter.setStateAsync(stateId, {
+
+				if (!currentState || currentState.val === null) {
+					// Zustand existiert noch gar nicht oder ist (null) -> Standardwert setzen
+					await adapter.setState(stateId, {
 						val: definition.def !== undefined ? definition.def : false,
 						ack: true,
 					});
-				} else if (currentState.ack === false) {
+				} else if (definition.folder === 'Actions' && currentState.ack === false) {
+					// Spezielle Logik nur für Buttons im Actions-Ordner
 					const valToSet = definition.role === 'button' ? false : currentState.val;
-					await adapter.setStateAsync(stateId, { val: valToSet, ack: true });
+					await adapter.setState(stateId, { val: valToSet, ack: true });
 				}
 			}
 		}
