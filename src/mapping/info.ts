@@ -1297,6 +1297,7 @@ export const INFO_MAPPING: Record<string, StateDefinition> = {
 		type: 'number',
 		isVirtual: true,
 		required: true,
+		def: 0,
 	},
 	write_cycles_total: {
 		folder: 'Information.12_SystemInfo',
@@ -1305,6 +1306,7 @@ export const INFO_MAPPING: Record<string, StateDefinition> = {
 		type: 'number',
 		isVirtual: true,
 		required: true,
+		def: 0,
 	},
 	pump_frequency: {
 		folder: 'Information.12_SystemInfo',
@@ -1361,11 +1363,12 @@ export const INFO_MAPPING: Record<string, StateDefinition> = {
 	watchdog: {
 		folder: 'Information.12_SystemInfo',
 		name: 'Watchdog Modbus',
-		role: 'text',
-		type: 'string',
+		role: 'indicator',
+		type: 'boolean',
 		luxWriteId: '9999',
 		dataSource: 'raw_parameter',
 		modbus: { type: 'coil', register: 1, configKey: 'sync_modbus_coil_1' },
+		def: false,
 	},
 	// ==========================================
 	// NACHTRAG: Hardware-Feedback (Calculations)
