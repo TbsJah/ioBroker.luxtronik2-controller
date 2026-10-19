@@ -417,7 +417,7 @@ export async function ensureAllObjectsExist(adapter: LuxtronikAdapter): Promise<
 					existingCommon.type !== targetType ||
 					existingCommon.role !== definition.role ||
 					(existingCommon.unit || '') !== (definition.unit || '') ||
-					JSON.stringify(existingCommon.name) !== JSON.stringify(definition.name) ||
+					JSON.stringify(existingCommon.name) !== JSON.stringify(commonDef.name) ||
 					existingCommon.read !== commonDef.read ||
 					existingCommon.write !== (definition.write || false) ||
 					existingCommon.min !== definition.min ||
