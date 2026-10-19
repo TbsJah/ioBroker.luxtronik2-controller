@@ -1,5 +1,6 @@
 import type { AdapterInstance } from '@iobroker/adapter-core';
 import type { Job } from 'node-schedule';
+import type { ModbusManager } from './modbusManager';
 
 /**
  * Zentrales Interface für den Luxtronik2 ioBroker Adapter.
@@ -12,9 +13,6 @@ export interface LuxtronikAdapter extends AdapterInstance {
 
 	/** Set aller während der Laufzeit erstellten oder verifizierten Datenpunkt-IDs */
 	createdStates: Set<string>;
-
-	/** ioBroker Timeout für die Zirkulationspumpe */
-	zipTimer?: ioBroker.Timeout;
 
 	/** Cron-Job für das DTA-Backup */
 	backupJob?: Job | null;
@@ -57,6 +55,18 @@ export interface LuxtronikAdapter extends AdapterInstance {
 
 	/** Gesamte Anzahl der Flash-Schreibvorgänge seit Zähler-Start */
 	writeCyclesTotal: number;
+
+	/** ioBroker Timeout für die Zirkulationspumpe */
+	zipTimer?: ioBroker.Timeout;
+
+	/** ioBroker Interval für den Restlaufzeit-Countdown der Zirkulationspumpe */
+	zipCountdownInterval?: ioBroker.Interval;
+
+	/** Endzeitpunkt (Unix-Timestamp in ms) des aktuellen ZIP-Laufs */
+	zipEndTime?: number;
+
+	/** Modbus Manager für hybride Schreibvorgänge */
+	modbusManager: ModbusManager;
 
 	/**
 	 * Synchronisiert einen Konfigurationswert sicher mit der Luxtronik.

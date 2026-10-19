@@ -85,7 +85,11 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 	public writeCyclesTotal: number = 0;
 	private midnightTimer?: ioBroker.Timeout;
 	/** Modbus Manager für hybride Schreibvorgänge (SmartGrid / Vorlauf) */
-	private modbusManager!: ModbusManager;
+	public modbusManager!: ModbusManager;
+	/** ioBroker interval handle for the ZIP remaining time countdown */
+	public zipCountdownInterval?: ioBroker.Interval;
+	/** Target timestamp when the current ZIP run finishes */
+	public zipEndTime?: number;
 	/**
 	 * Initializes a new instance of the Luxtronik2Controller class.
 	 *
@@ -264,6 +268,11 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 		const dpVirtualZipStatus = getDpPath('Virtual_ZIP_Status');
 		if (dpVirtualZipStatus) {
 			await this.setState(dpVirtualZipStatus, { val: false, ack: true });
+		}
+
+		const dpVirtualZipRemaining = getDpPath('Virtual_ZIP_Remaining_Time');
+		if (dpVirtualZipRemaining) {
+			await this.setState(dpVirtualZipRemaining, { val: 0, ack: true });
 		}
 
 		let intervalSeconds = this.config.interval ? Number(this.config.interval) : 45;
@@ -490,22 +499,24 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 					}
 				} else if (istWarmwasser) {
 					if (config.zip_optimierung_aktiv === true) {
-						// Prüfen, ob externe Aktoren konfiguriert sind
+						const mode = config.zip_control_mode || 'controller';
 						const actors = config.actors || [];
 						const validActors = actors.filter(
 							(a: any) => a.zip_external_relay_id && a.zip_external_relay_id.trim() !== '',
 						);
 
-						// Wenn Aktoren da sind, können wir die Zirkulation bedenkenlos starten (0 Flash-Schreibvorgänge!)
-						if (validActors.length > 0) {
+						const canRunWearFree =
+							(mode === 'actor' && validActors.length > 0) ||
+							(mode === 'modbus' && this.modbusManager?.isAvailable);
+
+						// Wenn Aktoren oder Modbus aktiv sind -> 0 Flash-Schreibvorgänge!
+						if (canRunWearFree) {
 							if (this.isDebugLogActive) {
 								this.log.debug(
-									'[ZIP] Externe Aktoren gefunden. Starte Zirkulation synchron zur Warmwasserbereitung.',
+									`[ZIP] Wear-free mode (${mode}) active. Starting circulation synchronous to hot water generation.`,
 								);
 							}
-							// Dauer aus der Config holen (mit einem sinnvollen Fallback von z.B. 120 Sekunden)
 							await this.syncConfigValue('zip_aktiv', config.zip_aktiv_ww ?? 120);
-							// Makro über den Trigger-Datenpunkt auslösen
 							await this.setOwnStateIfDifferent(getDpPath('Activate_Zip'), true, false);
 						}
 					}
@@ -918,7 +929,10 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 				clearInterval(this.pollingInterval);
 			}
 			if (this.zipTimer) {
-				clearTimeout(this.zipTimer);
+				this.clearTimeout(this.zipTimer);
+			}
+			if (this.zipCountdownInterval) {
+				this.clearInterval(this.zipCountdownInterval);
 			}
 
 			stopAutoBackup(this);

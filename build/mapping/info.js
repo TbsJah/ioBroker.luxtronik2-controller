@@ -482,6 +482,20 @@ const INFO_MAPPING = {
     isVirtual: true,
     required: true
   },
+  Virtual_ZIP_Remaining_Time: {
+    name: {
+      en: "Remaining runtime ZIP (Adapter Logic)",
+      de: "Restlaufzeit ZIP (Adapter-Logik)"
+    },
+    role: "value.interval",
+    type: "number",
+    unit: "s",
+    write: false,
+    folder: "Information.03_Outputs",
+    isVirtual: true,
+    required: true,
+    def: 0
+  },
   ZUPout: {
     folder: "Information.03_Outputs",
     name: "Auxiliary circulation pump ZUP",

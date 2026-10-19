@@ -72,6 +72,10 @@ class Luxtronik2Controller extends utils.Adapter {
   midnightTimer;
   /** Modbus Manager für hybride Schreibvorgänge (SmartGrid / Vorlauf) */
   modbusManager;
+  /** ioBroker interval handle for the ZIP remaining time countdown */
+  zipCountdownInterval;
+  /** Target timestamp when the current ZIP run finishes */
+  zipEndTime;
   /**
    * Initializes a new instance of the Luxtronik2Controller class.
    *
@@ -208,6 +212,10 @@ class Luxtronik2Controller extends utils.Adapter {
     const dpVirtualZipStatus = (0, import_stateMapping.getDpPath)("Virtual_ZIP_Status");
     if (dpVirtualZipStatus) {
       await this.setState(dpVirtualZipStatus, { val: false, ack: true });
+    }
+    const dpVirtualZipRemaining = (0, import_stateMapping.getDpPath)("Virtual_ZIP_Remaining_Time");
+    if (dpVirtualZipRemaining) {
+      await this.setState(dpVirtualZipRemaining, { val: 0, ack: true });
     }
     let intervalSeconds = this.config.interval ? Number(this.config.interval) : 45;
     if (intervalSeconds < 10) {
@@ -369,7 +377,7 @@ class Luxtronik2Controller extends utils.Adapter {
    * @returns A promise that resolves when the execution cycle finishes.
    */
   async runOptimizationSchedule() {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t, _u;
     try {
       const config = this.config;
       const bzState = await this.getStateAsync((0, import_stateMapping.getDpPath)("WP_BZ_akt"));
@@ -407,28 +415,30 @@ class Luxtronik2Controller extends utils.Adapter {
           }
         } else if (istWarmwasser) {
           if (config.zip_optimierung_aktiv === true) {
+            const mode = config.zip_control_mode || "controller";
             const actors = config.actors || [];
             const validActors = actors.filter(
               (a) => a.zip_external_relay_id && a.zip_external_relay_id.trim() !== ""
             );
-            if (validActors.length > 0) {
+            const canRunWearFree = mode === "actor" && validActors.length > 0 || mode === "modbus" && ((_e = this.modbusManager) == null ? void 0 : _e.isAvailable);
+            if (canRunWearFree) {
               if (this.isDebugLogActive) {
                 this.log.debug(
-                  "[ZIP] Externe Aktoren gefunden. Starte Zirkulation synchron zur Warmwasserbereitung."
+                  `[ZIP] Wear-free mode (${mode}) active. Starting circulation synchronous to hot water generation.`
                 );
               }
-              await this.syncConfigValue("zip_aktiv", (_e = config.zip_aktiv_ww) != null ? _e : 120);
+              await this.syncConfigValue("zip_aktiv", (_f = config.zip_aktiv_ww) != null ? _f : 120);
               await this.setOwnStateIfDifferent((0, import_stateMapping.getDpPath)("Activate_Zip"), true, false);
             }
           }
           if (config.hup_optimierung_aktiv === true) {
             await this.syncConfigValue(
               "heating_system_circ_pump_voltage_minimal",
-              (_f = config.sync_heating_system_circ_pump_voltage_minimal_water) != null ? _f : 3
+              (_g = config.sync_heating_system_circ_pump_voltage_minimal_water) != null ? _g : 3
             );
             await this.syncConfigValue(
               "heating_system_circ_pump_voltage_nominal",
-              (_g = config.sync_heating_system_circ_pump_voltage_nominal_water) != null ? _g : 10
+              (_h = config.sync_heating_system_circ_pump_voltage_nominal_water) != null ? _h : 10
             );
           }
         }
@@ -467,25 +477,25 @@ class Luxtronik2Controller extends utils.Adapter {
         this.getStateAsync((0, import_stateMapping.getDpPath)("heatingLimit")),
         this.istBetriebszustandAelterAls10Min()
       ]);
-      const wwSoll = (_h = wwSollState == null ? void 0 : wwSollState.val) != null ? _h : 0;
-      const wwIst = (_i = wwIstState == null ? void 0 : wwIstState.val) != null ? _i : 0;
-      const ruecklauf = (_j = ruecklaufState == null ? void 0 : ruecklaufState.val) != null ? _j : 0;
-      const spreizung = (_k = spreizungState == null ? void 0 : spreizungState.val) != null ? _k : 0;
+      const wwSoll = (_i = wwSollState == null ? void 0 : wwSollState.val) != null ? _i : 0;
+      const wwIst = (_j = wwIstState == null ? void 0 : wwIstState.val) != null ? _j : 0;
+      const ruecklauf = (_k = ruecklaufState == null ? void 0 : ruecklaufState.val) != null ? _k : 0;
+      const spreizung = (_l = spreizungState == null ? void 0 : spreizungState.val) != null ? _l : 0;
       const heatingStateStr = String((heatingStateStrState == null ? void 0 : heatingStateStrState.val) || "").trim();
       const vd1 = (vd1State == null ? void 0 : vd1State.val) === 1;
-      const wwHysterese = (_l = wwHystereseState == null ? void 0 : wwHystereseState.val) != null ? _l : 0;
-      const ruecklaufSoll = (_m = ruecklaufSollState == null ? void 0 : ruecklaufSollState.val) != null ? _m : 0;
-      const currentHupVolt = (_n = currentHupVoltState == null ? void 0 : currentHupVoltState.val) != null ? _n : 7;
-      const heizenHysterese = (_o = heizenHystereseState == null ? void 0 : heizenHystereseState.val) != null ? _o : 0;
-      const mitteltemperatur = (_p = mitteltempState == null ? void 0 : mitteltempState.val) != null ? _p : 0;
-      const thresholdHeatingLimit = (_q = thresholdHeatingLimitstate == null ? void 0 : thresholdHeatingLimitstate.val) != null ? _q : 0;
-      const heatingLimit = (_r = heatingLimitState == null ? void 0 : heatingLimitState.val) != null ? _r : 0;
+      const wwHysterese = (_m = wwHystereseState == null ? void 0 : wwHystereseState.val) != null ? _m : 0;
+      const ruecklaufSoll = (_n = ruecklaufSollState == null ? void 0 : ruecklaufSollState.val) != null ? _n : 0;
+      const currentHupVolt = (_o = currentHupVoltState == null ? void 0 : currentHupVoltState.val) != null ? _o : 7;
+      const heizenHysterese = (_p = heizenHystereseState == null ? void 0 : heizenHystereseState.val) != null ? _p : 0;
+      const mitteltemperatur = (_q = mitteltempState == null ? void 0 : mitteltempState.val) != null ? _q : 0;
+      const thresholdHeatingLimit = (_r = thresholdHeatingLimitstate == null ? void 0 : thresholdHeatingLimitstate.val) != null ? _r : 0;
+      const heatingLimit = (_s = heatingLimitState == null ? void 0 : heatingLimitState.val) != null ? _s : 0;
       const nachWasser = nachWasserState == null ? void 0 : nachWasserState.val;
       if (istHeizen) {
         if (isRegelungAktiv && aelterAls10 && vd1) {
-          const fusspunkt = (_s = await this.getStateAsync((0, import_stateMapping.getDpPath)("heating_curve_parallel_offset"))) == null ? void 0 : _s.val;
+          const fusspunkt = (_t = await this.getStateAsync((0, import_stateMapping.getDpPath)("heating_curve_parallel_offset"))) == null ? void 0 : _t.val;
           if (fusspunkt === 35) {
-            const fallbackFusspunkt = (_t = config.fusspunkt) != null ? _t : 21.7;
+            const fallbackFusspunkt = (_u = config.fusspunkt) != null ? _u : 21.7;
             await this.syncConfigValue("heating_curve_parallel_offset", fallbackFusspunkt);
           }
         }
@@ -737,7 +747,10 @@ class Luxtronik2Controller extends utils.Adapter {
         clearInterval(this.pollingInterval);
       }
       if (this.zipTimer) {
-        clearTimeout(this.zipTimer);
+        this.clearTimeout(this.zipTimer);
+      }
+      if (this.zipCountdownInterval) {
+        this.clearInterval(this.zipCountdownInterval);
       }
       (0, import_backupManager.stopAutoBackup)(this);
       if (this.midnightTimer) {

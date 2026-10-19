@@ -33,8 +33,11 @@ var import_stateMapping = require("./stateMapping");
 const CONSTANTS = {
   CMD_DEAERATE: 158,
   CMD_ZIP: 684,
+  MODBUS_COIL_ZIP: 7,
   END_OF_DAY: 86340,
-  WRITE_DELAY: 100
+  WRITE_DELAY: 100,
+  COUNTDOWN_TICK_MS: 5e3
+  // Update-Intervall für Restlaufzeit (5s schont DB)
 };
 const LEGACY_DAYS = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
 async function safeRawWrite(adapter, key, luxId, rawValue) {
@@ -68,15 +71,43 @@ async function safeRawWrite(adapter, key, luxId, rawValue) {
   });
 }
 function clearZipTimer(adapter) {
-  if (!adapter.zipTimer) {
-    return;
+  if (adapter.zipTimer) {
+    adapter.clearTimeout(adapter.zipTimer);
+    adapter.zipTimer = void 0;
   }
-  adapter.clearTimeout(adapter.zipTimer);
-  adapter.zipTimer = void 0;
+  if (adapter.zipCountdownInterval) {
+    adapter.clearInterval(adapter.zipCountdownInterval);
+    adapter.zipCountdownInterval = void 0;
+  }
+  adapter.zipEndTime = void 0;
+}
+async function startZipTimerAndCountdown(adapter, durationSeconds, onTimeoutCallback) {
+  clearZipTimer(adapter);
+  adapter.zipEndTime = Date.now() + durationSeconds * 1e3;
+  const remainingDp = (0, import_stateMapping.getDpPath)("Virtual_ZIP_Remaining_Time");
+  if (remainingDp) {
+    await adapter.setStateChangedAsync(remainingDp, { val: durationSeconds, ack: true });
+  }
+  adapter.zipCountdownInterval = adapter.setInterval(async () => {
+    if (!adapter.zipEndTime) {
+      return;
+    }
+    const remaining = Math.max(0, Math.round((adapter.zipEndTime - Date.now()) / 1e3));
+    if (remainingDp) {
+      await adapter.setStateChangedAsync(remainingDp, { val: remaining, ack: true });
+    }
+  }, CONSTANTS.COUNTDOWN_TICK_MS);
+  adapter.zipTimer = adapter.setTimeout(async () => {
+    clearZipTimer(adapter);
+    if (remainingDp) {
+      await adapter.setStateChangedAsync(remainingDp, { val: 0, ack: true });
+    }
+    await onTimeoutCallback();
+  }, durationSeconds * 1e3);
 }
 async function isZipAllowedBySchedule(adapter) {
   const config = adapter.config;
-  if (config.zip_lWP_aktiv === true) {
+  if (config.zip_control_mode === "modbus" || config.zip_lWP_aktiv === true) {
     return true;
   }
   try {
@@ -161,31 +192,45 @@ async function restoreOriginalZipConfig(adapter) {
   }
 }
 async function stopZipAndDeaeration(adapter) {
+  const mode = adapter.config.zip_control_mode || "controller";
   const actors = adapter.config.actors || [];
   const validActors = actors.filter((a) => a.zip_external_relay_id && a.zip_external_relay_id.trim() !== "");
-  if (validActors.length > 0) {
+  clearZipTimer(adapter);
+  if (mode === "actor" || validActors.length > 0) {
     try {
       for (const actor of validActors) {
         await adapter.setForeignStateAsync(actor.zip_external_relay_id, false, false);
       }
-      if (adapter.isDebugLogActive) {
-        (0, import_logger.writeLog)(`[ZIP] Emergency stop sent for external relays.`, "debug");
+      if (adapter.isDebugLogActive && validActors.length > 0) {
+        (0, import_logger.writeLog)(`[ZIP] Emergency/Timeout stop sent for external relays.`, "debug");
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       (0, import_logger.writeLog)(`[ZIP] Error switching off external relays: ${msg}`, "error");
     }
   }
+  if (mode === "modbus") {
+    try {
+      if (adapter.modbusManager && adapter.modbusManager.isAvailable) {
+        await adapter.modbusManager.writeRegister(CONSTANTS.MODBUS_COIL_ZIP, 0, true);
+        if (adapter.isDebugLogActive) {
+          (0, import_logger.writeLog)(`[ZIP] Modbus Coil ${CONSTANTS.MODBUS_COIL_ZIP} switched OFF.`, "debug");
+        }
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      (0, import_logger.writeLog)(`[ZIP] Error switching off Modbus Coil 7: ${msg}`, "error");
+    }
+  }
   try {
     const activateZipState = await adapter.getStateAsync((0, import_stateMapping.getDpPath)("Activate_Zip"));
     const runDeaerateState = await adapter.getStateAsync((0, import_stateMapping.getDpPath)("runDeaerate"));
-    const isZipActive = (activateZipState == null ? void 0 : activateZipState.val) === true || adapter.zipTimer || adapter.originalZipConfig !== null;
+    const isZipActive = (activateZipState == null ? void 0 : activateZipState.val) === true || adapter.originalZipConfig !== null;
     const isDeaerateActive = (runDeaerateState == null ? void 0 : runDeaerateState.val) === 1 || (runDeaerateState == null ? void 0 : runDeaerateState.val) === true;
-    if (isZipActive || isDeaerateActive) {
+    if (mode === "controller" && (isZipActive || isDeaerateActive)) {
       if (adapter.isDebugLogActive) {
-        (0, import_logger.writeLog)("Stopping active ZIP macro and deaeration program...", "info");
+        (0, import_logger.writeLog)("Stopping active controller ZIP macro and deaeration program...", "info");
       }
-      clearZipTimer(adapter);
       await restoreOriginalZipConfig(adapter);
       await safeRawWrite(adapter, "runDeaerate", CONSTANTS.CMD_DEAERATE, 0);
       await safeRawWrite(adapter, "hotWaterCircPumpDeaerate", CONSTANTS.CMD_ZIP, 0);
@@ -197,10 +242,10 @@ async function stopZipAndDeaeration(adapter) {
       if (dpCircDeaerate) {
         await adapter.setOwnStateIfDifferent(dpCircDeaerate, false, true);
       }
-      const dpZip = (0, import_stateMapping.getDpPath)("Activate_Zip");
-      if (dpZip) {
-        await adapter.setOwnStateIfDifferent(dpZip, false, true);
-      }
+    }
+    const dpZip = (0, import_stateMapping.getDpPath)("Activate_Zip");
+    if (dpZip) {
+      await adapter.setOwnStateIfDifferent(dpZip, false, true);
     }
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
@@ -210,115 +255,83 @@ async function stopZipAndDeaeration(adapter) {
     if (virtualDp) {
       await adapter.setStateChangedAsync(virtualDp, { val: false, ack: true });
     }
+    const remainingDp = (0, import_stateMapping.getDpPath)("Virtual_ZIP_Remaining_Time");
+    if (remainingDp) {
+      await adapter.setStateChangedAsync(remainingDp, { val: 0, ack: true });
+    }
   }
 }
 async function handleActivateZip(adapter, id, durationSeconds) {
+  const mode = adapter.config.zip_control_mode || "controller";
   const actors = adapter.config.actors || [];
   const validActors = actors.filter((a) => a.zip_external_relay_id && a.zip_external_relay_id.trim() !== "");
-  let isZipAlreadyRunning = false;
-  if (validActors.length > 0) {
-    for (const actor of validActors) {
-      try {
-        const foreignState = await adapter.getForeignStateAsync(actor.zip_external_relay_id);
-        if (foreignState && foreignState.val === true) {
-          isZipAlreadyRunning = true;
-          break;
-        }
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        if (adapter.isDebugLogActive) {
-          (0, import_logger.writeLog)(
-            `[ZIP] Could not read status of external relay ${actor.zip_external_relay_id}: ${msg}`,
-            "debug"
-          );
-        }
-      }
-    }
-  } else {
-    try {
-      const internalZip = await adapter.getStateAsync((0, import_stateMapping.getDpPath)("ZIPout"));
-      if (internalZip && (internalZip.val === 1 || internalZip.val === true)) {
-        isZipAlreadyRunning = true;
-      }
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      if (adapter.isDebugLogActive) {
-        (0, import_logger.writeLog)(`[ZIP] ${msg}`, "debug");
-      }
-    }
-  }
   const localId = id.replace(`${adapter.namespace}.`, "");
   await adapter.setState(localId, { val: true, ack: true });
   if (durationSeconds <= 0) {
-    await adapter.setState(localId, { val: false, ack: true });
+    await stopZipAndDeaeration(adapter);
     return;
   }
   const safeDurationSeconds = Math.max(1, isNaN(durationSeconds) ? 60 : durationSeconds);
+  const virtualStatusState = await adapter.getStateAsync((0, import_stateMapping.getDpPath)("Virtual_ZIP_Status"));
+  const isZipAlreadyRunning = Boolean(adapter.zipTimer) || (virtualStatusState == null ? void 0 : virtualStatusState.val) === true;
   if (isZipAlreadyRunning) {
     if (adapter.isDebugLogActive) {
-      (0, import_logger.writeLog)("[ZIP] Pump is already running. Extending timer.", "debug");
+      (0, import_logger.writeLog)(
+        `[ZIP] Pump is already running (Mode: ${mode}). Extending timer to ${safeDurationSeconds}s.`,
+        "debug"
+      );
     }
-    if (adapter.zipTimer) {
-      adapter.clearTimeout(adapter.zipTimer);
-    }
-    adapter.zipTimer = adapter.setTimeout(async () => {
-      if (validActors.length > 0) {
-        for (const actor of validActors) {
-          try {
-            await adapter.setForeignStateAsync(actor.zip_external_relay_id, false, false);
-          } catch (err) {
-            const msg = err instanceof Error ? err.message : String(err);
-            (0, import_logger.writeLog)(`[ZIP] Error switching off relay: ${msg}`, "error");
-          }
-        }
-        const virtualDp2 = (0, import_stateMapping.getDpPath)("Virtual_ZIP_Status");
-        if (virtualDp2) {
-          await adapter.setStateChangedAsync(virtualDp2, { val: false, ack: true });
-        }
-        await adapter.setState(localId, { val: false, ack: true });
-      } else {
-        await stopZipAndDeaeration(adapter);
-      }
-    }, safeDurationSeconds * 1e3);
+    await startZipTimerAndCountdown(adapter, safeDurationSeconds, async () => {
+      await stopZipAndDeaeration(adapter);
+    });
     return;
   }
-  if (validActors.length > 0) {
+  if (mode === "actor") {
+    if (validActors.length === 0) {
+      (0, import_logger.writeLog)("[ZIP] Mode is set to external actor, but no valid actor OIDs are configured!", "warn");
+      await adapter.setState(localId, { val: false, ack: true });
+      return;
+    }
     if (adapter.isDebugLogActive) {
-      (0, import_logger.writeLog)(`[ZIP] Switching ON ${validActors.length} external actor(s)`, "debug");
+      (0, import_logger.writeLog)(`[ZIP] Switching ON ${validActors.length} external actor(s) for ${safeDurationSeconds}s`, "debug");
     }
     for (const actor of validActors) {
       try {
         await adapter.setForeignStateAsync(actor.zip_external_relay_id, true, false);
-        const virtualDp2 = (0, import_stateMapping.getDpPath)("Virtual_ZIP_Status");
-        if (virtualDp2) {
-          await adapter.setStateChangedAsync(virtualDp2, { val: true, ack: true });
-        }
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
         (0, import_logger.writeLog)(`[ZIP] Error switching on ${actor.zip_external_relay_id}: ${msg}`, "error");
       }
     }
-    if (adapter.zipTimer) {
-      adapter.clearTimeout(adapter.zipTimer);
+    const virtualDp2 = (0, import_stateMapping.getDpPath)("Virtual_ZIP_Status");
+    if (virtualDp2) {
+      await adapter.setStateChangedAsync(virtualDp2, { val: true, ack: true });
     }
-    adapter.zipTimer = adapter.setTimeout(async () => {
-      for (const actor of validActors) {
-        try {
-          await adapter.setForeignStateAsync(actor.zip_external_relay_id, false, false);
-        } catch (err) {
-          const msg = err instanceof Error ? err.message : String(err);
-          (0, import_logger.writeLog)(`[ZIP] Error switching off ${actor.zip_external_relay_id}: ${msg}`, "error");
-        }
-      }
-      const virtualDp2 = (0, import_stateMapping.getDpPath)("Virtual_ZIP_Status");
-      if (virtualDp2) {
-        await adapter.setStateChangedAsync(virtualDp2, { val: false, ack: true });
-      }
+    await startZipTimerAndCountdown(adapter, safeDurationSeconds, async () => {
+      await stopZipAndDeaeration(adapter);
+    });
+    return;
+  }
+  if (mode === "modbus") {
+    if (!adapter.modbusManager || !adapter.modbusManager.isAvailable) {
+      (0, import_logger.writeLog)("[ZIP] Mode is set to Modbus TCP, but Modbus is disabled or unreachable!", "warn");
       await adapter.setState(localId, { val: false, ack: true });
-      if (adapter.isDebugLogActive) {
-        (0, import_logger.writeLog)(`[ZIP] Timeout. External relays OFF.`, "debug");
-      }
-    }, safeDurationSeconds * 1e3);
+      return;
+    }
+    if (adapter.isDebugLogActive) {
+      (0, import_logger.writeLog)(
+        `[ZIP] Switching ON via Modbus Coil ${CONSTANTS.MODBUS_COIL_ZIP} for ${safeDurationSeconds}s`,
+        "debug"
+      );
+    }
+    await adapter.modbusManager.writeRegister(CONSTANTS.MODBUS_COIL_ZIP, 1, true);
+    const virtualDp2 = (0, import_stateMapping.getDpPath)("Virtual_ZIP_Status");
+    if (virtualDp2) {
+      await adapter.setStateChangedAsync(virtualDp2, { val: true, ack: true });
+    }
+    await startZipTimerAndCountdown(adapter, safeDurationSeconds, async () => {
+      await stopZipAndDeaeration(adapter);
+    });
     return;
   }
   const bzState = await adapter.getStateAsync((0, import_stateMapping.getDpPath)("WP_BZ_akt"));
@@ -332,7 +345,6 @@ async function handleActivateZip(adapter, id, durationSeconds) {
     adapter.getStateAsync((0, import_stateMapping.getDpPath)("returnTemperatureHysteresis"))
   ]);
   const useDeaeration = bzVal === 5 && Number(wwIstS == null ? void 0 : wwIstS.val) > Number(wwSollS == null ? void 0 : wwSollS.val) - Number(wwHystS == null ? void 0 : wwHystS.val) && Number(rLState == null ? void 0 : rLState.val) > Number(rSollState == null ? void 0 : rSollState.val) - Number(hzHystState == null ? void 0 : hzHystState.val);
-  clearZipTimer(adapter);
   if (useDeaeration) {
     await safeRawWrite(adapter, "runDeaerate", CONSTANTS.CMD_DEAERATE, 1);
     await safeRawWrite(adapter, "hotWaterCircPumpDeaerate", CONSTANTS.CMD_ZIP, 1);
@@ -390,9 +402,9 @@ async function handleActivateZip(adapter, id, durationSeconds) {
   if (virtualDp) {
     await adapter.setStateChangedAsync(virtualDp, { val: true, ack: true });
   }
-  adapter.zipTimer = adapter.setTimeout(async () => {
+  await startZipTimerAndCountdown(adapter, safeDurationSeconds, async () => {
     await stopZipAndDeaeration(adapter);
-  }, safeDurationSeconds * 1e3);
+  });
 }
 function subscribeMotionSensors(adapter) {
   const config = adapter.config;
@@ -455,6 +467,9 @@ async function checkAndHandleMotionSensor(adapter, id, state) {
 }
 async function disableHardwareZipTimer(adapter) {
   const config = adapter.config;
+  if (config.zip_control_mode === "modbus") {
+    return;
+  }
   if (config.zip_lWP_aktiv === true) {
     if (adapter.isDebugLogActive) {
       (0, import_logger.writeLog)("Applying safe hardware defaults for ZIP timers...", "info");
