@@ -63,7 +63,8 @@ const SETTINGS_MAPPING = {
     luxWriteId: "11",
     factor: 10,
     dataSource: "raw_parameter",
-    required: true
+    required: true,
+    modbus: { type: "holding", register: 15, configKey: "sync_modbus_holding_15" }
   },
   heating_curve_parallel_offset: {
     folder: "Settings.02_Heating",
@@ -75,7 +76,8 @@ const SETTINGS_MAPPING = {
     luxWriteId: "12",
     factor: 10,
     dataSource: "raw_parameter",
-    required: true
+    required: true,
+    modbus: { type: "holding", register: 16, configKey: "sync_modbus_holding_16" }
   },
   deltaHeatingReduction: {
     folder: "Settings.02_Heating",
@@ -96,8 +98,9 @@ const SETTINGS_MAPPING = {
     unit: "\xB0C",
     write: true,
     luxWriteId: "1",
-    factor: 10,
-    dataSource: "raw_parameter"
+    factor: 1,
+    dataSource: "raw_parameter",
+    modbus: { type: "holding", register: 23, configKey: "sync_modbus_holding_23" }
   },
   returnTemperatureHysteresis: {
     folder: "Settings.02_Heating",

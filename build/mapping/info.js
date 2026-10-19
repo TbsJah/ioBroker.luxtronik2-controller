@@ -1390,6 +1390,15 @@ const INFO_MAPPING = {
     luxWriteId: "875",
     dataSource: "raw_parameter"
   },
+  watchdog: {
+    folder: "Information.12_SystemInfo",
+    name: "Watchdog Modbus",
+    role: "text",
+    type: "string",
+    luxWriteId: "9999",
+    dataSource: "raw_parameter",
+    modbus: { type: "coil", register: 1, configKey: "sync_modbus_coil_1" }
+  },
   // ==========================================
   // NACHTRAG: Hardware-Feedback (Calculations)
   // ==========================================

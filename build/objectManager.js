@@ -291,7 +291,7 @@ async function ensureAllObjectsExist(adapter) {
       } else {
         let needsUpdate = false;
         const existingCommon = existingObj.common;
-        if (existingCommon.type !== targetType || existingCommon.role !== definition.role || (existingCommon.unit || "") !== (definition.unit || "") || JSON.stringify(existingCommon.name) !== JSON.stringify(definition.name) || existingCommon.read !== commonDef.read || existingCommon.write !== (definition.write || false) || existingCommon.min !== definition.min || existingCommon.max !== definition.max || JSON.stringify(existingCommon.states) !== JSON.stringify(resolvedStates)) {
+        if (existingCommon.type !== targetType || existingCommon.role !== definition.role || (existingCommon.unit || "") !== (definition.unit || "") || JSON.stringify(existingCommon.name) !== JSON.stringify(commonDef.name) || existingCommon.read !== commonDef.read || existingCommon.write !== (definition.write || false) || existingCommon.min !== definition.min || existingCommon.max !== definition.max || JSON.stringify(existingCommon.states) !== JSON.stringify(resolvedStates)) {
           needsUpdate = true;
         }
         if (needsUpdate) {

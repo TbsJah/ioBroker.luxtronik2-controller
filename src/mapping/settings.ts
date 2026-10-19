@@ -43,6 +43,7 @@ export const SETTINGS_MAPPING: Record<string, StateDefinition> = {
 		factor: 10,
 		dataSource: 'raw_parameter',
 		required: true,
+		modbus: { type: 'holding', register: 15, configKey: 'sync_modbus_holding_15' },
 	},
 	heating_curve_parallel_offset: {
 		folder: 'Settings.02_Heating',
@@ -55,6 +56,7 @@ export const SETTINGS_MAPPING: Record<string, StateDefinition> = {
 		factor: 10,
 		dataSource: 'raw_parameter',
 		required: true,
+		modbus: { type: 'holding', register: 16, configKey: 'sync_modbus_holding_16' },
 	},
 	deltaHeatingReduction: {
 		folder: 'Settings.02_Heating',
@@ -75,8 +77,9 @@ export const SETTINGS_MAPPING: Record<string, StateDefinition> = {
 		unit: '°C',
 		write: true,
 		luxWriteId: '1',
-		factor: 10,
+		factor: 1,
 		dataSource: 'raw_parameter',
+		modbus: { type: 'holding', register: 23, configKey: 'sync_modbus_holding_23' },
 	},
 	returnTemperatureHysteresis: {
 		folder: 'Settings.02_Heating',
