@@ -92,8 +92,7 @@ You might see red error messages in the installation log related to `node-gyp`, 
 ## Changelog
 
 // ### **WORK IN PROGRESS**
-
-### **WORK IN PROGRESS**
+### 0.19.2 (2026-10-20)
 
 **🔧 Compatibility & Maintenance**
 
@@ -141,16 +140,6 @@ You might see red error messages in the installation log related to `node-gyp`, 
 **🐛 Bugfixes**
 
 - **COP Database Persistence:** Fixed a critical bug in the object manager's cleanup routine (`cleanupStates`). The internal database folder (`hidden.cop_buckets`) was missing from the exclusion list and got aggressively deleted upon every adapter restart, resulting in wiped COP histories and `(null)` values. The hidden states are now strictly protected against the cleanup process, ensuring long-term persistence for energy calculations.
-
-### 0.18.0 (2026-10-12)
-
-**🚀 Features & Enhancements**
-
-- **Smart PWM Pump Detection:** The `hupManager` now automatically detects whether the heating circulation pump (HUP) is controlled via a PWM signal (verified by checking if `heating_max_circ_pump_speed > 0%`). If this is the case, the obsolete dynamic 0-10V voltage optimization is automatically bypassed. This saves system resources and prevents unnecessary write commands to the Luxtronik controller.
-
-**🐛 Bugfixes**
-
-- **HUP Voltage Validation Fixed:** Fixed an issue where ioBroker threw a warning ("nur zwischen 3 und 10 V erlaubt") in the log for HUP voltage values below 3V. The object definitions for minimum and nominal voltage have been explicitly updated to `min: 0` and `max: 10`. This successfully overwrites lingering cache limits in the ioBroker database and allows the pump to transition into 0V standby mode without throwing errors.
 
 ## License
 
