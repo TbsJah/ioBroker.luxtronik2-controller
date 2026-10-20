@@ -81,9 +81,39 @@ class ModbusManager {
     }
   }
   /**
+   * Liest alle relevanten Holding-Register (0..23) und Coils (0..13) in einem schnellen Batch-Durchgang aus.
+   *
+   * @returns Ein Objekt mit den aktuellen Holdings und Coils oder null bei Fehlern.
+   */
+  async readAllRegisters() {
+    if (!this.isAvailable || !this.adapter.config.modbus_active) {
+      return null;
+    }
+    try {
+      this.client.setTimeout(2500);
+      await this.client.connectTCP(this.host, { port: this.port });
+      this.client.setID(1);
+      const holdingRes = await this.client.readHoldingRegisters(0, 24);
+      const holdings = holdingRes.data.map((val) => val > 32767 ? val - 65536 : val);
+      const coilRes = await this.client.readCoils(0, 14);
+      const coils = coilRes.data;
+      return { holdings, coils };
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (this.adapter.isDebugLogActive) {
+        (0, import_logger.writeLog)(`[Modbus] Lese-Zyklus fehlgeschlagen: ${msg}`, "debug");
+      }
+      return null;
+    } finally {
+      if (this.client.isOpen) {
+        this.client.close();
+      }
+    }
+  }
+  /**
    * Writes a volatile value to the heat pump's RAM via Modbus TCP.
    *
-   * @param register - The Modbus register number (e.g., 3 for target return temperature).
+   * @param register - The Modbus register number (e.g., 1 for target return temperature).
    * @param value - The value to write (ensure correct scaling factor, e.g., 23.5°C = 235).
    * @param isCoil - Set to true if the target is a boolean Coil (default is false for Holding registers).
    * @returns A promise that resolves when the write operation is completed.
@@ -98,14 +128,17 @@ class ModbusManager {
       await this.client.connectTCP(this.host, { port: this.port });
       this.client.setID(1);
       if (isCoil) {
-        await this.client.writeCoil(register, value === 1);
+        const coilVal = value === 1 || Boolean(value);
+        await this.client.writeCoil(register, coilVal);
         if (this.adapter.isDebugLogActive) {
-          (0, import_logger.writeLog)(`[Modbus] Coil ${register} erfolgreich auf ${value === 1} gesetzt.`, "debug");
+          (0, import_logger.writeLog)(`[Modbus] Coil ${register} erfolgreich auf ${coilVal} gesetzt.`, "debug");
         }
       } else {
-        await this.client.writeRegister(register, value);
+        const rounded = Math.round(Number(value));
+        const wireValue = rounded < 0 ? 65536 + rounded : rounded;
+        await this.client.writeRegister(register, wireValue);
         if (this.adapter.isDebugLogActive) {
-          (0, import_logger.writeLog)(`[Modbus] Holding-Register ${register} erfolgreich auf ${value} gesetzt.`, "debug");
+          (0, import_logger.writeLog)(`[Modbus] Holding-Register ${register} erfolgreich auf ${rounded} gesetzt.`, "debug");
         }
       }
     } catch (err) {

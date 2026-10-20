@@ -84,7 +84,7 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 	public writeCyclesToday: number = 0;
 	public writeCyclesTotal: number = 0;
 	private midnightTimer?: ioBroker.Timeout;
-	/** Modbus Manager für hybride Schreibvorgänge (SmartGrid / Vorlauf) */
+	/** Modbus Manager für hybride Schreib- und Lesevorgänge (SmartGrid / Vorlauf / ZIP) */
 	public modbusManager!: ModbusManager;
 	/** ioBroker interval handle for the ZIP remaining time countdown */
 	public zipCountdownInterval?: ioBroker.Interval;
@@ -253,6 +253,13 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 
 		this.subscribeStates('*');
 
+		// --- MODBUS HYBRID INITIALISIERUNG (Vor dem ersten updateData-Aufruf) ---
+		this.modbusManager = new ModbusManager(this);
+		if (config.modbus_active) {
+			writeLog('Checking Modbus TCP availability for hybrid operations...', 'info');
+			await this.modbusManager.checkAvailability();
+		}
+
 		try {
 			await this.updateData();
 		} catch (error: any) {
@@ -290,12 +297,6 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 				'warn',
 			);
 		}
-		// --- MODBUS HYBRID INITIALISIERUNG ---
-		this.modbusManager = new ModbusManager(this);
-		if (config.modbus_active) {
-			writeLog('Checking Modbus TCP availability for hybrid write operations...', 'info');
-			await this.modbusManager.checkAvailability();
-		}
 
 		this.pollingInterval = this.setInterval(async () => {
 			try {
@@ -327,6 +328,7 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 
 	/**
 	 * Synchronizes a single state configuration parameter with the Luxtronik physical controller.
+	 * Automatically routes via Modbus TCP if hybrid mode is enabled for the target datapoint.
 	 *
 	 * @param mappingKey - The unique key identifier within the STATE_MAPPING structure.
 	 * @param val - The raw or parsed value to apply.
@@ -351,9 +353,20 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 				writeLog(`Writing value directly into heat pump controller: ${mappingKey} = ${val}`, 'info');
 			}
 
-			if (definition.write === true && !definition.isVirtual && definition.luxWriteId) {
+			const config = this.config as Record<string, any>;
+			const isModbusEnabled = Boolean(
+				this.modbusManager &&
+				this.modbusManager.isAvailable &&
+				config.modbus_active &&
+				definition.modbus &&
+				config[definition.modbus.configKey] === true,
+			);
+
+			if ((definition.write === true || isModbusEnabled) && !definition.isVirtual && definition.luxWriteId) {
 				let valueToWrite: any = val;
-				if (definition.factor && typeof val === 'number') {
+				if (typeof valueToWrite === 'boolean') {
+					valueToWrite = valueToWrite ? 1 : 0;
+				} else if (definition.factor && typeof val === 'number') {
 					valueToWrite = val * definition.factor;
 				}
 
@@ -366,9 +379,19 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 				}
 
 				try {
-					const targetWriteId = definition.luxWriteId;
-					const writeId = isRawWrite ? parseInt(targetWriteId, 10) : targetWriteId;
-					await queueWrite(this, writeId, valueToWrite);
+					if (isModbusEnabled && definition.modbus) {
+						const isCoil = definition.modbus.type === 'coil';
+						await this.modbusManager.writeRegister(
+							definition.modbus.register,
+							Number(valueToWrite),
+							isCoil,
+						);
+					} else {
+						const writeId = parseInt(definition.luxWriteId, 10);
+						if (!isNaN(writeId) && writeId < 9990) {
+							await queueWrite(this, writeId, valueToWrite);
+						}
+					}
 					await new Promise(r => global.setTimeout(r, 200));
 				} catch (err: any) {
 					writeLog(
@@ -712,12 +735,19 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 				);
 			}
 
+			const config = this.config as Record<string, any>;
+
+			// Alle Modbus-Register (Holdings 0..23 & Coils 0..13) in einem Batch aus dem RAM lesen
+			const modbusData =
+				config.modbus_active && this.modbusManager?.isAvailable
+					? await this.modbusManager.readAllRegisters()
+					: null;
+
 			this.errorCount = 0;
 			await this.setState('info.connection', { val: true, ack: true });
 			await this.setState('info.lastUpdate', { val: new Date().toISOString(), ack: true });
 
 			const statePromises: Promise<any>[] = [];
-			const config = this.config as Record<string, any>;
 
 			for (const [key, definition] of Object.entries(STATE_MAPPING)) {
 				if (definition.isVirtual) {
@@ -771,6 +801,30 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 						value = undefined;
 					}
 				}
+
+				// =========================================================
+				// MODBUS LIVE-SYNC (Aktualisiert alle aktivierten Modbus-Werte)
+				// =========================================================
+				if (
+					modbusData &&
+					config.modbus_active &&
+					definition.modbus &&
+					config[definition.modbus.configKey] === true
+				) {
+					const reg = definition.modbus.register;
+					if (definition.modbus.type === 'holding' && modbusData.holdings[reg] !== undefined) {
+						value = modbusData.holdings[reg];
+						if (appliedFactor) {
+							value /= appliedFactor;
+						} else if (definition.unit === '°C') {
+							value /= 10;
+						}
+					} else if (definition.modbus.type === 'coil' && modbusData.coils[reg] !== undefined) {
+						value = modbusData.coils[reg] ? 1 : 0;
+					}
+				}
+				// =========================================================
+
 				if (value !== undefined && typeof value === 'number' && appliedFactor) {
 					value = Math.round(value * 100) / 100;
 				}
@@ -1077,7 +1131,16 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 				return;
 			}
 
-			if (!definition.luxWriteId || definition.write !== true) {
+			const config = this.config as Record<string, any>;
+			const isModbusEnabled = Boolean(
+				this.modbusManager &&
+				this.modbusManager.isAvailable &&
+				config.modbus_active &&
+				definition.modbus &&
+				config[definition.modbus.configKey] === true,
+			);
+
+			if (!definition.luxWriteId || (definition.write !== true && !isModbusEnabled)) {
 				return;
 			}
 
@@ -1085,7 +1148,9 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 
 			let valueToWrite: any = state.val;
 
-			if (
+			if (typeof valueToWrite === 'boolean') {
+				valueToWrite = valueToWrite ? 1 : 0;
+			} else if (
 				definition.isDurationFormat ||
 				definition.role === 'value.datetime' ||
 				definition.role === 'value.time'
@@ -1099,28 +1164,25 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 				valueToWrite = state.val * 10;
 			}
 
-			const targetWriteId = parseInt(definition.luxWriteId, 10);
-
 			// =========================================================
 			// HYBRIDE SCHREIB-WEICHE (MODBUS VS. NATIV PORT 8889)
 			// =========================================================
-			if (this.modbusManager && this.modbusManager.isAvailable && definition.modbus) {
-				const config = this.config as Record<string, any>;
-				const modbusConfigKey = definition.modbus.configKey;
+			if (isModbusEnabled && definition.modbus) {
+				const isCoil = definition.modbus.type === 'coil';
+				const register = definition.modbus.register;
 
-				// Prüfen, ob der User in der GUI genau dieses Register angehakt hat
-				if (config[modbusConfigKey] === true) {
-					const isCoil = definition.modbus.type === 'coil';
-					const register = definition.modbus.register;
-
-					await this.modbusManager.writeRegister(register, valueToWrite, isCoil);
-					return; // NATIVE ROUTE 8889 UMGEHEN!
-				}
+				await this.modbusManager.writeRegister(register, Number(valueToWrite), isCoil);
+				return; // NATIVE ROUTE 8889 UMGEHEN!
 			}
 
 			// =========================================================
 			// NATIVE ROUTE (Fallback oder Standard-Parameter via 8889)
 			// =========================================================
+			const targetWriteId = parseInt(definition.luxWriteId, 10);
+			// Platzhalter-IDs (>= 9990) niemals nativ über Port 8889 senden
+			if (isNaN(targetWriteId) || targetWriteId >= 9990) {
+				return;
+			}
 			await queueWrite(this, targetWriteId, valueToWrite);
 		} catch (err: any) {
 			writeLog(

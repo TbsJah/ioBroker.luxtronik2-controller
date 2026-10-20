@@ -92,6 +92,13 @@ You might see red error messages in the installation log related to `node-gyp`, 
 ## Changelog
 
 // ### **WORK IN PROGRESS**
+
+### **WORK IN PROGRESS**
+
+**🔧 Compatibility & Maintenance**
+
+- **Hybrid Modbus Value Persistence:** Prevented native 3003 telemetry polling (EEPROM) from overwriting volatile parameters actively managed via Modbus TCP (RAM) in the ioBroker object tree.
+
 ### 0.19.3 (2026-10-20)
 
 **🔧 Compatibility & Maintenance**

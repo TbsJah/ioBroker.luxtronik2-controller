@@ -268,8 +268,7 @@ const SETTINGS_MAPPING = {
     luxWriteId: "105",
     factor: 10,
     dataSource: "raw_parameter",
-    required: true,
-    modbus: { type: "holding", register: 5, configKey: "sync_modbus_holding_5" }
+    required: true
   },
   hotWaterTemperatureHysteresis: {
     folder: "Settings.03_HotWater",

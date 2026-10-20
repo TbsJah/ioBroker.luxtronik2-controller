@@ -254,7 +254,10 @@ async function ensureAllObjectsExist(adapter) {
         }
       }
       let finalName = definition.name;
-      if (config.modbus_active && definition.modbus && config[definition.modbus.configKey] === true) {
+      const isModbusEnabled = Boolean(
+        config.modbus_active && definition.modbus && config[definition.modbus.configKey] === true
+      );
+      if (isModbusEnabled) {
         if (typeof finalName === "string") {
           finalName = `${finalName} (Modbus)`;
         } else {
@@ -264,13 +267,14 @@ async function ensureAllObjectsExist(adapter) {
           };
         }
       }
+      const isWritableState = Boolean(definition.write || isModbusEnabled);
       const commonDef = {
         name: finalName,
         type: targetType,
         role: definition.role,
         unit: definition.unit || "",
         read: definition.role === "button" ? false : true,
-        write: definition.write || false,
+        write: isWritableState,
         min: definition.min,
         max: definition.max,
         states: resolvedStates
@@ -291,7 +295,7 @@ async function ensureAllObjectsExist(adapter) {
       } else {
         let needsUpdate = false;
         const existingCommon = existingObj.common;
-        if (existingCommon.type !== targetType || existingCommon.role !== definition.role || (existingCommon.unit || "") !== (definition.unit || "") || JSON.stringify(existingCommon.name) !== JSON.stringify(commonDef.name) || existingCommon.read !== commonDef.read || existingCommon.write !== (definition.write || false) || existingCommon.min !== definition.min || existingCommon.max !== definition.max || JSON.stringify(existingCommon.states) !== JSON.stringify(resolvedStates)) {
+        if (existingCommon.type !== targetType || existingCommon.role !== definition.role || (existingCommon.unit || "") !== (definition.unit || "") || JSON.stringify(existingCommon.name) !== JSON.stringify(commonDef.name) || existingCommon.read !== commonDef.read || existingCommon.write !== isWritableState || existingCommon.min !== definition.min || existingCommon.max !== definition.max || JSON.stringify(existingCommon.states) !== JSON.stringify(resolvedStates)) {
           needsUpdate = true;
         }
         if (needsUpdate) {
@@ -299,7 +303,7 @@ async function ensureAllObjectsExist(adapter) {
           (0, import_logger.writeLog)(`Properties of '${stateId}' synchronized (Repair).`, "debug");
         }
       }
-      if (definition.write) {
+      if (isWritableState) {
         adapter.subscribeStates(stateId);
       }
       adapter.createdStates.add(stateId);

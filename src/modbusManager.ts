@@ -3,7 +3,17 @@ import { writeLog } from './logger';
 import type { LuxtronikAdapter } from './types';
 
 /**
- * Manager class to handle volatile Modbus TCP write operations.
+ * Ergebnisstruktur eines vollständigen Modbus-Lesezyklus.
+ */
+export interface ModbusReadResult {
+	/** Ausgelesene Holding-Register (Index 0..23) als vorzeichenbehaftete Zahlen */
+	holdings: number[];
+	/** Ausgelesene Coils (Index 0..13) als Boolean-Werte */
+	coils: boolean[];
+}
+
+/**
+ * Manager class to handle volatile Modbus TCP read and write operations.
  */
 export class ModbusManager {
 	private client: ModbusRTU;
@@ -61,9 +71,47 @@ export class ModbusManager {
 	}
 
 	/**
+	 * Liest alle relevanten Holding-Register (0..23) und Coils (0..13) in einem schnellen Batch-Durchgang aus.
+	 *
+	 * @returns Ein Objekt mit den aktuellen Holdings und Coils oder null bei Fehlern.
+	 */
+	public async readAllRegisters(): Promise<ModbusReadResult | null> {
+		if (!this.isAvailable || !this.adapter.config.modbus_active) {
+			return null;
+		}
+
+		try {
+			this.client.setTimeout(2500);
+			await this.client.connectTCP(this.host, { port: this.port });
+			this.client.setID(1);
+
+			// 1. Holding-Register 0 bis 23 in einem Request lesen
+			const holdingRes = await this.client.readHoldingRegisters(0, 24);
+			// 16-Bit Signed Integer Umrechnung (für negative Außentemperaturen / Offsets)
+			const holdings = holdingRes.data.map(val => (val > 32767 ? val - 65536 : val));
+
+			// 2. Coils 0 bis 13 in einem Request lesen
+			const coilRes = await this.client.readCoils(0, 14);
+			const coils = coilRes.data;
+
+			return { holdings, coils };
+		} catch (err: unknown) {
+			const msg = err instanceof Error ? err.message : String(err);
+			if (this.adapter.isDebugLogActive) {
+				writeLog(`[Modbus] Lese-Zyklus fehlgeschlagen: ${msg}`, 'debug');
+			}
+			return null;
+		} finally {
+			if (this.client.isOpen) {
+				this.client.close();
+			}
+		}
+	}
+
+	/**
 	 * Writes a volatile value to the heat pump's RAM via Modbus TCP.
 	 *
-	 * @param register - The Modbus register number (e.g., 3 for target return temperature).
+	 * @param register - The Modbus register number (e.g., 1 for target return temperature).
 	 * @param value - The value to write (ensure correct scaling factor, e.g., 23.5°C = 235).
 	 * @param isCoil - Set to true if the target is a boolean Coil (default is false for Holding registers).
 	 * @returns A promise that resolves when the write operation is completed.
@@ -80,14 +128,17 @@ export class ModbusManager {
 			this.client.setID(1);
 
 			if (isCoil) {
-				await this.client.writeCoil(register, value === 1);
+				const coilVal = value === 1 || Boolean(value);
+				await this.client.writeCoil(register, coilVal);
 				if (this.adapter.isDebugLogActive) {
-					writeLog(`[Modbus] Coil ${register} erfolgreich auf ${value === 1} gesetzt.`, 'debug');
+					writeLog(`[Modbus] Coil ${register} erfolgreich auf ${coilVal} gesetzt.`, 'debug');
 				}
 			} else {
-				await this.client.writeRegister(register, value);
+				const rounded = Math.round(Number(value));
+				const wireValue = rounded < 0 ? 65536 + rounded : rounded;
+				await this.client.writeRegister(register, wireValue);
 				if (this.adapter.isDebugLogActive) {
-					writeLog(`[Modbus] Holding-Register ${register} erfolgreich auf ${value} gesetzt.`, 'debug');
+					writeLog(`[Modbus] Holding-Register ${register} erfolgreich auf ${rounded} gesetzt.`, 'debug');
 				}
 			}
 		} catch (err: unknown) {

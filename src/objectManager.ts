@@ -367,12 +367,15 @@ export async function ensureAllObjectsExist(adapter: LuxtronikAdapter): Promise<
 			}
 
 			// =========================================================
-			// MODBUS NAMENS-ZUSATZ (TRANSPARENZ IM OBJEKTBAUM)
+			// MODBUS NAMENS-ZUSATZ & SCHREIBFREIGABE
 			// =========================================================
 			let finalName = definition.name;
+			const isModbusEnabled = Boolean(
+				config.modbus_active && definition.modbus && config[definition.modbus.configKey] === true,
+			);
 
 			// Ist Modbus aktiv, der Datenpunkt Modbus-fähig und in der GUI angekreuzt?
-			if (config.modbus_active && definition.modbus && config[definition.modbus.configKey] === true) {
+			if (isModbusEnabled) {
 				if (typeof finalName === 'string') {
 					finalName = `${finalName} (Modbus)`;
 				} else {
@@ -383,13 +386,15 @@ export async function ensureAllObjectsExist(adapter: LuxtronikAdapter): Promise<
 				}
 			}
 
+			const isWritableState = Boolean(definition.write || isModbusEnabled);
+
 			const commonDef: ioBroker.StateCommon = {
 				name: finalName,
 				type: targetType,
 				role: definition.role,
 				unit: definition.unit || '',
 				read: definition.role === 'button' ? false : true,
-				write: definition.write || false,
+				write: isWritableState,
 				min: definition.min,
 				max: definition.max,
 				states: resolvedStates,
@@ -419,7 +424,7 @@ export async function ensureAllObjectsExist(adapter: LuxtronikAdapter): Promise<
 					(existingCommon.unit || '') !== (definition.unit || '') ||
 					JSON.stringify(existingCommon.name) !== JSON.stringify(commonDef.name) ||
 					existingCommon.read !== commonDef.read ||
-					existingCommon.write !== (definition.write || false) ||
+					existingCommon.write !== isWritableState ||
 					existingCommon.min !== definition.min ||
 					existingCommon.max !== definition.max ||
 					JSON.stringify(existingCommon.states) !== JSON.stringify(resolvedStates)
@@ -433,7 +438,7 @@ export async function ensureAllObjectsExist(adapter: LuxtronikAdapter): Promise<
 				}
 			}
 
-			if (definition.write) {
+			if (isWritableState) {
 				adapter.subscribeStates(stateId);
 			}
 

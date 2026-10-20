@@ -70,7 +70,7 @@ class Luxtronik2Controller extends utils.Adapter {
   writeCyclesToday = 0;
   writeCyclesTotal = 0;
   midnightTimer;
-  /** Modbus Manager für hybride Schreibvorgänge (SmartGrid / Vorlauf) */
+  /** Modbus Manager für hybride Schreib- und Lesevorgänge (SmartGrid / Vorlauf / ZIP) */
   modbusManager;
   /** ioBroker interval handle for the ZIP remaining time countdown */
   zipCountdownInterval;
@@ -200,6 +200,11 @@ class Luxtronik2Controller extends utils.Adapter {
     this.scheduleMidnightReset();
     (0, import_zipManager.subscribeMotionSensors)(this);
     this.subscribeStates("*");
+    this.modbusManager = new import_modbusManager.ModbusManager(this);
+    if (config.modbus_active) {
+      (0, import_logger.writeLog)("Checking Modbus TCP availability for hybrid operations...", "info");
+      await this.modbusManager.checkAvailability();
+    }
     try {
       await this.updateData();
     } catch (error) {
@@ -232,11 +237,6 @@ class Luxtronik2Controller extends utils.Adapter {
         "warn"
       );
     }
-    this.modbusManager = new import_modbusManager.ModbusManager(this);
-    if (config.modbus_active) {
-      (0, import_logger.writeLog)("Checking Modbus TCP availability for hybrid write operations...", "info");
-      await this.modbusManager.checkAvailability();
-    }
     this.pollingInterval = this.setInterval(async () => {
       try {
         await this.updateData();
@@ -261,6 +261,7 @@ class Luxtronik2Controller extends utils.Adapter {
   }
   /**
    * Synchronizes a single state configuration parameter with the Luxtronik physical controller.
+   * Automatically routes via Modbus TCP if hybrid mode is enabled for the target datapoint.
    *
    * @param mappingKey - The unique key identifier within the STATE_MAPPING structure.
    * @param val - The raw or parsed value to apply.
@@ -281,9 +282,15 @@ class Luxtronik2Controller extends utils.Adapter {
       if (this.isDebugLogActive) {
         (0, import_logger.writeLog)(`Writing value directly into heat pump controller: ${mappingKey} = ${val}`, "info");
       }
-      if (definition.write === true && !definition.isVirtual && definition.luxWriteId) {
+      const config = this.config;
+      const isModbusEnabled = Boolean(
+        this.modbusManager && this.modbusManager.isAvailable && config.modbus_active && definition.modbus && config[definition.modbus.configKey] === true
+      );
+      if ((definition.write === true || isModbusEnabled) && !definition.isVirtual && definition.luxWriteId) {
         let valueToWrite = val;
-        if (definition.factor && typeof val === "number") {
+        if (typeof valueToWrite === "boolean") {
+          valueToWrite = valueToWrite ? 1 : 0;
+        } else if (definition.factor && typeof val === "number") {
           valueToWrite = val * definition.factor;
         }
         const isRawWrite = definition.dataSource === "raw_parameter" || definition.dataSource === "raw_value" || !definition.dataSource && /^\d+$/.test(definition.luxWriteId || "");
@@ -291,9 +298,19 @@ class Luxtronik2Controller extends utils.Adapter {
           valueToWrite = val * 10;
         }
         try {
-          const targetWriteId = definition.luxWriteId;
-          const writeId = isRawWrite ? parseInt(targetWriteId, 10) : targetWriteId;
-          await (0, import_rawFunctions.queueWrite)(this, writeId, valueToWrite);
+          if (isModbusEnabled && definition.modbus) {
+            const isCoil = definition.modbus.type === "coil";
+            await this.modbusManager.writeRegister(
+              definition.modbus.register,
+              Number(valueToWrite),
+              isCoil
+            );
+          } else {
+            const writeId = parseInt(definition.luxWriteId, 10);
+            if (!isNaN(writeId) && writeId < 9990) {
+              await (0, import_rawFunctions.queueWrite)(this, writeId, valueToWrite);
+            }
+          }
           await new Promise((r) => global.setTimeout(r, 200));
         } catch (err) {
           (0, import_logger.writeLog)(
@@ -556,6 +573,7 @@ class Luxtronik2Controller extends utils.Adapter {
    * @returns A promise that resolves when the internal update registers conclude.
    */
   async updateData() {
+    var _a;
     if (this.updateRunning) {
       return;
     }
@@ -586,11 +604,12 @@ class Luxtronik2Controller extends utils.Adapter {
           `Raw telemetry value acquisition response error (Command 3004): ${err instanceof Error ? err.message : String(err)}`
         );
       }
+      const config = this.config;
+      const modbusData = config.modbus_active && ((_a = this.modbusManager) == null ? void 0 : _a.isAvailable) ? await this.modbusManager.readAllRegisters() : null;
       this.errorCount = 0;
       await this.setState("info.connection", { val: true, ack: true });
       await this.setState("info.lastUpdate", { val: (/* @__PURE__ */ new Date()).toISOString(), ack: true });
       const statePromises = [];
-      const config = this.config;
       for (const [key, definition] of Object.entries(import_stateMapping.STATE_MAPPING)) {
         if (definition.isVirtual) {
           continue;
@@ -633,6 +652,19 @@ class Luxtronik2Controller extends utils.Adapter {
             }
           } else {
             value = void 0;
+          }
+        }
+        if (modbusData && config.modbus_active && definition.modbus && config[definition.modbus.configKey] === true) {
+          const reg = definition.modbus.register;
+          if (definition.modbus.type === "holding" && modbusData.holdings[reg] !== void 0) {
+            value = modbusData.holdings[reg];
+            if (appliedFactor) {
+              value /= appliedFactor;
+            } else if (definition.unit === "\xB0C") {
+              value /= 10;
+            }
+          } else if (definition.modbus.type === "coil" && modbusData.coils[reg] !== void 0) {
+            value = modbusData.coils[reg] ? 1 : 0;
           }
         }
         if (value !== void 0 && typeof value === "number" && appliedFactor) {
@@ -873,12 +905,18 @@ class Luxtronik2Controller extends utils.Adapter {
         }
         return;
       }
-      if (!definition.luxWriteId || definition.write !== true) {
+      const config = this.config;
+      const isModbusEnabled = Boolean(
+        this.modbusManager && this.modbusManager.isAvailable && config.modbus_active && definition.modbus && config[definition.modbus.configKey] === true
+      );
+      if (!definition.luxWriteId || definition.write !== true && !isModbusEnabled) {
         return;
       }
       await this.setState(relativeId, { val: state.val, ack: true });
       let valueToWrite = state.val;
-      if (definition.isDurationFormat || definition.role === "value.datetime" || definition.role === "value.time") {
+      if (typeof valueToWrite === "boolean") {
+        valueToWrite = valueToWrite ? 1 : 0;
+      } else if (definition.isDurationFormat || definition.role === "value.datetime" || definition.role === "value.time") {
         valueToWrite = (0, import_convert.timeStringToSeconds)(state.val);
       } else if (definition.factor && typeof state.val === "number") {
         valueToWrite = state.val * definition.factor;
@@ -886,16 +924,15 @@ class Luxtronik2Controller extends utils.Adapter {
       if (definition.unit === "\xB0C" && typeof state.val === "number" && !definition.factor) {
         valueToWrite = state.val * 10;
       }
+      if (isModbusEnabled && definition.modbus) {
+        const isCoil = definition.modbus.type === "coil";
+        const register = definition.modbus.register;
+        await this.modbusManager.writeRegister(register, Number(valueToWrite), isCoil);
+        return;
+      }
       const targetWriteId = parseInt(definition.luxWriteId, 10);
-      if (this.modbusManager && this.modbusManager.isAvailable && definition.modbus) {
-        const config = this.config;
-        const modbusConfigKey = definition.modbus.configKey;
-        if (config[modbusConfigKey] === true) {
-          const isCoil = definition.modbus.type === "coil";
-          const register = definition.modbus.register;
-          await this.modbusManager.writeRegister(register, valueToWrite, isCoil);
-          return;
-        }
+      if (isNaN(targetWriteId) || targetWriteId >= 9990) {
+        return;
       }
       await (0, import_rawFunctions.queueWrite)(this, targetWriteId, valueToWrite);
     } catch (err) {
