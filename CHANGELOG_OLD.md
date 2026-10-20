@@ -23,6 +23,19 @@
 ### 0.1.0 (2026-07-09)
 
 - initial release
+## 0.17.3 (2026-10-12)
+
+**🚀 Features & Enhancements**
+
+- **Persistent COP Counters:** Raw energy counters (`last_raw_power`, `last_raw_thermal`) are now safely stored in the ioBroker database (`hidden.cop_buckets`) instead of volatile RAM. Consumption data is no longer lost during adapter instance or ioBroker host restarts, ensuring seamless and continuous delta calculation.
+
+**🐛 Bugfixes**
+
+- **Anti-Flapping Protection for Energy Counters (Root-Cause Fix):** Fixed a timing bug that caused the internal sum counters for thermal and electrical energy (`thermalenergy_total`, `energy_total`) to temporarily drop to `0 kWh`. The calculation function (`calculateSum`) now blocks physically impossible negative jumps and only writes new sums if they are greater than or equal to the previous peak value.
+- **COP Operating State Recognition:** The COP script no longer ignores energy increments for heating and hot water. The evaluation of the operating state (`WP_BZ_akt`) has been improved to reliably parse text strings with parentheses (e.g., `"Warmwasser(1)"` or `"Heizbetrieb(0)"`), correctly sorting the calculated deltas into their respective buckets (`Heating` / `HotWater`).
+- **CI/CD & Code Quality:** Resolved strict ESLint rule violations (`curly`) in the `copManager` by adding block braces to single-line `if` conditions, allowing the GitHub Actions build pipeline to pass successfully.
+- **Core Anti-Flapping Protection for Energy Counters:** Fixed a critical timing and raw data glitch where the heat pump occasionally transmits `0 kWh` for cumulative energy counters. A strict validation gate was implemented directly into the core polling loop (`main.ts`). All incoming updates for energy, thermal, and power states are now intercepted and discarded if they are lower than the currently persisted ioBroker state. This prevents faulty zero-drops from ever reaching the database and ensures clean, continuously rising graphs in history adapters like InfluxDB.
+
 ## 0.17.2 (2026-10-11)
 
 #### 🛠 Bugfixes & Enhancements
