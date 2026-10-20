@@ -92,6 +92,13 @@ You might see red error messages in the installation log related to `node-gyp`, 
 ## Changelog
 
 // ### **WORK IN PROGRESS**
+
+### **WORK IN PROGRESS**
+
+**🔧 Compatibility & Maintenance**
+
+- **Broader Node.js Compatibility:** Adjusted Node.js removed `{ "node": ">=18.0.0" }` in `dependencies` in `io-package.json`. T
+
 ### 0.19.2 (2026-10-20)
 
 **🔧 Compatibility & Maintenance**
