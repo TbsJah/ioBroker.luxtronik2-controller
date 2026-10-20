@@ -146,6 +146,7 @@ export const SETTINGS_MAPPING: Record<string, StateDefinition> = {
 		min: 15,
 		max: 60,
 		dataSource: 'raw_parameter',
+		modbus: { type: 'holding', register: 2, configKey: 'sync_modbus_holding_2' },
 	},
 	// ==========================================
 	// ZUSATZ: Heizung & Thermostate
