@@ -92,6 +92,14 @@ You might see red error messages in the installation log related to `node-gyp`, 
 ## Changelog
 
 // ### **WORK IN PROGRESS**
+
+### **WORK IN PROGRESS**
+
+**🔧 Compatibility & Maintenance**
+
+- **Broader Node.js Compatibility:** Adjusted Node.js engine requirement from `>=22` down to `>=18.0.0` in `package.json` and added `{ "node": ">=18.0.0" }` to `dependencies` in `io-package.json`. This enables full compatibility with widely used Long-Term Support (LTS) releases (Node.js 18 and 20) while preventing installation on deprecated runtimes.
+- **Hybrid Modbus Value Persistence:** Prevented native 3003 telemetry polling (EEPROM) from overwriting volatile parameters actively managed via Modbus TCP (RAM) in the ioBroker object tree.
+
 ### 0.19.1 (2026-10-20)
 
 **📝 Documentation & Guide Overhaul**
