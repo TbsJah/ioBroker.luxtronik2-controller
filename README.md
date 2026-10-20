@@ -95,7 +95,7 @@ You might see red error messages in the installation log related to `node-gyp`, 
 
 ### **WORK IN PROGRESS**
 
-### 📝 Documentation & Guide Overhaul
+**📝 Documentation & Guide Overhaul**
 
 - **Complete Alignment of Documentation (`README.md` & `documentation/readme_de.md` & `documentation/readme_en.md`):**
     - Restructured and synchronized both German and English documentation to accurately match all **11 configuration tabs** of the Admin UI in sequential order:
