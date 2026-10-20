@@ -241,6 +241,7 @@ export const SETTINGS_MAPPING: Record<string, StateDefinition> = {
 		factor: 10,
 		dataSource: 'raw_parameter',
 		required: true,
+		modbus: { type: 'holding', register: 5, configKey: 'sync_modbus_holding_5' },
 	},
 	hotWaterTemperatureHysteresis: {
 		folder: 'Settings.03_HotWater',

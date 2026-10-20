@@ -347,8 +347,8 @@
 				"sync_modbus_holding_5": {
 					"type": "checkbox",
 					"label": {
-						"en": "Hot water target (Deckung WP) (Holding 5)",
-						"de": "Hot water target (Deckung WP) (Holding 5)"
+						"en": "Hot water target (Wunschwert) (Holding 5)",
+						"de": "Hot water target (Wunschwert) (Holding 5)"
 					},
 					"default": false,
 					"disabled": "!data.modbus_active",
