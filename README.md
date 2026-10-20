@@ -92,8 +92,7 @@ You might see red error messages in the installation log related to `node-gyp`, 
 ## Changelog
 
 // ### **WORK IN PROGRESS**
-
-### **WORK IN PROGRESS**
+### 0.19.4 (2026-10-20)
 
 **🔧 Compatibility & Maintenance**
 
@@ -137,16 +136,6 @@ You might see red error messages in the installation log related to `node-gyp`, 
 **📝 Documentation**
 
 - **ARM Installation Notes:** Added a troubleshooting note to the README clarifying that `usocket`, `serialport`, and `node-gyp` compilation errors on Raspberry Pi / ARM systems originate from optional serial dependencies and can be safely ignored.
-
-### 0.18.2 (2026-10-17)
-
-**🔧 Maintenance & Repository Compliance**
-
-- **Core Dependency Update:** Raised minimum required `js-controller` dependency to `>=7.0.7` in `io-package.json` to ensure compatibility with modern ioBroker environments (resolves E1057).
-- **Full i18n Localization for Admin UI:** Added complete multi-language label sets (`ru`, `pt`, `nl`, `fr`, `it`, `es`, `pl`, `uk`, `zh-cn`) for COP power and thermal source selection dropdowns in `jsonConfig.json` (resolves W5611).
-- **Package News Cleanup:** Removed unreleased intermediate tags (`0.17.0`, `0.16.1`) from `common.news` in `io-package.json` to align strictly with published NPM releases (resolves W2004).
-- **CI/CD Security Compliance:** Updated GitHub auto-merge workflows for Dependabot to adhere to GitHub's updated `pull_request_target` execution policies (PR #90 / Issue #89).
-- **Code Modernization:** Migrated built-in Node.js module imports to use the explicit `node:` protocol prefix (e.g. `node:fs`, `node:path`).
 
 ## License
 
