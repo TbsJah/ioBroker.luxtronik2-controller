@@ -92,8 +92,7 @@ You might see red error messages in the installation log related to `node-gyp`, 
 ## Changelog
 
 // ### **WORK IN PROGRESS**
-
-### **WORK IN PROGRESS**
+### 0.19.3 (2026-10-20)
 
 **🔧 Compatibility & Maintenance**
 
@@ -141,12 +140,6 @@ You might see red error messages in the installation log related to `node-gyp`, 
 - **Package News Cleanup:** Removed unreleased intermediate tags (`0.17.0`, `0.16.1`) from `common.news` in `io-package.json` to align strictly with published NPM releases (resolves W2004).
 - **CI/CD Security Compliance:** Updated GitHub auto-merge workflows for Dependabot to adhere to GitHub's updated `pull_request_target` execution policies (PR #90 / Issue #89).
 - **Code Modernization:** Migrated built-in Node.js module imports to use the explicit `node:` protocol prefix (e.g. `node:fs`, `node:path`).
-
-### 0.18.1 (2026-10-13)
-
-**🐛 Bugfixes**
-
-- **COP Database Persistence:** Fixed a critical bug in the object manager's cleanup routine (`cleanupStates`). The internal database folder (`hidden.cop_buckets`) was missing from the exclusion list and got aggressively deleted upon every adapter restart, resulting in wiped COP histories and `(null)` values. The hidden states are now strictly protected against the cleanup process, ensuring long-term persistence for energy calculations.
 
 ## License
 
