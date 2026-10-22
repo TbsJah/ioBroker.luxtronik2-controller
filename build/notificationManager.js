@@ -21,7 +21,8 @@ __export(notificationManager_exports, {
   checkAndSendErrorNotifications: () => checkAndSendErrorNotifications,
   checkAndSendOutageNotifications: () => checkAndSendOutageNotifications,
   handleTestMessage: () => handleTestMessage,
-  sendTelegramNotification: () => sendTelegramNotification
+  sendTelegramNotification: () => sendTelegramNotification,
+  sendUpdateNotification: () => sendUpdateNotification
 });
 module.exports = __toCommonJS(notificationManager_exports);
 var import_logger = require("./logger");
@@ -219,11 +220,39 @@ _Hinweis: Die Anlage versucht meist einen Neustart. Bitte Heizkreis-Druck und St
   }
   await sendNotification(adapter, msg);
 }
+async function sendUpdateNotification(adapter, message) {
+  var _a;
+  const config = adapter.config;
+  if (config.update_check_notification === true) {
+    if (typeof adapter.registerNotification === "function") {
+      await adapter.registerNotification("luxtronik2-controller", "lwpError", message);
+      (0, import_logger.writeLog)("ioBroker-Benachrichtigung (Glocke) \xFCber neues Firmware-Update erstellt.", "info");
+    } else {
+      (0, import_logger.writeLog)("\u{1F6A8} ioBroker Notification Center (Glocke) nicht verf\xFCgbar.", "warn");
+    }
+  }
+  const telegramInstance = config.telegram_instance;
+  const isTelegramActive = config.update_check_telegram === true && typeof telegramInstance === "string" && telegramInstance !== "none";
+  if (isTelegramActive) {
+    const sendObj = { text: message };
+    const receiver = (_a = config.telegram_receiver) == null ? void 0 : _a.trim();
+    if (receiver) {
+      if (/^-?\d+$/.test(receiver)) {
+        sendObj.chatId = Number(receiver);
+      } else {
+        sendObj.user = receiver;
+      }
+    }
+    adapter.sendTo(telegramInstance, "send", sendObj);
+    (0, import_logger.writeLog)(`Telegram-Benachrichtigung f\xFCr Update an ${telegramInstance} gesendet.`, "info");
+  }
+}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   checkAndSendErrorNotifications,
   checkAndSendOutageNotifications,
   handleTestMessage,
-  sendTelegramNotification
+  sendTelegramNotification,
+  sendUpdateNotification
 });
 //# sourceMappingURL=notificationManager.js.map

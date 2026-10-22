@@ -21,6 +21,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
   mod
 ));
+var schedule = __toESM(require("node-schedule"));
 var utils = __toESM(require("@iobroker/adapter-core"));
 var import_actionHandlers = require("./actionHandlers");
 var import_backupManager = require("./backupManager");
@@ -34,6 +35,7 @@ var import_objectManager = require("./objectManager");
 var import_rawFunctions = require("./rawFunctions");
 var import_stateMapping = require("./stateMapping");
 var import_svgGenerator = require("./svgGenerator");
+var import_updateManager = require("./updateManager");
 var import_virtualStates = require("./virtualStates");
 var import_zipManager = require("./zipManager");
 class Luxtronik2Controller extends utils.Adapter {
@@ -76,6 +78,8 @@ class Luxtronik2Controller extends utils.Adapter {
   zipCountdownInterval;
   /** Target timestamp when the current ZIP run finishes */
   zipEndTime;
+  /** Cron-Job Handle für die Firmware-Update-Prüfung */
+  updateCronJob;
   /**
    * Initializes a new instance of the Luxtronik2Controller class.
    *
@@ -188,6 +192,7 @@ class Luxtronik2Controller extends utils.Adapter {
     await (0, import_objectManager.ensureAllObjectsExist)(this);
     await (0, import_objectManager.ensureCustomObjectsExist)(this);
     (0, import_backupManager.initAutoBackup)(this);
+    await this.subscribeStatesAsync("Information.12_SystemInfo.check_firmware");
     await this.setState((0, import_stateMapping.getDpPath)("Regelung_Aktiv"), { val: config.regelung_aktiv === true, ack: true });
     const debugState = await this.getStateAsync((0, import_stateMapping.getDpPath)("Schreibe_Debug_Log"));
     this.isDebugLogActive = (debugState == null ? void 0 : debugState.val) === true;
@@ -236,6 +241,39 @@ class Luxtronik2Controller extends utils.Adapter {
         "Configured polling interval exceeded maximum boundary. Restricted to 3600 seconds to prevent overflow issues.",
         "warn"
       );
+    }
+    for (const [key, stateDef] of Object.entries(import_stateMapping.STATE_MAPPING)) {
+      if (stateDef.isVirtual) {
+        await this.setObjectNotExistsAsync(`${stateDef.folder}.${key}`, {
+          type: "state",
+          common: {
+            name: stateDef.name,
+            type: stateDef.type,
+            role: stateDef.role,
+            read: true,
+            write: stateDef.write || false,
+            def: stateDef.def !== void 0 ? stateDef.def : null
+          },
+          native: {
+            luxWriteId: stateDef.luxWriteId || null,
+            dataSource: stateDef.dataSource || null
+          }
+        });
+      }
+    }
+    if (config.update_check_active === true) {
+      this.setTimeout(() => {
+        void (0, import_updateManager.checkFirmwareUpdate)(this);
+      }, 15e3);
+      const cronString = config.update_check_cron || "0 12 * * *";
+      try {
+        this.updateCronJob = schedule.scheduleJob(cronString, () => {
+          this.log.info("F\xFChre geplante Firmware-Update-Pr\xFCfung aus (Cron)...");
+          void (0, import_updateManager.checkFirmwareUpdate)(this);
+        });
+      } catch (err) {
+        this.log.error(`Fehler beim Einrichten des Firmware-Update-Crons (${cronString}): ${err.message}`);
+      }
     }
     this.pollingInterval = this.setInterval(async () => {
       try {
@@ -784,6 +822,9 @@ class Luxtronik2Controller extends utils.Adapter {
       if (this.zipCountdownInterval) {
         this.clearInterval(this.zipCountdownInterval);
       }
+      if (this.updateCronJob) {
+        this.updateCronJob.cancel();
+      }
       (0, import_backupManager.stopAutoBackup)(this);
       if (this.midnightTimer) {
         this.clearTimeout(this.midnightTimer);
@@ -814,6 +855,12 @@ class Luxtronik2Controller extends utils.Adapter {
       return;
     }
     if (state.ack) {
+      return;
+    }
+    if (id.endsWith("check_firmware") && state.val === true) {
+      this.log.info("Manuelle Firmware-Update-Pr\xFCfung durch Benutzer gestartet...");
+      void this.setState(id, false, true);
+      void (0, import_updateManager.checkFirmwareUpdate)(this);
       return;
     }
     if (id.startsWith(`${this.namespace}.Custom.`)) {

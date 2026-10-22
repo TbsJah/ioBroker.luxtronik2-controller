@@ -297,3 +297,45 @@ export async function checkAndSendOutageNotifications(
 
 	await sendNotification(adapter, msg);
 }
+
+/**
+ * Sendet eine Benachrichtigung über ein neues Firmware-Update (Glocke und/oder Telegram).
+ *
+ * @param adapter - Die erweiterte Adapter-Instanz.
+ * @param message - Der Nachrichtentext.
+ */
+export async function sendUpdateNotification(adapter: LuxtronikAdapter, message: string): Promise<void> {
+	const config = adapter.config as Record<string, any>;
+
+	// 1. ioBroker Notification Center (Glocke)
+	if (config.update_check_notification === true) {
+		if (typeof adapter.registerNotification === 'function') {
+			// Wir nutzen die bekannte Kategorie 'lwpError', damit ioBroker die Nachricht nicht verwirft
+			await adapter.registerNotification('luxtronik2-controller', 'lwpError', message);
+			writeLog('ioBroker-Benachrichtigung (Glocke) über neues Firmware-Update erstellt.', 'info');
+		} else {
+			writeLog('🚨 ioBroker Notification Center (Glocke) nicht verfügbar.', 'warn');
+		}
+	}
+
+	// 2. Telegram
+	const telegramInstance = config.telegram_instance;
+	const isTelegramActive =
+		config.update_check_telegram === true && typeof telegramInstance === 'string' && telegramInstance !== 'none';
+
+	if (isTelegramActive) {
+		const sendObj: Record<string, any> = { text: message };
+		const receiver = config.telegram_receiver?.trim();
+
+		if (receiver) {
+			if (/^-?\d+$/.test(receiver)) {
+				sendObj.chatId = Number(receiver);
+			} else {
+				sendObj.user = receiver;
+			}
+		}
+
+		adapter.sendTo(telegramInstance, 'send', sendObj);
+		writeLog(`Telegram-Benachrichtigung für Update an ${telegramInstance} gesendet.`, 'info');
+	}
+}

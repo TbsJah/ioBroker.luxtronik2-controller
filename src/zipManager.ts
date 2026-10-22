@@ -35,10 +35,10 @@ export type ZipConfig = Partial<Record<keyof typeof STATE_MAPPING, ioBroker.Stat
 /**
  * Schützt den Speicher durch Read-Before-Write direkt auf Rohwert-Ebene.
  *
- * @param adapter
- * @param key
- * @param luxId
- * @param rawValue
+ * @param adapter Die aktuelle Adapter-Instanz.
+ * @param key Der betroffene Datenpunkt-Schlüssel.
+ * @param luxId Die Luxtronik-ID.
+ * @param rawValue Der rohe Messwert.
  */
 async function safeRawWrite(
 	adapter: LuxtronikAdapter,
@@ -85,7 +85,7 @@ async function safeRawWrite(
 /**
  * Stoppt sowohl den Haupt-Timeout als auch das Countdown-Intervall der ZIP.
  *
- * @param adapter
+ * @param adapter Die aktuelle Adapter-Instanz.
  */
 function clearZipTimer(adapter: LuxtronikAdapter): void {
 	if (adapter.zipTimer) {
@@ -102,9 +102,9 @@ function clearZipTimer(adapter: LuxtronikAdapter): void {
 /**
  * Startet bzw. verlängert den Haupt-Timer und den sichtbaren Restlaufzeit-Countdown.
  *
- * @param adapter
- * @param durationSeconds
- * @param onTimeoutCallback
+ * @param adapter Die aktuelle Adapter-Instanz.
+ * @param durationSeconds Die Dauer in Sekunden.
+ * @param onTimeoutCallback Callback wenn der Timer abläuft.
  */
 async function startZipTimerAndCountdown(
 	adapter: LuxtronikAdapter,
@@ -144,7 +144,7 @@ async function startZipTimerAndCountdown(
 /**
  * Dynamically checks whether the current time is enabled for circulation according to the Luxtronik schedules.
  *
- * @param adapter
+ * @param adapter Die aktuelle Adapter-Instanz.
  */
 async function isZipAllowedBySchedule(adapter: LuxtronikAdapter): Promise<boolean> {
 	const config = adapter.config;
@@ -215,7 +215,7 @@ async function isZipAllowedBySchedule(adapter: LuxtronikAdapter): Promise<boolea
 /**
  * Restores the original circulation pump configuration from the saved cache.
  *
- * @param adapter
+ * @param adapter Die aktuelle Adapter-Instanz.
  */
 export async function restoreOriginalZipConfig(adapter: LuxtronikAdapter): Promise<void> {
 	if (!adapter.originalZipConfig) {
@@ -263,7 +263,7 @@ export async function restoreOriginalZipConfig(adapter: LuxtronikAdapter): Promi
 /**
  * Stops the active circulation pump macro and deaeration program across all modes.
  *
- * @param adapter
+ * @param adapter Die aktuelle Adapter-Instanz.
  */
 export async function stopZipAndDeaeration(adapter: LuxtronikAdapter): Promise<void> {
 	const mode = adapter.config.zip_control_mode || 'controller';
@@ -353,9 +353,9 @@ export async function stopZipAndDeaeration(adapter: LuxtronikAdapter): Promise<v
 /**
  * Activates the circulation pump (ZIP) via the selected control mode for a specified duration.
  *
- * @param adapter
- * @param id
- * @param durationSeconds
+ * @param adapter Die aktuelle Adapter-Instanz.
+ * @param id Die ID des Datenpunkts.
+ * @param durationSeconds Die Dauer in Sekunden.
  */
 export async function handleActivateZip(adapter: LuxtronikAdapter, id: string, durationSeconds: number): Promise<void> {
 	const mode = adapter.config.zip_control_mode || 'controller';
@@ -545,7 +545,7 @@ export async function handleActivateZip(adapter: LuxtronikAdapter, id: string, d
 /**
  * Abonniert die in der Konfiguration hinterlegten Bewegungsmelder (Foreign States).
  *
- * @param adapter
+ * @param adapter Die aktuelle Adapter-Instanz.
  */
 export function subscribeMotionSensors(adapter: LuxtronikAdapter): void {
 	const config = adapter.config;
@@ -564,9 +564,9 @@ export function subscribeMotionSensors(adapter: LuxtronikAdapter): void {
 /**
  * Prüft bei einem StateChange, ob ein abonnierter Bewegungsmelder ausgelöst hat.
  *
- * @param adapter
- * @param id
- * @param state
+ * @param adapter Die aktuelle Adapter-Instanz.
+ * @param id Die ID des Datenpunkts.
+ * @param state Der neue Status des Datenpunkts.
  */
 export async function checkAndHandleMotionSensor(
 	adapter: LuxtronikAdapter,
@@ -629,7 +629,7 @@ export async function checkAndHandleMotionSensor(
 /**
  * Deaktiviert die regulären Hardware-Timer der Zirkulationspumpe beim Adapter-Start.
  *
- * @param adapter
+ * @param adapter Die aktuelle Adapter-Instanz.
  */
 export async function disableHardwareZipTimer(adapter: LuxtronikAdapter): Promise<void> {
 	const config = adapter.config;

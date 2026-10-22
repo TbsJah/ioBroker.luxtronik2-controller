@@ -1,6 +1,7 @@
 /*
  * Created with @iobroker/create-adapter v3.1.5
  */
+import * as schedule from 'node-schedule';
 import * as utils from '@iobroker/adapter-core';
 import { handleZwangsheizen, handleZwangswarmwasser } from './actionHandlers';
 import { initAutoBackup, stopAutoBackup } from './backupManager';
@@ -91,6 +92,8 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 	public zipCountdownInterval?: ioBroker.Interval;
 	/** Target timestamp when the current ZIP run finishes */
 	public zipEndTime?: number;
+	/** Cron-Job Handle für die Firmware-Update-Prüfung */
+	public updateCronJob?: schedule.Job;
 	/**
 	 * Initializes a new instance of the Luxtronik2Controller class.
 	 *
@@ -232,7 +235,7 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 		await ensureAllObjectsExist(this);
 		await ensureCustomObjectsExist(this);
 		initAutoBackup(this);
-
+		await this.subscribeStatesAsync('Information.12_SystemInfo.check_firmware');
 		// Strikte "Opt-In" Prüfung beim Start
 		await this.setState(getDpPath('Regelung_Aktiv'), { val: config.regelung_aktiv === true, ack: true });
 
@@ -299,22 +302,44 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 			);
 		}
 
-		// --- FIRMWARE UPDATE TIMER ---
-		const updateIntervalHours = config.update_check_interval ? Number(config.update_check_interval) : 24;
+		for (const [key, stateDef] of Object.entries(STATE_MAPPING as Record<string, any>)) {
+			// Wenn der Punkt als virtuell markiert ist, legen wir ihn direkt beim Start an
+			if (stateDef.isVirtual) {
+				await this.setObjectNotExistsAsync(`${stateDef.folder}.${key}`, {
+					type: 'state',
+					common: {
+						name: stateDef.name,
+						type: stateDef.type as ioBroker.CommonType,
+						role: stateDef.role,
+						read: true,
+						write: stateDef.write || false,
+						def: stateDef.def !== undefined ? stateDef.def : null,
+					},
+					native: {
+						luxWriteId: stateDef.luxWriteId || null,
+						dataSource: stateDef.dataSource || null,
+					},
+				});
+			}
+		}
 
-		// Erste Prüfung 15 Sekunden nach Adapter-Start (damit die aktuelle Firmware bereits gelesen wurde)
+		// --- FIRMWARE UPDATE TIMER ---
 		if (config.update_check_active === true) {
+			// Erste Prüfung 15 Sekunden nach Adapter-Start (damit die aktuelle Firmware bereits gelesen wurde)
 			this.setTimeout(() => {
 				void checkFirmwareUpdate(this);
-
-				// Danach im gewählten Intervall prüfen
-				this.setInterval(
-					() => {
-						void checkFirmwareUpdate(this);
-					},
-					updateIntervalHours * 3600 * 1000,
-				);
 			}, 15000);
+
+			// Cronjob für regelmäßige Prüfungen einrichten
+			const cronString = config.update_check_cron || '0 12 * * *';
+			try {
+				this.updateCronJob = schedule.scheduleJob(cronString, () => {
+					this.log.info('Führe geplante Firmware-Update-Prüfung aus (Cron)...');
+					void checkFirmwareUpdate(this);
+				});
+			} catch (err: any) {
+				this.log.error(`Fehler beim Einrichten des Firmware-Update-Crons (${cronString}): ${err.message}`);
+			}
 		}
 
 		this.pollingInterval = this.setInterval(async () => {
@@ -1008,6 +1033,10 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 				this.clearInterval(this.zipCountdownInterval);
 			}
 
+			if (this.updateCronJob) {
+				this.updateCronJob.cancel();
+			}
+
 			stopAutoBackup(this);
 
 			if (this.midnightTimer) {
@@ -1045,6 +1074,17 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 		}
 
 		if (state.ack) {
+			return;
+		}
+
+		if (id.endsWith('check_firmware') && state.val === true) {
+			this.log.info('Manuelle Firmware-Update-Prüfung durch Benutzer gestartet...');
+
+			// Button direkt wieder auf false zurücksetzen, um Doppel-Trigger zu blockieren
+			void this.setState(id, false, true);
+
+			// Update-Prüfung starten
+			void checkFirmwareUpdate(this);
 			return;
 		}
 

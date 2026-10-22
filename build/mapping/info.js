@@ -1434,6 +1434,42 @@ const INFO_MAPPING = {
     modbus: { type: "coil", register: 1, configKey: "sync_modbus_coil_1" },
     def: false
   },
+  check_firmware: {
+    folder: "Information.12_SystemInfo",
+    name: { en: "Check for firmware update", de: "Manuell nach Firmware-Update suchen" },
+    role: "button",
+    type: "boolean",
+    isVirtual: true,
+    write: true,
+    def: false
+  },
+  firmware_available: {
+    folder: "Information.12_SystemInfo",
+    name: { en: "Available firmware version", de: "Verf\xFCgbare Firmware Version" },
+    role: "text",
+    type: "string",
+    isVirtual: true,
+    required: true,
+    def: ""
+  },
+  firmware_update_available: {
+    folder: "Information.12_SystemInfo",
+    name: { en: "Firmware update available", de: "Firmware Update verf\xFCgbar" },
+    role: "indicator.update",
+    type: "boolean",
+    isVirtual: true,
+    required: true,
+    def: false
+  },
+  firmware_changelog: {
+    folder: "Information.12_SystemInfo",
+    name: { en: "Firmware changelog", de: "Firmware Changelog" },
+    role: "text",
+    type: "string",
+    isVirtual: true,
+    required: true,
+    def: ""
+  },
   // ==========================================
   // NACHTRAG: Hardware-Feedback (Calculations)
   // ==========================================

@@ -1402,6 +1402,15 @@ export const INFO_MAPPING: Record<string, StateDefinition> = {
 		modbus: { type: 'coil', register: 1, configKey: 'sync_modbus_coil_1' },
 		def: false,
 	},
+	check_firmware: {
+		folder: 'Information.12_SystemInfo',
+		name: { en: 'Check for firmware update', de: 'Manuell nach Firmware-Update suchen' },
+		role: 'button',
+		type: 'boolean',
+		isVirtual: true,
+		write: true,
+		def: false,
+	},
 	firmware_available: {
 		folder: 'Information.12_SystemInfo',
 		name: { en: 'Available firmware version', de: 'Verfügbare Firmware Version' },

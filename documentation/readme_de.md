@@ -1,6 +1,6 @@
 ## Konfiguration der Adapter-Instanz
 
-Nach der Installation des Adapters öffnet sich die Konfigurationsoberfläche. Diese ist in 11 übersichtliche Reiter (Tabs) unterteilt, um die Einrichtung und Optimierung deiner Wärmepumpe so intuitiv wie möglich zu gestalten.
+Nach der Installation des Adapters öffnet sich die Konfigurationsoberfläche. Diese ist in übersichtliche Reiter (Tabs) unterteilt, um die Einrichtung und Optimierung deiner Wärmepumpe so intuitiv wie möglich zu gestalten.
 
 ---
 
@@ -171,7 +171,20 @@ Der Adapter überwacht kontinuierlich den **Fehlerspeicher**, den **Abschalt-Spe
 
 ---
 
-### 10. Reiter: Eigene Werte (Custom)
+### 10. Reiter: Updates (Firmware)
+
+Der Adapter kann automatisch das offizielle Alpha Innotec Download-Portal auf neue Firmware-Versionen für deine Wärmepumpe prüfen.
+
+- **Automatisch nach Firmware-Updates suchen:** Aktiviert die Hintergrundprüfung.
+- **Zeitplan für automatische Prüfung:** Ein frei definierbarer Cron-Job (Standard: `0 12 * * *` = Täglich um 12:00 Uhr).
+- **Telegram-Benachrichtigung bei neuem Update senden:** Informiert dich direkt via Telegram, sobald eine neue Version mitsamt Changelog bereitsteht.
+- **Manuelle Prüfung:** Über den neuen Button `Information.12_SystemInfo.check_firmware` im Objektbaum kann die Update-Prüfung jederzeit per Klick angestoßen werden.
+
+> 💡 **Hinweis:** Die gesammelten Ergebnisse (Verfügbare Version, Update-Indikator für Visualisierungen und die offiziellen Release Notes) legt der Adapter unter `Information.12_SystemInfo` ab.
+
+---
+
+### 11. Reiter: Eigene Werte (Custom)
 
 Deine Wärmepumpe liefert auf einem bestimmten Index einen speziellen Wert, der noch nicht im Standard-Mapping enthalten ist? In dieser Tabelle kannst du beliebige eigene Datenpunkte definieren, die automatisch im Ordner **`Custom`** angelegt werden:
 
@@ -184,7 +197,7 @@ Deine Wärmepumpe liefert auf einem bestimmten Index einen speziellen Wert, der 
 
 ---
 
-### 11. Reiter: Backup & Diagnose
+### 12. Reiter: Backup & Diagnose
 
 Über den internen Webserver der Luxtronik-Steuerung lassen sich detaillierte System-Logs (`.dta`-Dateien) herunterladen und am PC mit kostenlosen Werkzeugen wie **[OpenDTA](https://sourceforge.net/projects/opendta/)** grafisch analysieren.
 

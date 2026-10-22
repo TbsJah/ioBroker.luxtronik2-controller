@@ -1,6 +1,6 @@
 import * as https from 'node:https';
 import { writeLog } from './logger';
-import { sendTelegramNotification } from './notificationManager';
+import { sendUpdateNotification } from './notificationManager';
 import { getDpPath } from './stateMapping';
 import type { LuxtronikAdapter } from './types';
 
@@ -70,20 +70,46 @@ function isVersionNewer(availableVersion: string, currentVersion: string): boole
 }
 
 /**
- * Ruft eine URL per HTTP GET oder HEAD ab (ignoriert SSL-Fehler des AIT-Portals).
+ * Ruft eine URL per HTTP GET ab (ignoriert SSL-Fehler des AIT-Portals).
  *
  * @param url Die aufzurufende URL.
- * @param method Die HTTP-Methode (GET oder HEAD).
+ * @param abortAfterHeaders Ob die Verbindung nach Empfang der Header direkt abgebrochen werden soll.
+ * @param timeoutMs Timeout für die Anfrage in Millisekunden.
  * @returns Ein Promise mit den Headern und dem Body der Antwort.
  */
-function fetchUrl(url: string, method: 'GET' | 'HEAD' = 'GET'): Promise<{ headers: any; data: string }> {
+function fetchUrl(url: string, abortAfterHeaders = false, timeoutMs = 120000): Promise<{ headers: any; data: string }> {
 	return new Promise((resolve, reject) => {
-		const req = https.request(url, { method, agent: httpsAgent, timeout: 10000 }, res => {
+		const options = {
+			method: 'GET',
+			agent: httpsAgent,
+			timeout: timeoutMs, // Dynamischer Timeout statt hart codiert
+			headers: {
+				'User-Agent': 'ioBroker.luxtronik2-controller',
+				Accept: '*/*',
+			},
+		};
+
+		let wasAborted = false;
+
+		const req = https.request(url, options, res => {
+			if (abortAfterHeaders) {
+				wasAborted = true; // Markieren, dass wir den Abbruch selbst ausgelöst haben
+				resolve({ headers: res.headers, data: '' });
+				req.destroy();
+				return;
+			}
+
 			let body = '';
 			res.on('data', chunk => (body += chunk));
 			res.on('end', () => resolve({ headers: res.headers, data: body }));
 		});
-		req.on('error', err => reject(err));
+
+		req.on('error', err => {
+			// Ignoriere jegliche Netzwerk-Fehler, wenn wir den Abbruch selbst ausgelöst haben
+			if (!wasAborted) {
+				reject(err);
+			}
+		});
 		req.on('timeout', () => req.destroy(new Error('Timeout')));
 		req.end();
 	});
@@ -102,6 +128,10 @@ export async function checkFirmwareUpdate(adapter: LuxtronikAdapter): Promise<vo
 		return;
 	}
 
+	// Timeout aus der Konfig lesen (Standard 120 Sekunden)
+	const timeoutSeconds = config.update_check_timeout ? Number(config.update_check_timeout) : 120;
+	const timeoutMs = timeoutSeconds * 1000;
+
 	try {
 		const firmwareState = await adapter.getStateAsync(getDpPath('firmware'));
 		const currentFirmware = firmwareState && typeof firmwareState.val === 'string' ? firmwareState.val : null;
@@ -118,7 +148,7 @@ export async function checkFirmwareUpdate(adapter: LuxtronikAdapter): Promise<vo
 		}
 
 		// 1. Dateinamen aus den Headern der Download-URL abfragen
-		const response = await fetchUrl(`${DOWNLOAD_PORTAL_URL}${downloadId}`, 'HEAD');
+		const response = await fetchUrl(`${DOWNLOAD_PORTAL_URL}${downloadId}`, true, timeoutMs);
 		const contentDisposition = response.headers['content-disposition'] || '';
 
 		const filenameMatch = contentDisposition.match(/filename=(.+)/);
@@ -146,18 +176,28 @@ export async function checkFirmwareUpdate(adapter: LuxtronikAdapter): Promise<vo
 
 		if (isNewer) {
 			// 2. Changelog abfragen
-			const clResponse = await fetchUrl(`${CHANGELOG_URL}${downloadId}`);
+			const clResponse = await fetchUrl(`${CHANGELOG_URL}${downloadId}`, false, timeoutMs);
+			let cleanChangelog = 'Kein Changelog verfügbar.';
+
 			if (clResponse.data) {
 				await adapter.setState(getDpPath('firmware_changelog'), { val: clResponse.data, ack: true });
+
+				// HTML-Zeilenumbrüche für die Text-Benachrichtigung in echte Zeilenumbrüche (\n) umwandeln
+				cleanChangelog = clResponse.data.replace(/<br\s*\/?>/gi, '\n').trim();
 			}
 
 			writeLog(`Neues Firmware-Update verfügbar: ${availableVersion} (Aktuell: ${currentFirmware})`, 'info');
 
-			if (config.update_check_telegram === true && !wasAlreadyNotified) {
-				sendTelegramNotification(
+			if (!wasAlreadyNotified) {
+				writeLog('Sende Benachrichtigungen über neues Firmware-Update...', 'info');
+
+				// Changelog direkt mit in die Nachricht einbauen
+				await sendUpdateNotification(
 					adapter,
-					`Achtung: Für die Wärmepumpe steht ein neues Firmware-Update bereit!\n\nAktuell: ${currentFirmware}\nNeu: ${availableVersion}\n\nBitte das Changelog prüfen und das Update manuell über den USB-Stick installieren.`,
+					`Achtung: Für die Wärmepumpe steht ein neues Firmware-Update bereit!\n\nAktuell: ${currentFirmware}\nNeu: ${availableVersion}\n\nChangelog:\n${cleanChangelog}\n\nBitte das Update manuell über den USB-Stick installieren.`,
 				);
+			} else {
+				writeLog('Benachrichtigung übersprungen (für diese Version bereits erfolgt).', 'debug');
 			}
 		} else {
 			writeLog(`Firmware ist auf dem neuesten Stand (${currentFirmware}).`, 'debug');
