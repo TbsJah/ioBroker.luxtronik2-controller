@@ -381,6 +381,15 @@ export const INFO_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_value',
 		visiIndex: 49,
 	},
+	DefrostRequest: {
+		folder: 'Information.03_Outputs',
+		name: { en: 'Defrost request', de: 'Abtauwunsch' },
+		role: 'value',
+		type: 'number',
+		states: switchStates,
+		luxWriteId: '234',
+		dataSource: 'raw_value',
+	},
 	BUPout: {
 		folder: 'Information.03_Outputs',
 		name: 'Hot water charging pump BUP',

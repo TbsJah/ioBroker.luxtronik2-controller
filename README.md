@@ -92,6 +92,13 @@ You might see red error messages in the installation log related to `node-gyp`, 
 ## Changelog
 
 // ### **WORK IN PROGRESS**
+
+### **WORK IN PROGRESS**
+
+**🚀 Features & Enhancements**
+
+- **Defrost Request Datapoint:** Added `Information.03_Outputs.DefrostRequest` (Defrost request) to monitor the active defrosting request of the heat pump directly from the RAM telemetry (Index 234).
+
 ### 0.19.4 (2026-10-20)
 
 **🔧 Compatibility & Maintenance**
