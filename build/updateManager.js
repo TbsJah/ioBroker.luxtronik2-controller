@@ -83,7 +83,16 @@ function isVersionNewer(availableVersion, currentVersion) {
 }
 function fetchUrl(url, method = "GET") {
   return new Promise((resolve, reject) => {
-    const req = https.request(url, { method, agent: httpsAgent, timeout: 1e4 }, (res) => {
+    const options = {
+      method,
+      agent: httpsAgent,
+      timeout: 1e4,
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
+        Accept: "*/*"
+      }
+    };
+    const req = https.request(url, options, (res) => {
       let body = "";
       res.on("data", (chunk) => body += chunk);
       res.on("end", () => resolve({ headers: res.headers, data: body }));

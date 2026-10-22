@@ -232,7 +232,7 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 		await ensureAllObjectsExist(this);
 		await ensureCustomObjectsExist(this);
 		initAutoBackup(this);
-
+		await this.subscribeStatesAsync('Information.12_SystemInfo.check_firmware');
 		// Strikte "Opt-In" Prüfung beim Start
 		await this.setState(getDpPath('Regelung_Aktiv'), { val: config.regelung_aktiv === true, ack: true });
 
@@ -1066,6 +1066,12 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 		}
 
 		if (state.ack) {
+			return;
+		}
+
+		if (id.endsWith('check_firmware') && !state.ack && state.val === true) {
+			this.log.info('Manuelle Firmware-Update-Prüfung durch Benutzer gestartet...');
+			void checkFirmwareUpdate(this);
 			return;
 		}
 

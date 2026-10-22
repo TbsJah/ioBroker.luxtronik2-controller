@@ -189,6 +189,7 @@ class Luxtronik2Controller extends utils.Adapter {
     await (0, import_objectManager.ensureAllObjectsExist)(this);
     await (0, import_objectManager.ensureCustomObjectsExist)(this);
     (0, import_backupManager.initAutoBackup)(this);
+    await this.subscribeStatesAsync("Information.12_SystemInfo.check_firmware");
     await this.setState((0, import_stateMapping.getDpPath)("Regelung_Aktiv"), { val: config.regelung_aktiv === true, ack: true });
     const debugState = await this.getStateAsync((0, import_stateMapping.getDpPath)("Schreibe_Debug_Log"));
     this.isDebugLogActive = (debugState == null ? void 0 : debugState.val) === true;
@@ -846,6 +847,11 @@ class Luxtronik2Controller extends utils.Adapter {
       return;
     }
     if (state.ack) {
+      return;
+    }
+    if (id.endsWith("check_firmware") && !state.ack && state.val === true) {
+      this.log.info("Manuelle Firmware-Update-Pr\xFCfung durch Benutzer gestartet...");
+      void (0, import_updateManager.checkFirmwareUpdate)(this);
       return;
     }
     if (id.startsWith(`${this.namespace}.Custom.`)) {
