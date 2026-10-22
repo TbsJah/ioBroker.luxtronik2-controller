@@ -34,7 +34,7 @@ export const SETTINGS_MAPPING: Record<string, StateDefinition> = {
 	},
 	heating_curve_end_point: {
 		folder: 'Settings.02_Heating',
-		name: 'Heating curve end point (Return)',
+		name: { en: 'Heating curve end point (Return)', de: 'Heizen Endpunkt' },
 		role: 'level.temperature',
 		type: 'number',
 		unit: '°C',
@@ -47,7 +47,7 @@ export const SETTINGS_MAPPING: Record<string, StateDefinition> = {
 	},
 	heating_curve_parallel_offset: {
 		folder: 'Settings.02_Heating',
-		name: 'Heating curve parallel offset',
+		name: { en: 'Heating curve parallel offset', de: 'Heizen Fusspunkt' },
 		role: 'level.temperature',
 		type: 'number',
 		unit: '°C',
@@ -60,7 +60,7 @@ export const SETTINGS_MAPPING: Record<string, StateDefinition> = {
 	},
 	deltaHeatingReduction: {
 		folder: 'Settings.02_Heating',
-		name: 'Heating night reduction (Delta)',
+		name: { en: 'Heating night reduction (Delta)', de: 'Heizen Absenkung' },
 		role: 'level.temperature',
 		type: 'number',
 		unit: 'K',
@@ -71,19 +71,21 @@ export const SETTINGS_MAPPING: Record<string, StateDefinition> = {
 	},
 	heating_temperature: {
 		folder: 'Settings.02_Heating',
-		name: 'Heating target temp offset',
+		name: { en: 'Heating target temp offset', de: 'Heizen Parallelverschiebung' },
 		role: 'level.temperature',
 		type: 'number',
 		unit: '°C',
 		write: true,
 		luxWriteId: '1',
-		factor: 1,
+		factor: 10,
+		min: -5,
+		max: 5,
 		dataSource: 'raw_parameter',
 		modbus: { type: 'holding', register: 23, configKey: 'sync_modbus_holding_23' },
 	},
 	returnTemperatureHysteresis: {
 		folder: 'Settings.02_Heating',
-		name: 'Return temperature hysteresis',
+		name: { en: 'Return temperature hysteresis', de: 'Hysterese Heizen' },
 		role: 'level.temperature',
 		type: 'number',
 		unit: 'K',
@@ -95,7 +97,7 @@ export const SETTINGS_MAPPING: Record<string, StateDefinition> = {
 	},
 	thresholdHeatingLimit: {
 		folder: 'Settings.02_Heating',
-		name: 'Heating limit temperature',
+		name: { en: 'Heating limit temperature', de: 'Heizgrenze Temperatur' },
 		role: 'level.temperature',
 		type: 'number',
 		unit: '°C',
@@ -106,7 +108,7 @@ export const SETTINGS_MAPPING: Record<string, StateDefinition> = {
 	},
 	heatingLimit: {
 		folder: 'Settings.02_Heating',
-		name: 'Heating limit active',
+		name: { en: 'Heating limit active', de: 'Heizgrenze' },
 		role: 'switch',
 		type: 'boolean',
 		write: true,
@@ -115,7 +117,7 @@ export const SETTINGS_MAPPING: Record<string, StateDefinition> = {
 	},
 	Heizen_nach_Wasser: {
 		folder: 'Settings.02_Heating',
-		name: 'Heating by water active',
+		name: { en: 'Heating by water active', de: 'Heizen nach Wasser' },
 		role: 'sensor.switch',
 		type: 'boolean',
 		isVirtual: true,

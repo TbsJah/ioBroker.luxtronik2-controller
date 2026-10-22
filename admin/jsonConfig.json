@@ -292,7 +292,7 @@
 					"type": "checkbox",
 					"label": {
 						"en": "Heating curve end point (Return) (Holding 15)",
-						"de": "Heating curve end point (Return) (Holding 15)"
+						"de": "Heizen Endpunkt (Holding 15)"
 					},
 					"default": false,
 					"disabled": "!data.modbus_active",
@@ -306,7 +306,7 @@
 					"type": "checkbox",
 					"label": {
 						"en": "Heating curve parallel offset (Holding 16)",
-						"de": "Heating curve parallel offset (Holding 16)"
+						"de": "Heizen Fusspunkt (Holding 16)"
 					},
 					"default": false,
 					"disabled": "!data.modbus_active",
@@ -320,7 +320,7 @@
 					"type": "checkbox",
 					"label": {
 						"en": "Heating target temp offset (Holding 23)",
-						"de": "Heating target temp offset (Holding 23)"
+						"de": "Heizen Parallelverschiebung (Holding 23)"
 					},
 					"default": false,
 					"disabled": "!data.modbus_active",
@@ -4762,7 +4762,7 @@
 							"type": "checkbox",
 							"label": {
 								"en": "Heating curve end point (Return) (System critical)",
-								"de": "Heating curve end point (Return) (Systemrelevant)"
+								"de": "Heizen Endpunkt (Systemrelevant)"
 							},
 							"default": true,
 							"disabled": true,
@@ -4776,7 +4776,7 @@
 							"type": "checkbox",
 							"label": {
 								"en": "Heating curve parallel offset (System critical)",
-								"de": "Heating curve parallel offset (Systemrelevant)"
+								"de": "Heizen Fusspunkt (Systemrelevant)"
 							},
 							"default": true,
 							"disabled": true,
@@ -4790,7 +4790,7 @@
 							"type": "checkbox",
 							"label": {
 								"en": "Heating night reduction (Delta)",
-								"de": "Heating night reduction (Delta)"
+								"de": "Heizen Absenkung"
 							},
 							"default": true,
 							"disabled": "!data.sync_category_settings_02_heating",
@@ -4804,7 +4804,7 @@
 							"type": "checkbox",
 							"label": {
 								"en": "Heating target temp offset",
-								"de": "Heating target temp offset"
+								"de": "Heizen Parallelverschiebung"
 							},
 							"default": true,
 							"disabled": "!data.sync_category_settings_02_heating",
@@ -4818,7 +4818,7 @@
 							"type": "checkbox",
 							"label": {
 								"en": "Return temperature hysteresis (System critical)",
-								"de": "Return temperature hysteresis (Systemrelevant)"
+								"de": "Hysterese Heizen (Systemrelevant)"
 							},
 							"default": true,
 							"disabled": true,
@@ -4832,7 +4832,7 @@
 							"type": "checkbox",
 							"label": {
 								"en": "Heating limit temperature",
-								"de": "Heating limit temperature"
+								"de": "Heizgrenze Temperatur"
 							},
 							"default": true,
 							"disabled": "!data.sync_category_settings_02_heating",
@@ -4846,7 +4846,7 @@
 							"type": "checkbox",
 							"label": {
 								"en": "Heating limit active",
-								"de": "Heating limit active"
+								"de": "Heizgrenze"
 							},
 							"default": true,
 							"disabled": "!data.sync_category_settings_02_heating",
@@ -4860,7 +4860,7 @@
 							"type": "checkbox",
 							"label": {
 								"en": "Heating by water active (System critical)",
-								"de": "Heating by water active (Systemrelevant)"
+								"de": "Heizen nach Wasser (Systemrelevant)"
 							},
 							"default": true,
 							"disabled": true,
