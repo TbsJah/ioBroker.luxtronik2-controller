@@ -1,6 +1,6 @@
 import * as https from 'node:https';
 import { writeLog } from './logger';
-import { sendTelegramNotification } from './notificationManager';
+import { sendUpdateNotification } from './notificationManager';
 import { getDpPath } from './stateMapping';
 import type { LuxtronikAdapter } from './types';
 
@@ -180,13 +180,13 @@ export async function checkFirmwareUpdate(adapter: LuxtronikAdapter): Promise<vo
 
 			if (config.update_check_telegram === true) {
 				if (!wasAlreadyNotified) {
-					writeLog('Sende Telegram-Benachrichtigung über neues Firmware-Update...', 'info');
-					sendTelegramNotification(
+					writeLog('Sende Benachrichtigungen über neues Firmware-Update...', 'info');
+					await sendUpdateNotification(
 						adapter,
 						`Achtung: Für die Wärmepumpe steht ein neues Firmware-Update bereit!\n\nAktuell: ${currentFirmware}\nNeu: ${availableVersion}\n\nBitte das Changelog prüfen und das Update manuell über den USB-Stick installieren.`,
 					);
 				} else {
-					writeLog('Telegram-Benachrichtigung übersprungen (für diese Version bereits erfolgt).', 'debug');
+					writeLog('Benachrichtigung übersprungen (für diese Version bereits erfolgt).', 'debug');
 				}
 			} else {
 				writeLog('Telegram-Benachrichtigung in der Konfiguration deaktiviert.', 'debug');

@@ -10974,7 +10974,7 @@
 				"en": "Updates",
 				"de": "Updates"
 			},
-			"icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMjQgMjQiPgoJPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIgLz4KCTxwYXRoIGZpbGw9ImN1cnJlbnRDb2xvciIgZD0ibTE4IDIybDMtM2wtLjctLjdsLTEuOCAxLjhWMTZoLTF2NC4xbC0xLjgtMS44bC0uNy43ek0xMiA0TDYuMDc1IDcuNDI1TDEyIDEwLjg1bDUuOTI1LTMuNDI1ek0zIDE1Ljk3NXYtNy45NXEwLS41NS4yNjMtMVQ0IDYuM2w3LTQuMDI1cS4yNS0uMTI1LjQ4OC0uMlQxMiAydC41MjUuMDc1dC40NzUuMkwyMCA2LjNxLjQ3NS4yNzUuNzM4LjcyNXQuMjYyIDFWMTJoLTJWOS4xbC03LjAyNSA0LjA1TDUgOS4xdjYuODVsNiAzLjQ3NXYyLjNMNCAxNy43cS0uNDc1LS4yNzUtLjczNy0uNzI1dC0uMjYzLTFtMTEuNDYzIDYuNTYzUTEzIDIxLjA3NSAxMyAxOXQxLjQ2My0zLjUzN1QxOCAxNHQzLjUzOCAxLjQ2M1QyMyAxOXQtMS40NjMgMy41MzhUMTggMjR0LTMuNTM3LTEuNDYzTTEyIDExLjcyNiIgLz4KPC9zdmc+Cg==",
+			"icon": "system_update",
 			"items": {
 				"update_check_active": {
 					"type": "checkbox",
@@ -10994,14 +10994,51 @@
 					"default": "0 12 * * *",
 					"hidden": "!data.update_check_active"
 				},
+				"divider_notifications": {
+					"type": "divider",
+					"color": "primary",
+					"hidden": "!data.update_check_active",
+					"style": {
+						"marginBottom": "15px",
+						"marginTop": "15px"
+					},
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
+				"headerNotifications": {
+					"type": "header",
+					"text": {
+						"en": "Notification channels for new updates",
+						"de": "Benachrichtigungswege bei neuen Updates"
+					},
+					"size": 5,
+					"hidden": "!data.update_check_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
 				"update_check_telegram": {
 					"type": "checkbox",
 					"label": {
-						"en": "Send Telegram notification on new update",
-						"de": "Telegram-Benachrichtigung bei neuem Update senden"
+						"en": "Send Telegram message",
+						"de": "Telegram-Nachricht senden"
 					},
 					"default": false,
-					"hidden": "!data.update_check_active || !data.telegram_active"
+					"hidden": "!data.update_check_active"
+				},
+				"update_check_notification": {
+					"type": "checkbox",
+					"label": {
+						"en": "Show as ioBroker notification (Bell)",
+						"de": "Als ioBroker-Benachrichtigung (Glocke) zeigen"
+					},
+					"default": false,
+					"hidden": "!data.update_check_active"
 				}
 			}
 		},

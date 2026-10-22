@@ -158,8 +158,8 @@ async function checkFirmwareUpdate(adapter) {
       (0, import_logger.writeLog)(`Neues Firmware-Update verf\xFCgbar: ${availableVersion} (Aktuell: ${currentFirmware})`, "info");
       if (config.update_check_telegram === true) {
         if (!wasAlreadyNotified) {
-          (0, import_logger.writeLog)("Sende Telegram-Benachrichtigung \xFCber neues Firmware-Update...", "info");
-          (0, import_notificationManager.sendTelegramNotification)(
+          (0, import_logger.writeLog)("Sende Benachrichtigungen \xFCber neues Firmware-Update...", "info");
+          await (0, import_notificationManager.sendUpdateNotification)(
             adapter,
             `Achtung: F\xFCr die W\xE4rmepumpe steht ein neues Firmware-Update bereit!
 
@@ -169,7 +169,7 @@ Neu: ${availableVersion}
 Bitte das Changelog pr\xFCfen und das Update manuell \xFCber den USB-Stick installieren.`
           );
         } else {
-          (0, import_logger.writeLog)("Telegram-Benachrichtigung \xFCbersprungen (f\xFCr diese Version bereits erfolgt).", "debug");
+          (0, import_logger.writeLog)("Benachrichtigung \xFCbersprungen (f\xFCr diese Version bereits erfolgt).", "debug");
         }
       } else {
         (0, import_logger.writeLog)("Telegram-Benachrichtigung in der Konfiguration deaktiviert.", "debug");
