@@ -849,8 +849,9 @@ class Luxtronik2Controller extends utils.Adapter {
     if (state.ack) {
       return;
     }
-    if (id.endsWith("check_firmware") && !state.ack && state.val === true) {
+    if (id.endsWith("check_firmware") && state.val === true) {
       this.log.info("Manuelle Firmware-Update-Pr\xFCfung durch Benutzer gestartet...");
+      void this.setState(id, false, true);
       void (0, import_updateManager.checkFirmwareUpdate)(this);
       return;
     }

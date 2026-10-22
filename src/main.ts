@@ -1069,8 +1069,13 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 			return;
 		}
 
-		if (id.endsWith('check_firmware') && !state.ack && state.val === true) {
+		if (id.endsWith('check_firmware') && state.val === true) {
 			this.log.info('Manuelle Firmware-Update-Prüfung durch Benutzer gestartet...');
+
+			// Button direkt wieder auf false zurücksetzen, um Doppel-Trigger zu blockieren
+			void this.setState(id, false, true);
+
+			// Update-Prüfung starten
 			void checkFirmwareUpdate(this);
 			return;
 		}
