@@ -390,6 +390,15 @@ export const INFO_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: '234',
 		dataSource: 'raw_value',
 	},
+	DefrostRequest2: {
+		folder: 'Information.03_Outputs',
+		name: { en: 'Defrost request 2', de: 'Abtauwunsch 2' },
+		role: 'value',
+		type: 'number',
+		states: switchStates,
+		luxWriteId: '235',
+		dataSource: 'raw_value',
+	},
 	BUPout: {
 		folder: 'Information.03_Outputs',
 		name: 'Hot water charging pump BUP',
