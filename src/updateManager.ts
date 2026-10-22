@@ -70,31 +70,40 @@ function isVersionNewer(availableVersion: string, currentVersion: string): boole
 }
 
 /**
- * Ruft eine URL per HTTP GET oder HEAD ab (ignoriert SSL-Fehler des AIT-Portals).
+ * Ruft eine URL per HTTP GET ab (ignoriert SSL-Fehler des AIT-Portals).
  *
  * @param url Die aufzurufende URL.
- * @param method Die HTTP-Methode (GET oder HEAD).
+ * @param abortAfterHeaders Ob die Verbindung nach Empfang der Header direkt abgebrochen werden soll.
  * @returns Ein Promise mit den Headern und dem Body der Antwort.
  */
-function fetchUrl(url: string, method: 'GET' | 'HEAD' = 'GET'): Promise<{ headers: any; data: string }> {
+function fetchUrl(url: string, abortAfterHeaders = false): Promise<{ headers: any; data: string }> {
 	return new Promise((resolve, reject) => {
 		const options = {
-			method,
+			method: 'GET',
 			agent: httpsAgent,
-			timeout: 120000,
+			timeout: 120000, // Auf 120 Sekunden erhöht wegen langsamem AIT-Server
 			headers: {
-				'User-Agent':
-					'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
+				'User-Agent': 'ioBroker.luxtronik2-controller',
 				Accept: '*/*',
 			},
 		};
 
 		const req = https.request(url, options, res => {
+			if (abortAfterHeaders) {
+				resolve({ headers: res.headers, data: '' });
+				req.destroy();
+				return;
+			}
+
 			let body = '';
 			res.on('data', chunk => (body += chunk));
 			res.on('end', () => resolve({ headers: res.headers, data: body }));
 		});
-		req.on('error', err => reject(err));
+		req.on('error', err => {
+			if (err.message !== 'socket hang up') {
+				reject(err);
+			}
+		});
 		req.on('timeout', () => req.destroy(new Error('Timeout')));
 		req.end();
 	});
@@ -129,7 +138,7 @@ export async function checkFirmwareUpdate(adapter: LuxtronikAdapter): Promise<vo
 		}
 
 		// 1. Dateinamen aus den Headern der Download-URL abfragen
-		const response = await fetchUrl(`${DOWNLOAD_PORTAL_URL}${downloadId}`, 'HEAD');
+		const response = await fetchUrl(`${DOWNLOAD_PORTAL_URL}${downloadId}`, true);
 		const contentDisposition = response.headers['content-disposition'] || '';
 
 		const filenameMatch = contentDisposition.match(/filename=(.+)/);
@@ -157,18 +166,25 @@ export async function checkFirmwareUpdate(adapter: LuxtronikAdapter): Promise<vo
 
 		if (isNewer) {
 			// 2. Changelog abfragen
-			const clResponse = await fetchUrl(`${CHANGELOG_URL}${downloadId}`);
+			const clResponse = await fetchUrl(`${CHANGELOG_URL}${downloadId}`, false);
 			if (clResponse.data) {
 				await adapter.setState(getDpPath('firmware_changelog'), { val: clResponse.data, ack: true });
 			}
 
 			writeLog(`Neues Firmware-Update verfügbar: ${availableVersion} (Aktuell: ${currentFirmware})`, 'info');
 
-			if (config.update_check_telegram === true && !wasAlreadyNotified) {
-				sendTelegramNotification(
-					adapter,
-					`Achtung: Für die Wärmepumpe steht ein neues Firmware-Update bereit!\n\nAktuell: ${currentFirmware}\nNeu: ${availableVersion}\n\nBitte das Changelog prüfen und das Update manuell über den USB-Stick installieren.`,
-				);
+			if (config.update_check_telegram === true) {
+				if (!wasAlreadyNotified) {
+					writeLog('Sende Telegram-Benachrichtigung über neues Firmware-Update...', 'info');
+					sendTelegramNotification(
+						adapter,
+						`Achtung: Für die Wärmepumpe steht ein neues Firmware-Update bereit!\n\nAktuell: ${currentFirmware}\nNeu: ${availableVersion}\n\nBitte das Changelog prüfen und das Update manuell über den USB-Stick installieren.`,
+					);
+				} else {
+					writeLog('Telegram-Benachrichtigung übersprungen (für diese Version bereits erfolgt).', 'debug');
+				}
+			} else {
+				writeLog('Telegram-Benachrichtigung in der Konfiguration deaktiviert.', 'debug');
 			}
 		} else {
 			writeLog(`Firmware ist auf dem neuesten Stand (${currentFirmware}).`, 'debug');

@@ -81,23 +81,33 @@ function isVersionNewer(availableVersion, currentVersion) {
   }
   return false;
 }
-function fetchUrl(url, method = "GET") {
+function fetchUrl(url, abortAfterHeaders = false) {
   return new Promise((resolve, reject) => {
     const options = {
-      method,
+      method: "GET",
       agent: httpsAgent,
       timeout: 12e4,
+      // Auf 120 Sekunden erhöht wegen langsamem AIT-Server
       headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
+        "User-Agent": "ioBroker.luxtronik2-controller",
         Accept: "*/*"
       }
     };
     const req = https.request(url, options, (res) => {
+      if (abortAfterHeaders) {
+        resolve({ headers: res.headers, data: "" });
+        req.destroy();
+        return;
+      }
       let body = "";
       res.on("data", (chunk) => body += chunk);
       res.on("end", () => resolve({ headers: res.headers, data: body }));
     });
-    req.on("error", (err) => reject(err));
+    req.on("error", (err) => {
+      if (err.message !== "socket hang up") {
+        reject(err);
+      }
+    });
     req.on("timeout", () => req.destroy(new Error("Timeout")));
     req.end();
   });
@@ -119,7 +129,7 @@ async function checkFirmwareUpdate(adapter) {
       (0, import_logger.writeLog)(`Update-Pr\xFCfung abgebrochen: Unbekannter Firmware-Typ (${currentFirmware}).`, "debug");
       return;
     }
-    const response = await fetchUrl(`${DOWNLOAD_PORTAL_URL}${downloadId}`, "HEAD");
+    const response = await fetchUrl(`${DOWNLOAD_PORTAL_URL}${downloadId}`, true);
     const contentDisposition = response.headers["content-disposition"] || "";
     const filenameMatch = contentDisposition.match(/filename=(.+)/);
     if (!filenameMatch) {
@@ -139,21 +149,28 @@ async function checkFirmwareUpdate(adapter) {
     const wasAlreadyNotified = (oldUpdateState == null ? void 0 : oldUpdateState.val) === true;
     await adapter.setState(updateStateDp, { val: isNewer, ack: true });
     if (isNewer) {
-      const clResponse = await fetchUrl(`${CHANGELOG_URL}${downloadId}`);
+      const clResponse = await fetchUrl(`${CHANGELOG_URL}${downloadId}`, false);
       if (clResponse.data) {
         await adapter.setState((0, import_stateMapping.getDpPath)("firmware_changelog"), { val: clResponse.data, ack: true });
       }
       (0, import_logger.writeLog)(`Neues Firmware-Update verf\xFCgbar: ${availableVersion} (Aktuell: ${currentFirmware})`, "info");
-      if (config.update_check_telegram === true && !wasAlreadyNotified) {
-        (0, import_notificationManager.sendTelegramNotification)(
-          adapter,
-          `Achtung: F\xFCr die W\xE4rmepumpe steht ein neues Firmware-Update bereit!
+      if (config.update_check_telegram === true) {
+        if (!wasAlreadyNotified) {
+          (0, import_logger.writeLog)("Sende Telegram-Benachrichtigung \xFCber neues Firmware-Update...", "info");
+          (0, import_notificationManager.sendTelegramNotification)(
+            adapter,
+            `Achtung: F\xFCr die W\xE4rmepumpe steht ein neues Firmware-Update bereit!
 
 Aktuell: ${currentFirmware}
 Neu: ${availableVersion}
 
 Bitte das Changelog pr\xFCfen und das Update manuell \xFCber den USB-Stick installieren.`
-        );
+          );
+        } else {
+          (0, import_logger.writeLog)("Telegram-Benachrichtigung \xFCbersprungen (f\xFCr diese Version bereits erfolgt).", "debug");
+        }
+      } else {
+        (0, import_logger.writeLog)("Telegram-Benachrichtigung in der Konfiguration deaktiviert.", "debug");
       }
     } else {
       (0, import_logger.writeLog)(`Firmware ist auf dem neuesten Stand (${currentFirmware}).`, "debug");
