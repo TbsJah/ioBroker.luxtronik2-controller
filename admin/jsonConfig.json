@@ -810,10 +810,7 @@
 						"fusspunkt": "${data.fusspunkt}",
 						"endpunkt": "${data.endpunkt}"
 					},
-					"alsoDependsOn": [
-						"fusspunkt",
-						"endpunkt"
-					],
+					"alsoDependsOn": ["fusspunkt", "endpunkt"],
 					"style": {
 						"maxWidth": "800px",
 						"marginTop": "20px",
@@ -10909,6 +10906,48 @@
 					"md": 3,
 					"lg": 3,
 					"xl": 3
+				}
+			}
+		},
+		"tab_updates": {
+			"type": "panel",
+			"label": {
+				"en": "Updates",
+				"de": "Updates"
+			},
+			"icon": "system_update",
+			"items": {
+				"update_check_active": {
+					"type": "checkbox",
+					"label": {
+						"en": "Check for firmware updates automatically",
+						"de": "Automatisch nach Firmware-Updates suchen"
+					},
+					"newLine": true,
+					"default": false
+				},
+				"update_check_interval": {
+					"type": "select",
+					"label": {
+						"en": "Update check interval",
+						"de": "Prüfintervall"
+					},
+					"options": [
+						{ "label": "12 Hours", "value": 12 },
+						{ "label": "24 Hours", "value": 24 },
+						{ "label": "7 Days", "value": 168 }
+					],
+					"default": 24,
+					"hidden": "!data.update_check_active"
+				},
+				"update_check_telegram": {
+					"type": "checkbox",
+					"label": {
+						"en": "Send Telegram notification on new update",
+						"de": "Telegram-Benachrichtigung bei neuem Update senden"
+					},
+					"default": false,
+					"hidden": "!data.update_check_active || !data.telegram_active"
 				}
 			}
 		},

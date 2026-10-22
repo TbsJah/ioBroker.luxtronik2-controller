@@ -1402,6 +1402,33 @@ export const INFO_MAPPING: Record<string, StateDefinition> = {
 		modbus: { type: 'coil', register: 1, configKey: 'sync_modbus_coil_1' },
 		def: false,
 	},
+	firmware_available: {
+		folder: 'Information.12_SystemInfo',
+		name: { en: 'Available firmware version', de: 'Verfügbare Firmware Version' },
+		role: 'text',
+		type: 'string',
+		isVirtual: true,
+		required: true,
+		def: '',
+	},
+	firmware_update_available: {
+		folder: 'Information.12_SystemInfo',
+		name: { en: 'Firmware update available', de: 'Firmware Update verfügbar' },
+		role: 'indicator.update',
+		type: 'boolean',
+		isVirtual: true,
+		required: true,
+		def: false,
+	},
+	firmware_changelog: {
+		folder: 'Information.12_SystemInfo',
+		name: { en: 'Firmware changelog', de: 'Firmware Changelog' },
+		role: 'text',
+		type: 'string',
+		isVirtual: true,
+		required: true,
+		def: '',
+	},
 	// ==========================================
 	// NACHTRAG: Hardware-Feedback (Calculations)
 	// ==========================================
