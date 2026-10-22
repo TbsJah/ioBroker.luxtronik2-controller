@@ -92,6 +92,15 @@ You might see red error messages in the installation log related to `node-gyp`, 
 ## Changelog
 
 // ### **WORK IN PROGRESS**
+
+### **WORK IN PROGRESS**
+
+**🚀 Features & Enhancements**
+
+- **Automatic Firmware Update Check:** Added a background service to automatically check the official AIT download portal for new heat pump firmware updates.
+- **Update Notifications:** Added a new configuration tab to set custom update check intervals (12h, 24h, 7d) and enable optional Telegram notifications when a new firmware version is released.
+- **New Update Datapoints:** Added `firmware_available`, `firmware_update_available`, and `firmware_changelog` to the system info tree to directly expose update states and release notes in ioBroker.
+
 ### 0.19.6 (2026-10-22)
 
 **🚀 Features & Enhancements**

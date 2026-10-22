@@ -27,6 +27,7 @@ import { dumpAllRawToLog, queueWrite, readAllRaw } from './rawFunctions';
 import { STATE_MAPPING, getDpPath } from './stateMapping';
 import { generateHeatCurveSVG } from './svgGenerator';
 import type { LuxtronikAdapter } from './types';
+import { checkFirmwareUpdate } from './updateManager';
 import {
 	calculateTemperatureSpread,
 	calculateTotalEnergy,
@@ -296,6 +297,24 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 				'Configured polling interval exceeded maximum boundary. Restricted to 3600 seconds to prevent overflow issues.',
 				'warn',
 			);
+		}
+
+		// --- FIRMWARE UPDATE TIMER ---
+		const updateIntervalHours = config.update_check_interval ? Number(config.update_check_interval) : 24;
+
+		// Erste Prüfung 15 Sekunden nach Adapter-Start (damit die aktuelle Firmware bereits gelesen wurde)
+		if (config.update_check_active === true) {
+			this.setTimeout(() => {
+				void checkFirmwareUpdate(this);
+
+				// Danach im gewählten Intervall prüfen
+				this.setInterval(
+					() => {
+						void checkFirmwareUpdate(this);
+					},
+					updateIntervalHours * 3600 * 1000,
+				);
+			}, 15000);
 		}
 
 		this.pollingInterval = this.setInterval(async () => {
