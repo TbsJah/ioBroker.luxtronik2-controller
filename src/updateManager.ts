@@ -177,24 +177,27 @@ export async function checkFirmwareUpdate(adapter: LuxtronikAdapter): Promise<vo
 		if (isNewer) {
 			// 2. Changelog abfragen
 			const clResponse = await fetchUrl(`${CHANGELOG_URL}${downloadId}`, false, timeoutMs);
+			let cleanChangelog = 'Kein Changelog verfügbar.';
+
 			if (clResponse.data) {
 				await adapter.setState(getDpPath('firmware_changelog'), { val: clResponse.data, ack: true });
+
+				// HTML-Zeilenumbrüche für die Text-Benachrichtigung in echte Zeilenumbrüche (\n) umwandeln
+				cleanChangelog = clResponse.data.replace(/<br\s*\/?>/gi, '\n').trim();
 			}
 
 			writeLog(`Neues Firmware-Update verfügbar: ${availableVersion} (Aktuell: ${currentFirmware})`, 'info');
 
-			if (config.update_check_telegram === true) {
-				if (!wasAlreadyNotified) {
-					writeLog('Sende Benachrichtigungen über neues Firmware-Update...', 'info');
-					await sendUpdateNotification(
-						adapter,
-						`Achtung: Für die Wärmepumpe steht ein neues Firmware-Update bereit!\n\nAktuell: ${currentFirmware}\nNeu: ${availableVersion}\n\nBitte das Changelog prüfen und das Update manuell über den USB-Stick installieren.`,
-					);
-				} else {
-					writeLog('Benachrichtigung übersprungen (für diese Version bereits erfolgt).', 'debug');
-				}
+			if (!wasAlreadyNotified) {
+				writeLog('Sende Benachrichtigungen über neues Firmware-Update...', 'info');
+
+				// Changelog direkt mit in die Nachricht einbauen
+				await sendUpdateNotification(
+					adapter,
+					`Achtung: Für die Wärmepumpe steht ein neues Firmware-Update bereit!\n\nAktuell: ${currentFirmware}\nNeu: ${availableVersion}\n\nChangelog:\n${cleanChangelog}\n\nBitte das Update manuell über den USB-Stick installieren.`,
+				);
 			} else {
-				writeLog('Telegram-Benachrichtigung in der Konfiguration deaktiviert.', 'debug');
+				writeLog('Benachrichtigung übersprungen (für diese Version bereits erfolgt).', 'debug');
 			}
 		} else {
 			writeLog(`Firmware ist auf dem neuesten Stand (${currentFirmware}).`, 'debug');

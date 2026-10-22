@@ -154,27 +154,28 @@ async function checkFirmwareUpdate(adapter) {
     await adapter.setState(updateStateDp, { val: isNewer, ack: true });
     if (isNewer) {
       const clResponse = await fetchUrl(`${CHANGELOG_URL}${downloadId}`, false, timeoutMs);
+      let cleanChangelog = "Kein Changelog verf\xFCgbar.";
       if (clResponse.data) {
         await adapter.setState((0, import_stateMapping.getDpPath)("firmware_changelog"), { val: clResponse.data, ack: true });
+        cleanChangelog = clResponse.data.replace(/<br\s*\/?>/gi, "\n").trim();
       }
       (0, import_logger.writeLog)(`Neues Firmware-Update verf\xFCgbar: ${availableVersion} (Aktuell: ${currentFirmware})`, "info");
-      if (config.update_check_telegram === true) {
-        if (!wasAlreadyNotified) {
-          (0, import_logger.writeLog)("Sende Benachrichtigungen \xFCber neues Firmware-Update...", "info");
-          await (0, import_notificationManager.sendUpdateNotification)(
-            adapter,
-            `Achtung: F\xFCr die W\xE4rmepumpe steht ein neues Firmware-Update bereit!
+      if (!wasAlreadyNotified) {
+        (0, import_logger.writeLog)("Sende Benachrichtigungen \xFCber neues Firmware-Update...", "info");
+        await (0, import_notificationManager.sendUpdateNotification)(
+          adapter,
+          `Achtung: F\xFCr die W\xE4rmepumpe steht ein neues Firmware-Update bereit!
 
 Aktuell: ${currentFirmware}
 Neu: ${availableVersion}
 
-Bitte das Changelog pr\xFCfen und das Update manuell \xFCber den USB-Stick installieren.`
-          );
-        } else {
-          (0, import_logger.writeLog)("Benachrichtigung \xFCbersprungen (f\xFCr diese Version bereits erfolgt).", "debug");
-        }
+Changelog:
+${cleanChangelog}
+
+Bitte das Update manuell \xFCber den USB-Stick installieren.`
+        );
       } else {
-        (0, import_logger.writeLog)("Telegram-Benachrichtigung in der Konfiguration deaktiviert.", "debug");
+        (0, import_logger.writeLog)("Benachrichtigung \xFCbersprungen (f\xFCr diese Version bereits erfolgt).", "debug");
       }
     } else {
       (0, import_logger.writeLog)(`Firmware ist auf dem neuesten Stand (${currentFirmware}).`, "debug");

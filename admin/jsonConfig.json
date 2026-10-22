@@ -11002,7 +11002,7 @@
 					},
 					"default": 120,
 					"min": 10,
-					"max": 300,
+					"max": 600,
 					"hidden": "!data.update_check_active"
 				},
 				"update_timeout_info": {

@@ -1036,7 +1036,7 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 			if (this.updateCronJob) {
 				this.updateCronJob.cancel();
 			}
-			
+
 			stopAutoBackup(this);
 
 			if (this.midnightTimer) {
