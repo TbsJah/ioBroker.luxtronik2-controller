@@ -1,6 +1,6 @@
 ## Adapter Instance Configuration
 
-After installing the adapter, the configuration interface opens. It is organized into 11 structured tabs to make setting up and optimizing your heat pump as intuitive and clear as possible.
+After installing the adapter, the configuration interface opens. It is organized into structured tabs to make setting up and optimizing your heat pump as intuitive and clear as possible.
 
 ---
 
@@ -171,7 +171,20 @@ Monitors the **error log**, **outage log** (detecting heat pump alarms and **wat
 
 ---
 
-### 10. Tab: Custom Values (Custom)
+### 10. Tab: Updates (Firmware)
+
+The adapter can automatically check the official Alpha Innotec download portal for new firmware versions for your heat pump.
+
+- **Check for firmware updates automatically:** Enables the background check.
+- **Update check schedule:** A freely definable cron job (Default: `0 12 * * *` = Daily at 12:00 PM).
+- **Send Telegram notification on new update:** Informs you directly via Telegram as soon as a new version including the changelog is available.
+- **Manual check:** You can trigger the update check manually at any time using the new `Information.12_SystemInfo.check_firmware` button in the object tree.
+
+> 💡 **Note:** The collected results (available version, update indicator for visualizations, and the official release notes) are stored by the adapter under `Information.12_SystemInfo`.
+
+---
+
+### 11. Tab: Custom Values (Custom)
 
 If your heat pump exposes unique sensor indices not covered in standard mappings, define custom objects stored under the **`Custom`** tree:
 
@@ -184,7 +197,7 @@ If your heat pump exposes unique sensor indices not covered in standard mappings
 
 ---
 
-### 11. Tab: Backup & Diagnostics
+### 12. Tab: Backup & Diagnostics
 
 Download system log archives (`.dta` files) directly from the heat pump web server and analyze them graphically on your PC using tools such as **[OpenDTA](https://sourceforge.net/projects/opendta/)**.
 
