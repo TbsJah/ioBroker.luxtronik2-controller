@@ -23,6 +23,23 @@
 ### 0.1.0 (2026-07-09)
 
 - initial release
+## 0.19.0 (2026-10-19)
+
+**🚀 Features & UX Improvements**
+
+- **Hybrid Modbus TCP Support:** Introduced hybrid Modbus TCP support (`modbus-serial`) to write volatile parameters (e.g., target temperatures, heating curves, and coils/switches) directly into the Luxtronik RAM without causing EEPROM/flash memory wear, while continuing to read full telemetry via native port 8889/8214.
+- **Smart ZIP Configuration:** Completely redesigned the Circulation Pump (ZIP) tab in the Admin UI. Introduced a dynamic dropdown (`zip_control_mode`) to intuitively switch between Internal Controller, External Actor (e.g., Shelly), and Modbus TCP (Coil 7), automatically hiding irrelevant settings to prevent misconfigurations.
+- **ZIP Countdown Timer:** Added a new virtual datapoint (`Information.03_Outputs.Virtual_ZIP_Remaining_Time`) that displays the remaining runtime of the active circulation pump cycle in seconds.
+- **Seamless Migration:** Implemented an automatic background migration routine to seamlessly upgrade existing user configurations to the new ZIP control logic without data loss.
+
+**🐛 Bugfixes**
+
+- **Telegram Notifications UI:** Fixed a logic issue in `jsonConfig.json` where the Telegram warning message was incorrectly displayed even when instances were installed and available, and fixed the broken icon on the test button.
+
+**📝 Documentation**
+
+- **ARM Installation Notes:** Added a troubleshooting note to the README clarifying that `usocket`, `serialport`, and `node-gyp` compilation errors on Raspberry Pi / ARM systems originate from optional serial dependencies and can be safely ignored.
+
 ## 0.18.2 (2026-10-17)
 
 **🔧 Maintenance & Repository Compliance**
