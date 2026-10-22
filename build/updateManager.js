@@ -81,13 +81,13 @@ function isVersionNewer(availableVersion, currentVersion) {
   }
   return false;
 }
-function fetchUrl(url, abortAfterHeaders = false) {
+function fetchUrl(url, abortAfterHeaders = false, timeoutMs = 12e4) {
   return new Promise((resolve, reject) => {
     const options = {
       method: "GET",
       agent: httpsAgent,
-      timeout: 12e4,
-      // Auf 120 Sekunden erhöht wegen langsamem AIT-Server
+      timeout: timeoutMs,
+      // Dynamischer Timeout statt hart codiert
       headers: {
         "User-Agent": "ioBroker.luxtronik2-controller",
         Accept: "*/*"
@@ -119,6 +119,8 @@ async function checkFirmwareUpdate(adapter) {
   if (config.update_check_active !== true) {
     return;
   }
+  const timeoutSeconds = config.update_check_timeout ? Number(config.update_check_timeout) : 120;
+  const timeoutMs = timeoutSeconds * 1e3;
   try {
     const firmwareState = await adapter.getStateAsync((0, import_stateMapping.getDpPath)("firmware"));
     const currentFirmware = firmwareState && typeof firmwareState.val === "string" ? firmwareState.val : null;
@@ -131,7 +133,7 @@ async function checkFirmwareUpdate(adapter) {
       (0, import_logger.writeLog)(`Update-Pr\xFCfung abgebrochen: Unbekannter Firmware-Typ (${currentFirmware}).`, "debug");
       return;
     }
-    const response = await fetchUrl(`${DOWNLOAD_PORTAL_URL}${downloadId}`, true);
+    const response = await fetchUrl(`${DOWNLOAD_PORTAL_URL}${downloadId}`, true, timeoutMs);
     const contentDisposition = response.headers["content-disposition"] || "";
     const filenameMatch = contentDisposition.match(/filename=(.+)/);
     if (!filenameMatch) {
@@ -151,7 +153,7 @@ async function checkFirmwareUpdate(adapter) {
     const wasAlreadyNotified = (oldUpdateState == null ? void 0 : oldUpdateState.val) === true;
     await adapter.setState(updateStateDp, { val: isNewer, ack: true });
     if (isNewer) {
-      const clResponse = await fetchUrl(`${CHANGELOG_URL}${downloadId}`, false);
+      const clResponse = await fetchUrl(`${CHANGELOG_URL}${downloadId}`, false, timeoutMs);
       if (clResponse.data) {
         await adapter.setState((0, import_stateMapping.getDpPath)("firmware_changelog"), { val: clResponse.data, ack: true });
       }

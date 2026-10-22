@@ -74,14 +74,15 @@ function isVersionNewer(availableVersion: string, currentVersion: string): boole
  *
  * @param url Die aufzurufende URL.
  * @param abortAfterHeaders Ob die Verbindung nach Empfang der Header direkt abgebrochen werden soll.
+ * @param timeoutMs Timeout für die Anfrage in Millisekunden.
  * @returns Ein Promise mit den Headern und dem Body der Antwort.
  */
-function fetchUrl(url: string, abortAfterHeaders = false): Promise<{ headers: any; data: string }> {
+function fetchUrl(url: string, abortAfterHeaders = false, timeoutMs = 120000): Promise<{ headers: any; data: string }> {
 	return new Promise((resolve, reject) => {
 		const options = {
 			method: 'GET',
 			agent: httpsAgent,
-			timeout: 120000, // Auf 120 Sekunden erhöht wegen langsamem AIT-Server
+			timeout: timeoutMs, // Dynamischer Timeout statt hart codiert
 			headers: {
 				'User-Agent': 'ioBroker.luxtronik2-controller',
 				Accept: '*/*',
@@ -127,6 +128,10 @@ export async function checkFirmwareUpdate(adapter: LuxtronikAdapter): Promise<vo
 		return;
 	}
 
+	// Timeout aus der Konfig lesen (Standard 120 Sekunden)
+	const timeoutSeconds = config.update_check_timeout ? Number(config.update_check_timeout) : 120;
+	const timeoutMs = timeoutSeconds * 1000;
+
 	try {
 		const firmwareState = await adapter.getStateAsync(getDpPath('firmware'));
 		const currentFirmware = firmwareState && typeof firmwareState.val === 'string' ? firmwareState.val : null;
@@ -143,7 +148,7 @@ export async function checkFirmwareUpdate(adapter: LuxtronikAdapter): Promise<vo
 		}
 
 		// 1. Dateinamen aus den Headern der Download-URL abfragen
-		const response = await fetchUrl(`${DOWNLOAD_PORTAL_URL}${downloadId}`, true);
+		const response = await fetchUrl(`${DOWNLOAD_PORTAL_URL}${downloadId}`, true, timeoutMs);
 		const contentDisposition = response.headers['content-disposition'] || '';
 
 		const filenameMatch = contentDisposition.match(/filename=(.+)/);
@@ -171,7 +176,7 @@ export async function checkFirmwareUpdate(adapter: LuxtronikAdapter): Promise<vo
 
 		if (isNewer) {
 			// 2. Changelog abfragen
-			const clResponse = await fetchUrl(`${CHANGELOG_URL}${downloadId}`, false);
+			const clResponse = await fetchUrl(`${CHANGELOG_URL}${downloadId}`, false, timeoutMs);
 			if (clResponse.data) {
 				await adapter.setState(getDpPath('firmware_changelog'), { val: clResponse.data, ack: true });
 			}

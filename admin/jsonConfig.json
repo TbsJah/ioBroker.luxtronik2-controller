@@ -10994,6 +10994,30 @@
 					"default": "0 12 * * *",
 					"hidden": "!data.update_check_active"
 				},
+				"update_check_timeout": {
+					"type": "number",
+					"label": {
+						"en": "Network timeout (seconds)",
+						"de": "Netzwerk-Timeout (Sekunden)"
+					},
+					"default": 120,
+					"min": 10,
+					"max": 300,
+					"hidden": "!data.update_check_active"
+				},
+				"update_timeout_info": {
+					"type": "staticText",
+					"text": {
+						"en": "⚠️ <b>Note:</b> The official Alpha Innotec server is currently responding extremely slowly. A timeout of at least 120 seconds is highly recommended to prevent aborted checks.",
+						"de": "⚠️ <b>Hinweis:</b> Der offizielle Alpha Innotec Server (heatpump24) antwortet aktuell extrem langsam. Ein Timeout von mindestens 120 Sekunden wird dringend empfohlen, damit die Prüfung nicht abbricht."
+					},
+					"style": {
+						"color": "#ff9800",
+						"marginBottom": "15px",
+						"fontSize": "12px"
+					},
+					"hidden": "!data.update_check_active"
+				},
 				"divider_notifications": {
 					"type": "divider",
 					"color": "primary",
