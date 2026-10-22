@@ -34,6 +34,7 @@ var import_objectManager = require("./objectManager");
 var import_rawFunctions = require("./rawFunctions");
 var import_stateMapping = require("./stateMapping");
 var import_svgGenerator = require("./svgGenerator");
+var import_updateManager = require("./updateManager");
 var import_virtualStates = require("./virtualStates");
 var import_zipManager = require("./zipManager");
 class Luxtronik2Controller extends utils.Adapter {
@@ -236,6 +237,37 @@ class Luxtronik2Controller extends utils.Adapter {
         "Configured polling interval exceeded maximum boundary. Restricted to 3600 seconds to prevent overflow issues.",
         "warn"
       );
+    }
+    for (const [key, stateDef] of Object.entries(import_stateMapping.STATE_MAPPING)) {
+      if (stateDef.isVirtual) {
+        await this.setObjectNotExistsAsync(`${stateDef.folder}.${key}`, {
+          type: "state",
+          common: {
+            name: stateDef.name,
+            type: stateDef.type,
+            role: stateDef.role,
+            read: true,
+            write: stateDef.write || false,
+            def: stateDef.def !== void 0 ? stateDef.def : null
+          },
+          native: {
+            luxWriteId: stateDef.luxWriteId || null,
+            dataSource: stateDef.dataSource || null
+          }
+        });
+      }
+    }
+    const updateIntervalHours = config.update_check_interval ? Number(config.update_check_interval) : 24;
+    if (config.update_check_active === true) {
+      this.setTimeout(() => {
+        void (0, import_updateManager.checkFirmwareUpdate)(this);
+        this.setInterval(
+          () => {
+            void (0, import_updateManager.checkFirmwareUpdate)(this);
+          },
+          updateIntervalHours * 3600 * 1e3
+        );
+      }, 15e3);
     }
     this.pollingInterval = this.setInterval(async () => {
       try {

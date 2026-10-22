@@ -810,7 +810,10 @@
 						"fusspunkt": "${data.fusspunkt}",
 						"endpunkt": "${data.endpunkt}"
 					},
-					"alsoDependsOn": ["fusspunkt", "endpunkt"],
+					"alsoDependsOn": [
+						"fusspunkt",
+						"endpunkt"
+					],
 					"style": {
 						"maxWidth": "800px",
 						"marginTop": "20px",
@@ -4013,6 +4016,48 @@
 							},
 							"default": true,
 							"disabled": "!data.sync_category_information_12_systeminfo",
+							"xs": 12,
+							"sm": 6,
+							"md": 3,
+							"lg": 3,
+							"xl": 3
+						},
+						"sync_firmware_available": {
+							"type": "checkbox",
+							"label": {
+								"en": "Available firmware version (System critical)",
+								"de": "Verfügbare Firmware Version (Systemrelevant)"
+							},
+							"default": true,
+							"disabled": true,
+							"xs": 12,
+							"sm": 6,
+							"md": 3,
+							"lg": 3,
+							"xl": 3
+						},
+						"sync_firmware_update_available": {
+							"type": "checkbox",
+							"label": {
+								"en": "Firmware update available (System critical)",
+								"de": "Firmware Update verfügbar (Systemrelevant)"
+							},
+							"default": true,
+							"disabled": true,
+							"xs": 12,
+							"sm": 6,
+							"md": 3,
+							"lg": 3,
+							"xl": 3
+						},
+						"sync_firmware_changelog": {
+							"type": "checkbox",
+							"label": {
+								"en": "Firmware changelog (System critical)",
+								"de": "Firmware Changelog (Systemrelevant)"
+							},
+							"default": true,
+							"disabled": true,
 							"xs": 12,
 							"sm": 6,
 							"md": 3,
@@ -10933,9 +10978,18 @@
 						"de": "Prüfintervall"
 					},
 					"options": [
-						{ "label": "12 Hours", "value": 12 },
-						{ "label": "24 Hours", "value": 24 },
-						{ "label": "7 Days", "value": 168 }
+						{
+							"label": "12 Hours",
+							"value": 12
+						},
+						{
+							"label": "24 Hours",
+							"value": 24
+						},
+						{
+							"label": "7 Days",
+							"value": 168
+						}
 					],
 					"default": 24,
 					"hidden": "!data.update_check_active"

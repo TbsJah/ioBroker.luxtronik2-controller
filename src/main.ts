@@ -299,6 +299,27 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 			);
 		}
 
+		for (const [key, stateDef] of Object.entries(STATE_MAPPING as Record<string, any>)) {
+			// Wenn der Punkt als virtuell markiert ist, legen wir ihn direkt beim Start an
+			if (stateDef.isVirtual) {
+				await this.setObjectNotExistsAsync(`${stateDef.folder}.${key}`, {
+					type: 'state',
+					common: {
+						name: stateDef.name,
+						type: stateDef.type as ioBroker.CommonType,
+						role: stateDef.role,
+						read: true,
+						write: stateDef.write || false,
+						def: stateDef.def !== undefined ? stateDef.def : null,
+					},
+					native: {
+						luxWriteId: stateDef.luxWriteId || null,
+						dataSource: stateDef.dataSource || null,
+					},
+				});
+			}
+		}
+
 		// --- FIRMWARE UPDATE TIMER ---
 		const updateIntervalHours = config.update_check_interval ? Number(config.update_check_interval) : 24;
 
