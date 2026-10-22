@@ -23,6 +23,15 @@
 ### 0.1.0 (2026-07-09)
 
 - initial release
+## 0.19.1 (2026-10-20)
+
+**📝 Documentation & Guide Overhaul**
+
+- **Complete Alignment of Documentation (`README.md` & `documentation/readme_de.md` & `documentation/readme_en.md`):**
+    - Restructured and synchronized both German and English documentation to accurately match all **11 configuration tabs** of the Admin UI in sequential order:
+    - **Hardware Protection Architecture:** Added an explicit section explaining Read-Before-Write protection (`writePumpSafe`), daily and total flash cycle counters, and the vendor firmware `.90` crash shield.
+    - **Troubleshooting & ARM Compatibility:** Added troubleshooting documentation regarding harmless `node-gyp` / `serialport` / `usocket` compilation warnings on Raspberry Pi / ARM systems, alongside step-by-step guidance for running the raw TCP diagnostic script (`Test_Script.ts`).
+
 ## 0.19.0 (2026-10-19)
 
 **🚀 Features & UX Improvements**

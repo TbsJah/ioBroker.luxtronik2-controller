@@ -90,8 +90,7 @@ You might see red error messages in the installation log related to `node-gyp`, 
 [Info English](documentation/readme_en.md)
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 0.20.0 (2026-10-22)
 
 **🚀 Features & Enhancements**
 
@@ -126,15 +125,6 @@ You might see red error messages in the installation log related to `node-gyp`, 
 
 - **Broader Node.js Compatibility:** Adjusted Node.js engine requirement from `>=22` down to `>=18.0.0` in `package.json` and added `{ "node": ">=18.0.0" }` to `dependencies` in `io-package.json`. This enables full compatibility with widely used Long-Term Support (LTS) releases (Node.js 18 and 20) while preventing installation on deprecated runtimes.
 - **Hybrid Modbus Value Persistence:** Prevented native 3003 telemetry polling (EEPROM) from overwriting volatile parameters actively managed via Modbus TCP (RAM) in the ioBroker object tree.
-
-### 0.19.1 (2026-10-20)
-
-**📝 Documentation & Guide Overhaul**
-
-- **Complete Alignment of Documentation (`README.md` & `documentation/readme_de.md` & `documentation/readme_en.md`):**
-    - Restructured and synchronized both German and English documentation to accurately match all **11 configuration tabs** of the Admin UI in sequential order:
-    - **Hardware Protection Architecture:** Added an explicit section explaining Read-Before-Write protection (`writePumpSafe`), daily and total flash cycle counters, and the vendor firmware `.90` crash shield.
-    - **Troubleshooting & ARM Compatibility:** Added troubleshooting documentation regarding harmless `node-gyp` / `serialport` / `usocket` compilation warnings on Raspberry Pi / ARM systems, alongside step-by-step guidance for running the raw TCP diagnostic script (`Test_Script.ts`).
 
 ## License
 
