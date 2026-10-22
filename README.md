@@ -88,10 +88,11 @@ You might see red error messages in the installation log related to `node-gyp`, 
 [Info Deutsch](documentation/readme_de.md)
 
 [Info English](documentation/readme_en.md)
+//### **WORK IN PROGRESS**
 
 ## Changelog
 
-### work in progress
+### **WORK IN PROGRESS**
 
 **🐛 Bugfixes & Tweaks**
 
