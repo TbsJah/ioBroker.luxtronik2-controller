@@ -90,6 +90,14 @@ You might see red error messages in the installation log related to `node-gyp`, 
 [Info English](documentation/readme_en.md)
 
 ## Changelog
+
+### work in progress
+
+**🐛 Bugfixes & Tweaks**
+
+- **Modbus Factor Correction:** Explicitly set the scaling factor for the heating target temperature offset (Luxtronik ID 1 / Holding 23) to `10` to correctly handle and display Modbus TCP values in tenths of a degree (e.g., 5.0 °C instead of 50).
+- **Configuration UI:** Clarified the English and German labels for heating parameters (such as base point and parallel offset) in the adapter settings to prevent mapping confusion.
+
 ### 0.20.0 (2026-10-22)
 
 **🚀 Features & Enhancements**
