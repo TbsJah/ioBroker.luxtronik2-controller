@@ -92,8 +92,7 @@ You might see red error messages in the installation log related to `node-gyp`, 
 ## Changelog
 
 // ### **WORK IN PROGRESS**
-
-### **WORK IN PROGRESS**
+### 0.19.6 (2026-10-22)
 
 **🚀 Features & Enhancements**
 
