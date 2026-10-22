@@ -81,7 +81,7 @@ function fetchUrl(url: string, method: 'GET' | 'HEAD' = 'GET'): Promise<{ header
 		const options = {
 			method,
 			agent: httpsAgent,
-			timeout: 10000,
+			timeout: 120000,
 			headers: {
 				'User-Agent':
 					'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',

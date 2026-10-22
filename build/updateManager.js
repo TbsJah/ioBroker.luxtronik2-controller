@@ -86,7 +86,7 @@ function fetchUrl(url, method = "GET") {
     const options = {
       method,
       agent: httpsAgent,
-      timeout: 1e4,
+      timeout: 12e4,
       headers: {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
         Accept: "*/*"
