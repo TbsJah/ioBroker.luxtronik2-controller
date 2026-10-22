@@ -10985,27 +10985,13 @@
 					"newLine": true,
 					"default": false
 				},
-				"update_check_interval": {
-					"type": "select",
+				"update_check_cron": {
+					"type": "cron",
 					"label": {
-						"en": "Update check interval",
-						"de": "Prüfintervall"
+						"en": "Update check schedule",
+						"de": "Zeitplan für automatische Prüfung"
 					},
-					"options": [
-						{
-							"label": "12 Hours",
-							"value": 12
-						},
-						{
-							"label": "24 Hours",
-							"value": 24
-						},
-						{
-							"label": "7 Days",
-							"value": 168
-						}
-					],
-					"default": 24,
+					"default": "0 12 * * *",
 					"hidden": "!data.update_check_active"
 				},
 				"update_check_telegram": {

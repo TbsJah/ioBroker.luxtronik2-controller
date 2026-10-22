@@ -1,6 +1,7 @@
 /*
  * Created with @iobroker/create-adapter v3.1.5
  */
+import * as schedule from 'node-schedule';
 import * as utils from '@iobroker/adapter-core';
 import { handleZwangsheizen, handleZwangswarmwasser } from './actionHandlers';
 import { initAutoBackup, stopAutoBackup } from './backupManager';
@@ -91,6 +92,8 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 	public zipCountdownInterval?: ioBroker.Interval;
 	/** Target timestamp when the current ZIP run finishes */
 	public zipEndTime?: number;
+	/** Cron-Job Handle für die Firmware-Update-Prüfung */
+	public updateCronJob?: schedule.Job;
 	/**
 	 * Initializes a new instance of the Luxtronik2Controller class.
 	 *
@@ -321,21 +324,22 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 		}
 
 		// --- FIRMWARE UPDATE TIMER ---
-		const updateIntervalHours = config.update_check_interval ? Number(config.update_check_interval) : 24;
-
-		// Erste Prüfung 15 Sekunden nach Adapter-Start (damit die aktuelle Firmware bereits gelesen wurde)
 		if (config.update_check_active === true) {
+			// Erste Prüfung 15 Sekunden nach Adapter-Start (damit die aktuelle Firmware bereits gelesen wurde)
 			this.setTimeout(() => {
 				void checkFirmwareUpdate(this);
-
-				// Danach im gewählten Intervall prüfen
-				this.setInterval(
-					() => {
-						void checkFirmwareUpdate(this);
-					},
-					updateIntervalHours * 3600 * 1000,
-				);
 			}, 15000);
+
+			// Cronjob für regelmäßige Prüfungen einrichten
+			const cronString = config.update_check_cron || '0 12 * * *';
+			try {
+				this.updateCronJob = schedule.scheduleJob(cronString, () => {
+					this.log.info('Führe geplante Firmware-Update-Prüfung aus (Cron)...');
+					void checkFirmwareUpdate(this);
+				});
+			} catch (err: any) {
+				this.log.error(`Fehler beim Einrichten des Firmware-Update-Crons (${cronString}): ${err.message}`);
+			}
 		}
 
 		this.pollingInterval = this.setInterval(async () => {
@@ -1029,6 +1033,10 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 				this.clearInterval(this.zipCountdownInterval);
 			}
 
+			if (this.updateCronJob) {
+				this.updateCronJob.cancel();
+			}
+			
 			stopAutoBackup(this);
 
 			if (this.midnightTimer) {

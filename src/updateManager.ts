@@ -88,8 +88,11 @@ function fetchUrl(url: string, abortAfterHeaders = false): Promise<{ headers: an
 			},
 		};
 
+		let wasAborted = false;
+
 		const req = https.request(url, options, res => {
 			if (abortAfterHeaders) {
+				wasAborted = true; // Markieren, dass wir den Abbruch selbst ausgelöst haben
 				resolve({ headers: res.headers, data: '' });
 				req.destroy();
 				return;
@@ -99,8 +102,10 @@ function fetchUrl(url: string, abortAfterHeaders = false): Promise<{ headers: an
 			res.on('data', chunk => (body += chunk));
 			res.on('end', () => resolve({ headers: res.headers, data: body }));
 		});
+
 		req.on('error', err => {
-			if (err.message !== 'socket hang up') {
+			// Ignoriere jegliche Netzwerk-Fehler, wenn wir den Abbruch selbst ausgelöst haben
+			if (!wasAborted) {
 				reject(err);
 			}
 		});

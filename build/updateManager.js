@@ -93,8 +93,10 @@ function fetchUrl(url, abortAfterHeaders = false) {
         Accept: "*/*"
       }
     };
+    let wasAborted = false;
     const req = https.request(url, options, (res) => {
       if (abortAfterHeaders) {
+        wasAborted = true;
         resolve({ headers: res.headers, data: "" });
         req.destroy();
         return;
@@ -104,7 +106,7 @@ function fetchUrl(url, abortAfterHeaders = false) {
       res.on("end", () => resolve({ headers: res.headers, data: body }));
     });
     req.on("error", (err) => {
-      if (err.message !== "socket hang up") {
+      if (!wasAborted) {
         reject(err);
       }
     });

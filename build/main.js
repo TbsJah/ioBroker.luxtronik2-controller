@@ -21,6 +21,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
   mod
 ));
+var schedule = __toESM(require("node-schedule"));
 var utils = __toESM(require("@iobroker/adapter-core"));
 var import_actionHandlers = require("./actionHandlers");
 var import_backupManager = require("./backupManager");
@@ -77,6 +78,8 @@ class Luxtronik2Controller extends utils.Adapter {
   zipCountdownInterval;
   /** Target timestamp when the current ZIP run finishes */
   zipEndTime;
+  /** Cron-Job Handle für die Firmware-Update-Prüfung */
+  updateCronJob;
   /**
    * Initializes a new instance of the Luxtronik2Controller class.
    *
@@ -258,17 +261,19 @@ class Luxtronik2Controller extends utils.Adapter {
         });
       }
     }
-    const updateIntervalHours = config.update_check_interval ? Number(config.update_check_interval) : 24;
     if (config.update_check_active === true) {
       this.setTimeout(() => {
         void (0, import_updateManager.checkFirmwareUpdate)(this);
-        this.setInterval(
-          () => {
-            void (0, import_updateManager.checkFirmwareUpdate)(this);
-          },
-          updateIntervalHours * 3600 * 1e3
-        );
       }, 15e3);
+      const cronString = config.update_check_cron || "0 12 * * *";
+      try {
+        this.updateCronJob = schedule.scheduleJob(cronString, () => {
+          this.log.info("F\xFChre geplante Firmware-Update-Pr\xFCfung aus (Cron)...");
+          void (0, import_updateManager.checkFirmwareUpdate)(this);
+        });
+      } catch (err) {
+        this.log.error(`Fehler beim Einrichten des Firmware-Update-Crons (${cronString}): ${err.message}`);
+      }
     }
     this.pollingInterval = this.setInterval(async () => {
       try {
@@ -816,6 +821,9 @@ class Luxtronik2Controller extends utils.Adapter {
       }
       if (this.zipCountdownInterval) {
         this.clearInterval(this.zipCountdownInterval);
+      }
+      if (this.updateCronJob) {
+        this.updateCronJob.cancel();
       }
       (0, import_backupManager.stopAutoBackup)(this);
       if (this.midnightTimer) {
