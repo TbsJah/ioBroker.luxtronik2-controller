@@ -1654,12 +1654,36 @@
 					"lg": 12,
 					"xl": 12
 				},
-				"pv_info_text": {
+				"pv_info_header": {
+					"type": "header",
+					"text": {
+						"en": "How it works: PV Surplus Control",
+						"de": "Funktionsweise: PV-Überschusssteuerung"
+					},
+					"size": 3,
+					"hidden": "!data.pv_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
+				"pv_info_desc": {
 					"type": "staticText",
 					"text": {
-						"en": "<br><div style='text-align: center;'><h3>How it works: PV Surplus Control</h3><p>Automatically raises the setpoints for hot water and heating when your solar system feeds enough power into the grid. The adapter waits for active cycles to finish before reverting values to protect the compressor.</p><img src='img/PV_Optimierung.svg' style='max-width: 100%; height: auto; margin-top: 10px; border: 1px solid #ddd; border-radius: 4px;' alt='PV Logic'></div><br>",
-						"de": "<br><div style='text-align: center;'><h3>Funktionsweise: PV-Überschusssteuerung</h3><p>Hebt die Sollwerte für Warmwasser und Heizung automatisch an, wenn deine Solaranlage ausreichend Strom ins Netz einspeist. Der Adapter wartet beim Wegfall der Sonne auf das Ende laufender Takte, um den Verdichter zu schonen.</p><img src='img/PV_Optimierung.svg' style='max-width: 100%; height: auto; margin-top: 10px; border: 1px solid #ddd; border-radius: 4px;' alt='PV Logik'></div><br>"
+						"en": "Automatically raises the setpoints for hot water and heating when your solar system feeds enough power into the grid. The adapter waits for active cycles to finish before reverting values to protect the compressor.",
+						"de": "Hebt die Sollwerte für Warmwasser und Heizung automatisch an, wenn deine Solaranlage ausreichend Strom ins Netz einspeist. Der Adapter wartet beim Wegfall der Sonne auf das Ende laufender Takte, um den Verdichter zu schonen."
 					},
+					"hidden": "!data.pv_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
+				"pv_info_image": {
+					"type": "staticImage",
+					"src": "img/PV_Optimierung.svg",
 					"hidden": "!data.pv_active",
 					"xs": 12,
 					"sm": 12,
