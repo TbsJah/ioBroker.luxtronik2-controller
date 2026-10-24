@@ -66,19 +66,25 @@ export function handlePvFeedInChange(adapter: LuxtronikAdapter, id: string, stat
 		return;
 	}
 
-	// 1. Einspeise-Wert in absoluten Überschuss umrechnen (abhängig vom konfigurierten Vorzeichen)
+	// 1. Wert erfassen und ggf. von kW in Watt umrechnen
+	let rawValue = state.val;
+	if (config.pv_feed_in_unit === 'kW') {
+		rawValue = rawValue * 1000;
+	}
+
+	// 2. Einspeise-Wert in absoluten Überschuss (positiver Watt-Wert) umrechnen
 	let surplus = 0;
 	if (config.pv_feed_in_sign === 'negative') {
-		surplus = state.val < 0 ? Math.abs(state.val) : 0;
+		surplus = rawValue < 0 ? Math.abs(rawValue) : 0;
 	} else {
-		surplus = state.val > 0 ? state.val : 0;
+		surplus = rawValue > 0 ? rawValue : 0;
 	}
 
 	const threshold = config.pv_threshold_start || 2000;
 	const delayStartMs = (config.pv_delay_start || 5) * 60000;
 	const delayStopMs = (config.pv_delay_stop || 10) * 60000;
 
-	// 2. Überschuss ist hoch genug
+	// 3. Überschuss ist hoch genug
 	if (surplus >= threshold) {
 		if (pvStopTimer) {
 			adapter.clearTimeout(pvStopTimer);
@@ -94,7 +100,7 @@ export function handlePvFeedInChange(adapter: LuxtronikAdapter, id: string, stat
 			pvStartTimer = adapter.setTimeout(() => activateBoost(adapter), delayStartMs);
 		}
 	} else {
-		// 3. Überschuss ist eingebrochen
+		// 4. Überschuss ist eingebrochen
 		if (pvStartTimer) {
 			adapter.clearTimeout(pvStartTimer);
 			pvStartTimer = undefined;

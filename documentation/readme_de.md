@@ -184,7 +184,21 @@ Der Adapter kann automatisch das offizielle Alpha Innotec Download-Portal auf ne
 
 ---
 
-### 11. Reiter: Eigene Werte (Custom)
+### 11. Reiter: PV / Überschuss
+
+Integrierte "PV-Ready" Steuerung: Nutzt deinen überschüssigen Solarstrom, um die Wärmepumpe als thermischen Akku zu verwenden. Sobald deine Solaranlage genug Leistung ins Netz einspeist, hebt der Adapter vollautomatisch und verschleißfrei (via Modbus-RAM) die Sollwerte für Warmwasser und/oder Heizung an.
+
+- **PV-Überschusssteuerung aktivieren:** Schaltet die Logik ein.
+- **Datenpunkt für aktuelle Netzleistung:** Verlinke hier den Live-Datenpunkt deines Smart-Meters oder Wechselrichters (z.B. SMA, Shelly 3EM, Kostal).
+- **Einheit & Vorzeichen:** Gib an, ob der Zähler in Watt (W) oder Kilowatt (kW) misst und ob Einspeisungen als positive oder negative Werte dargestellt werden.
+- **Aktivierung (Einschaltbedingungen):** Lege den _Schwellenwert_ (z.B. 2000 Watt) und eine _Mindestdauer_ (z.B. 5 Minuten) fest, um nervöses Takten bei durchziehenden Wolken zu vermeiden. Gib zudem an, um wie viel Kelvin das Warmwasser und die Heizkurve (Parallelverschiebung) angehoben werden sollen.
+- **Deaktivierung (Rückfallbedingungen):**
+    - _Verzögerung vor Rücksetzung:_ Verhindert einen sofortigen Abbruch, wenn die Sonne kurz verdeckt wird.
+    - _Aktiven Takt nach Reset bis zum Normalwert zu Ende fahren (Hardware-Schutz):_ Fällt der Überschuss weg, wird der Sollwert nicht sofort hart zurückgesetzt. Der Adapter wartet intelligent, bis der aktuelle Heiz- oder Warmwasserzyklus seinen regulären (niedrigeren) Zielwert erreicht hat, um den Verdichter nicht abzuwürgen.
+
+---
+
+### 12. Reiter: Eigene Werte (Custom)
 
 Deine Wärmepumpe liefert auf einem bestimmten Index einen speziellen Wert, der noch nicht im Standard-Mapping enthalten ist? In dieser Tabelle kannst du beliebige eigene Datenpunkte definieren, die automatisch im Ordner **`Custom`** angelegt werden:
 
@@ -197,7 +211,7 @@ Deine Wärmepumpe liefert auf einem bestimmten Index einen speziellen Wert, der 
 
 ---
 
-### 12. Reiter: Backup & Diagnose
+### 13. Reiter: Backup & Diagnose
 
 Über den internen Webserver der Luxtronik-Steuerung lassen sich detaillierte System-Logs (`.dta`-Dateien) herunterladen und am PC mit kostenlosen Werkzeugen wie **[OpenDTA](https://sourceforge.net/projects/opendta/)** grafisch analysieren.
 

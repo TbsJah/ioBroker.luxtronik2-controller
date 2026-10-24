@@ -184,7 +184,21 @@ The adapter can automatically check the official Alpha Innotec download portal f
 
 ---
 
-### 11. Tab: Custom Values (Custom)
+### 11. Tab: PV / Surplus
+
+Integrated "PV-Ready" control: Uses your surplus solar power to turn the heat pump into a thermal battery. As soon as your solar system feeds enough power into the grid, the adapter automatically and wear-free (via Modbus RAM) raises the setpoints for hot water and/or heating.
+
+- **Enable PV surplus management:** Activates the logic.
+- **Datapoint for current grid power:** Link the live datapoint of your smart meter or inverter (e.g. SMA, Shelly 3EM, Kostal).
+- **Unit & Sign:** Specify whether the meter provides data in Watts (W) or Kilowatts (kW) and whether feed-in is represented by positive or negative values.
+- **Activation (Boost):** Define the _Surplus threshold_ (e.g. 2000 Watts) and a _Minimum duration_ (e.g. 5 minutes) to prevent short-cycling during variable cloud cover. Specify how many Kelvin the hot water and heating curve offset should be increased by.
+- **Deactivation (Reset):**
+    - _Delay before reset:_ Prevents an immediate shutdown if the sun is briefly covered by a cloud.
+    - _Finish active cycle to base target after reset (Hardware Protection):_ If the solar surplus drops, the setpoint is not reset abruptly. The adapter intelligently waits until the current heating or hot water cycle has naturally finished its regular (lower) target to avoid abruptly stalling the compressor.
+
+---
+
+### 12. Tab: Custom Values (Custom)
 
 If your heat pump exposes unique sensor indices not covered in standard mappings, define custom objects stored under the **`Custom`** tree:
 
@@ -197,7 +211,7 @@ If your heat pump exposes unique sensor indices not covered in standard mappings
 
 ---
 
-### 12. Tab: Backup & Diagnostics
+### 13. Tab: Backup & Diagnostics
 
 Download system log archives (`.dta` files) directly from the heat pump web server and analyze them graphically on your PC using tools such as **[OpenDTA](https://sourceforge.net/projects/opendta/)**.
 

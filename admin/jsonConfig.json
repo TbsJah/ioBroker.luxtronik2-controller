@@ -586,7 +586,7 @@
 			"type": "panel",
 			"label": {
 				"en": "Idle Defaults",
-				"de": "Leerlauf - Vorgaben"
+				"de": "Vorgaben"
 			},
 			"icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMjQgMjQiPgoJPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIgLz4KCTxwYXRoIGZpbGw9ImN1cnJlbnRDb2xvciIgZD0ibTEyIDEzLjRsMi45IDIuOXEuMjc1LjI3NS43LjI3NXQuNy0uMjc1dC4yNzUtLjd0LS4yNzUtLjdMMTMuNCAxMmwyLjktMi45cS4yNzUtLjI3NS4yNzUtLjd0LS4yNzUtLjd0LS43LS4yNzV0LS43LjI3NUwxMiAxMC42TDkuMSA3LjdxLS4yNzUtLjI3NS0uNy0uMjc1dC0uNy4yNzV0LS4yNzUuN3QuMjc1LjdsMi45IDIuOWwtMi45IDIuOXEtLjI3NS4yNzUtLjI3NS43dC4yNzUuN3QuNy4yNzV0LjctLjI3NXpNNSAyMXEtLjgyNSAwLTEuNDEyLS41ODdUMyAxOVY1cTAtLjgyNS41ODgtMS40MTJUNSAzaDE0cS44MjUgMCAxLjQxMy41ODhUMjEgNXYxNHEwIC44MjUtLjU4NyAxLjQxM1QxOSAyMXptMC0yaDE0VjVINXpNNSA1djE0eiIgLz4KPC9zdmc+Cg==",
 			"items": {
@@ -1079,7 +1079,7 @@
 		"hupTab": {
 			"type": "panel",
 			"label": {
-				"en": "HUP",
+				"en": "HUP control",
 				"de": "HUP Steuerung"
 			},
 			"icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMjQgMjQiPgoJPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIgLz4KCTxwYXRoIGZpbGw9ImN1cnJlbnRDb2xvciIgZD0iTTE0IDE2aDJ2LTNoM3YtMmgtM1Y4aC0ydjNoLTN2Mmgzem0tOCA0LjVxLTIuNzI1LS45NS00LjM2Mi0zLjI4N1QwIDEydDEuNjM4LTUuMjEyVDYgMy41djIuMnEtMS44NS44NzUtMi45MjUgMi41NzVUMiAxMnQxLjA3NSAzLjcyNVQ2IDE4LjN6bTUuNDg4LS4yMTNxLTEuNjM4LS43MTItMi44NS0xLjkyNHQtMS45MjUtMi44NVQ2IDEydC43MTMtMy41MTJ0MS45MjUtMi44NXQyLjg1LTEuOTI1VDE1IDN0My41MTMuNzEzdDIuODUgMS45MjR0MS45MjUgMi44NVQyNCAxMnQtLjcxMiAzLjUxM3QtMS45MjUgMi44NXQtMi44NSAxLjkyNVQxNSAyMXQtMy41MTItLjcxMk0xNSAxOXEyLjkyNSAwIDQuOTYzLTIuMDM3VDIyIDEydC0yLjAzNy00Ljk2MlQxNSA1dC00Ljk2MiAyLjAzOFQ4IDEydDIuMDM4IDQuOTYzVDE1IDE5IiAvPgo8L3N2Zz4K",
@@ -1302,7 +1302,7 @@
 			"type": "panel",
 			"label": {
 				"en": "Circulation pump",
-				"de": "Zirkulationspumpe"
+				"de": "ZIP Steuerung"
 			},
 			"icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMjQgMjQiPgoJPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIgLz4KCTxwYXRoIGZpbGw9ImN1cnJlbnRDb2xvciIgZD0iTTEwLjU4OCAxNC40MTNRMTAgMTMuODI1IDEwIDEzcTAtLjU3NS4yMzgtMS4xMzd0LjkxMi0xLjYxM2wuNDI1LS42MjVxLjE1LS4yMjUuNDI1LS4yMjV0LjQyNS4yMjVsLjQyNS42MjVxLjY3NSAxLjA1LjkxMyAxLjYxM1QxNCAxM3EwIC44MjUtLjU4NyAxLjQxM1QxMiAxNXQtMS40MTItLjU4N00zIDE3aDQuMXEtLjQyNS0uNDI1LS43ODctLjkyNVQ1LjY3NSAxNUgzem0xMi41MzgtMS40NjNRMTcgMTQuMDc2IDE3IDEydC0xLjQ2My0zLjUzN1QxMiA3VDguNDYzIDguNDYzVDcgMTJ0MS40NjMgMy41MzhUMTIgMTd0My41MzgtMS40NjNNMTguMzI1IDlIMjFWN2gtNC4xcS40MjUuNDI1Ljc4OC45MjVUMTguMzI1IDlNMyAxOXEwIC40MjUtLjI4OC43MTNUMiAyMHQtLjcxMi0uMjg4VDEgMTl2LTZxMC0uNDI1LjI4OC0uNzEyVDIgMTJ0LjcxMy4yODhUMyAxM2gyLjA3NXEtLjA1LS4yNS0uMDYyLS40ODhUNSAxMnEwLTIuOTI1IDIuMDM4LTQuOTYyVDEyIDVoOXEwLS40MjUuMjg4LS43MTJUMjIgNHQuNzEzLjI4OFQyMyA1djZxMCAuNDI1LS4yODguNzEzVDIyIDEydC0uNzEyLS4yODhUMjEgMTFoLTIuMDc1cS4wNS4yNS4wNjMuNDg4VDE5IDEycTAgMi45MjUtMi4wMzcgNC45NjNUMTIgMTl6bTAtMnYtMnptMTgtOFY3em0tOSAzIiAvPgo8L3N2Zz4K",
 			"items": {
@@ -1639,7 +1639,7 @@
 			"type": "panel",
 			"label": {
 				"en": "PV / Surplus",
-				"de": "PV / Überschuss"
+				"de": "PV-Überschuss"
 			},
 			"icon": "solar_power",
 			"items": {
@@ -1657,18 +1657,55 @@
 					"lg": 12,
 					"xl": 12
 				},
-				"pv_feed_in_dp": {
-					"type": "objectId",
-					"label": {
-						"en": "Datapoint for current grid power (Watt)",
-						"de": "Datenpunkt für aktuelle Netzleistung (Watt)"
+				"pv_info_text": {
+					"type": "staticText",
+					"text": {
+						"en": "<br><div style='text-align: center;'><h3>How it works: PV Surplus Control</h3><p>Automatically raises the setpoints for hot water and heating when your solar system feeds enough power into the grid. The adapter waits for active cycles to finish before reverting values to protect the compressor.</p><img src='img/PV_Optimierung.svg' style='max-width: 100%; height: auto; margin-top: 10px; border: 1px solid #ddd; border-radius: 4px;' alt='PV Logic'></div><br>",
+						"de": "<br><div style='text-align: center;'><h3>Funktionsweise: PV-Überschusssteuerung</h3><p>Hebt die Sollwerte für Warmwasser und Heizung automatisch an, wenn deine Solaranlage ausreichend Strom ins Netz einspeist. Der Adapter wartet beim Wegfall der Sonne auf das Ende laufender Takte, um den Verdichter zu schonen.</p><img src='img/PV_Optimierung.svg' style='max-width: 100%; height: auto; margin-top: 10px; border: 1px solid #ddd; border-radius: 4px;' alt='PV Logik'></div><br>"
 					},
 					"hidden": "!data.pv_active",
 					"xs": 12,
 					"sm": 12,
-					"md": 8,
-					"lg": 8,
-					"xl": 8
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
+				"pv_feed_in_dp": {
+					"type": "objectId",
+					"label": {
+						"en": "Datapoint for current grid power",
+						"de": "Datenpunkt für aktuelle Netzleistung"
+					},
+					"hidden": "!data.pv_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 6,
+					"lg": 6,
+					"xl": 6
+				},
+				"pv_feed_in_unit": {
+					"type": "select",
+					"label": {
+						"en": "Unit of datapoint",
+						"de": "Einheit des Datenpunkts"
+					},
+					"options": [
+						{
+							"label": "Watt (W)",
+							"value": "W"
+						},
+						{
+							"label": "Kilowatt (kW)",
+							"value": "kW"
+						}
+					],
+					"default": "W",
+					"hidden": "!data.pv_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 2,
+					"lg": 2,
+					"xl": 2
 				},
 				"pv_feed_in_sign": {
 					"type": "select",
@@ -1679,33 +1716,15 @@
 					"options": [
 						{
 							"label": {
-								"en": "Negative values (e.g. -2500 W) = Feed-in",
-								"de": "Negative Werte (z.B. -2500 W) = Einspeisung",
-								"ru": "Отрицательные значения = Подача",
-								"pt": "Valores negativos = Injeção",
-								"nl": "Negatieve waarden = Teruglevering",
-								"fr": "Valeurs négatives = Injection",
-								"it": "Valori negativi = Immissione",
-								"es": "Valores negativos = Inyección",
-								"pl": "Wartości ujemne = Wprowadzanie",
-								"uk": "Від'ємні значення = Подача",
-								"zh-cn": "负值 = 馈入"
+								"en": "Negative (e.g. -2500) = Feed-in",
+								"de": "Negativ (z.B. -2500) = Einspeisung"
 							},
 							"value": "negative"
 						},
 						{
 							"label": {
-								"en": "Positive values (e.g. 2500 W) = Feed-in",
-								"de": "Positive Werte (z.B. 2500 W) = Einspeisung",
-								"ru": "Положительные значения = Подача",
-								"pt": "Valores positivos = Injeção",
-								"nl": "Positieve waarden = Teruglevering",
-								"fr": "Valeurs positives = Injection",
-								"it": "Valori positivi = Immissione",
-								"es": "Valores positivos = Inyección",
-								"pl": "Wartości dodatnie = Wprowadzanie",
-								"uk": "Позитивні значення = Подача",
-								"zh-cn": "正值 = 馈入"
+								"en": "Positive (e.g. 2500) = Feed-in",
+								"de": "Positiv (z.B. 2500) = Einspeisung"
 							},
 							"value": "positive"
 						}
@@ -1840,6 +1859,24 @@
 					"md": 6,
 					"lg": 6,
 					"xl": 6
+				},
+				"hupImage_de": {
+					"type": "staticImage",
+					"src": "img/PV.png",
+					"style": {
+						"width": "900px",
+						"maxWidth": "100%",
+						"height": "auto",
+						"border": "1px solid #cccccc",
+						"borderRadius": "5px",
+						"marginTop": "20px",
+						"marginBottom": "20px"
+					},
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
 				}
 			}
 		},

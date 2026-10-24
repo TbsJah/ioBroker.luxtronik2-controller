@@ -57,11 +57,15 @@ function handlePvFeedInChange(adapter, id, state) {
   if (!config.pv_active || !config.pv_feed_in_dp || id !== config.pv_feed_in_dp.trim() || !state || typeof state.val !== "number") {
     return;
   }
+  let rawValue = state.val;
+  if (config.pv_feed_in_unit === "kW") {
+    rawValue = rawValue * 1e3;
+  }
   let surplus = 0;
   if (config.pv_feed_in_sign === "negative") {
-    surplus = state.val < 0 ? Math.abs(state.val) : 0;
+    surplus = rawValue < 0 ? Math.abs(rawValue) : 0;
   } else {
-    surplus = state.val > 0 ? state.val : 0;
+    surplus = rawValue > 0 ? rawValue : 0;
   }
   const threshold = config.pv_threshold_start || 2e3;
   const delayStartMs = (config.pv_delay_start || 5) * 6e4;
