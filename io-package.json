@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "luxtronik2-controller",
-    "version": "0.20.3",
+    "version": "0.20.4",
     "news": {
+      "0.20.4": {
+        "en": "*🔧 Maintenance & Compatibility**\n\n**Node.js Requirement:** Updated minimum Node.js requirement to `>= 22` in `package.json` and `io-package.json` to meet current adapter standards.",
+        "de": "* 🔧 Wartung und Kompatibilität**\n\n**Node.js-Anforderung: ** Die Mindestanforderung für Node.js in `package.json` und `io-package.json` wurde auf `>= 22` aktualisiert.",
+        "ru": "* 🔧 Техническое обслуживание и совместимость**\n\n**Требование к Node.js: ** Минимальное требование к Node.js обновлено до `>= 22` в `package.json` и `io-package.json` в соответствии с текущими стандартами адаптеров.",
+        "pt": "* 🔧 Manutenção e compatibilidade**\n\n**Requisito do Node.js: ** Atualizado para `>= 22` em `package.json` e `io-package.json` para atender aos padrões atuais de adaptador. Node.js",
+        "nl": "* 🔧 Onderhoud en compatibiliteit**\n\n**Node.js-vereiste: ** De minimumvereiste voor Node.js is bijgewerkt naar `>= 22` in `package.json` en `io-package.json` om te voldoen aan de huidige adapterstandaarden.",
+        "fr": "* 🔧 Entretien et compatibilité**\n\n**Configuration requise pour Node.js :** Mise à jour de l'exigence minimale de Node.js à « >= 22 » dans « package.json » et « io-package.json » pour répondre aux normes actuelles.",
+        "it": "* 🔧 Cura e compatibilità**\n\n**Requisiti Node.js: ** Aggiornato il requisito minimo Node.js a `>= 22` in `package.json` e `io-package.json` per soddisfare gli attuali standard degli adattatori.",
+        "es": "* 🔧 Mantenimiento y compatibilidad**\n\n**Requisito de Node.js: ** Se actualizó el requisito mínimo de Node.js a `>= 22 en `package.json e `io-package.json» para cumplir con los estándares de adaptador actuales.",
+        "pl": "* 🔧 Konserwacja i kompatybilność**\n\n**Wymaganie Node.js: ** Zaktualizowano minimalne wymagania Node.js do `>= 22` w `package.json` i `io-package.json` w celu spełnienia aktualnych standardów adaptera.",
+        "uk": "* 🔧 Технічне обслуговування та сумісність**\n\n**Вимога Node.js: ** Оновлено мінімальну вимогу Node.js до `>= 22` у `package.json` та `io-package.json`, щоб відповідати поточним стандартам адаптера.",
+        "zh-cn": "* 🔧 维护和兼容性**\n\n**Node.js 要求：** 将 `package.json` 和 `io-package.json` 中的最低 Node.js 要求更新为 `>= 22`，以满足当前的适配器标准。"
+      },
       "0.20.3": {
         "en": "*🔧 Maintenance & Compatibility**\n\n**Node.js Requirement:** Updated minimum Node.js requirement to `>= 22` in `package.json` and `io-package.json` to meet current adapter standards.",
         "de": "* 🔧 Wartung und Kompatibilität**\n\n**Node.js-Anforderung: ** Die Mindestanforderung für Node.js in `package.json` und `io-package.json` wurde auf `>= 22` aktualisiert.",
@@ -80,19 +93,6 @@
         "pl": "* 🔧 Kompatybilność i konserwacja**\n\n**Trwałość wartości hybrydowego Modbusa: ** Zapobiegało nadpisywaniu zmiennych parametrów zmiennych aktywnie zarządzanych przez Modbus TCP (RAM) w drzewie obiektów ioBroker, natywne badanie telemetryczne 3003 (EEPROM).",
         "uk": "* 🔧 Сумісність та обслуговування**\n\n**Стійкість значення гібридного Modbus: ** Заборонено перезаписувати нестабільні параметри, які активно керуються за допомогою Modbus TCP (RAM) у дереві об'єктів IObroker, що використовуються у власному телеметричному опитуванні 3003 (EEPROM).",
         "zh-cn": "* 🔧 兼容性和维护**\n\n**混合 Modbus 价值持久化：** 防止原生 3003 遥测轮询 (EEPROM) 覆盖 IOBroker 对象树中通过 Modbus TCP (RAM) 主动管理的易失性参数。"
-      },
-      "0.19.3": {
-        "en": "*🔧 Compatibility & Maintenance**\n\n**Broader Node.js Compatibility:** Adjusted Node.js removed `{ \"node\": \">=18.0.0\" }` in `dependencies` in `io-package.json`. T",
-        "de": "* 🔧 Kompatibilität und Wartung**\n\n**Umfassender kompatibel mit Node.js: ** Node.js entfernt `{„node“: „>=18.0.0\"}` in `dependencies` in `io-package.json`. T",
-        "ru": "* 🔧 Совместимость и обслуживание**\n\n**Более широкая совместимость с Node.js: ** В файле Node.js исправлена ошибка «{«node»: «>=18.0.0\"} `из `зависимости` в `io-package.json`. T",
-        "pt": "* 🔧 Compatibilidade e manutenção**\n\n**Maior compatibilidade com Node.js: ** O Node.js ajustado removeu `{“node”: “>=18.0.0\"}` em `dependencies` em `io-package.json`. T",
-        "nl": "* 🔧 Compatibiliteit en onderhoud**\n\n**Bredere compatibiliteit met Node.js: ** Aangepaste Node.js heeft `{„node”: „>=18.0.0\"}` verwijderd in `dependencies` in `io-package.json`. T",
-        "fr": "* 🔧 Compatibilité et maintenance**\n\n**Compatibilité accrue avec Node.js :** Node.js ajusté a supprimé `{« node » : « >=18.0.0\"}` des dépendances de `io-package.json`. T",
-        "it": "* 🔧 Compatibilità e manutenzione**\n\n**Compatibilità più ampia con Node.js: ** Node.js modificato rimosso «>=18.0.0\"} nelle dipendenze in io-package.json. T",
-        "es": "* 🔧 Compatibilidad y mantenimiento**\n\n**Compatibilidad más amplia con Node.js: ** Node.js ajustado eliminado `{«node»: «>=18.0.0\"}` en `dependencias` en `io-package.json`. T",
-        "pl": "* 🔧 Kompatybilność i konserwacja**\n\n**Szersza kompatybilność Node.js: ** Skorygowane Node.js usunięto `{„node”: „>=18.0.0\"}` w `dependencies` w `io-package.json`. T",
-        "uk": "* 🔧 Сумісність та обслуговування**\n\n**Ширша сумісність Node.js: ** Коригований Node.js видалений `{«вузол»: «>=18.0.0\"}` у `залежності` у `io-package.json`. Т",
-        "zh-cn": "* 🔧 兼容性和维护**\n\n**更广泛的 Node.js 兼容性：** 调整后的 Node.js 在 `io-package.json` 的 `依赖项`中删除了 `{ “node”: “>=18.0.0\"} `。T"
       }
     },
     "titleLang": {

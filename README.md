@@ -89,8 +89,7 @@ You might see red error messages in the installation log related to `node-gyp`, 
 
 [Info English](documentation/readme_en.md)
 //### **WORK IN PROGRESS**
-
-### **WORK IN PROGRESS**
+### 0.20.4 (2026-10-24)
 
 **🔧 Maintenance & Compatibility**
 
@@ -131,14 +130,6 @@ You might see red error messages in the installation log related to `node-gyp`, 
 - **Update Notifications:** Added a new configuration tab to set a custom cron schedule and enable optional Telegram notifications when a new firmware version is released.
 - **New Update Datapoints:** Added `firmware_available`, `firmware_update_available`, and `firmware_changelog` to the system info tree to directly expose update states and release notes in ioBroker.
 - **Manual Trigger Button:** Added a `check_firmware` button to manually initiate the update check process at any time.
-
-### 0.19.6 (2026-10-22)
-
-**🚀 Features & Enhancements**
-
-- **Defrost Request Datapoint:** Added `Information.03_Outputs.DefrostRequest2` (Defrost request) to monitor the active defrosting request of the heat pump directly from the RAM telemetry (Index 235).
-
-- **Defrost Request Datapoint:** Added `Information.03_Outputs.DefrostRequest` (Defrost request) to monitor the active defrosting request of the heat pump directly from the RAM telemetry (Index 234).
 
 ## License
 

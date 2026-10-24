@@ -23,6 +23,14 @@
 ### 0.1.0 (2026-07-09)
 
 - initial release
+## 0.19.6 (2026-10-22)
+
+**🚀 Features & Enhancements**
+
+- **Defrost Request Datapoint:** Added `Information.03_Outputs.DefrostRequest2` (Defrost request) to monitor the active defrosting request of the heat pump directly from the RAM telemetry (Index 235).
+
+- **Defrost Request Datapoint:** Added `Information.03_Outputs.DefrostRequest` (Defrost request) to monitor the active defrosting request of the heat pump directly from the RAM telemetry (Index 234).
+
 ## 0.19.4 (2026-10-20)
 
 **🔧 Compatibility & Maintenance**
