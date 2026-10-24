@@ -352,7 +352,7 @@ export async function updateStatusStrings(
 		}
 
 		const dpHeating = getDpPath('opStateHeatingString');
-		if (dpHeating) {
+		if (dpHeating && (adapter as any).createdStates.has(dpHeating)) {
 			await adapter.setStateChangedAsync(dpHeating, heatingStr, true);
 		}
 
@@ -405,18 +405,18 @@ export async function updateStatusStrings(
 			extStateStr = `${line1Text} ${line2Text} ${zeitStringText}`;
 
 			const dpDuration = getDpPath('heatpump_duration');
-			if (dpDuration) {
+			if (dpDuration && (adapter as any).createdStates.has(dpDuration)) {
 				await adapter.setStateChangedAsync(dpDuration, zeitStringDuration, true);
 			}
 		}
 
 		const dpExtState = getDpPath('heatpump_extendet_state_string');
-		if (dpExtState) {
+		if (dpExtState && (adapter as any).createdStates.has(dpExtState)) {
 			await adapter.setStateChangedAsync(dpExtState, stateStr, true);
 		}
 
 		const dpState = getDpPath('heatpump_state_string');
-		if (dpState) {
+		if (dpState && (adapter as any).createdStates.has(dpState)) {
 			await adapter.setStateChangedAsync(dpState, extStateStr, true);
 		}
 
@@ -440,7 +440,7 @@ export async function updateStatusStrings(
 		}
 
 		const dpHotWater = getDpPath('opStateHotWaterString');
-		if (dpHotWater) {
+		if (dpHotWater && (adapter as any).createdStates.has(dpHotWater)) {
 			await adapter.setStateChangedAsync(dpHotWater, hotWaterStr, true);
 		}
 
@@ -480,7 +480,7 @@ export async function updateStatusStrings(
 		}
 
 		const dpCooling = getDpPath('opStateCoolingString');
-		if (dpCooling) {
+		if (dpCooling && (adapter as any).createdStates.has(dpCooling)) {
 			await adapter.setStateChangedAsync(dpCooling, coolingStr, true);
 		}
 	} catch (err: unknown) {
