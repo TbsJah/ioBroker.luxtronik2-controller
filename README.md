@@ -100,6 +100,10 @@ You might see red error messages in the installation log related to `node-gyp`, 
 - **Translations:** Added missing i18n translations for all supported languages in the configuration dropdown menus (COP sources and ZIP control mode).
 - **Metadata:** Removed non-existent version entries from the `news` section in `io-package.json`.
 
+**✨ Features & Enhancements**
+
+- **Notification Center:** Introduced a dedicated notification category (`lwpSystem`) for firmware updates and system info to cleanly separate them from critical heat pump errors in the ioBroker UI.
+
 ## Changelog
 
 ### 0.20.1 (2026-10-22)
