@@ -21,8 +21,8 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
   mod
 ));
-var schedule = __toESM(require("node-schedule"));
 var utils = __toESM(require("@iobroker/adapter-core"));
+var schedule = __toESM(require("node-schedule"));
 var import_actionHandlers = require("./actionHandlers");
 var import_backupManager = require("./backupManager");
 var import_convert = require("./convert");
@@ -32,6 +32,7 @@ var import_logger = require("./logger");
 var import_modbusManager = require("./modbusManager");
 var import_notificationManager = require("./notificationManager");
 var import_objectManager = require("./objectManager");
+var import_pvManager = require("./pvManager");
 var import_rawFunctions = require("./rawFunctions");
 var import_stateMapping = require("./stateMapping");
 var import_svgGenerator = require("./svgGenerator");
@@ -204,6 +205,7 @@ class Luxtronik2Controller extends utils.Adapter {
     this.writeCyclesTotal = cycleTotalState && typeof cycleTotalState.val === "number" ? cycleTotalState.val : 0;
     this.scheduleMidnightReset();
     (0, import_zipManager.subscribeMotionSensors)(this);
+    await (0, import_pvManager.initPvManagement)(this);
     this.subscribeStates("*");
     this.modbusManager = new import_modbusManager.ModbusManager(this);
     if (config.modbus_active) {
@@ -850,11 +852,20 @@ class Luxtronik2Controller extends utils.Adapter {
     if (!state) {
       return;
     }
+    if (!id.startsWith(`${this.namespace}.`)) {
+      (0, import_pvManager.handlePvFeedInChange)(this, id, state);
+    }
     const isMotionSensor = await (0, import_zipManager.checkAndHandleMotionSensor)(this, id, state);
     if (isMotionSensor) {
       return;
     }
+    if (!id.startsWith(`${this.namespace}.`)) {
+      return;
+    }
     if (state.ack) {
+      if (id.endsWith("WP_BZ_akt")) {
+        await (0, import_pvManager.handlePvCycleCheck)(this, Number(state.val));
+      }
       return;
     }
     if (id.endsWith("check_firmware") && state.val === true) {

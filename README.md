@@ -90,6 +90,8 @@ You might see red error messages in the installation log related to `node-gyp`, 
 [Info English](documentation/readme_en.md)
 //### **WORK IN PROGRESS**
 
+## Changelog
+
 ### **WORK IN PROGRESS**
 
 **🚀 New Features**

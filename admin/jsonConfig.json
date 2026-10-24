@@ -810,7 +810,10 @@
 						"fusspunkt": "${data.fusspunkt}",
 						"endpunkt": "${data.endpunkt}"
 					},
-					"alsoDependsOn": ["fusspunkt", "endpunkt"],
+					"alsoDependsOn": [
+						"fusspunkt",
+						"endpunkt"
+					],
 					"style": {
 						"maxWidth": "800px",
 						"marginTop": "20px",
@@ -1717,7 +1720,10 @@
 				},
 				"header_pv_start": {
 					"type": "header",
-					"text": { "en": "Activation (Boost)", "de": "Aktivierung (Einschaltbedingungen)" },
+					"text": {
+						"en": "Activation (Boost)",
+						"de": "Aktivierung (Einschaltbedingungen)"
+					},
 					"size": 5,
 					"hidden": "!data.pv_active",
 					"xs": 12,
@@ -1790,7 +1796,10 @@
 				},
 				"header_pv_stop": {
 					"type": "header",
-					"text": { "en": "Deactivation (Reset)", "de": "Deaktivierung (Rückfallbedingungen)" },
+					"text": {
+						"en": "Deactivation (Reset)",
+						"de": "Deaktivierung (Rückfallbedingungen)"
+					},
 					"size": 5,
 					"hidden": "!data.pv_active",
 					"xs": 12,

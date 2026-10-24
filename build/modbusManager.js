@@ -34,7 +34,6 @@ module.exports = __toCommonJS(modbusManager_exports);
 var import_modbus_serial = __toESM(require("modbus-serial"));
 var import_logger = require("./logger");
 class ModbusManager {
-  client;
   /** Indicates whether the Modbus interface on the heat pump is reachable */
   isAvailable = false;
   adapter;
@@ -47,7 +46,6 @@ class ModbusManager {
    */
   constructor(adapter) {
     this.adapter = adapter;
-    this.client = new import_modbus_serial.default();
     this.host = adapter.config.host || "192.168.178.81";
     this.port = adapter.config.modbus_port ? Number(adapter.config.modbus_port) : 502;
   }
@@ -61,11 +59,12 @@ class ModbusManager {
     if (!this.adapter.config.modbus_active) {
       return false;
     }
+    const client = new import_modbus_serial.default();
     try {
-      this.client.setTimeout(2e3);
-      await this.client.connectTCP(this.host, { port: this.port });
-      this.client.setID(1);
-      await this.client.readHoldingRegisters(1, 1);
+      client.setTimeout(2e3);
+      await client.connectTCP(this.host, { port: this.port });
+      client.setID(1);
+      await client.readHoldingRegisters(1, 1);
       (0, import_logger.writeLog)(`[Modbus] Pre-Check erfolgreich! Modbus TCP ist auf Port ${this.port} erreichbar.`, "info");
       this.isAvailable = true;
       return true;
@@ -75,8 +74,8 @@ class ModbusManager {
       this.isAvailable = false;
       return false;
     } finally {
-      if (this.client.isOpen) {
-        this.client.close();
+      if (client.isOpen) {
+        client.close();
       }
     }
   }
@@ -89,13 +88,14 @@ class ModbusManager {
     if (!this.isAvailable || !this.adapter.config.modbus_active) {
       return null;
     }
+    const client = new import_modbus_serial.default();
     try {
-      this.client.setTimeout(2500);
-      await this.client.connectTCP(this.host, { port: this.port });
-      this.client.setID(1);
-      const holdingRes = await this.client.readHoldingRegisters(0, 24);
+      client.setTimeout(2500);
+      await client.connectTCP(this.host, { port: this.port });
+      client.setID(1);
+      const holdingRes = await client.readHoldingRegisters(0, 24);
       const holdings = holdingRes.data.map((val) => val > 32767 ? val - 65536 : val);
-      const coilRes = await this.client.readCoils(0, 14);
+      const coilRes = await client.readCoils(0, 14);
       const coils = coilRes.data;
       return { holdings, coils };
     } catch (err) {
@@ -105,8 +105,8 @@ class ModbusManager {
       }
       return null;
     } finally {
-      if (this.client.isOpen) {
-        this.client.close();
+      if (client.isOpen) {
+        client.close();
       }
     }
   }
@@ -123,20 +123,21 @@ class ModbusManager {
       (0, import_logger.writeLog)(`[Modbus] Abbruch: Modbus nicht erreichbar. Kann Register ${register} nicht schreiben.`, "warn");
       return;
     }
+    const client = new import_modbus_serial.default();
     try {
-      this.client.setTimeout(3e3);
-      await this.client.connectTCP(this.host, { port: this.port });
-      this.client.setID(1);
+      client.setTimeout(3e3);
+      await client.connectTCP(this.host, { port: this.port });
+      client.setID(1);
       if (isCoil) {
         const coilVal = value === 1 || Boolean(value);
-        await this.client.writeCoil(register, coilVal);
+        await client.writeCoil(register, coilVal);
         if (this.adapter.isDebugLogActive) {
           (0, import_logger.writeLog)(`[Modbus] Coil ${register} erfolgreich auf ${coilVal} gesetzt.`, "debug");
         }
       } else {
         const rounded = Math.round(Number(value));
         const wireValue = rounded < 0 ? 65536 + rounded : rounded;
-        await this.client.writeRegister(register, wireValue);
+        await client.writeRegister(register, wireValue);
         if (this.adapter.isDebugLogActive) {
           (0, import_logger.writeLog)(`[Modbus] Holding-Register ${register} erfolgreich auf ${rounded} gesetzt.`, "debug");
         }
@@ -145,8 +146,8 @@ class ModbusManager {
       const msg = err instanceof Error ? err.message : String(err);
       (0, import_logger.writeLog)(`[Modbus] Schreibfehler auf Register ${register}: ${msg}`, "error");
     } finally {
-      if (this.client.isOpen) {
-        this.client.close();
+      if (client.isOpen) {
+        client.close();
       }
     }
   }
