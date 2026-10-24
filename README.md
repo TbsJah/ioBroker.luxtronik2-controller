@@ -89,8 +89,7 @@ You might see red error messages in the installation log related to `node-gyp`, 
 
 [Info English](documentation/readme_en.md)
 //### **WORK IN PROGRESS**
-
-### **WORK IN PROGRESS**
+### 0.20.2 (2026-10-24)
 
 **🔧 Maintenance & Compatibility**
 
@@ -103,8 +102,6 @@ You might see red error messages in the installation log related to `node-gyp`, 
 **✨ Features & Enhancements**
 
 - **Notification Center:** Introduced a dedicated notification category (`lwpSystem`) for firmware updates and system info to cleanly separate them from critical heat pump errors in the ioBroker UI.
-
-## Changelog
 
 ### 0.20.1 (2026-10-22)
 
@@ -135,12 +132,6 @@ You might see red error messages in the installation log related to `node-gyp`, 
 **🔧 Compatibility & Maintenance**
 
 - **Hybrid Modbus Value Persistence:** Prevented native 3003 telemetry polling (EEPROM) from overwriting volatile parameters actively managed via Modbus TCP (RAM) in the ioBroker object tree.
-
-### 0.19.3 (2026-10-20)
-
-**🔧 Compatibility & Maintenance**
-
-- **Broader Node.js Compatibility:** Adjusted Node.js removed `{ "node": ">=18.0.0" }` in `dependencies` in `io-package.json`. T
 
 ## License
 

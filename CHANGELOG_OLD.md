@@ -23,6 +23,12 @@
 ### 0.1.0 (2026-07-09)
 
 - initial release
+## 0.19.3 (2026-10-20)
+
+**🔧 Compatibility & Maintenance**
+
+- **Broader Node.js Compatibility:** Adjusted Node.js removed `{ "node": ">=18.0.0" }` in `dependencies` in `io-package.json`. T
+
 ## 0.19.2 (2026-10-20)
 
 **🔧 Compatibility & Maintenance**
