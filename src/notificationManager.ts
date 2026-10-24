@@ -310,8 +310,8 @@ export async function sendUpdateNotification(adapter: LuxtronikAdapter, message:
 	// 1. ioBroker Notification Center (Glocke)
 	if (config.update_check_notification === true) {
 		if (typeof adapter.registerNotification === 'function') {
-			// Wir nutzen die bekannte Kategorie 'lwpError', damit ioBroker die Nachricht nicht verwirft
-			await adapter.registerNotification('luxtronik2-controller', 'lwpError', message);
+			// Neue Kategorie 'lwpSystem' statt 'lwpError' nutzen
+			await adapter.registerNotification('luxtronik2-controller', 'lwpSystem', message);
 			writeLog('ioBroker-Benachrichtigung (Glocke) über neues Firmware-Update erstellt.', 'info');
 		} else {
 			writeLog('🚨 ioBroker Notification Center (Glocke) nicht verfügbar.', 'warn');

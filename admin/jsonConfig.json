@@ -1316,21 +1316,48 @@
 						{
 							"label": {
 								"en": "Via Luxtronik controller (Internal)",
-								"de": "Über Luxtronik Regler (Intern)"
+								"de": "Über Luxtronik Regler (Intern)",
+								"ru": "Через контроллер Luxtronik (Внутренний)",
+								"pt": "Via controlador Luxtronik (Interno)",
+								"nl": "Via Luxtronik regelaar (Intern)",
+								"fr": "Via le contrôleur Luxtronik (Interne)",
+								"it": "Tramite controller Luxtronik (Interno)",
+								"es": "A través del controlador Luxtronik (Interno)",
+								"pl": "Przez sterownik Luxtronik (Wewnętrzny)",
+								"uk": "Через контролер Luxtronik (Внутрішній)",
+								"zh-cn": "通过 Luxtronik 控制器 (内部)"
 							},
 							"value": "controller"
 						},
 						{
 							"label": {
 								"en": "Via external actor (e.g. Shelly)",
-								"de": "Über externen Aktor (z.B. Shelly)"
+								"de": "Über externen Aktor (z.B. Shelly)",
+								"ru": "Через внешний актуатор (например, Shelly)",
+								"pt": "Via ator externo (ex. Shelly)",
+								"nl": "Via externe actor (bijv. Shelly)",
+								"fr": "Via un acteur externe (ex. Shelly)",
+								"it": "Tramite attuatore esterno (es. Shelly)",
+								"es": "A través de actor externo (ej. Shelly)",
+								"pl": "Przez zewnętrzny aktor (np. Shelly)",
+								"uk": "Через зовнішній актуатор (наприклад, Shelly)",
+								"zh-cn": "通过外部执行器 (例如 Shelly)"
 							},
 							"value": "actor"
 						},
 						{
 							"label": {
 								"en": "Via Modbus TCP (Hybrid)",
-								"de": "Über Modbus TCP (Hybrid)"
+								"de": "Über Modbus TCP (Hybrid)",
+								"ru": "Через Modbus TCP (Гибрид)",
+								"pt": "Via Modbus TCP (Híbrido)",
+								"nl": "Via Modbus TCP (Hybride)",
+								"fr": "Via Modbus TCP (Hybride)",
+								"it": "Tramite Modbus TCP (Ibrido)",
+								"es": "A través de Modbus TCP (Híbrido)",
+								"pl": "Przez Modbus TCP (Hybryda)",
+								"uk": "Через Modbus TCP (Гібрид)",
+								"zh-cn": "通过 Modbus TCP (混合)"
 							},
 							"value": "modbus"
 						}
@@ -10983,7 +11010,12 @@
 						"de": "Automatisch nach Firmware-Updates suchen"
 					},
 					"newLine": true,
-					"default": false
+					"default": false,
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
 				},
 				"update_check_cron": {
 					"type": "cron",
@@ -10992,7 +11024,12 @@
 						"de": "Zeitplan für automatische Prüfung"
 					},
 					"default": "0 12 * * *",
-					"hidden": "!data.update_check_active"
+					"hidden": "!data.update_check_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 6,
+					"lg": 6,
+					"xl": 6
 				},
 				"update_check_timeout": {
 					"type": "number",
@@ -11002,8 +11039,12 @@
 					},
 					"default": 120,
 					"min": 10,
-					"max": 600,
-					"hidden": "!data.update_check_active"
+					"hidden": "!data.update_check_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 6,
+					"lg": 6,
+					"xl": 6
 				},
 				"update_timeout_info": {
 					"type": "staticText",
@@ -11016,7 +11057,12 @@
 						"marginBottom": "15px",
 						"fontSize": "12px"
 					},
-					"hidden": "!data.update_check_active"
+					"hidden": "!data.update_check_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
 				},
 				"divider_notifications": {
 					"type": "divider",
@@ -11053,7 +11099,12 @@
 						"de": "Telegram-Nachricht senden"
 					},
 					"default": false,
-					"hidden": "!data.update_check_active"
+					"hidden": "!data.update_check_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 6,
+					"lg": 6,
+					"xl": 6
 				},
 				"update_check_notification": {
 					"type": "checkbox",
@@ -11062,7 +11113,12 @@
 						"de": "Als ioBroker-Benachrichtigung (Glocke) zeigen"
 					},
 					"default": false,
-					"hidden": "!data.update_check_active"
+					"hidden": "!data.update_check_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 6,
+					"lg": 6,
+					"xl": 6
 				}
 			}
 		},

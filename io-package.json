@@ -1,296 +1,300 @@
 {
-  "common": {
-    "name": "luxtronik2-controller",
-    "version": "0.20.1",
-    "news": {
-      "0.20.1": {
-        "en": "*🐛 Bugfixes & Tweaks**\n\n**Modbus Factor Correction:** Explicitly set the scaling factor for the heating target temperature offset (Luxtronik ID 1 / Holding 23) to `10` to correctly handle and display Modbus TCP values in tenths of a degree (e.g., 5.0 °C instead of 50).\n**Configuration UI:** Clarified the English and German labels for heating parameters (such as base point and parallel offset) in the adapter settings to prevent mapping confusion.",
-        "de": "* 🐛 Bugfixes & Tweaks**\n\n**Modbus-Faktorkorrektur: ** Setzen Sie den Skalierungsfaktor für den Heiz-Zieltemperatur-Offset (Luxtronik ID 1/Holding 23) explizit auf `10`, um Modbus-TCP-Werte korrekt in Zehntelgrad anzuzeigen (z. B. 5,0 °C statt 50).\n**Configuration UI: ** Die englischen und deutschen Bezeichnungen für Heizparameter (wie Basispunkt und Parallelversatz) in den Adaptereinstellungen wurden geklärt.",
-        "ru": "* 🐛 Исправления ошибок и изменения**\n\n**Коррекция коэффициента Modbus: ** Явно задайте коэффициент масштабирования для смещения целевой температуры нагрева (Luxtronik ID 1/Holding 23) равным «10», чтобы правильно обрабатывать и отображать значения Modbus TCP в десятых долях градуса (например, 5,0 °C вместо 50).\n**Пользовательский интерфейс конфигурации: ** Уточнил английские и немецкие надписи параметров нагрева (таких как базовая точка и параллельное смещение) в настройках адаптера, чтобы избежать путаницы при сопоставлении.",
-        "pt": "* 🐛 Correções e ajustas**\n\n**Correção do fator Modbus: ** Defina explicitamente o fator de escala da temperatura alvo de aquecimento (Luxtronik ID 1/Holding 23) para `10` para exibir e manipular corretamente os valores de TCP do Modbus em décimos de grau (p. ex., 5,0 °C em vez de 50).\n**UI de configuração: ** Esclareceu os rótulos em inglês e alemão dos parâmetros de aquecimento (como ponto base e desvio paralelo) no adaptador para evitar confusão no mapeamento.",
-        "nl": "* 🐛 Oplossingen en aanpassingen van bug**\n\n**Modbus-factorcorrectie: ** Stel de schaalfactor voor de verschuiving van de doeltemperatuur van de verwarming (Luxtronik ID 1/Holding 23) expliciet in op `10` om de Modbus TCP-waarden in tienden van een graad correct te verwerken en weer te geven (bijv. 5,0 °C in plaats van 50).\n**Configuratie-gebruikersinterface: ** De Engelse en Duitse labels voor verwarmingsparameters (zoals basispunt en parallelle offset) in de adapterinstellingen zijn verduidelijkt om verwarring in de kaarten te voorkomen.",
-        "fr": "* 🐛 Corrections et modifications**\n\n**Correction du facteur Modbus :** Réglez explicitement le facteur d'échelle du décalage de température cible (Luxtronik ID 1/Holding 23) sur « 10 » pour gérer et afficher correctement les valeurs Modbus TCP en dixièmes de degré (par exemple, 5,0 °C au lieu de 50).\n**Interface utilisateur :** Clarification des libellés anglais et allemand des paramètres de chauffage (point de base et décalage parallèle) dans les paramètres de l'adaptateur pour éviter toute confusion.",
-        "it": "* 🐛 Bugfix e tweak**\n\n**Imposta esplicitamente il fattore di scala per l'offset della temperatura nominale di riscaldamento (Luxtronik ID 1/Holding 23) su `10` per gestire e visualizzare correttamente i valori Modbus TCP in decimi di grado (ad es. 5,0 °C anziché 50).\n**UI di configurazione: ** Ha chiarito le etichette in inglese e tedesco per i parametri di riscaldamento (come punto base e offset parallelo) per evitare confusioni.",
-        "es": "* 🐛 Correcciones y ajustes**\n\n**Corrección del factor Modbus: ** Establezca explícitamente el factor de escala del desfase de temperatura objetivo de calefacción (Luxtronik ID 1/Holding 23) en 10 para gestionar y mostrar correctamente los valores Modbus TCP en décimas de grado (por ejemplo, 5,0 °C en lugar de 50).\n**Interfaz de usuario: ** Se aclararon las etiquetas en inglés y alemán de los parámetros de calefacción (punto base y desfase paralelo) en los ajustes del adaptador para evitar confusiones en los mapas.",
-        "pl": "* 🐛 Poprawki błędów i poprawki**\n\n**Korekcja współczynnika Modbusa: ** Wyraźnie ustaw współczynnik skalowania docelowego przesunięcia temperatury ogrzewania (Luxtronik ID 1/Holding 23) na „10”, aby poprawnie obsługiwać i wyświetlać wartości TCP Modbus w dziesiątych stopniach (np. 5,0 °C zamiast 50).\n**Interfejs konfiguracji: ** Wyjaśniono angielskie i niemieckie etykiety parametrów ogrzewania (takich jak punkt bazowy i przesunięcie równoległe) w ustawieniach adaptera, aby zapobiec nieporozumieniom w mapowaniu.",
-        "uk": "* 🐛 Виправлення помилок та налаштування**\n\n**Корекція коефіцієнта Modbus: ** Чітко встановіть коефіцієнт масштабування для зміщення цільової температури нагріву (Luxtronik ID 1/Holding 23) на `10`, щоб правильно обробляти та відображати значення Modbus TCP у десятих частках градуса (наприклад, 5.0°C замість 50).\n**Інтерфейс конфігурації: ** Уточнено англійську та німецьку етикетки параметрів нагріву (таких як базова точка та паралельний зсув) у налаштуваннях адаптера, щоб запобігти плутаниці відображення.",
-        "zh-cn": "* 🐛 错误修复和调整**\n\n**Modbus 系数校正：** 明确将加热目标温度偏移的缩放系数（Luxtronik ID 1/Holding 23）设置为 `10`，以正确处理和显示以十分之一度为单位的 Modbus TCP 值（例如，5.0 °C 而不是 50）。\n**配置用户界面：** 阐明了适配器设置中加热参数（例如基点和平行偏移）的英文和德文标签，以防止映射混淆。"
-      },
-      "0.20.0": {
-        "en": "*🚀 Features & Enhancements**\n\n**Automatic Firmware Update Check:** Added a background service to automatically check the official AIT download portal for new heat pump firmware updates.\n**Update Notifications:** Added a new configuration tab to set a custom cron schedule and enable optional Telegram notifications when a new firmware version is released.\n**New Update Datapoints:** Added `firmware_available`, `firmware_update_available`, and `firmware_changelog` to the system info tree to directly expose update states and release notes in ioBroker.\n**Manual Trigger Button:** Added a `check_firmware` button to manually initiate the update check process at any time.",
-        "de": "* 🚀 Funktionen & Erweiterungen**\n\n**Automatischer Firmware-Check: ** Es wurde ein Dienst hinzugefügt, der das offizielle AIT-Downloadportal nach neuen Wärmepumpen-Firmwareupdates sucht.\n**Updates: ** Ein neuer Konfigurationstab für Cron-Pläne und optionale Telegram-Benachrichtigungen bei Firmware-Versionen hinzugefügt.\n**Neue Update-Datenpunkte: ** `firmware_available`, `firmware_update_available` und `firmware_changelog` zum Systeminfobaum hinzugefügt, um Aktualisierungsstatus und Versionshinweise direkt in ioBroker anzuzeigen.\n**Manueller Auslöser: ** Es wurde eine `check_firmware`-Taste hinzugefügt, um das Update jederzeit manuell zu prüfen.",
-        "ru": "* 🚀 Функции и улучшения**\n\n**Автоматическая проверка обновления микропрограммного обеспечения: ** Добавлена фоновая служба для автоматической проверки обновлений прошивки тепловых насосов на официальном портале загрузок AIT.\n**Уведомления об обновлениях: ** Добавлена новая вкладка конфигурации, позволяющая настроить собственное расписание cron и включить дополнительные уведомления Telegram при выходе новой версии прошивки.\n**Новые точки обновления: ** Добавлены `firmware_available`, `firmware_update_available` и `firmware_changelog` в системное информационное дерево для непосредственного отображения состояний обновлений и примечаний к выпуску в IOBroker.\n**Кнопка ручного запуска: ** Добавлена кнопка `check_firmware` для ручного запуска процесса проверки обновлений в любое время.",
-        "pt": "* 🚀 Recursos e melhores**\n\n**Foi adicionado um serviço em segundo plano para verificar automaticamente o portal oficial de download da AIT para novas atualizações de firmware de bombas de calor.\n**Notificações de atualização: ** Foi adicionada uma nova guia para personalizar o cron e ativar as notificações opcionais do Telegram.\n**Novos pontos de dados: ** Foram adicionados `firmware_available`, `firmware_update_available` e `firmware_changelog` à árvore de dados do sistema para expor diretamente os estados e notas de lançamento no IOBroker.\n**Botão de acionamento manual: ** Adicionado o botão `check_firmware` para iniciar a atualização a qualquer momento.",
-        "nl": "* 🚀 Kenmerken en verbeteringen**\n\n**Automatische controle van de firmware-update: ** Een achtergrondservice toegevoegd om automatisch het officiële AIT-downloadportaal te controleren op nieuwe firmware-updates voor de warmtepomp.\n**Updatemeldingen: ** Een nieuw configuratietabblad toegevoegd om een aangepast cron-schema in te stellen en optionele Telegram-meldingen in te schakelen wanneer een nieuwe firmwareversie wordt uitgebracht.\n**Nieuwe updatedatapunten: ** `firmware_available`, `firmware_update_available` en `firmware_changelog` toegevoegd aan de systeeminformatiestructuur om de updatestatus en release-opmerkingen rechtstreeks in IOBroker weer te geven.\n**Handmatige triggerknop: ** Een `check_firmware'-knop toegevoegd om het updatecontroleproces op elk gewenst moment handmatig te starten.",
-        "fr": "* 🚀 Fonctionnalités et améliorations**\n\n**Vérification automatique du firmware :** Ajout d'un service d'arrière-plan permettant de consulter automatiquement les mises à jour du firmware des pompes à chaleur.\n**Notifications de mise à jour :** Ajout d'un nouvel onglet pour définir un calendrier Cron personnalisé et activer les notifications Telegram en cas de sortie du firmware.\n**Nouveaux points de mise à jour :** Ajout de « firmware_available », « firmware_update_available » et « firmware_changelog » à l'arborescence du système pour exposer directement l'état des mises à jour et les notes de version dans IOBroker.\n**Déclencheur manuel :** Ajout d'un bouton « check_firmware » pour lancer la vérification des mises à jour à tout moment.",
-        "it": "* 🚀 Funzioni e migliorie**\n\n**Controllo automatico del firmware: ** Aggiunto un servizio in background per il download ufficiale di AIT per le nuove pompe di calore.\n**Notifiche di aggiornamento: ** Aggiunta una nuova scheda per impostare un cron personalizzato e attivare le notifiche opzionali di Telegram.\n**Nuovi datapoint di aggiornamento: ** Aggiunti `firmware_available`, `firmware_update_available` e `firmware_changelog` al system info tree per esporre direttamente gli stati e le note di rilascio in IOBroker.\n**Aggiunto un pulsante `check_firmware` per avviare manualmente la verifica degli aggiornamenti in qualsiasi momento.",
-        "es": "* 🚀 Funciones y mejoras**\n\n**Comprobación automática del firmware: ** Se ha añadido un servicio en segundo plano para comprobar automáticamente el portal oficial de descargas de AIT.\n**Notificaciones de actualización: ** Se ha añadido una nueva pestaña de configuración para fijar un cron personalizado y recibir notificaciones de Telegram cuando salga una nueva versión del firmware.\n**Nuevos puntos de datos de actualización: ** Se han añadido «firmware_available» y «firmware_changelog» al árbol de información del sistema para ver directamente los estados de las actualizaciones y las notas de versión de ioBroker.\n**Botón de activación manual: ** Se ha añadido un botón `check_firmware` para iniciar el proceso de actualización en cualquier momento.",
-        "pl": "* 🚀 Funkcje i ulepszenia**\n\n**Automatyczne sprawdzanie aktualizacji oprogramowania układowego: ** Dodano usługę w tle, aby automatycznie sprawdzić oficjalny portal pobierania AIT pod kątem nowych aktualizacji oprogramowania układowego pompy ciepła.\n**Aktualizuj powiadomienia: ** Dodano nową kartę konfiguracji, aby ustawić niestandardowy harmonogram cron i włączyć opcjonalne powiadomienia Telegram po wydaniu nowej wersji oprogramowania układowego.\n**Nowe punkty danych aktualizacji: ** Dodano `firmware_available`, `firmware_update_available` i `firmware_changelog` do drzewa informacji systemowych, aby bezpośrednio wyświetlić stany aktualizacji i notatki o wydaniu w iOBroker.\n**Przycisk wyzwalania ręcznego: ** Dodano przycisk „check_firmware”, aby ręcznie rozpocząć proces sprawdzania aktualizacji w dowolnym momencie.",
-        "uk": "* 🚀 Функції та покращення**\n\n**Автоматична перевірка оновлення мікропрограми: ** Додано фонову службу для автоматичної перевірки офіційного порталу завантаження AIT на наявність нових оновлень мікропрограмного забезпечення теплового насоса.\n**Оновлення сповіщень: ** Додана нова вкладка конфігурації, щоб встановити власний розклад cron та увімкнути необов'язкові сповіщення Telegram при випуску нової версії мікропрограми.\n**Нові пункти оновлення: ** Додано `firmware_available`, `firmware_update_available` та `firmware_changelog` до системного інформаційного дерева для безпосереднього відображення станів оновлення та приміток до випуску в IObroker.\n**Кнопка запуску вручну: ** Додана кнопка `check_firmware` для ручного запуску процесу перевірки оновлення в будь-який час.",
-        "zh-cn": "* 🚀 功能和增强功能**\n\n**自动固件更新检查：** 添加了后台服务，可自动检查官方 AIT 下载门户是否有新的热泵固件更新。\n**更新通知：** 添加了新的配置选项卡，用于设置自定义 cron 时间表并在发布新固件版本时启用可选的 Telegram 通知。\n**新更新数据点：** 在系统信息树中添加了 “固件可用”、“firmware_update_available” 和 “firmware_changelog”，以直接在 IOBroker 中显示更新状态和发行说明。\n**手动触发按钮：** 添加了 “check_firmware” 按钮，可随时手动启动更新检查流程。"
-      },
-      "0.19.6": {
-        "en": "*🚀 Features & Enhancements**\n\n**Defrost Request Datapoint:** Added `Information.03_Outputs.DefrostRequest2` (Defrost request) to monitor the active defrosting request of the heat pump directly from the RAM telemetry (Index 235).\n\n**Defrost Request Datapoint:** Added `Information.03_Outputs.DefrostRequest` (Defrost request) to monitor the active defrosting request of the heat pump directly from the RAM telemetry (Index 234).",
-        "de": "* 🚀 Funktionen & Erweiterungen**\n\n**Abtauanfrage: ** `Information.03_outputs.defrostRequest2` (Abtauanfrage) hinzugefügt, um die aktive Abtauanfrage der Wärmepumpe direkt aus der RAM-Telemetrie zu überwachen (Index 235).\n\n**Abtauanfrage: ** `Information.03_outputs.defrostRequest` (Abtauanfrage) hinzugefügt, um die aktive Abtauanfrage der Wärmepumpe direkt aus der RAM-Telemetrie zu überwachen (Index 234).",
-        "ru": "* 🚀 Функции и улучшения**\n\n**Точка данных запроса на размораживание: ** Добавлена функция `Information.03_outputs.DefrostRequest2` (запрос на размораживание) для отслеживания активного запроса на размораживание теплового насоса непосредственно из телеметрии ОЗУ (индекс 235).\n\n**Точка данных запроса на размораживание: ** Добавлена функция `Information.03_outputs.DefrostRequest` (запрос на размораживание) для отслеживания активного запроса на размораживание теплового насоса непосредственно из телеметрии ОЗУ (индекс 234).",
-        "pt": "* 🚀 Recursos e melhores**\n\n**Ponto de dados de solicitação de degelo: ** Adicionado `information.03_outputs.defrostRequest2` para monitorar o pedido ativo de degelo da bomba de calor diretamente da telemetria RAM (Índice 235).\n\n**Ponto de dados de solicitação de degelo: ** Adicionado `information.03_outputs.defrostRequest` para monitorar a solicitação ativa de degelo da bomba de calor diretamente da telemetria RAM (Índice 234).",
-        "nl": "* 🚀 Kenmerken en verbeteringen**\n\n**Datapunt voor ontdooiaanvraag: ** `Information.03_Outputs.DefrostRequest2` toegevoegd om het actieve ontdooiverzoek van de warmtepomp rechtstreeks via de RAM-telemetrie te controleren (Index 235).\n\n**Datapunt voor ontdooiaanvraag: ** `Information.03_Outputs.DefrostRequest` (Ontdooiverzoek) toegevoegd om het actieve ontdooiverzoek van de warmtepomp rechtstreeks via de RAM-telemetrie te controleren (index 234).",
-        "fr": "* 🚀 Fonctionnalités et améliorations**\n\n**Point de données de demande de dégivrage :** Ajout de « Information.03_outputs.defrostRequest2 » pour suivre la demande de dégivrage active de la pompe à chaleur directement à partir de la télémétrie RAM (Index 235).\n\n**Point de données de demande de dégivrage :** Ajout de « Information.03_outputs.defrostRequest » pour suivre la demande de dégivrage active de la pompe à chaleur directement à partir de la télémétrie RAM (Index 234).",
-        "it": "* 🚀 Funzioni e migliorie**\n\n**Defrost Request Datapoint: ** Aggiunto `Information.03_outputs.defrostRequest2` per monitorare la richiesta di sbrinamento attiva della pompa di calore direttamente dalla telemetria RAM (Indice 235).\n\n**Defrost Request Datapoint: ** Aggiunto `Information.03_outputs.defrostRequest` per monitorare la richiesta di sbrinamento attiva della pompa di calore direttamente dalla telemetria RAM (Indice 234).",
-        "es": "* 🚀 Funciones y mejoras**\n\n**Punto de datos de solicitud de descongelación: ** Se ha añadido `Information.03_Outputs.defrostRequest2 para supervisar la solicitud de descongelación activa de la bomba de calor directamente desde la telemetría de la RAM (índice 235).\n\n**Punto de datos de solicitud de descongelación: ** Se ha añadido `Information.03_Outputs.defrostRequest` para supervisar la solicitud de descongelación activa de la bomba de calor directamente desde la telemetría de la RAM (índice 234).",
-        "pl": "* 🚀 Funkcje i ulepszenia**\n\n**Punkt danych żądania rozmrażania: ** Dodano `Information.03_Outputs.DefrostRequest2` (Żądanie rozmrażania) w celu monitorowania aktywnego żądania rozmrażania pompy ciepła bezpośrednio z telemetrii RAM (indeks 235).\n\n**Punkt danych żądania rozmrażania: ** Dodano `Information.03_Outputs.DefrostRequest` (żądanie rozmrażania) w celu monitorowania aktywnego żądania rozmrażania pompy ciepła bezpośrednio z telemetrii RAM (indeks 234).",
-        "uk": "* 🚀 Функції та покращення**\n\n**Запит на розморожування даних: ** Додано `information.03_outputs.defrostrequest2` (Запит на розморожування) для моніторингу активного запиту на розморожування теплового насоса безпосередньо з телеметрії оперативної пам'яті (Індекс 235).\n\n**Запит на розморожування даних: ** Додано `information.03_outputs.defrostRequest` (запит на розморожування) для моніторингу активного запиту на розморожування теплового насоса безпосередньо з телеметрії оперативної пам'яті (Індекс 234).",
-        "zh-cn": "* 🚀 功能和增强功能**\n\n**解冻请求数据点：** 添加了 `information.03_outputs.defrostRequest2`（解冻请求），以直接从内存遥测（索引 235）监控热泵的有效除霜请求。\n\n**解冻请求数据点：** 添加了 `information.03_outputs.defrostRequest`（解冻请求），以直接从内存遥测（索引 234）监控热泵的有效除霜请求。"
-      },
-      "0.19.5": {
-        "en": "*🚀 Features & Enhancements**\n\n**Defrost Request Datapoint:** Added `Information.03_Outputs.DefrostRequest` (Defrost request) to monitor the active defrosting request of the heat pump directly from the RAM telemetry (Index 234).",
-        "de": "* 🚀 Funktionen & Erweiterungen**\n\n**Abtauanfrage: ** `Information.03_outputs.defrostRequest` (Abtauanfrage) hinzugefügt, um die aktive Abtauanfrage der Wärmepumpe direkt aus der RAM-Telemetrie zu überwachen (Index 234).",
-        "ru": "* 🚀 Функции и улучшения**\n\n**Точка данных запроса на размораживание: ** Добавлена функция `Information.03_outputs.DefrostRequest` (запрос на размораживание) для отслеживания активного запроса на размораживание теплового насоса непосредственно из телеметрии ОЗУ (индекс 234).",
-        "pt": "* 🚀 Recursos e melhores**\n\n**Ponto de dados de solicitação de degelo: ** Adicionado `information.03_outputs.defrostRequest` para monitorar a solicitação ativa de degelo da bomba de calor diretamente da telemetria RAM (Índice 234).",
-        "nl": "* 🚀 Kenmerken en verbeteringen**\n\n**Datapunt voor ontdooiaanvraag: ** `Information.03_Outputs.DefrostRequest` (Ontdooiverzoek) toegevoegd om het actieve ontdooiverzoek van de warmtepomp rechtstreeks via de RAM-telemetrie te controleren (index 234).",
-        "fr": "* 🚀 Fonctionnalités et améliorations**\n\n**Point de données de demande de dégivrage :** Ajout de « Information.03_outputs.defrostRequest » pour suivre la demande de dégivrage active de la pompe à chaleur directement à partir de la télémétrie RAM (Index 234).",
-        "it": "* 🚀 Funzioni e migliorie**\n\n**Defrost Request Datapoint: ** Aggiunto `Information.03_outputs.defrostRequest` per monitorare la richiesta di sbrinamento attiva della pompa di calore direttamente dalla telemetria RAM (Indice 234).",
-        "es": "* 🚀 Funciones y mejoras**\n\n**Punto de datos de solicitud de descongelación: ** Se ha añadido `Information.03_Outputs.defrostRequest` para supervisar la solicitud de descongelación activa de la bomba de calor directamente desde la telemetría de la RAM (índice 234).",
-        "pl": "* 🚀 Funkcje i ulepszenia**\n\n**Punkt danych żądania rozmrażania: ** Dodano `Information.03_Outputs.DefrostRequest` (żądanie rozmrażania) w celu monitorowania aktywnego żądania rozmrażania pompy ciepła bezpośrednio z telemetrii RAM (indeks 234).",
-        "uk": "* 🚀 Функції та покращення**\n\n**Запит на розморожування даних: ** Додано `information.03_outputs.defrostRequest` (запит на розморожування) для моніторингу активного запиту на розморожування теплового насоса безпосередньо з телеметрії оперативної пам'яті (Індекс 234).",
-        "zh-cn": "* 🚀 功能和增强功能**\n\n**解冻请求数据点：** 添加了 `information.03_outputs.defrostRequest`（解冻请求），以直接从内存遥测（索引 234）监控热泵的有效除霜请求。"
-      },
-      "0.19.4": {
-        "en": "*🔧 Compatibility & Maintenance**\n\n**Hybrid Modbus Value Persistence:** Prevented native 3003 telemetry polling (EEPROM) from overwriting volatile parameters actively managed via Modbus TCP (RAM) in the ioBroker object tree.",
-        "de": "* 🔧 Kompatibilität und Wartung**\n\n**Hybrid Modbus Value Persistence: ** Hat verhindert, dass native 3003-Telemetrieabfragen (EEPROM) im ioBroker-Objektbaum aktiv über Modbus TCP (RAM) verwaltet werden.",
-        "ru": "* 🔧 Совместимость и обслуживание**\n\n**Постоянство значений в гибридном режиме Modbus: ** Предотвращение перезаписи изменчивых параметров, активно управляемых через Modbus TCP (RAM) в дереве объектов IOBroker, встроенным телеметрическим опросом 3003 (EEPROM).",
-        "pt": "* 🔧 Compatibilidade e manutenção**\n\n**Persistência híbrida do valor do Modbus: ** Impediu que a EEPROM nativa 3003 substituísse parâmetros voláteis gerenciados ativamente via Modbus TCP (RAM) na árvore de objetos IOBroker.",
-        "nl": "* 🔧 Compatibiliteit en onderhoud**\n\n**Hybrid Modbus Value Persistence: ** Voorkwam dat native 3003 telemetriepeilingen (EEPROM) vluchtige parameters overschreven die actief werden beheerd via Modbus TCP (RAM) in de IOBroker-objectstructuur.",
-        "fr": "* 🔧 Compatibilité et maintenance**\n\n**Persistance des valeurs Modbus hybrides :** Empêche l'écrasement des paramètres volatils gérés activement via Modbus TCP (RAM) dans l'arborescence d'objets d'IObroker grâce à l'EEPROM 3003.",
-        "it": "* 🔧 Compatibilità e manutenzione**\n\n**Hybrid Modbus Value Persistence: ** Ha impedito alla EEPROM 3003 nativa di sovrascrivere i parametri volatili gestiti attivamente tramite Modbus TCP (RAM) nell'albero degli oggetti IOBroker.",
-        "es": "* 🔧 Compatibilidad y mantenimiento**\n\n**Persistencia del valor del Modbus híbrido: ** Impidió que la EEPROM nativa del 3003 sobrescribiera los parámetros volátiles gestionados activamente a través de Modbus TCP (RAM) en el árbol de objetos de ioBroker.",
-        "pl": "* 🔧 Kompatybilność i konserwacja**\n\n**Trwałość wartości hybrydowego Modbusa: ** Zapobiegało nadpisywaniu zmiennych parametrów zmiennych aktywnie zarządzanych przez Modbus TCP (RAM) w drzewie obiektów ioBroker, natywne badanie telemetryczne 3003 (EEPROM).",
-        "uk": "* 🔧 Сумісність та обслуговування**\n\n**Стійкість значення гібридного Modbus: ** Заборонено перезаписувати нестабільні параметри, які активно керуються за допомогою Modbus TCP (RAM) у дереві об'єктів IObroker, що використовуються у власному телеметричному опитуванні 3003 (EEPROM).",
-        "zh-cn": "* 🔧 兼容性和维护**\n\n**混合 Modbus 价值持久化：** 防止原生 3003 遥测轮询 (EEPROM) 覆盖 IOBroker 对象树中通过 Modbus TCP (RAM) 主动管理的易失性参数。"
-      },
-      "0.19.3": {
-        "en": "*🔧 Compatibility & Maintenance**\n\n**Broader Node.js Compatibility:** Adjusted Node.js removed `{ \"node\": \">=18.0.0\" }` in `dependencies` in `io-package.json`. T",
-        "de": "* 🔧 Kompatibilität und Wartung**\n\n**Umfassender kompatibel mit Node.js: ** Node.js entfernt `{„node“: „>=18.0.0\"}` in `dependencies` in `io-package.json`. T",
-        "ru": "* 🔧 Совместимость и обслуживание**\n\n**Более широкая совместимость с Node.js: ** В файле Node.js исправлена ошибка «{«node»: «>=18.0.0\"} `из `зависимости` в `io-package.json`. T",
-        "pt": "* 🔧 Compatibilidade e manutenção**\n\n**Maior compatibilidade com Node.js: ** O Node.js ajustado removeu `{“node”: “>=18.0.0\"}` em `dependencies` em `io-package.json`. T",
-        "nl": "* 🔧 Compatibiliteit en onderhoud**\n\n**Bredere compatibiliteit met Node.js: ** Aangepaste Node.js heeft `{„node”: „>=18.0.0\"}` verwijderd in `dependencies` in `io-package.json`. T",
-        "fr": "* 🔧 Compatibilité et maintenance**\n\n**Compatibilité accrue avec Node.js :** Node.js ajusté a supprimé `{« node » : « >=18.0.0\"}` des dépendances de `io-package.json`. T",
-        "it": "* 🔧 Compatibilità e manutenzione**\n\n**Compatibilità più ampia con Node.js: ** Node.js modificato rimosso «>=18.0.0\"} nelle dipendenze in io-package.json. T",
-        "es": "* 🔧 Compatibilidad y mantenimiento**\n\n**Compatibilidad más amplia con Node.js: ** Node.js ajustado eliminado `{«node»: «>=18.0.0\"}` en `dependencias` en `io-package.json`. T",
-        "pl": "* 🔧 Kompatybilność i konserwacja**\n\n**Szersza kompatybilność Node.js: ** Skorygowane Node.js usunięto `{„node”: „>=18.0.0\"}` w `dependencies` w `io-package.json`. T",
-        "uk": "* 🔧 Сумісність та обслуговування**\n\n**Ширша сумісність Node.js: ** Коригований Node.js видалений `{«вузол»: «>=18.0.0\"}` у `залежності` у `io-package.json`. Т",
-        "zh-cn": "* 🔧 兼容性和维护**\n\n**更广泛的 Node.js 兼容性：** 调整后的 Node.js 在 `io-package.json` 的 `依赖项`中删除了 `{ “node”: “>=18.0.0\"} `。T"
-      },
-      "0.19.2": {
-        "en": "*🔧 Compatibility & Maintenance**\n\n**Broader Node.js Compatibility:** Adjusted Node.js engine requirement from `>=22` down to `>=18.0.0` in `package.json` and added `{ \"node\": \">=18.0.0\" }` to `dependencies` in `io-package.json`. This enables full compatibility with widely used Long-Term Support (LTS) releases (Node.js 18 and 20) while preventing installation on deprecated runtimes.\n**Hybrid Modbus Value Persistence:** Prevented native 3003 telemetry polling (EEPROM) from overwriting volatile parameters actively managed via Modbus TCP (RAM) in the ioBroker object tree.",
-        "de": "* 🔧 Kompatibilität und Wartung**\n\n**Breitere Kompatibilität mit Node.js: ** Die Engine-Anforderung von `>=22` auf `>=18.0.0` in `package.json` angepasst und `{„node“: „>=18.0.0\"}` zu `dependencies` in `io-package.json` hinzugefügt. Node.js Das ermöglicht volle Kompatibilität mit den gängigen LTS-Versionen (Node.js 18 und 20) und verhindert Installationen auf veralteten Runtimes.\n**Hybrid Modbus Value Persistence: ** Hat verhindert, dass native 3003-Telemetrieabfragen (EEPROM) im ioBroker-Objektbaum aktiv über Modbus TCP (RAM) verwaltet werden.",
-        "ru": "* 🔧 Совместимость и обслуживание**\n\n**Более широкая совместимость с Node.js: ** Изменены требования к движку Node.js с `>=22` до `>=18.0.0` в `package.json` и добавлено `{«node»: «>=18.0.0\"}` к `зависимости` в `io-package.json`. Это обеспечивает полную совместимость с широко используемыми версиями долгосрочной поддержки (LTS) (Node.js 18 и 20) и предотвращает установку в устаревших средах выполнения.\n**Постоянство значений в гибридном режиме Modbus: ** Предотвращение перезаписи изменчивых параметров, активно управляемых через Modbus TCP (RAM) в дереве объектов IOBroker, встроенным телеметрическим опросом 3003 (EEPROM).",
-        "pt": "* 🔧 Compatibilidade e manutenção**\n\n**Ampla compatibilidade com Node.js: ** Ajustou o requisito do motor Node.js de `>=22` para `>=18.0.0` em `package.json` e adicionou `{“node”: “>=18.0.0\"}` a `dependencies` em `io-package.json`. Isso permite total compatibilidade com as versões mais usadas de LTS (Node.js 18 e 20), evitando a instalação em runtimes obsoletos.\n**Persistência híbrida do valor do Modbus: ** Impediu que a EEPROM nativa 3003 substituísse parâmetros voláteis gerenciados ativamente via Modbus TCP (RAM) na árvore de objetos IOBroker.",
-        "nl": "* 🔧 Compatibiliteit en onderhoud**\n\n**Bredere compatibiliteit met Node.js: ** De vereiste engine voor Node.js is aangepast van `>=22` naar `>=18.0.0` in `package.json` en `{„node”: „>=18.0.0\"}` toegevoegd aan `dependencies` in `io-package.json`. Dit maakt volledige compatibiliteit mogelijk met veelgebruikte versies voor langdurige ondersteuning (LTS) (Node.js 18 en 20) en voorkomt tegelijkertijd de installatie bij verouderde runtimes.\n**Hybrid Modbus Value Persistence: ** Voorkwam dat native 3003 telemetriepeilingen (EEPROM) vluchtige parameters overschreven die actief werden beheerd via Modbus TCP (RAM) in de IOBroker-objectstructuur.",
-        "fr": "* 🔧 Compatibilité et maintenance**\n\n**Compatibilité accrue avec Node.js :** Les exigences relatives au moteur Node.js ont été ajustées de « >=22 » à « >=18.0.0 » dans « package.json » et ajout de « {« node » : « >=18.0.0\"} à « dependencies` dans `io-package.json`. Cela permet une compatibilité totale avec les versions LTS les plus utilisées (Node.js 18 et 20) tout en empêchant l'installation sur des moteurs obsolètes.\n**Persistance des valeurs Modbus hybrides :** Empêche l'écrasement des paramètres volatils gérés activement via Modbus TCP (RAM) dans l'arborescence d'objets d'IObroker grâce à l'EEPROM 3003.",
-        "it": "* 🔧 Compatibilità e manutenzione**\n\n**Compatibilità più ampia con Node.js: ** Modificato il requisito del motore Node.js da `>=22` a `>=18.0.0` in `package.json` e aggiunto `{ «node»: «>=18.0.0\"} `a `dependencies` in `io-package.json`. Ciò consente la piena compatibilità con le versioni LTS (Node.js 18 e 20) ampiamente utilizzate e impedisce l'installazione su runtime obsoleti.\n**Hybrid Modbus Value Persistence: ** Ha impedito alla EEPROM 3003 nativa di sovrascrivere i parametri volatili gestiti attivamente tramite Modbus TCP (RAM) nell'albero degli oggetti IOBroker.",
-        "es": "* 🔧 Compatibilidad y mantenimiento**\n\n**Compatibilidad más amplia con Node.js: ** Se ajustó el requisito del motor Node.js de `>=22` a `>=18.0.0` en `package.json` y se añadió `{«node»: «>=18.0.0\"}` a `dependencies` en `io-package.json`. Esto permite la total compatibilidad con las versiones de soporte a largo plazo (LTS) más utilizadas (Node.js 18 y 20) y evita que se instale en tiempos de ejecución obsoletos.\n**Persistencia del valor del Modbus híbrido: ** Impidió que la EEPROM nativa del 3003 sobrescribiera los parámetros volátiles gestionados activamente a través de Modbus TCP (RAM) en el árbol de objetos de ioBroker.",
-        "pl": "* 🔧 Kompatybilność i konserwacja**\n\n**Szersza kompatybilność Node.js: ** Skorygowano wymagania silnika Node.js z `>=22` do `>=18.0.0` w `package.json` i dodano `{„node”: „>=18.0.0\"}` do `dependencies` w `io-package.json`. Umożliwia to pełną kompatybilność z szeroko stosowanymi wersjami wsparcia długoterminowego (LTS) (Node.js 18 i 20), jednocześnie uniemożliwiając instalację w przestarzałych środowiskach wykonawczych.\n**Trwałość wartości hybrydowego Modbusa: ** Zapobiegało nadpisywaniu zmiennych parametrów zmiennych aktywnie zarządzanych przez Modbus TCP (RAM) w drzewie obiektów ioBroker, natywne badanie telemetryczne 3003 (EEPROM).",
-        "uk": "* 🔧 Сумісність та обслуговування**\n\n**Ширша сумісність Node.js: ** Скориговано вимоги до движка Node.js від `>=22` до `>=18.0.0` у `package.json` і додано `{«node»: «>=18.0.0\"}` до `залежності` у `io-package.json`. Це забезпечує повну сумісність із широко використовуваними випусками довгострокової підтримки (LTS) (Node.js 18 та 20), одночасно запобігаючи інсталяції на застарілих часах виконання.\n**Стійкість значення гібридного Modbus: ** Заборонено перезаписувати нестабільні параметри, які активно керуються за допомогою Modbus TCP (RAM) у дереві об'єктів IObroker, що використовуються у власному телеметричному опитуванні 3003 (EEPROM).",
-        "zh-cn": "* 🔧 兼容性和维护**\n\n**更广泛的 Node.js 兼容性：** 在 `package.json` 中将 Node.js 引擎要求从 `>=22` 调整为 `>=18.0.0`，并在 `io-package.json`的 `dependencies` 中将 `{“node”: “>=18.0.0\"}` 添加到 `dependencies` 中。这样可以与广泛使用的长期支持 (LTS) 版本（Node.js 18 和 20）完全兼容，同时防止在过时的运行时上进行安装。\n**混合 Modbus 价值持久化：** 防止原生 3003 遥测轮询 (EEPROM) 覆盖 IOBroker 对象树中通过 Modbus TCP (RAM) 主动管理的易失性参数。"
-      }
-    },
-    "titleLang": {
-      "en": "Luxtronik2 Controller",
-      "de": "Luxtronik2-Controller",
-      "ru": "Контроллер Luxtronik2",
-      "pt": "Controlador Luxtronik2",
-      "nl": "Luxtronik2-controller",
-      "fr": "Contrôleur Luxtronik2",
-      "it": "Controllore Luxtronik2",
-      "es": "Controlador Luxtronik2",
-      "pl": "Kontroler Luxtronik2",
-      "uk": "Контролер Luxtronik2",
-      "zh-cn": "Luxtronik2控制器"
-    },
-    "desc": {
-      "en": "Access and control of heat pumps with a Luxtronik 2.x controller",
-      "de": "Zugriff und Steuerung von Wärmepumpen mit einer Luxtronik 2.x Steuereinheit",
-      "ru": "Доступ и управление тепловыми насосами с контроллером Luxtronik 2.x",
-      "pt": "Acesso e controle de bombas de calor com um controlador Luxtronik 2.x",
-      "nl": "Toegang en controle van warmtepompen met een Luxtronik 2.x controller",
-      "fr": "Accès et contrôle des pompes à chaleur avec un contrôleur Luxtronik 2.x",
-      "it": "Accesso e controllo di pompe di calore con un controller Luxtronik 2.x",
-      "es": "Acceso y control de bombas de calor con un controlador Luxtronik 2.x",
-      "pl": "Dostęp i sterowanie pompami ciepła za pomocą sterownika Luxtronik 2.x",
-      "uk": "Доступ та управління тепловими насосами з контролером Luxtronik 2.x",
-      "zh-cn": "通过Luxtronik 2.x控制器访问和控制热泵"
-    },
-    "authors": [
-      "TbsJah <github.tbsjah@googlemail.com>"
-    ],
-    "keywords": [
-      "Luxtronik2",
-      "LWD50",
-      "Luft Wärme Pumpe",
-      "Heizung",
-      "LWP",
-      "Alpha InnoTec AIT",
-      "Buderus",
-      "Novelan"
-    ],
-    "licenseInformation": {
-      "type": "free",
-      "license": "MIT"
-    },
-    "platform": "Javascript/Node.js",
-    "icon": "luxtronik2-controller.png",
-    "enabled": true,
-    "extIcon": "https://raw.githubusercontent.com/TbsJah/ioBroker.luxtronik2-controller/main/admin/luxtronik2-controller.png",
-    "readme": "https://github.com/TbsJah/ioBroker.luxtronik2-controller/blob/main/README.md",
-    "loglevel": "info",
-    "tier": 3,
-    "mode": "daemon",
-    "type": "climate-control",
-    "compact": true,
-    "messagebox": true,
-    "connectionType": "local",
-    "dataSource": "poll",
-    "adminUI": {
-      "config": "json"
-    },
-    "dependencies": [
-      {
-        "js-controller": ">=7.0.7"
-      }
-    ],
-    "globalDependencies": [
-      {
-        "admin": ">=7.8.23"
-      }
-    ]
-  },
-  "native": {
-    "host": "192.168.178.81",
-    "port": 8889,
-    "interval": 30,
-    "fusspunkt": 21.7,
-    "endpunkt": 23,
-    "zip_aktiv_ww": 600,
-    "zip_aktiv": 120,
-    "sync_warmwater_target_temperature": 54,
-    "sync_hotwater_temperature_hysteresis": 10,
-    "sync_heating_system_circ_pump_voltage_minimal_heating": 3,
-    "sync_heating_system_circ_pump_voltage_nominal_heating": 7,
-    "sync_heating_system_circ_pump_voltage_minimal_water": 3,
-    "sync_heating_system_circ_pump_voltage_nominal_water": 10,
-    "sync_return_temperature_hysteresis": 1.5,
-    "zip_last_run_min": 600,
-    "regelung_aktiv": false,
-    "Heating_after_warmwater": true,
-    "telegram_enabled": false,
-    "notification_bell": false,
-    "telegram_receiver": "",
-    "telegram_instance": "",
-    "motionSensors": [],
-    "motion_sensors_aktiv": false,
-    "cop_calculation_active": false,
-    "cop_source_power": "internal",
-    "cop_oid_power_total": "",
-    "cop_source_thermal": "internal",
-    "cop_oid_thermal_total": ""
-  },
-  "notifications": [
-    {
-      "scope": "luxtronik2-controller",
-      "name": {
-        "en": "Luxtronik2-Controller",
-        "de": "Luxtronik2-Controller",
-        "ru": "Контроллер Luxtronik2",
-        "pt": "Controlador Luxtronik2",
-        "nl": "Luxtronik2-controller",
-        "fr": "Contrôleur Luxtronik2",
-        "it": "Controllore Luxtronik2",
-        "es": "Controlador Luxtronik2",
-        "pl": "Kontroler Luxtronik2",
-        "uk": "Контролер Luxtronik2",
-        "zh-cn": "Luxtronik2控制器"
-      },
-      "description": {
-        "en": "Notifications from the Luxtronik2-Controller adapter",
-        "de": "Benachrichtigungen vom Luxtronik2-Controller Adapter",
-        "ru": "Уведомления от адаптера Luxtronik2-Controller",
-        "pt": "Notificações do adaptador Luxtronik2-Controller",
-        "nl": "Meldingen van de Luxtronik2-Controller adapter",
-        "fr": "Notifications de l'adaptateur Luxtronik2-Controller",
-        "it": "Notifiche dall'adattatore Luxtronik2-Controller",
-        "es": "Notificaciones del adaptador Luxtronik2-Controller",
-        "pl": "Powiadomienia z adaptera Luxtronik2-Controller",
-        "uk": "Сповіщення від адаптера Luxtronik2-Controller",
-        "zh-cn": "来自 Luxtronik2-Controller 适配器的通知"
-      },
-      "categories": [
-        {
-          "category": "lwpError",
-          "name": {
-            "en": "Heat Pump Errors",
-            "de": "Wärmepumpen-Fehler",
-            "ru": "Ошибки теплового насоса",
-            "pt": "Erros da bomba de calor",
-            "nl": "Fouten warmtepomp",
-            "fr": "Erreurs de la pompe à chaleur",
-            "it": "Errori della pompa di calore",
-            "es": "Errores de la bomba de calor",
-            "pl": "Błędy pompy ciepła",
-            "uk": "Помилки теплового насоса",
-            "zh-cn": "热泵错误"
-          },
-          "severity": "alert",
-          "description": {
-            "en": "Error messages from the heating system",
-            "de": "Fehlermeldungen aus der Heizungsanlage",
-            "ru": "Сообщения об ошибках от системы отопления",
-            "pt": "Mensagens de erro do sistema de aquecimento",
-            "nl": "Foutmeldingen van het verwarmingssysteem",
-            "fr": "Messages d'erreur du système de chauffage",
-            "it": "Messaggi di errore dal sistema di riscaldamento",
-            "es": "Mensajes de error del sistema de calefacción",
-            "pl": "Komunikaty o błędach z systemu grzewczego",
-            "uk": "Повідомлення про помилки від системи опалення",
-            "zh-cn": "来自供暖系统的错误消息"
-          },
-          "regex": [],
-          "limit": 10
-        }
-      ]
-    }
-  ],
-  "objects": [],
-  "instanceObjects": [
-    {
-      "_id": "info",
-      "type": "channel",
-      "common": {
-        "name": "Information"
-      },
-      "native": {}
-    },
-    {
-      "_id": "backups",
-      "type": "meta",
-      "common": {
-        "name": "Luxtronik DTA Backups",
-        "type": "meta.user"
-      },
-      "native": {}
-    },
-    {
-      "_id": "info.connection",
-      "type": "state",
-      "common": {
-        "role": "indicator.connected",
-        "name": "Device or service connected",
-        "type": "boolean",
-        "read": true,
-        "write": false,
-        "def": false
-      },
-      "native": {}
-    }
-  ]
+	"common": {
+		"name": "luxtronik2-controller",
+		"version": "0.20.1",
+		"news": {
+			"0.20.1": {
+				"en": "*🐛 Bugfixes & Tweaks**\n\n**Modbus Factor Correction:** Explicitly set the scaling factor for the heating target temperature offset (Luxtronik ID 1 / Holding 23) to `10` to correctly handle and display Modbus TCP values in tenths of a degree (e.g., 5.0 °C instead of 50).\n**Configuration UI:** Clarified the English and German labels for heating parameters (such as base point and parallel offset) in the adapter settings to prevent mapping confusion.",
+				"de": "* 🐛 Bugfixes & Tweaks**\n\n**Modbus-Faktorkorrektur: ** Setzen Sie den Skalierungsfaktor für den Heiz-Zieltemperatur-Offset (Luxtronik ID 1/Holding 23) explizit auf `10`, um Modbus-TCP-Werte korrekt in Zehntelgrad anzuzeigen (z. B. 5,0 °C statt 50).\n**Configuration UI: ** Die englischen und deutschen Bezeichnungen für Heizparameter (wie Basispunkt und Parallelversatz) in den Adaptereinstellungen wurden geklärt.",
+				"ru": "* 🐛 Исправления ошибок и изменения**\n\n**Коррекция коэффициента Modbus: ** Явно задайте коэффициент масштабирования для смещения целевой температуры нагрева (Luxtronik ID 1/Holding 23) равным «10», чтобы правильно обрабатывать и отображать значения Modbus TCP в десятых долях градуса (например, 5,0 °C вместо 50).\n**Пользовательский интерфейс конфигурации: ** Уточнил английские и немецкие надписи параметров нагрева (таких как базовая точка и параллельное смещение) в настройках адаптера, чтобы избежать путаницы при сопоставлении.",
+				"pt": "* 🐛 Correções e ajustas**\n\n**Correção do fator Modbus: ** Defina explicitamente o fator de escala da temperatura alvo de aquecimento (Luxtronik ID 1/Holding 23) para `10` para exibir e manipular corretamente os valores de TCP do Modbus em décimos de grau (p. ex., 5,0 °C em vez de 50).\n**UI de configuração: ** Esclareceu os rótulos em inglês e alemão dos parâmetros de aquecimento (como ponto base e desvio paralelo) no adaptador para evitar confusão no mapeamento.",
+				"nl": "* 🐛 Oplossingen en aanpassingen van bug**\n\n**Modbus-factorcorrectie: ** Stel de schaalfactor voor de verschuiving van de doeltemperatuur van de verwarming (Luxtronik ID 1/Holding 23) expliciet in op `10` om de Modbus TCP-waarden in tienden van een graad correct te verwerken en weer te geven (bijv. 5,0 °C in plaats van 50).\n**Configuratie-gebruikersinterface: ** De Engelse en Duitse labels voor verwarmingsparameters (zoals basispunt en parallelle offset) in de adapterinstellingen zijn verduidelijkt om verwarring in de kaarten te voorkomen.",
+				"fr": "* 🐛 Corrections et modifications**\n\n**Correction du facteur Modbus :** Réglez explicitement le facteur d'échelle du décalage de température cible (Luxtronik ID 1/Holding 23) sur « 10 » pour gérer et afficher correctement les valeurs Modbus TCP en dixièmes de degré (par exemple, 5,0 °C au lieu de 50).\n**Interface utilisateur :** Clarification des libellés anglais et allemand des paramètres de chauffage (point de base et décalage parallèle) dans les paramètres de l'adaptateur pour éviter toute confusion.",
+				"it": "* 🐛 Bugfix e tweak**\n\n**Imposta esplicitamente il fattore di scala per l'offset della temperatura nominale di riscaldamento (Luxtronik ID 1/Holding 23) su `10` per gestire e visualizzare correttamente i valori Modbus TCP in decimi di grado (ad es. 5,0 °C anziché 50).\n**UI di configurazione: ** Ha chiarito le etichette in inglese e tedesco per i parametri di riscaldamento (come punto base e offset parallelo) per evitare confusioni.",
+				"es": "* 🐛 Correcciones y ajustes**\n\n**Corrección del factor Modbus: ** Establezca explícitamente el factor de escala del desfase de temperatura objetivo de calefacción (Luxtronik ID 1/Holding 23) en 10 para gestionar y mostrar correctamente los valores Modbus TCP en décimas de grado (por ejemplo, 5,0 °C en lugar de 50).\n**Interfaz de usuario: ** Se aclararon las etiquetas en inglés y alemán de los parámetros de calefacción (punto base y desfase paralelo) en los ajustes del adaptador para evitar confusiones en los mapas.",
+				"pl": "* 🐛 Poprawki błędów i poprawki**\n\n**Korekcja współczynnika Modbusa: ** Wyraźnie ustaw współczynnik skalowania docelowego przesunięcia temperatury ogrzewania (Luxtronik ID 1/Holding 23) na „10”, aby poprawnie obsługiwać i wyświetlać wartości TCP Modbus w dziesiątych stopniach (np. 5,0 °C zamiast 50).\n**Interfejs konfiguracji: ** Wyjaśniono angielskie i niemieckie etykiety parametrów ogrzewania (takich jak punkt bazowy i przesunięcie równoległe) w ustawieniach adaptera, aby zapobiec nieporozumieniom w mapowaniu.",
+				"uk": "* 🐛 Виправлення помилок та налаштування**\n\n**Корекція коефіцієнта Modbus: ** Чітко встановіть коефіцієнт масштабування для зміщення цільової температури нагріву (Luxtronik ID 1/Holding 23) на `10`, щоб правильно обробляти та відображати значення Modbus TCP у десятих частках градуса (наприклад, 5.0°C замість 50).\n**Інтерфейс конфігурації: ** Уточнено англійську та німецьку етикетки параметрів нагріву (таких як базова точка та паралельний зсув) у налаштуваннях адаптера, щоб запобігти плутаниці відображення.",
+				"zh-cn": "* 🐛 错误修复和调整**\n\n**Modbus 系数校正：** 明确将加热目标温度偏移的缩放系数（Luxtronik ID 1/Holding 23）设置为 `10`，以正确处理和显示以十分之一度为单位的 Modbus TCP 值（例如，5.0 °C 而不是 50）。\n**配置用户界面：** 阐明了适配器设置中加热参数（例如基点和平行偏移）的英文和德文标签，以防止映射混淆。"
+			},
+			"0.20.0": {
+				"en": "*🚀 Features & Enhancements**\n\n**Automatic Firmware Update Check:** Added a background service to automatically check the official AIT download portal for new heat pump firmware updates.\n**Update Notifications:** Added a new configuration tab to set a custom cron schedule and enable optional Telegram notifications when a new firmware version is released.\n**New Update Datapoints:** Added `firmware_available`, `firmware_update_available`, and `firmware_changelog` to the system info tree to directly expose update states and release notes in ioBroker.\n**Manual Trigger Button:** Added a `check_firmware` button to manually initiate the update check process at any time.",
+				"de": "* 🚀 Funktionen & Erweiterungen**\n\n**Automatischer Firmware-Check: ** Es wurde ein Dienst hinzugefügt, der das offizielle AIT-Downloadportal nach neuen Wärmepumpen-Firmwareupdates sucht.\n**Updates: ** Ein neuer Konfigurationstab für Cron-Pläne und optionale Telegram-Benachrichtigungen bei Firmware-Versionen hinzugefügt.\n**Neue Update-Datenpunkte: ** `firmware_available`, `firmware_update_available` und `firmware_changelog` zum Systeminfobaum hinzugefügt, um Aktualisierungsstatus und Versionshinweise direkt in ioBroker anzuzeigen.\n**Manueller Auslöser: ** Es wurde eine `check_firmware`-Taste hinzugefügt, um das Update jederzeit manuell zu prüfen.",
+				"ru": "* 🚀 Функции и улучшения**\n\n**Автоматическая проверка обновления микропрограммного обеспечения: ** Добавлена фоновая служба для автоматической проверки обновлений прошивки тепловых насосов на официальном портале загрузок AIT.\n**Уведомления об обновлениях: ** Добавлена новая вкладка конфигурации, позволяющая настроить собственное расписание cron и включить дополнительные уведомления Telegram при выходе новой версии прошивки.\n**Новые точки обновления: ** Добавлены `firmware_available`, `firmware_update_available` и `firmware_changelog` в системное информационное дерево для непосредственного отображения состояний обновлений и примечаний к выпуску в IOBroker.\n**Кнопка ручного запуска: ** Добавлена кнопка `check_firmware` для ручного запуска процесса проверки обновлений в любое время.",
+				"pt": "* 🚀 Recursos e melhores**\n\n**Foi adicionado um serviço em segundo plano para verificar automaticamente o portal oficial de download da AIT para novas atualizações de firmware de bombas de calor.\n**Notificações de atualização: ** Foi adicionada uma nova guia para personalizar o cron e ativar as notificações opcionais do Telegram.\n**Novos pontos de dados: ** Foram adicionados `firmware_available`, `firmware_update_available` e `firmware_changelog` à árvore de dados do sistema para expor diretamente os estados e notas de lançamento no IOBroker.\n**Botão de acionamento manual: ** Adicionado o botão `check_firmware` para iniciar a atualização a qualquer momento.",
+				"nl": "* 🚀 Kenmerken en verbeteringen**\n\n**Automatische controle van de firmware-update: ** Een achtergrondservice toegevoegd om automatisch het officiële AIT-downloadportaal te controleren op nieuwe firmware-updates voor de warmtepomp.\n**Updatemeldingen: ** Een nieuw configuratietabblad toegevoegd om een aangepast cron-schema in te stellen en optionele Telegram-meldingen in te schakelen wanneer een nieuwe firmwareversie wordt uitgebracht.\n**Nieuwe updatedatapunten: ** `firmware_available`, `firmware_update_available` en `firmware_changelog` toegevoegd aan de systeeminformatiestructuur om de updatestatus en release-opmerkingen rechtstreeks in IOBroker weer te geven.\n**Handmatige triggerknop: ** Een `check_firmware'-knop toegevoegd om het updatecontroleproces op elk gewenst moment handmatig te starten.",
+				"fr": "* 🚀 Fonctionnalités et améliorations**\n\n**Vérification automatique du firmware :** Ajout d'un service d'arrière-plan permettant de consulter automatiquement les mises à jour du firmware des pompes à chaleur.\n**Notifications de mise à jour :** Ajout d'un nouvel onglet pour définir un calendrier Cron personnalisé et activer les notifications Telegram en cas de sortie du firmware.\n**Nouveaux points de mise à jour :** Ajout de « firmware_available », « firmware_update_available » et « firmware_changelog » à l'arborescence du système pour exposer directement l'état des mises à jour et les notes de version dans IOBroker.\n**Déclencheur manuel :** Ajout d'un bouton « check_firmware » pour lancer la vérification des mises à jour à tout moment.",
+				"it": "* 🚀 Funzioni e migliorie**\n\n**Controllo automatico del firmware: ** Aggiunto un servizio in background per il download ufficiale di AIT per le nuove pompe di calore.\n**Notifiche di aggiornamento: ** Aggiunta una nuova scheda per impostare un cron personalizzato e attivare le notifiche opzionali di Telegram.\n**Nuovi datapoint di aggiornamento: ** Aggiunti `firmware_available`, `firmware_update_available` e `firmware_changelog` al system info tree per esporre direttamente gli stati e le note di rilascio in IOBroker.\n**Aggiunto un pulsante `check_firmware` per avviare manualmente la verifica degli aggiornamenti in qualsiasi momento.",
+				"es": "* 🚀 Funciones y mejoras**\n\n**Comprobación automática del firmware: ** Se ha añadido un servicio en segundo plano para comprobar automáticamente el portal oficial de descargas de AIT.\n**Notificaciones de actualización: ** Se ha añadido una nueva pestaña de configuración para fijar un cron personalizado y recibir notificaciones de Telegram cuando salga una nueva versión del firmware.\n**Nuevos puntos de datos de actualización: ** Se han añadido «firmware_available» y «firmware_changelog» al árbol de información del sistema para ver directamente los estados de las actualizaciones y las notas de versión de ioBroker.\n**Botón de activación manual: ** Se ha añadido un botón `check_firmware` para iniciar el proceso de actualización en cualquier momento.",
+				"pl": "* 🚀 Funkcje i ulepszenia**\n\n**Automatyczne sprawdzanie aktualizacji oprogramowania układowego: ** Dodano usługę w tle, aby automatycznie sprawdzić oficjalny portal pobierania AIT pod kątem nowych aktualizacji oprogramowania układowego pompy ciepła.\n**Aktualizuj powiadomienia: ** Dodano nową kartę konfiguracji, aby ustawić niestandardowy harmonogram cron i włączyć opcjonalne powiadomienia Telegram po wydaniu nowej wersji oprogramowania układowego.\n**Nowe punkty danych aktualizacji: ** Dodano `firmware_available`, `firmware_update_available` i `firmware_changelog` do drzewa informacji systemowych, aby bezpośrednio wyświetlić stany aktualizacji i notatki o wydaniu w iOBroker.\n**Przycisk wyzwalania ręcznego: ** Dodano przycisk „check_firmware”, aby ręcznie rozpocząć proces sprawdzania aktualizacji w dowolnym momencie.",
+				"uk": "* 🚀 Функції та покращення**\n\n**Автоматична перевірка оновлення мікропрограми: ** Додано фонову службу для автоматичної перевірки офіційного порталу завантаження AIT на наявність нових оновлень мікропрограмного забезпечення теплового насоса.\n**Оновлення сповіщень: ** Додана нова вкладка конфігурації, щоб встановити власний розклад cron та увімкнути необов'язкові сповіщення Telegram при випуску нової версії мікропрограми.\n**Нові пункти оновлення: ** Додано `firmware_available`, `firmware_update_available` та `firmware_changelog` до системного інформаційного дерева для безпосереднього відображення станів оновлення та приміток до випуску в IObroker.\n**Кнопка запуску вручну: ** Додана кнопка `check_firmware` для ручного запуску процесу перевірки оновлення в будь-який час.",
+				"zh-cn": "* 🚀 功能和增强功能**\n\n**自动固件更新检查：** 添加了后台服务，可自动检查官方 AIT 下载门户是否有新的热泵固件更新。\n**更新通知：** 添加了新的配置选项卡，用于设置自定义 cron 时间表并在发布新固件版本时启用可选的 Telegram 通知。\n**新更新数据点：** 在系统信息树中添加了 “固件可用”、“firmware_update_available” 和 “firmware_changelog”，以直接在 IOBroker 中显示更新状态和发行说明。\n**手动触发按钮：** 添加了 “check_firmware” 按钮，可随时手动启动更新检查流程。"
+			},
+			"0.19.6": {
+				"en": "*🚀 Features & Enhancements**\n\n**Defrost Request Datapoint:** Added `Information.03_Outputs.DefrostRequest2` (Defrost request) to monitor the active defrosting request of the heat pump directly from the RAM telemetry (Index 235).\n\n**Defrost Request Datapoint:** Added `Information.03_Outputs.DefrostRequest` (Defrost request) to monitor the active defrosting request of the heat pump directly from the RAM telemetry (Index 234).",
+				"de": "* 🚀 Funktionen & Erweiterungen**\n\n**Abtauanfrage: ** `Information.03_outputs.defrostRequest2` (Abtauanfrage) hinzugefügt, um die aktive Abtauanfrage der Wärmepumpe direkt aus der RAM-Telemetrie zu überwachen (Index 235).\n\n**Abtauanfrage: ** `Information.03_outputs.defrostRequest` (Abtauanfrage) hinzugefügt, um die aktive Abtauanfrage der Wärmepumpe direkt aus der RAM-Telemetrie zu überwachen (Index 234).",
+				"ru": "* 🚀 Функции и улучшения**\n\n**Точка данных запроса на размораживание: ** Добавлена функция `Information.03_outputs.DefrostRequest2` (запрос на размораживание) для отслеживания активного запроса на размораживание теплового насоса непосредственно из телеметрии ОЗУ (индекс 235).\n\n**Точка данных запроса на размораживание: ** Добавлена функция `Information.03_outputs.DefrostRequest` (запрос на размораживание) для отслеживания активного запроса на размораживание теплового насоса непосредственно из телеметрии ОЗУ (индекс 234).",
+				"pt": "* 🚀 Recursos e melhores**\n\n**Ponto de dados de solicitação de degelo: ** Adicionado `information.03_outputs.defrostRequest2` para monitorar o pedido ativo de degelo da bomba de calor diretamente da telemetria RAM (Índice 235).\n\n**Ponto de dados de solicitação de degelo: ** Adicionado `information.03_outputs.defrostRequest` para monitorar a solicitação ativa de degelo da bomba de calor diretamente da telemetria RAM (Índice 234).",
+				"nl": "* 🚀 Kenmerken en verbeteringen**\n\n**Datapunt voor ontdooiaanvraag: ** `Information.03_Outputs.DefrostRequest2` toegevoegd om het actieve ontdooiverzoek van de warmtepomp rechtstreeks via de RAM-telemetrie te controleren (Index 235).\n\n**Datapunt voor ontdooiaanvraag: ** `Information.03_Outputs.DefrostRequest` (Ontdooiverzoek) toegevoegd om het actieve ontdooiverzoek van de warmtepomp rechtstreeks via de RAM-telemetrie te controleren (index 234).",
+				"fr": "* 🚀 Fonctionnalités et améliorations**\n\n**Point de données de demande de dégivrage :** Ajout de « Information.03_outputs.defrostRequest2 » pour suivre la demande de dégivrage active de la pompe à chaleur directement à partir de la télémétrie RAM (Index 235).\n\n**Point de données de demande de dégivrage :** Ajout de « Information.03_outputs.defrostRequest » pour suivre la demande de dégivrage active de la pompe à chaleur directement à partir de la télémétrie RAM (Index 234).",
+				"it": "* 🚀 Funzioni e migliorie**\n\n**Defrost Request Datapoint: ** Aggiunto `Information.03_outputs.defrostRequest2` per monitorare la richiesta di sbrinamento attiva della pompa di calore direttamente dalla telemetria RAM (Indice 235).\n\n**Defrost Request Datapoint: ** Aggiunto `Information.03_outputs.defrostRequest` per monitorare la richiesta di sbrinamento attiva della pompa di calore direttamente dalla telemetria RAM (Indice 234).",
+				"es": "* 🚀 Funciones y mejoras**\n\n**Punto de datos de solicitud de descongelación: ** Se ha añadido `Information.03_Outputs.defrostRequest2 para supervisar la solicitud de descongelación activa de la bomba de calor directamente desde la telemetría de la RAM (índice 235).\n\n**Punto de datos de solicitud de descongelación: ** Se ha añadido `Information.03_Outputs.defrostRequest` para supervisar la solicitud de descongelación activa de la bomba de calor directamente desde la telemetría de la RAM (índice 234).",
+				"pl": "* 🚀 Funkcje i ulepszenia**\n\n**Punkt danych żądania rozmrażania: ** Dodano `Information.03_Outputs.DefrostRequest2` (Żądanie rozmrażania) w celu monitorowania aktywnego żądania rozmrażania pompy ciepła bezpośrednio z telemetrii RAM (indeks 235).\n\n**Punkt danych żądania rozmrażania: ** Dodano `Information.03_Outputs.DefrostRequest` (żądanie rozmrażania) w celu monitorowania aktywnego żądania rozmrażania pompy ciepła bezpośrednio z telemetrii RAM (indeks 234).",
+				"uk": "* 🚀 Функції та покращення**\n\n**Запит на розморожування даних: ** Додано `information.03_outputs.defrostrequest2` (Запит на розморожування) для моніторингу активного запиту на розморожування теплового насоса безпосередньо з телеметрії оперативної пам'яті (Індекс 235).\n\n**Запит на розморожування даних: ** Додано `information.03_outputs.defrostRequest` (запит на розморожування) для моніторингу активного запиту на розморожування теплового насоса безпосередньо з телеметрії оперативної пам'яті (Індекс 234).",
+				"zh-cn": "* 🚀 功能和增强功能**\n\n**解冻请求数据点：** 添加了 `information.03_outputs.defrostRequest2`（解冻请求），以直接从内存遥测（索引 235）监控热泵的有效除霜请求。\n\n**解冻请求数据点：** 添加了 `information.03_outputs.defrostRequest`（解冻请求），以直接从内存遥测（索引 234）监控热泵的有效除霜请求。"
+			},
+			"0.19.4": {
+				"en": "*🔧 Compatibility & Maintenance**\n\n**Hybrid Modbus Value Persistence:** Prevented native 3003 telemetry polling (EEPROM) from overwriting volatile parameters actively managed via Modbus TCP (RAM) in the ioBroker object tree.",
+				"de": "* 🔧 Kompatibilität und Wartung**\n\n**Hybrid Modbus Value Persistence: ** Hat verhindert, dass native 3003-Telemetrieabfragen (EEPROM) im ioBroker-Objektbaum aktiv über Modbus TCP (RAM) verwaltet werden.",
+				"ru": "* 🔧 Совместимость и обслуживание**\n\n**Постоянство значений в гибридном режиме Modbus: ** Предотвращение перезаписи изменчивых параметров, активно управляемых через Modbus TCP (RAM) в дереве объектов IOBroker, встроенным телеметрическим опросом 3003 (EEPROM).",
+				"pt": "* 🔧 Compatibilidade e manutenção**\n\n**Persistência híbrida do valor do Modbus: ** Impediu que a EEPROM nativa 3003 substituísse parâmetros voláteis gerenciados ativamente via Modbus TCP (RAM) na árvore de objetos IOBroker.",
+				"nl": "* 🔧 Compatibiliteit en onderhoud**\n\n**Hybrid Modbus Value Persistence: ** Voorkwam dat native 3003 telemetriepeilingen (EEPROM) vluchtige parameters overschreven die actief werden beheerd via Modbus TCP (RAM) in de IOBroker-objectstructuur.",
+				"fr": "* 🔧 Compatibilité et maintenance**\n\n**Persistance des valeurs Modbus hybrides :** Empêche l'écrasement des paramètres volatils gérés activement via Modbus TCP (RAM) dans l'arborescence d'objets d'IObroker grâce à l'EEPROM 3003.",
+				"it": "* 🔧 Compatibilità e manutenzione**\n\n**Hybrid Modbus Value Persistence: ** Ha impedito alla EEPROM 3003 nativa di sovrascrivere i parametri volatili gestiti attivamente tramite Modbus TCP (RAM) nell'albero degli oggetti IOBroker.",
+				"es": "* 🔧 Compatibilidad y mantenimiento**\n\n**Persistencia del valor del Modbus híbrido: ** Impidió que la EEPROM nativa del 3003 sobrescribiera los parámetros volátiles gestionados activamente a través de Modbus TCP (RAM) en el árbol de objetos de ioBroker.",
+				"pl": "* 🔧 Kompatybilność i konserwacja**\n\n**Trwałość wartości hybrydowego Modbusa: ** Zapobiegało nadpisywaniu zmiennych parametrów zmiennych aktywnie zarządzanych przez Modbus TCP (RAM) w drzewie obiektów ioBroker, natywne badanie telemetryczne 3003 (EEPROM).",
+				"uk": "* 🔧 Сумісність та обслуговування**\n\n**Стійкість значення гібридного Modbus: ** Заборонено перезаписувати нестабільні параметри, які активно керуються за допомогою Modbus TCP (RAM) у дереві об'єктів IObroker, що використовуються у власному телеметричному опитуванні 3003 (EEPROM).",
+				"zh-cn": "* 🔧 兼容性和维护**\n\n**混合 Modbus 价值持久化：** 防止原生 3003 遥测轮询 (EEPROM) 覆盖 IOBroker 对象树中通过 Modbus TCP (RAM) 主动管理的易失性参数。"
+			},
+			"0.19.3": {
+				"en": "*🔧 Compatibility & Maintenance**\n\n**Broader Node.js Compatibility:** Adjusted Node.js removed `{ \"node\": \">=18.0.0\" }` in `dependencies` in `io-package.json`. T",
+				"de": "* 🔧 Kompatibilität und Wartung**\n\n**Umfassender kompatibel mit Node.js: ** Node.js entfernt `{„node“: „>=18.0.0\"}` in `dependencies` in `io-package.json`. T",
+				"ru": "* 🔧 Совместимость и обслуживание**\n\n**Более широкая совместимость с Node.js: ** В файле Node.js исправлена ошибка «{«node»: «>=18.0.0\"} `из `зависимости` в `io-package.json`. T",
+				"pt": "* 🔧 Compatibilidade e manutenção**\n\n**Maior compatibilidade com Node.js: ** O Node.js ajustado removeu `{“node”: “>=18.0.0\"}` em `dependencies` em `io-package.json`. T",
+				"nl": "* 🔧 Compatibiliteit en onderhoud**\n\n**Bredere compatibiliteit met Node.js: ** Aangepaste Node.js heeft `{„node”: „>=18.0.0\"}` verwijderd in `dependencies` in `io-package.json`. T",
+				"fr": "* 🔧 Compatibilité et maintenance**\n\n**Compatibilité accrue avec Node.js :** Node.js ajusté a supprimé `{« node » : « >=18.0.0\"}` des dépendances de `io-package.json`. T",
+				"it": "* 🔧 Compatibilità e manutenzione**\n\n**Compatibilità più ampia con Node.js: ** Node.js modificato rimosso «>=18.0.0\"} nelle dipendenze in io-package.json. T",
+				"es": "* 🔧 Compatibilidad y mantenimiento**\n\n**Compatibilidad más amplia con Node.js: ** Node.js ajustado eliminado `{«node»: «>=18.0.0\"}` en `dependencias` en `io-package.json`. T",
+				"pl": "* 🔧 Kompatybilność i konserwacja**\n\n**Szersza kompatybilność Node.js: ** Skorygowane Node.js usunięto `{„node”: „>=18.0.0\"}` w `dependencies` w `io-package.json`. T",
+				"uk": "* 🔧 Сумісність та обслуговування**\n\n**Ширша сумісність Node.js: ** Коригований Node.js видалений `{«вузол»: «>=18.0.0\"}` у `залежності` у `io-package.json`. Т",
+				"zh-cn": "* 🔧 兼容性和维护**\n\n**更广泛的 Node.js 兼容性：** 调整后的 Node.js 在 `io-package.json` 的 `依赖项`中删除了 `{ “node”: “>=18.0.0\"} `。T"
+			}
+		},
+		"titleLang": {
+			"en": "Luxtronik2 Controller",
+			"de": "Luxtronik2-Controller",
+			"ru": "Контроллер Luxtronik2",
+			"pt": "Controlador Luxtronik2",
+			"nl": "Luxtronik2-controller",
+			"fr": "Contrôleur Luxtronik2",
+			"it": "Controllore Luxtronik2",
+			"es": "Controlador Luxtronik2",
+			"pl": "Kontroler Luxtronik2",
+			"uk": "Контролер Luxtronik2",
+			"zh-cn": "Luxtronik2控制器"
+		},
+		"desc": {
+			"en": "Access and control of heat pumps with a Luxtronik 2.x controller",
+			"de": "Zugriff und Steuerung von Wärmepumpen mit einer Luxtronik 2.x Steuereinheit",
+			"ru": "Доступ и управление тепловыми насосами с контроллером Luxtronik 2.x",
+			"pt": "Acesso e controle de bombas de calor com um controlador Luxtronik 2.x",
+			"nl": "Toegang en controle van warmtepompen met een Luxtronik 2.x controller",
+			"fr": "Accès et contrôle des pompes à chaleur avec un contrôleur Luxtronik 2.x",
+			"it": "Accesso e controllo di pompe di calore con un controller Luxtronik 2.x",
+			"es": "Acceso y control de bombas de calor con un controlador Luxtronik 2.x",
+			"pl": "Dostęp i sterowanie pompami ciepła za pomocą sterownika Luxtronik 2.x",
+			"uk": "Доступ та управління тепловими насосами з контролером Luxtronik 2.x",
+			"zh-cn": "通过Luxtronik 2.x控制器访问和控制热泵"
+		},
+		"authors": ["TbsJah <github.tbsjah@googlemail.com>"],
+		"keywords": [
+			"Luxtronik2",
+			"LWD50",
+			"Luft Wärme Pumpe",
+			"Heizung",
+			"LWP",
+			"Alpha InnoTec AIT",
+			"Buderus",
+			"Novelan"
+		],
+		"licenseInformation": {
+			"type": "free",
+			"license": "MIT"
+		},
+		"platform": "Javascript/Node.js",
+		"icon": "luxtronik2-controller.png",
+		"enabled": true,
+		"extIcon": "https://raw.githubusercontent.com/TbsJah/ioBroker.luxtronik2-controller/main/admin/luxtronik2-controller.png",
+		"readme": "https://github.com/TbsJah/ioBroker.luxtronik2-controller/blob/main/README.md",
+		"loglevel": "info",
+		"tier": 3,
+		"mode": "daemon",
+		"type": "climate-control",
+		"compact": true,
+		"messagebox": true,
+		"connectionType": "local",
+		"dataSource": "poll",
+		"adminUI": {
+			"config": "json"
+		},
+		"dependencies": [
+			{
+				"js-controller": ">=7.0.7"
+			}
+		],
+		"globalDependencies": [
+			{
+				"admin": ">=7.8.23"
+			}
+		]
+	},
+	"native": {
+		"host": "192.168.178.81",
+		"port": 8889,
+		"interval": 30,
+		"fusspunkt": 21.7,
+		"endpunkt": 23,
+		"zip_aktiv_ww": 600,
+		"zip_aktiv": 120,
+		"sync_warmwater_target_temperature": 54,
+		"sync_hotwater_temperature_hysteresis": 10,
+		"sync_heating_system_circ_pump_voltage_minimal_heating": 3,
+		"sync_heating_system_circ_pump_voltage_nominal_heating": 7,
+		"sync_heating_system_circ_pump_voltage_minimal_water": 3,
+		"sync_heating_system_circ_pump_voltage_nominal_water": 10,
+		"sync_return_temperature_hysteresis": 1.5,
+		"zip_last_run_min": 600,
+		"regelung_aktiv": false,
+		"Heating_after_warmwater": true,
+		"telegram_enabled": false,
+		"notification_bell": false,
+		"telegram_receiver": "",
+		"telegram_instance": "",
+		"motionSensors": [],
+		"motion_sensors_aktiv": false,
+		"cop_calculation_active": false,
+		"cop_source_power": "internal",
+		"cop_oid_power_total": "",
+		"cop_source_thermal": "internal",
+		"cop_oid_thermal_total": ""
+	},
+	"notifications": [
+		{
+			"scope": "luxtronik2-controller",
+			"name": {
+				"en": "Luxtronik2-Controller",
+				"de": "Luxtronik2-Controller",
+				"ru": "Контроллер Luxtronik2",
+				"pt": "Controlador Luxtronik2",
+				"nl": "Luxtronik2-controller",
+				"fr": "Contrôleur Luxtronik2",
+				"it": "Controllore Luxtronik2",
+				"es": "Controlador Luxtronik2",
+				"pl": "Kontroler Luxtronik2",
+				"uk": "Контролер Luxtronik2",
+				"zh-cn": "Luxtronik2控制器"
+			},
+			"description": {
+				"en": "Notifications from the Luxtronik2-Controller adapter",
+				"de": "Benachrichtigungen vom Luxtronik2-Controller Adapter",
+				"ru": "Уведомления от адаптера Luxtronik2-Controller",
+				"pt": "Notificações do adaptador Luxtronik2-Controller",
+				"nl": "Meldingen van de Luxtronik2-Controller adapter",
+				"fr": "Notifications de l'adaptateur Luxtronik2-Controller",
+				"it": "Notifiche dall'adattatore Luxtronik2-Controller",
+				"es": "Notificaciones del adaptador Luxtronik2-Controller",
+				"pl": "Powiadomienia z adaptera Luxtronik2-Controller",
+				"uk": "Сповіщення від адаптера Luxtronik2-Controller",
+				"zh-cn": "来自 Luxtronik2-Controller 适配器的通知"
+			},
+			"categories": [
+				{
+					"category": "lwpError",
+					"name": {
+						"en": "Heat Pump Errors",
+						"de": "Wärmepumpen-Fehler",
+						"ru": "Ошибки теплового насоса",
+						"pt": "Erros da bomba de calor",
+						"nl": "Fouten warmtepomp",
+						"fr": "Erreurs de la pompe à chaleur",
+						"it": "Errori della pompa di calore",
+						"es": "Errores de la bomba de calor",
+						"pl": "Błędy pompy ciepła",
+						"uk": "Помилки теплового насоса",
+						"zh-cn": "热泵错误"
+					},
+					"severity": "alert",
+					"description": {
+						"en": "Error messages from the heating system",
+						"de": "Fehlermeldungen aus der Heizungsanlage",
+						"ru": "Сообщения об ошибках от системы отопления",
+						"pt": "Mensagens de erro do sistema de aquecimento",
+						"nl": "Foutmeldingen van het verwarmingssysteem",
+						"fr": "Messages d'erreur du système de chauffage",
+						"it": "Messaggi di errore dal sistema di riscaldamento",
+						"es": "Mensajes de error del sistema de calefacción",
+						"pl": "Komunikaty o błędach z systemu grzewczego",
+						"uk": "Повідомлення про помилки від системи опалення",
+						"zh-cn": "来自供暖系统的错误消息"
+					},
+					"regex": [],
+					"limit": 10
+				},
+				{
+					"category": "lwpSystem",
+					"name": {
+						"en": "Heat Pump Updates & Info",
+						"de": "Wärmepumpen Updates & Info",
+						"ru": "Обновления и информация о тепловом насосе",
+						"pt": "Atualizações e informações da bomba de calor",
+						"nl": "Warmtepomp updates & info",
+						"fr": "Mises à jour et infos de la pompe à chaleur",
+						"it": "Aggiornamenti e informazioni sulla pompa di calore",
+						"es": "Actualizaciones e información de la bomba de calor",
+						"pl": "Aktualizacje i informacje o pompie ciepła",
+						"uk": "Оновлення та інформація про тепловий насос",
+						"zh-cn": "热泵更新和信息"
+					},
+					"severity": "info",
+					"description": {
+						"en": "System information and firmware updates",
+						"de": "Systeminformationen und Firmware-Updates",
+						"ru": "Системная информация и обновления прошивки",
+						"pt": "Informações do sistema e atualizações de firmware",
+						"nl": "Systeeminformatie en firmware-updates",
+						"fr": "Informations système et mises à jour du firmware",
+						"it": "Informazioni di sistema e aggiornamenti firmware",
+						"es": "Información del sistema y actualizaciones de firmware",
+						"pl": "Informacje o systemie i aktualizacje oprogramowania",
+						"uk": "Системна інформація та оновлення прошивки",
+						"zh-cn": "系统信息和固件更新"
+					},
+					"regex": [],
+					"limit": 10
+				}
+			]
+		}
+	],
+	"objects": [],
+	"instanceObjects": [
+		{
+			"_id": "info",
+			"type": "channel",
+			"common": {
+				"name": "Information"
+			},
+			"native": {}
+		},
+		{
+			"_id": "backups",
+			"type": "meta",
+			"common": {
+				"name": "Luxtronik DTA Backups",
+				"type": "meta.user"
+			},
+			"native": {}
+		},
+		{
+			"_id": "info.connection",
+			"type": "state",
+			"common": {
+				"role": "indicator.connected",
+				"name": "Device or service connected",
+				"type": "boolean",
+				"read": true,
+				"write": false,
+				"def": false
+			},
+			"native": {}
+		}
+	]
 }

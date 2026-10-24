@@ -225,7 +225,7 @@ async function sendUpdateNotification(adapter, message) {
   const config = adapter.config;
   if (config.update_check_notification === true) {
     if (typeof adapter.registerNotification === "function") {
-      await adapter.registerNotification("luxtronik2-controller", "lwpError", message);
+      await adapter.registerNotification("luxtronik2-controller", "lwpSystem", message);
       (0, import_logger.writeLog)("ioBroker-Benachrichtigung (Glocke) \xFCber neues Firmware-Update erstellt.", "info");
     } else {
       (0, import_logger.writeLog)("\u{1F6A8} ioBroker Notification Center (Glocke) nicht verf\xFCgbar.", "warn");
