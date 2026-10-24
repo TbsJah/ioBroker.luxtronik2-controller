@@ -810,10 +810,7 @@
 						"fusspunkt": "${data.fusspunkt}",
 						"endpunkt": "${data.endpunkt}"
 					},
-					"alsoDependsOn": [
-						"fusspunkt",
-						"endpunkt"
-					],
+					"alsoDependsOn": ["fusspunkt", "endpunkt"],
 					"style": {
 						"maxWidth": "800px",
 						"marginTop": "20px",
@@ -1641,7 +1638,7 @@
 				"en": "PV / Surplus",
 				"de": "PV-Überschuss"
 			},
-			"icon": "solar_power",
+			"icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMjQgMjQiPgoJPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIgLz4KCTxwYXRoIGZpbGw9ImN1cnJlbnRDb2xvciIgZD0iTTMgNFYyaDN2MnpNMiAyMmg5di00SDIuOHpNNi4xMjUgOS4zMjVMNC43IDcuOTI1TDYuODI1IDUuOEw4LjI1IDcuMnpNMy4yIDE2SDExdi00SDR6TTguNDYzIDUuNTM4UTcgNC4wNzQgNyAyaDEwcTAgMi4wNzUtMS40NjMgMy41MzhUMTIgN1Q4LjQ2MyA1LjUzN00xMSAxMVY4aDJ2M3ptMiAxMWg5bC0uOC00SDEzem0wLTZoNy44bC0uOC00aC03em00Ljg3NS02LjY3NWwtMi4xLTIuMTI1bDEuNC0xLjRMMTkuMyA3Ljl6TTE4IDRWMmgzdjJ6IiAvPgo8L3N2Zz4K",
 			"items": {
 				"pv_active": {
 					"type": "checkbox",
