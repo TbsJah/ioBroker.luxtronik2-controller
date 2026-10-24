@@ -41,6 +41,17 @@ export async function initPvManagement(adapter: LuxtronikAdapter): Promise<void>
 
 		pvIsBoostActive = false;
 		pvWaitingForCycleEnd = false;
+
+		// --- NEUE DATENPUNKTE INITIALISIEREN ---
+		const dpActive = getDpPath('pv_boost_active');
+		const dpSince = getDpPath('pv_boost_active_since');
+
+		if (dpActive) {
+			await adapter.setState(dpActive, { val: false, ack: true });
+		}
+		if (dpSince) {
+			await adapter.setState(dpSince, { val: '', ack: true });
+		}
 	} catch (err: unknown) {
 		const msg = err instanceof Error ? err.message : String(err);
 		writeLog(`[PV] Error initializing PV management: ${msg}`, 'error');
@@ -155,6 +166,22 @@ async function activateBoost(adapter: LuxtronikAdapter): Promise<void> {
 
 		pvIsBoostActive = true;
 		pvWaitingForCycleEnd = false;
+
+		// --- NEUE DATENPUNKTE AKTUALISIEREN ---
+		const nowStr = new Date().toISOString().replace('T', ' ').substring(0, 19);
+		const dpActive = getDpPath('pv_boost_active');
+		const dpSince = getDpPath('pv_boost_active_since');
+		const dpLast = getDpPath('pv_boost_last_activation');
+
+		if (dpActive) {
+			await adapter.setState(dpActive, { val: true, ack: true });
+		}
+		if (dpSince) {
+			await adapter.setState(dpSince, { val: nowStr, ack: true });
+		}
+		if (dpLast) {
+			await adapter.setState(dpLast, { val: nowStr, ack: true });
+		}
 	} catch (err: unknown) {
 		const msg = err instanceof Error ? err.message : String(err);
 		writeLog(`[PV] Error activating boost: ${msg}`, 'error');
@@ -216,10 +243,22 @@ async function deactivateBoost(adapter: LuxtronikAdapter): Promise<void> {
 		if (originalHz !== null && hzPath) {
 			await adapter.setState(hzPath, { val: originalHz, ack: false });
 		}
+
 		pvIsBoostActive = false;
 		pvWaitingForCycleEnd = false;
 		originalWw = null;
 		originalHz = null;
+
+		// --- NEUE DATENPUNKTE AKTUALISIEREN ---
+		const dpActive = getDpPath('pv_boost_active');
+		const dpSince = getDpPath('pv_boost_active_since');
+
+		if (dpActive) {
+			await adapter.setState(dpActive, { val: false, ack: true });
+		}
+		if (dpSince) {
+			await adapter.setState(dpSince, { val: '', ack: true });
+		}
 	} catch (err: unknown) {
 		const msg = err instanceof Error ? err.message : String(err);
 		writeLog(`[PV] Error deactivating boost: ${msg}`, 'error');

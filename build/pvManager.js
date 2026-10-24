@@ -47,6 +47,14 @@ async function initPvManagement(adapter) {
     );
     pvIsBoostActive = false;
     pvWaitingForCycleEnd = false;
+    const dpActive = (0, import_stateMapping.getDpPath)("pv_boost_active");
+    const dpSince = (0, import_stateMapping.getDpPath)("pv_boost_active_since");
+    if (dpActive) {
+      await adapter.setState(dpActive, { val: false, ack: true });
+    }
+    if (dpSince) {
+      await adapter.setState(dpSince, { val: "", ack: true });
+    }
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     (0, import_logger.writeLog)(`[PV] Error initializing PV management: ${msg}`, "error");
@@ -122,6 +130,19 @@ async function activateBoost(adapter) {
     }
     pvIsBoostActive = true;
     pvWaitingForCycleEnd = false;
+    const nowStr = (/* @__PURE__ */ new Date()).toISOString().replace("T", " ").substring(0, 19);
+    const dpActive = (0, import_stateMapping.getDpPath)("pv_boost_active");
+    const dpSince = (0, import_stateMapping.getDpPath)("pv_boost_active_since");
+    const dpLast = (0, import_stateMapping.getDpPath)("pv_boost_last_activation");
+    if (dpActive) {
+      await adapter.setState(dpActive, { val: true, ack: true });
+    }
+    if (dpSince) {
+      await adapter.setState(dpSince, { val: nowStr, ack: true });
+    }
+    if (dpLast) {
+      await adapter.setState(dpLast, { val: nowStr, ack: true });
+    }
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     (0, import_logger.writeLog)(`[PV] Error activating boost: ${msg}`, "error");
@@ -169,6 +190,14 @@ async function deactivateBoost(adapter) {
     pvWaitingForCycleEnd = false;
     originalWw = null;
     originalHz = null;
+    const dpActive = (0, import_stateMapping.getDpPath)("pv_boost_active");
+    const dpSince = (0, import_stateMapping.getDpPath)("pv_boost_active_since");
+    if (dpActive) {
+      await adapter.setState(dpActive, { val: false, ack: true });
+    }
+    if (dpSince) {
+      await adapter.setState(dpSince, { val: "", ack: true });
+    }
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     (0, import_logger.writeLog)(`[PV] Error deactivating boost: ${msg}`, "error");

@@ -810,7 +810,10 @@
 						"fusspunkt": "${data.fusspunkt}",
 						"endpunkt": "${data.endpunkt}"
 					},
-					"alsoDependsOn": ["fusspunkt", "endpunkt"],
+					"alsoDependsOn": [
+						"fusspunkt",
+						"endpunkt"
+					],
 					"style": {
 						"maxWidth": "800px",
 						"marginTop": "20px",
@@ -1681,7 +1684,6 @@
 					"lg": 12,
 					"xl": 12
 				},
-
 				"pv_feed_in_dp": {
 					"type": "objectId",
 					"label": {
@@ -4926,6 +4928,89 @@
 							},
 							"default": true,
 							"disabled": "!data.sync_category_information_16_efficiency",
+							"xs": 12,
+							"sm": 6,
+							"md": 3,
+							"lg": 3,
+							"xl": 3
+						}
+					}
+				},
+				"panel_information_17_pv_surplus": {
+					"type": "panel",
+					"label": {
+						"en": "Information.17 PV Surplus",
+						"de": "Information.17 PV Surplus"
+					},
+					"collapsable": true,
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12,
+					"items": {
+						"sync_category_information_17_pv_surplus": {
+							"type": "checkbox",
+							"label": {
+								"en": "🌟 Enable entire category: Information.17 PV Surplus",
+								"de": "🌟 Komplette Kategorie aktivieren: Information.17 PV Surplus"
+							},
+							"default": true,
+							"xs": 12,
+							"sm": 12,
+							"md": 12,
+							"lg": 12,
+							"xl": 12
+						},
+						"divider_information_17_pv_surplus": {
+							"type": "divider",
+							"color": "primary",
+							"style": {
+								"marginBottom": "15px",
+								"marginTop": "5px"
+							},
+							"xs": 12,
+							"sm": 12,
+							"md": 12,
+							"lg": 12,
+							"xl": 12
+						},
+						"sync_pv_boost_active": {
+							"type": "checkbox",
+							"label": {
+								"en": "PV Boost Active",
+								"de": "PV Boost Aktiv"
+							},
+							"default": true,
+							"disabled": "!data.sync_category_information_17_pv_surplus",
+							"xs": 12,
+							"sm": 6,
+							"md": 3,
+							"lg": 3,
+							"xl": 3
+						},
+						"sync_pv_boost_active_since": {
+							"type": "checkbox",
+							"label": {
+								"en": "PV Boost Active Since",
+								"de": "PV Boost aktiv seit"
+							},
+							"default": true,
+							"disabled": "!data.sync_category_information_17_pv_surplus",
+							"xs": 12,
+							"sm": 6,
+							"md": 3,
+							"lg": 3,
+							"xl": 3
+						},
+						"sync_pv_boost_last_activation": {
+							"type": "checkbox",
+							"label": {
+								"en": "Last PV Boost Activation",
+								"de": "Letzte PV Boost Aktivierung"
+							},
+							"default": true,
+							"disabled": "!data.sync_category_information_17_pv_surplus",
 							"xs": 12,
 							"sm": 6,
 							"md": 3,
