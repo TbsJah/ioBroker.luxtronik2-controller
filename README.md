@@ -89,6 +89,13 @@ You might see red error messages in the installation log related to `node-gyp`, 
 
 [Info English](documentation/readme_en.md)
 //### **WORK IN PROGRESS**
+
+### **WORK IN PROGRESS**
+
+**🔧 Maintenance & Compatibility**
+
+- **Node.js Requirement:** Updated minimum Node.js requirement to `>= 22` in `package.json` and `io-package.json` to meet current adapter standards.
+
 ### 0.20.3 (2026-10-24)
 
 **🔧 Maintenance & Compatibility**
