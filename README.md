@@ -89,8 +89,7 @@ You might see red error messages in the installation log related to `node-gyp`, 
 
 [Info English](documentation/readme_en.md)
 //### **WORK IN PROGRESS**
-
-### **WORK IN PROGRESS**
+### 0.20.3 (2026-10-24)
 
 **🔧 Maintenance & Compatibility**
 
@@ -133,12 +132,6 @@ You might see red error messages in the installation log related to `node-gyp`, 
 - **Defrost Request Datapoint:** Added `Information.03_Outputs.DefrostRequest2` (Defrost request) to monitor the active defrosting request of the heat pump directly from the RAM telemetry (Index 235).
 
 - **Defrost Request Datapoint:** Added `Information.03_Outputs.DefrostRequest` (Defrost request) to monitor the active defrosting request of the heat pump directly from the RAM telemetry (Index 234).
-
-### 0.19.4 (2026-10-20)
-
-**🔧 Compatibility & Maintenance**
-
-- **Hybrid Modbus Value Persistence:** Prevented native 3003 telemetry polling (EEPROM) from overwriting volatile parameters actively managed via Modbus TCP (RAM) in the ioBroker object tree.
 
 ## License
 
