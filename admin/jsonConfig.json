@@ -810,10 +810,7 @@
 						"fusspunkt": "${data.fusspunkt}",
 						"endpunkt": "${data.endpunkt}"
 					},
-					"alsoDependsOn": [
-						"fusspunkt",
-						"endpunkt"
-					],
+					"alsoDependsOn": ["fusspunkt", "endpunkt"],
 					"style": {
 						"maxWidth": "800px",
 						"marginTop": "20px",
@@ -1632,6 +1629,208 @@
 							"width": "70%"
 						}
 					]
+				}
+			}
+		},
+		"pvTab": {
+			"type": "panel",
+			"label": {
+				"en": "PV / Surplus",
+				"de": "PV / Überschuss"
+			},
+			"icon": "solar_power",
+			"items": {
+				"pv_active": {
+					"type": "checkbox",
+					"label": {
+						"en": "Enable PV surplus management",
+						"de": "PV-Überschusssteuerung aktivieren"
+					},
+					"newLine": true,
+					"default": false,
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
+				"pv_feed_in_dp": {
+					"type": "objectId",
+					"label": {
+						"en": "Datapoint for current grid power (Watt)",
+						"de": "Datenpunkt für aktuelle Netzleistung (Watt)"
+					},
+					"hidden": "!data.pv_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 8,
+					"lg": 8,
+					"xl": 8
+				},
+				"pv_feed_in_sign": {
+					"type": "select",
+					"label": {
+						"en": "Sign for grid feed-in",
+						"de": "Vorzeichen bei Einspeisung"
+					},
+					"options": [
+						{
+							"label": {
+								"en": "Negative values (e.g. -2500 W) = Feed-in",
+								"de": "Negative Werte (z.B. -2500 W) = Einspeisung",
+								"ru": "Отрицательные значения = Подача",
+								"pt": "Valores negativos = Injeção",
+								"nl": "Negatieve waarden = Teruglevering",
+								"fr": "Valeurs négatives = Injection",
+								"it": "Valori negativi = Immissione",
+								"es": "Valores negativos = Inyección",
+								"pl": "Wartości ujemne = Wprowadzanie",
+								"uk": "Від'ємні значення = Подача",
+								"zh-cn": "负值 = 馈入"
+							},
+							"value": "negative"
+						},
+						{
+							"label": {
+								"en": "Positive values (e.g. 2500 W) = Feed-in",
+								"de": "Positive Werte (z.B. 2500 W) = Einspeisung",
+								"ru": "Положительные значения = Подача",
+								"pt": "Valores positivos = Injeção",
+								"nl": "Positieve waarden = Teruglevering",
+								"fr": "Valeurs positives = Injection",
+								"it": "Valori positivi = Immissione",
+								"es": "Valores positivos = Inyección",
+								"pl": "Wartości dodatnie = Wprowadzanie",
+								"uk": "Позитивні значення = Подача",
+								"zh-cn": "正值 = 馈入"
+							},
+							"value": "positive"
+						}
+					],
+					"default": "negative",
+					"hidden": "!data.pv_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 4,
+					"lg": 4,
+					"xl": 4
+				},
+				"header_pv_start": {
+					"type": "header",
+					"text": { "en": "Activation (Boost)", "de": "Aktivierung (Einschaltbedingungen)" },
+					"size": 5,
+					"hidden": "!data.pv_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
+				"pv_threshold_start": {
+					"type": "number",
+					"label": {
+						"en": "Surplus threshold (Watt)",
+						"de": "Überschuss-Schwellenwert (Watt)"
+					},
+					"min": 100,
+					"default": 2000,
+					"hidden": "!data.pv_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 6,
+					"lg": 6,
+					"xl": 6
+				},
+				"pv_delay_start": {
+					"type": "number",
+					"label": {
+						"en": "Minimum duration before start (Minutes)",
+						"de": "Mindestdauer vor Aktivierung (Minuten)"
+					},
+					"min": 1,
+					"default": 5,
+					"hidden": "!data.pv_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 6,
+					"lg": 6,
+					"xl": 6
+				},
+				"pv_boost_ww": {
+					"type": "number",
+					"label": {
+						"en": "Hot water boost (+ K)",
+						"de": "Warmwasser Erhöhung (+ K)"
+					},
+					"min": 0,
+					"max": 20,
+					"default": 5,
+					"hidden": "!data.pv_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 6,
+					"lg": 6,
+					"xl": 6
+				},
+				"pv_boost_hz": {
+					"type": "number",
+					"label": {
+						"en": "Heating offset boost (+ K)",
+						"de": "Heizung Parallelverschiebung Erhöhung (+ K)"
+					},
+					"min": 0,
+					"max": 10,
+					"default": 2,
+					"hidden": "!data.pv_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 6,
+					"lg": 6,
+					"xl": 6
+				},
+				"header_pv_stop": {
+					"type": "header",
+					"text": { "en": "Deactivation (Reset)", "de": "Deaktivierung (Rückfallbedingungen)" },
+					"size": 5,
+					"hidden": "!data.pv_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
+				"pv_delay_stop": {
+					"type": "number",
+					"label": {
+						"en": "Delay before reset (Minutes)",
+						"de": "Verzögerung vor Rücksetzung (Minuten)"
+					},
+					"min": 1,
+					"default": 10,
+					"hidden": "!data.pv_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 6,
+					"lg": 6,
+					"xl": 6
+				},
+				"pv_finish_cycle": {
+					"type": "checkbox",
+					"label": {
+						"en": "Finish active cycle to base target after reset",
+						"de": "Aktiven Takt nach Reset bis zum Normalwert zu Ende fahren"
+					},
+					"help": {
+						"en": "If deactivated, the compressor might stop immediately if current temp is higher than base target.",
+						"de": "Verhindert hartes Abschalten: Setzt den Sollwert erst auf Standard zurück, wenn der aktuelle Takt beendet ist."
+					},
+					"default": true,
+					"hidden": "!data.pv_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 6,
+					"lg": 6,
+					"xl": 6
 				}
 			}
 		},

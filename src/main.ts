@@ -1,8 +1,8 @@
 /*
  * Created with @iobroker/create-adapter v3.1.5
  */
-import * as schedule from 'node-schedule';
 import * as utils from '@iobroker/adapter-core';
+import * as schedule from 'node-schedule';
 import { handleZwangsheizen, handleZwangswarmwasser } from './actionHandlers';
 import { initAutoBackup, stopAutoBackup } from './backupManager';
 import { formatTimerSecondsToTime, timeStringToSeconds } from './convert';
@@ -24,6 +24,7 @@ import {
 	ensureCustomObjectsExist,
 	isStateEnabled,
 } from './objectManager';
+import { handlePvCycleCheck, handlePvFeedInChange, initPvManagement } from './pvManager';
 import { dumpAllRawToLog, queueWrite, readAllRaw } from './rawFunctions';
 import { STATE_MAPPING, getDpPath } from './stateMapping';
 import { generateHeatCurveSVG } from './svgGenerator';
@@ -254,6 +255,9 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 
 		this.scheduleMidnightReset(); // Startet den 00:00 Uhr Timer (nur für den Tageszähler!)
 		subscribeMotionSensors(this);
+
+		// PV-Steuerung initialisieren
+		await initPvManagement(this);
 
 		this.subscribeStates('*');
 
@@ -1067,13 +1071,29 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 			return;
 		}
 
-		// Bewegungsmelder an den Manager auslagern
+		// 1. Fremd-Datenpunkte (PV-Überschuss etc.) abfangen
+		if (!id.startsWith(`${this.namespace}.`)) {
+			// An PV-Manager weiterleiten (wird synchron verarbeitet)
+			handlePvFeedInChange(this, id, state);
+		}
+
+		// Bewegungsmelder an den Manager auslagern (können technisch eigene oder fremde OIDs sein)
 		const isMotionSensor = await checkAndHandleMotionSensor(this, id, state);
 		if (isMotionSensor) {
 			return; // Der zipManager hat das Event verarbeitet, wir sind hier fertig
 		}
 
+		// Falls wir hier noch bei einem Fremd-Datenpunkt sind, brechen wir ab
+		// (eigene Logik unten ist nur für den internen Adapter-Namespace!)
+		if (!id.startsWith(`${this.namespace}.`)) {
+			return;
+		}
+
 		if (state.ack) {
+			// PV-Sicherheits-Check beim Verdichter-Status (nur bei Ack=true, wenn der Wert echt von der WP kommt)
+			if (id.endsWith('WP_BZ_akt')) {
+				await handlePvCycleCheck(this, Number(state.val));
+			}
 			return;
 		}
 
