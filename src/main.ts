@@ -24,7 +24,13 @@ import {
 	ensureCustomObjectsExist,
 	isStateEnabled,
 } from './objectManager';
-import { handlePvCycleCheck, handlePvFeedInChange, initPvManagement, pvIsBoostActive } from './pvManager';
+import {
+	forceResetPvBoost,
+	handlePvCycleCheck,
+	handlePvFeedInChange,
+	initPvManagement,
+	pvIsBoostActive,
+} from './pvManager';
 
 import { dumpAllRawToLog, queueWrite, readAllRaw } from './rawFunctions';
 import { STATE_MAPPING, getDpPath } from './stateMapping';
@@ -1184,6 +1190,10 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 			}
 			if (mappingKey === 'Setze_Vorgabewerte' && state.val === true) {
 				await this.setState(relativeId, { val: false, ack: true });
+
+				// FIX: Bricht einen eventuell laufenden PV-Boost hart ab, bevor die Standardwerte geladen werden
+				await forceResetPvBoost(this);
+
 				await this.setIdleDefaults();
 				return;
 			}

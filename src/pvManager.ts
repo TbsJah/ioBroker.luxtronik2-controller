@@ -425,3 +425,26 @@ export async function handlePvCycleCheck(adapter: LuxtronikAdapter, newBzVal: nu
 		await deactivateBoost(adapter);
 	}
 }
+
+/**
+ * Bricht den PV-Boost manuell ab (z.B. wenn der Benutzer den Reset-Button drückt).
+ *
+ * @param adapter Die aktuelle Adapter-Instanz.
+ */
+export async function forceResetPvBoost(adapter: LuxtronikAdapter): Promise<void> {
+	if (pvIsBoostActive) {
+		writeLog('[PV] Manual override triggered. Cancelling active PV boost...', 'info');
+
+		// Laufende Timer sofort aufräumen
+		if (pvStartTimer) {
+			adapter.clearTimeout(pvStartTimer);
+			pvStartTimer = undefined;
+		}
+		if (pvStopTimer) {
+			adapter.clearTimeout(pvStopTimer);
+			pvStopTimer = undefined;
+		}
+
+		await deactivateBoost(adapter);
+	}
+}

@@ -18,6 +18,7 @@ var __copyProps = (to, from, except, desc) => {
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 var pvManager_exports = {};
 __export(pvManager_exports, {
+  forceResetPvBoost: () => forceResetPvBoost,
   handlePvCycleCheck: () => handlePvCycleCheck,
   handlePvFeedInChange: () => handlePvFeedInChange,
   initPvManagement: () => initPvManagement,
@@ -340,8 +341,23 @@ async function handlePvCycleCheck(adapter, newBzVal) {
     await deactivateBoost(adapter);
   }
 }
+async function forceResetPvBoost(adapter) {
+  if (pvIsBoostActive) {
+    (0, import_logger.writeLog)("[PV] Manual override triggered. Cancelling active PV boost...", "info");
+    if (pvStartTimer) {
+      adapter.clearTimeout(pvStartTimer);
+      pvStartTimer = void 0;
+    }
+    if (pvStopTimer) {
+      adapter.clearTimeout(pvStopTimer);
+      pvStopTimer = void 0;
+    }
+    await deactivateBoost(adapter);
+  }
+}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
+  forceResetPvBoost,
   handlePvCycleCheck,
   handlePvFeedInChange,
   initPvManagement,

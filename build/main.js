@@ -938,6 +938,7 @@ class Luxtronik2Controller extends utils.Adapter {
       }
       if (mappingKey === "Setze_Vorgabewerte" && state.val === true) {
         await this.setState(relativeId, { val: false, ack: true });
+        await (0, import_pvManager.forceResetPvBoost)(this);
         await this.setIdleDefaults();
         return;
       }
