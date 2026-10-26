@@ -24,7 +24,8 @@ import {
 	ensureCustomObjectsExist,
 	isStateEnabled,
 } from './objectManager';
-import { handlePvCycleCheck, handlePvFeedInChange, initPvManagement } from './pvManager';
+import { handlePvCycleCheck, handlePvFeedInChange, initPvManagement, pvIsBoostActive } from './pvManager';
+
 import { dumpAllRawToLog, queueWrite, readAllRaw } from './rawFunctions';
 import { STATE_MAPPING, getDpPath } from './stateMapping';
 import { generateHeatCurveSVG } from './svgGenerator';
@@ -548,13 +549,13 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 			// =========================================================
 			if (bzVal !== this.lastBzVal) {
 				if (istLeerlauf) {
-					if (config.idle_defaults_aktiv === true) {
+					// FIX: Leerlauf-Vorgaben nur setzen, wenn PV-Boost NICHT aktiv ist
+					if (config.idle_defaults_aktiv === true && !pvIsBoostActive) {
 						await this.setIdleDefaults();
 					}
 				} else if (istHeizen) {
-					// FIX: Wenn wir von WW direkt ins Heizen wechseln (ohne Leerlauf),
-					// muss der künstliche WW-Sollwert der Takt-Optimierung zwingend auf den Standard zurückgesetzt werden!
-					if (this.lastBzVal === '1' && config.idle_defaults_aktiv === true) {
+					// FIX: WW-Reset nur ausführen, wenn PV-Boost NICHT aktiv ist
+					if (this.lastBzVal === '1' && config.idle_defaults_aktiv === true && !pvIsBoostActive) {
 						await this.syncConfigValue(
 							'temperature_hot_water_target',
 							config.sync_warmwater_target_temperature ?? 54,

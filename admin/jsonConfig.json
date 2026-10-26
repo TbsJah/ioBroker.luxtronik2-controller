@@ -1827,6 +1827,43 @@
 					"lg": 6,
 					"xl": 6
 				},
+				"pv_priority": {
+					"type": "select",
+					"label": {
+						"en": "Boost Priority (Sequence)",
+						"de": "Boost-Priorität (Reihenfolge)"
+					},
+					"options": [
+						{
+							"label": {
+								"en": "Simultaneous (Default)",
+								"de": "Gleichzeitig (Standard)"
+							},
+							"value": "both"
+						},
+						{
+							"label": {
+								"en": "Hot Water first, then Heating",
+								"de": "Warmwasser zuerst, dann Heizen"
+							},
+							"value": "ww"
+						},
+						{
+							"label": {
+								"en": "Heating first, then Hot Water",
+								"de": "Heizen zuerst, dann Warmwasser"
+							},
+							"value": "hz"
+						}
+					],
+					"default": "both",
+					"hidden": "!data.pv_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
 				"header_pv_stop": {
 					"type": "header",
 					"text": {

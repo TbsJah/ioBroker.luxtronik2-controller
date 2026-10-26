@@ -31,6 +31,8 @@ let pvStartTimer;
 let pvStopTimer;
 let pvIsBoostActive = false;
 let pvWaitingForCycleEnd = false;
+let activeBoostWwApplied = false;
+let activeBoostHzApplied = false;
 let originalWw = null;
 let originalHz = null;
 async function initPvManagement(adapter) {
@@ -47,6 +49,8 @@ async function initPvManagement(adapter) {
     );
     pvIsBoostActive = false;
     pvWaitingForCycleEnd = false;
+    activeBoostWwApplied = false;
+    activeBoostHzApplied = false;
     const dpActive = (0, import_stateMapping.getDpPath)("pv_boost_active");
     const dpSince = (0, import_stateMapping.getDpPath)("pv_boost_active_since");
     if (dpActive) {
@@ -91,6 +95,8 @@ function handlePvFeedInChange(adapter, id, state) {
         "info"
       );
       pvStartTimer = adapter.setTimeout(() => activateBoost(adapter), delayStartMs);
+    } else if (pvIsBoostActive) {
+      void evaluatePvBoost(adapter);
     }
   } else if (surplus <= thresholdStop) {
     if (pvStartTimer) {
@@ -115,6 +121,9 @@ function handlePvFeedInChange(adapter, id, state) {
       adapter.clearTimeout(pvStopTimer);
       pvStopTimer = void 0;
       (0, import_logger.writeLog)(`[PV] Surplus ${surplus} W is above stop threshold. Stop timer cancelled.`, "debug");
+    }
+    if (pvIsBoostActive) {
+      void evaluatePvBoost(adapter);
     }
   }
 }
@@ -141,17 +150,12 @@ async function activateBoost(adapter) {
     }
     originalWw = baseWw;
     originalHz = baseHz;
-    const boostWw = config.pv_boost_ww || 0;
-    const boostHz = config.pv_boost_hz || 0;
-    (0, import_logger.writeLog)(`[PV] Timer finished. Activating boost! WW: +${boostWw}K, HZ: +${boostHz}K`, "info");
-    if (originalWw !== null && boostWw > 0 && wwPath) {
-      await adapter.setState(wwPath, { val: originalWw + boostWw, ack: false });
-    }
-    if (originalHz !== null && boostHz > 0 && hzPath) {
-      await adapter.setState(hzPath, { val: originalHz + boostHz, ack: false });
-    }
     pvIsBoostActive = true;
     pvWaitingForCycleEnd = false;
+    activeBoostWwApplied = false;
+    activeBoostHzApplied = false;
+    (0, import_logger.writeLog)("[PV] Timer finished. Activating boost logic...", "info");
+    await evaluatePvBoost(adapter);
     const nowStr = (/* @__PURE__ */ new Date()).toISOString().replace("T", " ").substring(0, 19);
     const dpActive = (0, import_stateMapping.getDpPath)("pv_boost_active");
     const dpSince = (0, import_stateMapping.getDpPath)("pv_boost_active_since");
@@ -168,6 +172,64 @@ async function activateBoost(adapter) {
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     (0, import_logger.writeLog)(`[PV] Error activating boost: ${msg}`, "error");
+  }
+}
+async function evaluatePvBoost(adapter) {
+  if (!pvIsBoostActive) {
+    return;
+  }
+  try {
+    const config = adapter.config;
+    const priority = config.pv_priority || "both";
+    const boostWwAmount = Number(config.pv_boost_ww) || 0;
+    const boostHzAmount = Number(config.pv_boost_hz) || 0;
+    const wwPath = (0, import_stateMapping.getDpPath)("Wamwassertemperatur_Soll");
+    const hzPath = (0, import_stateMapping.getDpPath)("heating_temperature");
+    const wwIstState = await adapter.getStateAsync((0, import_stateMapping.getDpPath)("Wamwassertemperatur_Ist"));
+    const hzIstState = await adapter.getStateAsync((0, import_stateMapping.getDpPath)("temperature_return"));
+    const wwIst = wwIstState && typeof wwIstState.val === "number" ? wwIstState.val : 0;
+    const hzIst = hzIstState && typeof hzIstState.val === "number" ? hzIstState.val : 0;
+    const isWwFull = originalWw !== null && wwIst >= originalWw + boostWwAmount - 0.5;
+    const isHzFull = originalHz !== null && hzIst >= originalHz + boostHzAmount - 0.5;
+    let shouldBoostWw = false;
+    let shouldBoostHz = false;
+    if (priority === "ww") {
+      if (!isWwFull) {
+        shouldBoostWw = true;
+      } else {
+        shouldBoostHz = true;
+      }
+    } else if (priority === "hz") {
+      if (!isHzFull) {
+        shouldBoostHz = true;
+      } else {
+        shouldBoostWw = true;
+      }
+    } else {
+      shouldBoostWw = !isWwFull;
+      shouldBoostHz = !isHzFull;
+    }
+    if (shouldBoostWw && !activeBoostWwApplied && originalWw !== null && boostWwAmount > 0 && wwPath) {
+      await adapter.setState(wwPath, { val: originalWw + boostWwAmount, ack: false });
+      activeBoostWwApplied = true;
+      (0, import_logger.writeLog)(`[PV] Priority logic: Applying Hot Water boost (+${boostWwAmount}K).`, "info");
+    } else if (!shouldBoostWw && activeBoostWwApplied && originalWw !== null && wwPath) {
+      await adapter.setState(wwPath, { val: originalWw, ack: false });
+      activeBoostWwApplied = false;
+      (0, import_logger.writeLog)(`[PV] Priority logic: Target reached. Revoking Hot Water boost.`, "info");
+    }
+    if (shouldBoostHz && !activeBoostHzApplied && originalHz !== null && boostHzAmount > 0 && hzPath) {
+      await adapter.setState(hzPath, { val: originalHz + boostHzAmount, ack: false });
+      activeBoostHzApplied = true;
+      (0, import_logger.writeLog)(`[PV] Priority logic: Applying Heating boost (+${boostHzAmount}K).`, "info");
+    } else if (!shouldBoostHz && activeBoostHzApplied && originalHz !== null && hzPath) {
+      await adapter.setState(hzPath, { val: originalHz, ack: false });
+      activeBoostHzApplied = false;
+      (0, import_logger.writeLog)(`[PV] Priority logic: Target reached. Revoking Heating boost.`, "info");
+    }
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    (0, import_logger.writeLog)(`[PV] Error evaluating boost priority: ${msg}`, "error");
   }
 }
 async function initiateDeactivation(adapter) {
@@ -210,6 +272,8 @@ async function deactivateBoost(adapter) {
     }
     pvIsBoostActive = false;
     pvWaitingForCycleEnd = false;
+    activeBoostWwApplied = false;
+    activeBoostHzApplied = false;
     originalWw = null;
     originalHz = null;
     const dpActive = (0, import_stateMapping.getDpPath)("pv_boost_active");

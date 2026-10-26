@@ -450,11 +450,11 @@ class Luxtronik2Controller extends utils.Adapter {
       }
       if (bzVal !== this.lastBzVal) {
         if (istLeerlauf) {
-          if (config.idle_defaults_aktiv === true) {
+          if (config.idle_defaults_aktiv === true && !import_pvManager.pvIsBoostActive) {
             await this.setIdleDefaults();
           }
         } else if (istHeizen) {
-          if (this.lastBzVal === "1" && config.idle_defaults_aktiv === true) {
+          if (this.lastBzVal === "1" && config.idle_defaults_aktiv === true && !import_pvManager.pvIsBoostActive) {
             await this.syncConfigValue(
               "temperature_hot_water_target",
               (_a = config.sync_warmwater_target_temperature) != null ? _a : 54
