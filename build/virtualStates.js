@@ -226,7 +226,7 @@ async function updateStatusStrings(adapter, rawValues, rawParams) {
       }
     }
     const dpHeating = (0, import_stateMapping.getDpPath)("opStateHeatingString");
-    if (dpHeating) {
+    if (dpHeating && adapter.createdStates.has(dpHeating)) {
       await adapter.setStateChangedAsync(dpHeating, heatingStr, true);
     }
     let stateStr = "Unknown";
@@ -267,16 +267,16 @@ async function updateStatusStrings(adapter, rawValues, rawParams) {
       const line2Text = line2Map[0] || "since";
       extStateStr = `${line1Text} ${line2Text} ${zeitStringText}`;
       const dpDuration = (0, import_stateMapping.getDpPath)("heatpump_duration");
-      if (dpDuration) {
+      if (dpDuration && adapter.createdStates.has(dpDuration)) {
         await adapter.setStateChangedAsync(dpDuration, zeitStringDuration, true);
       }
     }
     const dpExtState = (0, import_stateMapping.getDpPath)("heatpump_extendet_state_string");
-    if (dpExtState) {
+    if (dpExtState && adapter.createdStates.has(dpExtState)) {
       await adapter.setStateChangedAsync(dpExtState, stateStr, true);
     }
     const dpState = (0, import_stateMapping.getDpPath)("heatpump_state_string");
-    if (dpState) {
+    if (dpState && adapter.createdStates.has(dpState)) {
       await adapter.setStateChangedAsync(dpState, extStateStr, true);
     }
     const hotWaterBoilerValve = rawValues[(0, import_stateMapping.getLuxIdByKey)("hotWaterBoilerValve")] || 0;
@@ -294,7 +294,7 @@ async function updateStatusStrings(adapter, rawValues, rawParams) {
       hotWaterStr = `Unknown [${opStateHotWaterOriginal}/${hotWaterBoilerValve}]`;
     }
     const dpHotWater = (0, import_stateMapping.getDpPath)("opStateHotWaterString");
-    if (dpHotWater) {
+    if (dpHotWater && adapter.createdStates.has(dpHotWater)) {
       await adapter.setStateChangedAsync(dpHotWater, hotWaterStr, true);
     }
     const coolingOpMode = rawParams[(0, import_stateMapping.getLuxIdByKey)("cooling_operation_mode")];
@@ -318,7 +318,7 @@ async function updateStatusStrings(adapter, rawValues, rawParams) {
       }
     }
     const dpCooling = (0, import_stateMapping.getDpPath)("opStateCoolingString");
-    if (dpCooling) {
+    if (dpCooling && adapter.createdStates.has(dpCooling)) {
       await adapter.setStateChangedAsync(dpCooling, coolingStr, true);
     }
   } catch (err) {

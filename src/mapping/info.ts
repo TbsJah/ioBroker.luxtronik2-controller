@@ -1704,4 +1704,41 @@ export const INFO_MAPPING: Record<string, StateDefinition> = {
 		type: 'number',
 		isVirtual: true,
 	},
+	// PV
+	pv_boost_active: {
+		name: {
+			en: 'PV Boost Active',
+			de: 'PV Boost Aktiv',
+		},
+		type: 'boolean',
+		role: 'indicator',
+		folder: 'Information.17_PV_Surplus',
+		isVirtual: true,
+		def: false,
+		write: false,
+	},
+	pv_boost_active_since: {
+		name: {
+			en: 'PV Boost Active Since',
+			de: 'PV Boost aktiv seit',
+		},
+		type: 'string',
+		role: 'value.datetime',
+		folder: 'Information.17_PV_Surplus',
+		isVirtual: true,
+		def: '',
+		write: false,
+	},
+	pv_boost_last_activation: {
+		name: {
+			en: 'Last PV Boost Activation',
+			de: 'Letzte PV Boost Aktivierung',
+		},
+		type: 'string',
+		role: 'value.datetime',
+		folder: 'Information.17_PV_Surplus',
+		isVirtual: true,
+		def: '',
+		write: false,
+	},
 };

@@ -16,7 +16,6 @@ export interface ModbusReadResult {
  * Manager class to handle volatile Modbus TCP read and write operations.
  */
 export class ModbusManager {
-	private client: ModbusRTU;
 	/** Indicates whether the Modbus interface on the heat pump is reachable */
 	public isAvailable: boolean = false;
 	private adapter: LuxtronikAdapter;
@@ -30,7 +29,6 @@ export class ModbusManager {
 	 */
 	constructor(adapter: LuxtronikAdapter) {
 		this.adapter = adapter;
-		this.client = new ModbusRTU();
 		this.host = adapter.config.host || '192.168.178.81';
 		this.port = adapter.config.modbus_port ? Number(adapter.config.modbus_port) : 502;
 	}
@@ -46,13 +44,14 @@ export class ModbusManager {
 			return false;
 		}
 
+		const client = new ModbusRTU();
 		try {
-			this.client.setTimeout(2000);
-			await this.client.connectTCP(this.host, { port: this.port });
-			this.client.setID(1);
+			client.setTimeout(2000);
+			await client.connectTCP(this.host, { port: this.port });
+			client.setID(1);
 
 			// Testverbindung: Wir lesen Holding 1 (Rücklauf-Soll) aus
-			await this.client.readHoldingRegisters(1, 1);
+			await client.readHoldingRegisters(1, 1);
 
 			writeLog(`[Modbus] Pre-Check erfolgreich! Modbus TCP ist auf Port ${this.port} erreichbar.`, 'info');
 			this.isAvailable = true;
@@ -63,9 +62,8 @@ export class ModbusManager {
 			this.isAvailable = false;
 			return false;
 		} finally {
-			// Verbindung immer sauber schließen, um den Port nicht zu blockieren
-			if (this.client.isOpen) {
-				this.client.close();
+			if (client.isOpen) {
+				client.close();
 			}
 		}
 	}
@@ -80,18 +78,19 @@ export class ModbusManager {
 			return null;
 		}
 
+		const client = new ModbusRTU();
 		try {
-			this.client.setTimeout(2500);
-			await this.client.connectTCP(this.host, { port: this.port });
-			this.client.setID(1);
+			client.setTimeout(2500);
+			await client.connectTCP(this.host, { port: this.port });
+			client.setID(1);
 
 			// 1. Holding-Register 0 bis 23 in einem Request lesen
-			const holdingRes = await this.client.readHoldingRegisters(0, 24);
+			const holdingRes = await client.readHoldingRegisters(0, 24);
 			// 16-Bit Signed Integer Umrechnung (für negative Außentemperaturen / Offsets)
 			const holdings = holdingRes.data.map(val => (val > 32767 ? val - 65536 : val));
 
 			// 2. Coils 0 bis 13 in einem Request lesen
-			const coilRes = await this.client.readCoils(0, 14);
+			const coilRes = await client.readCoils(0, 14);
 			const coils = coilRes.data;
 
 			return { holdings, coils };
@@ -102,8 +101,8 @@ export class ModbusManager {
 			}
 			return null;
 		} finally {
-			if (this.client.isOpen) {
-				this.client.close();
+			if (client.isOpen) {
+				client.close();
 			}
 		}
 	}
@@ -122,21 +121,22 @@ export class ModbusManager {
 			return;
 		}
 
+		const client = new ModbusRTU();
 		try {
-			this.client.setTimeout(3000);
-			await this.client.connectTCP(this.host, { port: this.port });
-			this.client.setID(1);
+			client.setTimeout(3000);
+			await client.connectTCP(this.host, { port: this.port });
+			client.setID(1);
 
 			if (isCoil) {
 				const coilVal = value === 1 || Boolean(value);
-				await this.client.writeCoil(register, coilVal);
+				await client.writeCoil(register, coilVal);
 				if (this.adapter.isDebugLogActive) {
 					writeLog(`[Modbus] Coil ${register} erfolgreich auf ${coilVal} gesetzt.`, 'debug');
 				}
 			} else {
 				const rounded = Math.round(Number(value));
 				const wireValue = rounded < 0 ? 65536 + rounded : rounded;
-				await this.client.writeRegister(register, wireValue);
+				await client.writeRegister(register, wireValue);
 				if (this.adapter.isDebugLogActive) {
 					writeLog(`[Modbus] Holding-Register ${register} erfolgreich auf ${rounded} gesetzt.`, 'debug');
 				}
@@ -145,8 +145,8 @@ export class ModbusManager {
 			const msg = err instanceof Error ? err.message : String(err);
 			writeLog(`[Modbus] Schreibfehler auf Register ${register}: ${msg}`, 'error');
 		} finally {
-			if (this.client.isOpen) {
-				this.client.close();
+			if (client.isOpen) {
+				client.close();
 			}
 		}
 	}

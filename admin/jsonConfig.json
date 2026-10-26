@@ -586,7 +586,7 @@
 			"type": "panel",
 			"label": {
 				"en": "Idle Defaults",
-				"de": "Leerlauf - Vorgaben"
+				"de": "Vorgaben"
 			},
 			"icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMjQgMjQiPgoJPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIgLz4KCTxwYXRoIGZpbGw9ImN1cnJlbnRDb2xvciIgZD0ibTEyIDEzLjRsMi45IDIuOXEuMjc1LjI3NS43LjI3NXQuNy0uMjc1dC4yNzUtLjd0LS4yNzUtLjdMMTMuNCAxMmwyLjktMi45cS4yNzUtLjI3NS4yNzUtLjd0LS4yNzUtLjd0LS43LS4yNzV0LS43LjI3NUwxMiAxMC42TDkuMSA3LjdxLS4yNzUtLjI3NS0uNy0uMjc1dC0uNy4yNzV0LS4yNzUuN3QuMjc1LjdsMi45IDIuOWwtMi45IDIuOXEtLjI3NS4yNzUtLjI3NS43dC4yNzUuN3QuNy4yNzV0LjctLjI3NXpNNSAyMXEtLjgyNSAwLTEuNDEyLS41ODdUMyAxOVY1cTAtLjgyNS41ODgtMS40MTJUNSAzaDE0cS44MjUgMCAxLjQxMy41ODhUMjEgNXYxNHEwIC44MjUtLjU4NyAxLjQxM1QxOSAyMXptMC0yaDE0VjVINXpNNSA1djE0eiIgLz4KPC9zdmc+Cg==",
 			"items": {
@@ -1079,7 +1079,7 @@
 		"hupTab": {
 			"type": "panel",
 			"label": {
-				"en": "HUP",
+				"en": "HUP control",
 				"de": "HUP Steuerung"
 			},
 			"icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMjQgMjQiPgoJPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIgLz4KCTxwYXRoIGZpbGw9ImN1cnJlbnRDb2xvciIgZD0iTTE0IDE2aDJ2LTNoM3YtMmgtM1Y4aC0ydjNoLTN2Mmgzem0tOCA0LjVxLTIuNzI1LS45NS00LjM2Mi0zLjI4N1QwIDEydDEuNjM4LTUuMjEyVDYgMy41djIuMnEtMS44NS44NzUtMi45MjUgMi41NzVUMiAxMnQxLjA3NSAzLjcyNVQ2IDE4LjN6bTUuNDg4LS4yMTNxLTEuNjM4LS43MTItMi44NS0xLjkyNHQtMS45MjUtMi44NVQ2IDEydC43MTMtMy41MTJ0MS45MjUtMi44NXQyLjg1LTEuOTI1VDE1IDN0My41MTMuNzEzdDIuODUgMS45MjR0MS45MjUgMi44NVQyNCAxMnQtLjcxMiAzLjUxM3QtMS45MjUgMi44NXQtMi44NSAxLjkyNVQxNSAyMXQtMy41MTItLjcxMk0xNSAxOXEyLjkyNSAwIDQuOTYzLTIuMDM3VDIyIDEydC0yLjAzNy00Ljk2MlQxNSA1dC00Ljk2MiAyLjAzOFQ4IDEydDIuMDM4IDQuOTYzVDE1IDE5IiAvPgo8L3N2Zz4K",
@@ -1302,7 +1302,7 @@
 			"type": "panel",
 			"label": {
 				"en": "Circulation pump",
-				"de": "Zirkulationspumpe"
+				"de": "ZIP Steuerung"
 			},
 			"icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMjQgMjQiPgoJPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIgLz4KCTxwYXRoIGZpbGw9ImN1cnJlbnRDb2xvciIgZD0iTTEwLjU4OCAxNC40MTNRMTAgMTMuODI1IDEwIDEzcTAtLjU3NS4yMzgtMS4xMzd0LjkxMi0xLjYxM2wuNDI1LS42MjVxLjE1LS4yMjUuNDI1LS4yMjV0LjQyNS4yMjVsLjQyNS42MjVxLjY3NSAxLjA1LjkxMyAxLjYxM1QxNCAxM3EwIC44MjUtLjU4NyAxLjQxM1QxMiAxNXQtMS40MTItLjU4N00zIDE3aDQuMXEtLjQyNS0uNDI1LS43ODctLjkyNVQ1LjY3NSAxNUgzem0xMi41MzgtMS40NjNRMTcgMTQuMDc2IDE3IDEydC0xLjQ2My0zLjUzN1QxMiA3VDguNDYzIDguNDYzVDcgMTJ0MS40NjMgMy41MzhUMTIgMTd0My41MzgtMS40NjNNMTguMzI1IDlIMjFWN2gtNC4xcS40MjUuNDI1Ljc4OC45MjVUMTguMzI1IDlNMyAxOXEwIC40MjUtLjI4OC43MTNUMiAyMHQtLjcxMi0uMjg4VDEgMTl2LTZxMC0uNDI1LjI4OC0uNzEyVDIgMTJ0LjcxMy4yODhUMyAxM2gyLjA3NXEtLjA1LS4yNS0uMDYyLS40ODhUNSAxMnEwLTIuOTI1IDIuMDM4LTQuOTYyVDEyIDVoOXEwLS40MjUuMjg4LS43MTJUMjIgNHQuNzEzLjI4OFQyMyA1djZxMCAuNDI1LS4yODguNzEzVDIyIDEydC0uNzEyLS4yODhUMjEgMTFoLTIuMDc1cS4wNS4yNS4wNjMuNDg4VDE5IDEycTAgMi45MjUtMi4wMzcgNC45NjNUMTIgMTl6bTAtMnYtMnptMTgtOFY3em0tOSAzIiAvPgo8L3N2Zz4K",
 			"items": {
@@ -1632,6 +1632,398 @@
 							"width": "70%"
 						}
 					]
+				}
+			}
+		},
+		"pvTab": {
+			"type": "panel",
+			"label": {
+				"en": "PV / Surplus",
+				"de": "PV-Überschuss"
+			},
+			"icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMjQgMjQiPgoJPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIgLz4KCTxwYXRoIGZpbGw9ImN1cnJlbnRDb2xvciIgZD0iTTMgNFYyaDN2MnpNMiAyMmg5di00SDIuOHpNNi4xMjUgOS4zMjVMNC43IDcuOTI1TDYuODI1IDUuOEw4LjI1IDcuMnpNMy4yIDE2SDExdi00SDR6TTguNDYzIDUuNTM4UTcgNC4wNzQgNyAyaDEwcTAgMi4wNzUtMS40NjMgMy41MzhUMTIgN1Q4LjQ2MyA1LjUzN00xMSAxMVY4aDJ2M3ptMiAxMWg5bC0uOC00SDEzem0wLTZoNy44bC0uOC00aC03em00Ljg3NS02LjY3NWwtMi4xLTIuMTI1bDEuNC0xLjRMMTkuMyA3Ljl6TTE4IDRWMmgzdjJ6IiAvPgo8L3N2Zz4K",
+			"items": {
+				"pv_active": {
+					"type": "checkbox",
+					"label": {
+						"en": "Enable PV surplus management",
+						"de": "PV-Überschusssteuerung aktivieren"
+					},
+					"newLine": true,
+					"default": false,
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
+				"pv_info_header": {
+					"type": "header",
+					"text": {
+						"en": "How it works: PV Surplus Control",
+						"de": "Funktionsweise: PV-Überschusssteuerung"
+					},
+					"size": 3,
+					"hidden": "!data.pv_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
+				"pv_info_desc": {
+					"type": "staticText",
+					"text": {
+						"en": "Automatically raises the setpoints for hot water and heating when your solar system feeds enough power into the grid. The adapter waits for active cycles to finish before reverting values to protect the compressor.",
+						"de": "Hebt die Sollwerte für Warmwasser und Heizung automatisch an, wenn deine Solaranlage ausreichend Strom ins Netz einspeist. Der Adapter wartet beim Wegfall der Sonne auf das Ende laufender Takte, um den Verdichter zu schonen."
+					},
+					"hidden": "!data.pv_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
+				"pv_feed_in_dp": {
+					"type": "objectId",
+					"label": {
+						"en": "Datapoint for current grid power",
+						"de": "Datenpunkt für aktuelle Netzleistung"
+					},
+					"hidden": "!data.pv_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 6,
+					"lg": 6,
+					"xl": 6
+				},
+				"pv_feed_in_unit": {
+					"type": "select",
+					"label": {
+						"en": "Unit of datapoint",
+						"de": "Einheit des Datenpunkts"
+					},
+					"options": [
+						{
+							"label": "Watt (W)",
+							"value": "W"
+						},
+						{
+							"label": "Kilowatt (kW)",
+							"value": "kW"
+						}
+					],
+					"default": "W",
+					"hidden": "!data.pv_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 2,
+					"lg": 2,
+					"xl": 2
+				},
+				"pv_feed_in_sign": {
+					"type": "select",
+					"label": {
+						"en": "Sign for grid feed-in",
+						"de": "Vorzeichen bei Einspeisung"
+					},
+					"options": [
+						{
+							"label": {
+								"en": "Negative (e.g. -2500) = Feed-in",
+								"de": "Negativ (z.B. -2500) = Einspeisung"
+							},
+							"value": "negative"
+						},
+						{
+							"label": {
+								"en": "Positive (e.g. 2500) = Feed-in",
+								"de": "Positiv (z.B. 2500) = Einspeisung"
+							},
+							"value": "positive"
+						}
+					],
+					"default": "negative",
+					"hidden": "!data.pv_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 4,
+					"lg": 4,
+					"xl": 4
+				},
+				"pv_battery_active": {
+					"type": "checkbox",
+					"label": {
+						"en": "Include battery charging power (Prioritize Heat Pump)",
+						"de": "Batterieladung zum Überschuss addieren (Wärmepumpe priorisieren)"
+					},
+					"newLine": true,
+					"default": false,
+					"hidden": "!data.pv_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
+				"pv_battery_dp": {
+					"type": "objectId",
+					"label": {
+						"en": "Datapoint for battery power",
+						"de": "Datenpunkt für Batterieleistung"
+					},
+					"hidden": "!data.pv_active || !data.pv_battery_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 6,
+					"lg": 6,
+					"xl": 6
+				},
+				"pv_battery_unit": {
+					"type": "select",
+					"label": {
+						"en": "Unit",
+						"de": "Einheit"
+					},
+					"options": [
+						{
+							"label": "Watt (W)",
+							"value": "W"
+						},
+						{
+							"label": "Kilowatt (kW)",
+							"value": "kW"
+						}
+					],
+					"default": "W",
+					"hidden": "!data.pv_active || !data.pv_battery_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 2,
+					"lg": 2,
+					"xl": 2
+				},
+				"pv_battery_sign": {
+					"type": "select",
+					"label": {
+						"en": "Sign for charging",
+						"de": "Vorzeichen bei Ladung"
+					},
+					"options": [
+						{
+							"label": {
+								"en": "Positive (e.g. 1500) = Charging",
+								"de": "Positiv (z.B. 1500) = Laden"
+							},
+							"value": "positive"
+						},
+						{
+							"label": {
+								"en": "Negative (e.g. -1500) = Charging",
+								"de": "Negativ (z.B. -1500) = Laden"
+							},
+							"value": "negative"
+						}
+					],
+					"default": "positive",
+					"hidden": "!data.pv_active || !data.pv_battery_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 4,
+					"lg": 4,
+					"xl": 4
+				},
+				"header_pv_start": {
+					"type": "header",
+					"text": {
+						"en": "Activation (Boost)",
+						"de": "Aktivierung (Einschaltbedingungen)"
+					},
+					"size": 5,
+					"hidden": "!data.pv_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
+				"pv_threshold_start": {
+					"type": "number",
+					"label": {
+						"en": "Surplus threshold (Watt)",
+						"de": "Überschuss-Schwellenwert (Watt)"
+					},
+					"min": 100,
+					"default": 2000,
+					"hidden": "!data.pv_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 6,
+					"lg": 6,
+					"xl": 6
+				},
+				"pv_delay_start": {
+					"type": "number",
+					"label": {
+						"en": "Minimum duration before start (Minutes)",
+						"de": "Mindestdauer vor Aktivierung (Minuten)"
+					},
+					"min": 1,
+					"default": 5,
+					"hidden": "!data.pv_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 6,
+					"lg": 6,
+					"xl": 6
+				},
+				"pv_boost_ww": {
+					"type": "number",
+					"label": {
+						"en": "Hot water boost (+ K)",
+						"de": "Warmwasser Erhöhung (+ K)"
+					},
+					"min": 0,
+					"max": 20,
+					"default": 5,
+					"hidden": "!data.pv_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 6,
+					"lg": 6,
+					"xl": 6
+				},
+				"pv_boost_hz": {
+					"type": "number",
+					"label": {
+						"en": "Heating offset boost (+ K)",
+						"de": "Heizung Parallelverschiebung Erhöhung (+ K)"
+					},
+					"min": 0,
+					"max": 10,
+					"default": 2,
+					"hidden": "!data.pv_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 6,
+					"lg": 6,
+					"xl": 6
+				},
+				"pv_priority": {
+					"type": "select",
+					"label": {
+						"en": "Boost Priority (Sequence)",
+						"de": "Boost-Priorität (Reihenfolge)"
+					},
+					"options": [
+						{
+							"label": {
+								"en": "Simultaneous (Default)",
+								"de": "Gleichzeitig (Standard)"
+							},
+							"value": "both"
+						},
+						{
+							"label": {
+								"en": "Hot Water first, then Heating",
+								"de": "Warmwasser zuerst, dann Heizen"
+							},
+							"value": "ww"
+						},
+						{
+							"label": {
+								"en": "Heating first, then Hot Water",
+								"de": "Heizen zuerst, dann Warmwasser"
+							},
+							"value": "hz"
+						}
+					],
+					"default": "both",
+					"hidden": "!data.pv_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
+				"header_pv_stop": {
+					"type": "header",
+					"text": {
+						"en": "Deactivation (Reset)",
+						"de": "Deaktivierung (Rückfallbedingungen)"
+					},
+					"size": 5,
+					"hidden": "!data.pv_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
+				"pv_threshold_stop": {
+					"type": "number",
+					"label": {
+						"en": "Stop threshold (Watt, e.g. 0 = grid draw)",
+						"de": "Ausschalt-Schwellenwert (Watt, z.B. 0 = Netzbezug)"
+					},
+					"default": 0,
+					"hidden": "!data.pv_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 6,
+					"lg": 6,
+					"xl": 6
+				},
+				"pv_delay_stop": {
+					"type": "number",
+					"label": {
+						"en": "Delay before reset (Minutes)",
+						"de": "Verzögerung vor Rücksetzung (Minuten)"
+					},
+					"min": 1,
+					"default": 10,
+					"hidden": "!data.pv_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 6,
+					"lg": 6,
+					"xl": 6
+				},
+				"pv_finish_cycle": {
+					"type": "checkbox",
+					"label": {
+						"en": "Finish active cycle to base target after reset",
+						"de": "Aktiven Takt nach Reset bis zum Normalwert zu Ende fahren"
+					},
+					"help": {
+						"en": "If deactivated, the compressor might stop immediately if current temp is higher than base target.",
+						"de": "Verhindert hartes Abschalten: Setzt den Sollwert erst auf Standard zurück, wenn der aktuelle Takt beendet ist."
+					},
+					"default": true,
+					"hidden": "!data.pv_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 6,
+					"lg": 6,
+					"xl": 6
+				},
+				"hupImage_de": {
+					"type": "staticImage",
+					"src": "img/PV.png",
+					"style": {
+						"width": "900px",
+						"maxWidth": "100%",
+						"height": "auto",
+						"border": "1px solid #cccccc",
+						"borderRadius": "5px",
+						"marginTop": "20px",
+						"marginBottom": "20px"
+					},
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
 				}
 			}
 		},
@@ -4669,6 +5061,89 @@
 							},
 							"default": true,
 							"disabled": "!data.sync_category_information_16_efficiency",
+							"xs": 12,
+							"sm": 6,
+							"md": 3,
+							"lg": 3,
+							"xl": 3
+						}
+					}
+				},
+				"panel_information_17_pv_surplus": {
+					"type": "panel",
+					"label": {
+						"en": "Information.17 PV Surplus",
+						"de": "Information.17 PV Surplus"
+					},
+					"collapsable": true,
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12,
+					"items": {
+						"sync_category_information_17_pv_surplus": {
+							"type": "checkbox",
+							"label": {
+								"en": "🌟 Enable entire category: Information.17 PV Surplus",
+								"de": "🌟 Komplette Kategorie aktivieren: Information.17 PV Surplus"
+							},
+							"default": true,
+							"xs": 12,
+							"sm": 12,
+							"md": 12,
+							"lg": 12,
+							"xl": 12
+						},
+						"divider_information_17_pv_surplus": {
+							"type": "divider",
+							"color": "primary",
+							"style": {
+								"marginBottom": "15px",
+								"marginTop": "5px"
+							},
+							"xs": 12,
+							"sm": 12,
+							"md": 12,
+							"lg": 12,
+							"xl": 12
+						},
+						"sync_pv_boost_active": {
+							"type": "checkbox",
+							"label": {
+								"en": "PV Boost Active",
+								"de": "PV Boost Aktiv"
+							},
+							"default": true,
+							"disabled": "!data.sync_category_information_17_pv_surplus",
+							"xs": 12,
+							"sm": 6,
+							"md": 3,
+							"lg": 3,
+							"xl": 3
+						},
+						"sync_pv_boost_active_since": {
+							"type": "checkbox",
+							"label": {
+								"en": "PV Boost Active Since",
+								"de": "PV Boost aktiv seit"
+							},
+							"default": true,
+							"disabled": "!data.sync_category_information_17_pv_surplus",
+							"xs": 12,
+							"sm": 6,
+							"md": 3,
+							"lg": 3,
+							"xl": 3
+						},
+						"sync_pv_boost_last_activation": {
+							"type": "checkbox",
+							"label": {
+								"en": "Last PV Boost Activation",
+								"de": "Letzte PV Boost Aktivierung"
+							},
+							"default": true,
+							"disabled": "!data.sync_category_information_17_pv_surplus",
 							"xs": 12,
 							"sm": 6,
 							"md": 3,

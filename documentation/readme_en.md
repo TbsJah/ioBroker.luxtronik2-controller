@@ -184,7 +184,26 @@ The adapter can automatically check the official Alpha Innotec download portal f
 
 ---
 
-### 11. Tab: Custom Values (Custom)
+### 11. Tab: PV / Surplus
+
+Integrated "PV-Ready" control: Uses your surplus solar power to turn the heat pump into a thermal battery. As soon as your solar system feeds enough power into the grid, the adapter automatically and wear-free (via Modbus RAM) raises the setpoints for hot water and/or heating.
+
+- **Enable PV surplus management:** Activates the logic.
+- **Datapoint for current grid power:** Link the live datapoint of your smart meter or inverter (e.g. SMA, Shelly 3EM, Kostal).
+- **Include battery charging power (Prioritize Heat Pump):** Optional datapoint for your home battery. If the battery is currently charging with solar power, this energy is treated as "usable surplus". The heat pump acts as the primary thermal battery, intercepting the power before it flows into the chemical battery.
+- **Activation (Boost):**
+    - Define the _Surplus threshold_ (e.g. 2000 Watts) and a _Minimum duration_ (e.g. 5 minutes) to prevent short-cycling during variable cloud cover.
+    - Specify how many Kelvin the hot water and heating curve offset should be increased by.
+    - **Boost Priority (Sequence):** Choose whether the power is routed _Simultaneously_, _Hot Water first_, or _Heating first_. The intelligent saturation check automatically reroutes the remaining power during the boost as soon as the prioritized target reaches its maximum temperature.
+- **Deactivation (Reset):**
+    - **Stop threshold (Schmitt trigger logic):** Prevents the classic feedback loop. If the surplus drops due to the power consumption of the starting heat pump, the boost is not cancelled as long as this separate threshold (e.g. 0 Watts = grid draw) is not undershot.
+    - **Delay before reset:** Prevents an immediate shutdown if the sun is briefly covered by a cloud.
+    - **Finish active cycle to base target after reset (Hardware Protection):** If the solar surplus drops, the setpoint is not reset abruptly. The adapter intelligently waits until the current heating or hot water cycle has naturally finished its regular (lower) target to avoid abruptly stalling the compressor.
+      ![Example PV](../admin/img/PV.png)
+
+---
+
+### 12. Tab: Custom Values (Custom)
 
 If your heat pump exposes unique sensor indices not covered in standard mappings, define custom objects stored under the **`Custom`** tree:
 
@@ -197,7 +216,7 @@ If your heat pump exposes unique sensor indices not covered in standard mappings
 
 ---
 
-### 12. Tab: Backup & Diagnostics
+### 13. Tab: Backup & Diagnostics
 
 Download system log archives (`.dta` files) directly from the heat pump web server and analyze them graphically on your PC using tools such as **[OpenDTA](https://sourceforge.net/projects/opendta/)**.
 
