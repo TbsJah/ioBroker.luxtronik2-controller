@@ -84,16 +84,24 @@ async function processCopData(adapter, bzVal) {
     const lastThermalState = await adapter.getStateAsync(rawThermalId);
     const lastPowerTotal = lastPowerState && typeof lastPowerState.val === "number" ? lastPowerState.val : currentPower;
     const lastThermalTotal = lastThermalState && typeof lastThermalState.val === "number" ? lastThermalState.val : currentThermal;
-    const deltaPower = currentPower - lastPowerTotal;
-    const deltaThermal = currentThermal - lastThermalTotal;
-    if (deltaPower > 0 || deltaThermal > 0) {
+    const deltaPower = Math.max(0, currentPower - lastPowerTotal);
+    const deltaThermal = Math.max(0, currentThermal - lastThermalTotal);
+    if (currentPower < lastPowerTotal) {
       await adapter.setState(rawPowerId, { val: currentPower, ack: true });
+    }
+    if (currentThermal < lastThermalTotal) {
+      await adapter.setState(rawThermalId, { val: currentThermal, ack: true });
+    }
+    if (deltaPower > 0) {
+      await adapter.setState(rawPowerId, { val: currentPower, ack: true });
+    }
+    if (deltaThermal > 0) {
       await adapter.setState(rawThermalId, { val: currentThermal, ack: true });
     }
     await handleTimeRollover(adapter);
     if (deltaPower > 0 || deltaThermal > 0) {
       await addDeltaToBucket(adapter, "Total", deltaPower, deltaThermal);
-      if (bzVal === "0") {
+      if (bzVal === "0" || bzVal === "4") {
         await addDeltaToBucket(adapter, "Heating", deltaPower, deltaThermal);
       } else if (bzVal === "1") {
         await addDeltaToBucket(adapter, "HotWater", deltaPower, deltaThermal);
@@ -127,9 +135,12 @@ async function handleTimeRollover(adapter) {
   const state = await adapter.getStateAsync(dateStateId);
   const lastDate = state && typeof state.val === "string" ? state.val : "";
   const now = /* @__PURE__ */ new Date();
-  const currentDate = now.toISOString().split("T")[0];
-  const currentMonth = currentDate.substring(0, 7);
-  const currentYear = currentDate.substring(0, 4);
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  const currentDate = `${y}-${m}-${d}`;
+  const currentMonth = `${y}-${m}`;
+  const currentYear = `${y}`;
   if (lastDate !== currentDate) {
     const lastMonth = lastDate ? lastDate.substring(0, 7) : "";
     const lastYear = lastDate ? lastDate.substring(0, 4) : "";

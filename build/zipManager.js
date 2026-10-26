@@ -169,7 +169,7 @@ async function restoreOriginalZipConfig(adapter) {
         continue;
       }
       let rawVal = val;
-      if (def.role === "value.datetime" && typeof val === "string") {
+      if (typeof val === "string" && val.includes(":")) {
         rawVal = (0, import_convert.timeStringToSeconds)(val);
       }
       const targetPath = (0, import_stateMapping.getDpPath)(key);
@@ -361,16 +361,16 @@ async function handleActivateZip(adapter, id, durationSeconds) {
     if (!adapter.originalZipConfig) {
       const keysToSave = [
         "hotWaterCircPumpTimerTableSelected",
-        "WW_MoSo_Start1",
-        "WW_MoSo_End1",
-        "WW_MoSo_Start2",
-        "WW_MoSo_End2",
-        "WW_MoSo_Start3",
-        "WW_MoSo_End3",
-        "WW_MoSo_Start4",
-        "WW_MoSo_End4",
-        "WW_MoSo_Start5",
-        "WW_MoSo_End5",
+        "Zirkulation_MoSo_Start1",
+        "Zirkulation_MoSo_End1",
+        "Zirkulation_MoSo_Start2",
+        "Zirkulation_MoSo_End2",
+        "Zirkulation_MoSo_Start3",
+        "Zirkulation_MoSo_End3",
+        "Zirkulation_MoSo_Start4",
+        "Zirkulation_MoSo_End4",
+        "Zirkulation_MoSo_Start5",
+        "Zirkulation_MoSo_End5",
         "hotWaterCircPumpOnTime",
         "hotWaterCircPumpOffTime"
       ];
@@ -384,10 +384,10 @@ async function handleActivateZip(adapter, id, durationSeconds) {
     }
     const updates = [
       { key: "hotWaterCircPumpTimerTableSelected", raw: 0 },
-      { key: "WW_MoSo_Start1", raw: 0 },
-      { key: "WW_MoSo_End1", raw: CONSTANTS.END_OF_DAY },
-      { key: "WW_MoSo_Start2", raw: 0 },
-      { key: "WW_MoSo_End2", raw: 0 },
+      { key: "Zirkulation_MoSo_Start1", raw: 0 },
+      { key: "Zirkulation_MoSo_End1", raw: CONSTANTS.END_OF_DAY },
+      { key: "Zirkulation_MoSo_Start2", raw: 0 },
+      { key: "Zirkulation_MoSo_End2", raw: 0 },
       { key: "hotWaterCircPumpOnTime", raw: onTimeMinutes },
       { key: "hotWaterCircPumpOffTime", raw: 60 }
     ];

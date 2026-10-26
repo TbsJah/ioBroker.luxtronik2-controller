@@ -89,24 +89,34 @@ export async function processCopData(adapter: LuxtronikAdapter, bzVal: string): 
 		const lastThermalTotal =
 			lastThermalState && typeof lastThermalState.val === 'number' ? lastThermalState.val : currentThermal;
 
-		// 4. DELTA BERECHNEN
-		const deltaPower = currentPower - lastPowerTotal;
-		const deltaThermal = currentThermal - lastThermalTotal;
+		// 4. DELTA BERECHNEN (Gegen negative Werte absichern)
+		const deltaPower = Math.max(0, currentPower - lastPowerTotal);
+		const deltaThermal = Math.max(0, currentThermal - lastThermalTotal);
+
+		// Falls ein externer Zähler genullt wurde (Reset), Referenzwert nachziehen
+		if (currentPower < lastPowerTotal) {
+			await adapter.setState(rawPowerId, { val: currentPower, ack: true });
+		}
+		if (currentThermal < lastThermalTotal) {
+			await adapter.setState(rawThermalId, { val: currentThermal, ack: true });
+		}
 
 		// 5. NEUE ZÄHLERSTÄNDE SOFORT FÜR DEN NÄCHSTEN DURCHLAUF IN DB SPEICHERN
-		if (deltaPower > 0 || deltaThermal > 0) {
+		if (deltaPower > 0) {
 			await adapter.setState(rawPowerId, { val: currentPower, ack: true });
+		}
+		if (deltaThermal > 0) {
 			await adapter.setState(rawThermalId, { val: currentThermal, ack: true });
 		}
 
 		// 6. ZEITWECHSEL PRÜFEN (Hat ein neuer Tag/Monat/Jahr begonnen?)
 		await handleTimeRollover(adapter);
 
-		// 7. WERTE IN DIE ENDLOS-ZÄHLER VERTEILEN
+		// 7. WERTE IN DIE ENDLOS-ZÄHLER VERTEILEN (inkl. Abtauen = '4' für Heizung)
 		if (deltaPower > 0 || deltaThermal > 0) {
 			await addDeltaToBucket(adapter, 'Total', deltaPower, deltaThermal);
 
-			if (bzVal === '0') {
+			if (bzVal === '0' || bzVal === '4') {
 				await addDeltaToBucket(adapter, 'Heating', deltaPower, deltaThermal);
 			} else if (bzVal === '1') {
 				await addDeltaToBucket(adapter, 'HotWater', deltaPower, deltaThermal);
@@ -150,9 +160,12 @@ async function handleTimeRollover(adapter: LuxtronikAdapter): Promise<void> {
 	const lastDate = state && typeof state.val === 'string' ? state.val : '';
 
 	const now = new Date();
-	const currentDate = now.toISOString().split('T')[0]; // Format: YYYY-MM-DD
-	const currentMonth = currentDate.substring(0, 7); // Format: YYYY-MM
-	const currentYear = currentDate.substring(0, 4); // Format: YYYY
+	const y = now.getFullYear();
+	const m = String(now.getMonth() + 1).padStart(2, '0');
+	const d = String(now.getDate()).padStart(2, '0');
+	const currentDate = `${y}-${m}-${d}`; // Lokales Datum YYYY-MM-DD
+	const currentMonth = `${y}-${m}`; // Lokaler Monat YYYY-MM
+	const currentYear = `${y}`; // Lokales Jahr YYYY
 
 	if (lastDate !== currentDate) {
 		const lastMonth = lastDate ? lastDate.substring(0, 7) : '';

@@ -627,7 +627,6 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 				wwIstState,
 				ruecklaufState,
 				spreizungState,
-				heatingStateStrState,
 				vd1State,
 				wwHystereseState,
 				ruecklaufSollState,
@@ -643,7 +642,6 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 				this.getStateAsync(getDpPath('Wamwassertemperatur_Ist')),
 				this.getStateAsync(getDpPath('temperature_return')),
 				this.getStateAsync(getDpPath('spreizung_vorlauf_ruecklauf')),
-				this.getStateAsync(getDpPath('opStateHeatingString')),
 				this.getStateAsync(getDpPath('VD1out')),
 				this.getStateAsync(getDpPath('hotWaterTemperatureHysteresis')),
 				this.getStateAsync(getDpPath('temperature_target_return')),
@@ -660,7 +658,6 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 			const wwIst = (wwIstState?.val as number) ?? 0;
 			const ruecklauf = (ruecklaufState?.val as number) ?? 0;
 			const spreizung = (spreizungState?.val as number) ?? 0;
-			const heatingStateStr = String(heatingStateStrState?.val || '').trim();
 			const vd1 = vd1State?.val === 1;
 			const wwHysterese = (wwHystereseState?.val as number) ?? 0;
 			const ruecklaufSoll = (ruecklaufSollState?.val as number) ?? 0;
@@ -705,8 +702,8 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 						await this.syncConfigValue('Heizen_nach_Wasser', true);
 					}
 
-					// Warmwassertakt erzwingen
-					if (wwSoll - wwIst > 2 && ruecklauf >= ruecklaufSoll + heizenHysterese - 0.1) {
+					// Warmwassertakt erzwingen (NUR wenn kein PV-Boost aktiv ist!)
+					if (!pvIsBoostActive && wwSoll - wwIst > 2 && ruecklauf >= ruecklaufSoll + heizenHysterese - 0.1) {
 						// Neuen Sollwert berechnen: Ist-Wert + aktuelle Hysterese + 1.5K Puffer
 						let forceSoll = wwIst + wwHysterese + 1.5;
 
@@ -722,11 +719,13 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 				}
 			}
 
+			// Sprachunabhängige Prüfung, ob die Heizgrenze das Heizen erlaubt
+			const isHeatingAllowedByLimit =
+				(heatingLimit === 1 && mitteltemperatur < thresholdHeatingLimit) || heatingLimit === 0;
+
 			if (istWarmwasser && nachWasser) {
-				if (isRegelungAktiv) {
-					if ((heatingLimit === 1 && mitteltemperatur < thresholdHeatingLimit) || heatingLimit === 0) {
-						await this.syncConfigValue('heating_curve_parallel_offset', 35);
-					}
+				if (isRegelungAktiv && isHeatingAllowedByLimit) {
+					await this.syncConfigValue('heating_curve_parallel_offset', 35);
 				}
 			}
 
@@ -737,12 +736,8 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 					}
 				}
 
-				if (isRegelungAktiv) {
-					if (
-						wwSoll - wwIst >= wwHysterese - 1.5 &&
-						ruecklauf <= ruecklaufSoll &&
-						heatingStateStr !== 'Heating limit'
-					) {
+				if (isRegelungAktiv && !pvIsBoostActive) {
+					if (wwSoll - wwIst >= wwHysterese - 1.5 && ruecklauf <= ruecklaufSoll && isHeatingAllowedByLimit) {
 						await this.syncConfigValue('heating_curve_parallel_offset', 35);
 					}
 				}

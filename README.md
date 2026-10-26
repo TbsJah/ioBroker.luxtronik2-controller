@@ -96,6 +96,17 @@ You might see red error messages in the installation log related to `node-gyp`, 
 //### **WORK IN PROGRESS**
 
 ## Changelog
+
+### **WORK IN PROGRESS**
+
+**🐛 Bugfixes & Tweaks**
+
+- **PV Manager Target & Offset Fixes:** Fixed remaining references to the read-only `Wamwassertemperatur_Soll` datapoint in `activateBoost` and `deactivateBoost` (now consistently targeting `temperature_hot_water_target`). Resolved a baseline mix-up where `fusspunkt` was mistakenly applied to the parallel offset (`heating_temperature`), and fixed the heating saturation check (`isHzFull`) to compare actual return temperature against target return + hysteresis without prematurely revoking active boosts.
+- **Cycle Optimization & Heating Limit:** Replaced the language-dependent `'Heating limit'` string check during idle with a reliable numerical evaluation of the heating limit parameters. Added a `!pvIsBoostActive` guard to prevent forced hot water triggers from overwriting active solar boosts, and included a baseline reset (`0 K`) for `heating_temperature` in `setIdleDefaults`.
+- **ZIP Controller Timer Fix:** Fixed a bug in `zipManager` (internal controller mode) where hot water timer slots (`WW_MoSo_...`) were backed up and overwritten instead of the circulation pump timer slots (`Zirkulation_MoSo_...`), and improved time string restoration.
+- **COP Calculation Accuracy:** Fixed a UTC timezone offset in the daily rollover check so COP snapshots occur accurately at local midnight (00:00). Included defrosting cycles (`WP_BZ_akt = 4`) in the heating COP bucket and added clamping against negative deltas if external energy meters are reset.
+- **Object Management & Virtual States:** Removed a redundant loop in `onReady` that recreated disabled virtual datapoints on startup, and fixed `PREFIX_MAPPING` for weekend timer tables (`SaSo`) to properly reference the `52SatSun` configuration flags.
+
 ### 0.21.0 (2026-10-26)
 
 **🚀 New Features**

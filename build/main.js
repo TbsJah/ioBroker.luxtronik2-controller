@@ -512,7 +512,6 @@ class Luxtronik2Controller extends utils.Adapter {
         wwIstState,
         ruecklaufState,
         spreizungState,
-        heatingStateStrState,
         vd1State,
         wwHystereseState,
         ruecklaufSollState,
@@ -528,7 +527,6 @@ class Luxtronik2Controller extends utils.Adapter {
         this.getStateAsync((0, import_stateMapping.getDpPath)("Wamwassertemperatur_Ist")),
         this.getStateAsync((0, import_stateMapping.getDpPath)("temperature_return")),
         this.getStateAsync((0, import_stateMapping.getDpPath)("spreizung_vorlauf_ruecklauf")),
-        this.getStateAsync((0, import_stateMapping.getDpPath)("opStateHeatingString")),
         this.getStateAsync((0, import_stateMapping.getDpPath)("VD1out")),
         this.getStateAsync((0, import_stateMapping.getDpPath)("hotWaterTemperatureHysteresis")),
         this.getStateAsync((0, import_stateMapping.getDpPath)("temperature_target_return")),
@@ -544,7 +542,6 @@ class Luxtronik2Controller extends utils.Adapter {
       const wwIst = (_k = wwIstState == null ? void 0 : wwIstState.val) != null ? _k : 0;
       const ruecklauf = (_l = ruecklaufState == null ? void 0 : ruecklaufState.val) != null ? _l : 0;
       const spreizung = (_m = spreizungState == null ? void 0 : spreizungState.val) != null ? _m : 0;
-      const heatingStateStr = String((heatingStateStrState == null ? void 0 : heatingStateStrState.val) || "").trim();
       const vd1 = (vd1State == null ? void 0 : vd1State.val) === 1;
       const wwHysterese = (_n = wwHystereseState == null ? void 0 : wwHystereseState.val) != null ? _n : 0;
       const ruecklaufSoll = (_o = ruecklaufSollState == null ? void 0 : ruecklaufSollState.val) != null ? _o : 0;
@@ -579,7 +576,7 @@ class Luxtronik2Controller extends utils.Adapter {
           } else if (!nachWasser && config.Heating_after_warmwater === true) {
             await this.syncConfigValue("Heizen_nach_Wasser", true);
           }
-          if (wwSoll - wwIst > 2 && ruecklauf >= ruecklaufSoll + heizenHysterese - 0.1) {
+          if (!import_pvManager.pvIsBoostActive && wwSoll - wwIst > 2 && ruecklauf >= ruecklaufSoll + heizenHysterese - 0.1) {
             let forceSoll = wwIst + wwHysterese + 1.5;
             if (forceSoll > 70) {
               forceSoll = 70;
@@ -589,11 +586,10 @@ class Luxtronik2Controller extends utils.Adapter {
           }
         }
       }
+      const isHeatingAllowedByLimit = heatingLimit === 1 && mitteltemperatur < thresholdHeatingLimit || heatingLimit === 0;
       if (istWarmwasser && nachWasser) {
-        if (isRegelungAktiv) {
-          if (heatingLimit === 1 && mitteltemperatur < thresholdHeatingLimit || heatingLimit === 0) {
-            await this.syncConfigValue("heating_curve_parallel_offset", 35);
-          }
+        if (isRegelungAktiv && isHeatingAllowedByLimit) {
+          await this.syncConfigValue("heating_curve_parallel_offset", 35);
         }
       }
       if (istLeerlauf) {
@@ -602,8 +598,8 @@ class Luxtronik2Controller extends utils.Adapter {
             await (0, import_zipManager.stopZipAndDeaeration)(this);
           }
         }
-        if (isRegelungAktiv) {
-          if (wwSoll - wwIst >= wwHysterese - 1.5 && ruecklauf <= ruecklaufSoll && heatingStateStr !== "Heating limit") {
+        if (isRegelungAktiv && !import_pvManager.pvIsBoostActive) {
+          if (wwSoll - wwIst >= wwHysterese - 1.5 && ruecklauf <= ruecklaufSoll && isHeatingAllowedByLimit) {
             await this.syncConfigValue("heating_curve_parallel_offset", 35);
           }
         }

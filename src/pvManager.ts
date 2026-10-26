@@ -214,22 +214,22 @@ async function activateBoost(adapter: LuxtronikAdapter): Promise<void> {
 
 	const config = adapter.config;
 	try {
-		const wwPath = getDpPath('Wamwassertemperatur_Soll');
+		// KORREKTUR: Beschreibbaren Settings-Datenpunkt verwenden!
+		const wwPath = getDpPath('temperature_hot_water_target');
 		const hzPath = getDpPath('heating_temperature');
 
 		const currentWwState = wwPath ? await adapter.getStateAsync(wwPath) : null;
 		const currentHzState = hzPath ? await adapter.getStateAsync(hzPath) : null;
 
-		let baseWw = currentWwState && typeof currentWwState.val === 'number' ? currentWwState.val : null;
-		let baseHz = currentHzState && typeof currentHzState.val === 'number' ? currentHzState.val : null;
+		let baseWw = currentWwState && typeof currentWwState.val === 'number' ? currentWwState.val : 54;
+		let baseHz = currentHzState && typeof currentHzState.val === 'number' ? currentHzState.val : 0;
 
 		if (config.idle_defaults_aktiv) {
 			if (config.sync_warmwater_target_temperature) {
 				baseWw = Number(config.sync_warmwater_target_temperature);
 			}
-			if (config.fusspunkt) {
-				baseHz = Number(config.fusspunkt);
-			}
+			// KORREKTUR: Parallelverschiebung hat im Normalbetrieb die Basis 0 K (nicht config.fusspunkt!)
+			baseHz = 0;
 		}
 
 		originalWw = baseWw;
@@ -263,11 +263,11 @@ async function activateBoost(adapter: LuxtronikAdapter): Promise<void> {
 }
 
 /**
- * Evaluiert fortlaufend die Prioritäten und schreibt die Sollwerte dynamisch in die Anlage.
+ * Evaluiert fortlaufend die Prioritäten und gibt das sekundäre Ziel frei, sobald das primäre Ziel erreicht ist.
  *
  * @param adapter Die aktuelle Adapter-Instanz.
  */
-async function evaluatePvBoost(adapter: LuxtronikAdapter): Promise<void> {
+export async function evaluatePvBoost(adapter: LuxtronikAdapter): Promise<void> {
 	if (!pvIsBoostActive) {
 		return;
 	}
@@ -282,57 +282,103 @@ async function evaluatePvBoost(adapter: LuxtronikAdapter): Promise<void> {
 		const wwPath = getDpPath('temperature_hot_water_target');
 		const hzPath = getDpPath('heating_temperature');
 
-		const wwIstState = await adapter.getStateAsync(getDpPath('Wamwassertemperatur_Ist'));
-		const hzIstState = await adapter.getStateAsync(getDpPath('temperature_return'));
+		const [wwIstState, rlIstState, rlSollState, hzHystState] = await Promise.all([
+			adapter.getStateAsync(getDpPath('Wamwassertemperatur_Ist')),
+			adapter.getStateAsync(getDpPath('temperature_return')),
+			adapter.getStateAsync(getDpPath('temperature_target_return')),
+			adapter.getStateAsync(getDpPath('returnTemperatureHysteresis')),
+		]);
 
 		const wwIst = wwIstState && typeof wwIstState.val === 'number' ? wwIstState.val : 0;
-		const hzIst = hzIstState && typeof hzIstState.val === 'number' ? hzIstState.val : 0;
+		const rlIst = rlIstState && typeof rlIstState.val === 'number' ? rlIstState.val : 0;
+		const rlSoll = rlSollState && typeof rlSollState.val === 'number' ? rlSollState.val : 0;
+		const hzHyst = hzHystState && typeof hzHystState.val === 'number' ? hzHystState.val : 1.5;
 
-		const isWwFull = originalWw !== null && wwIst >= originalWw + boostWwAmount - 0.5;
-		const isHzFull = originalHz !== null && hzIst >= originalHz + boostHzAmount - 0.5;
+		// KORREKTUR: Physikalisch korrekte Sättigungsprüfung
+		const isWwFull = originalWw !== null && wwIst >= originalWw + boostWwAmount;
+		const isHzFull = rlSoll > 0 && rlIst >= rlSoll + hzHyst;
 
 		let shouldBoostWw = false;
 		let shouldBoostHz = false;
 
 		if (priority === 'ww') {
-			if (!isWwFull) {
-				shouldBoostWw = true;
-			} else {
+			shouldBoostWw = true;
+			// Sobald WW voll ist, zusätzlich Heizen freigeben (und aktiv lassen!)
+			if (isWwFull || activeBoostHzApplied) {
 				shouldBoostHz = true;
 			}
 		} else if (priority === 'hz') {
-			if (!isHzFull) {
-				shouldBoostHz = true;
-			} else {
+			shouldBoostHz = true;
+			// Sobald Heizen voll ist, zusätzlich WW freigeben (und aktiv lassen!)
+			if (isHzFull || activeBoostWwApplied) {
 				shouldBoostWw = true;
 			}
 		} else {
-			shouldBoostWw = !isWwFull;
-			shouldBoostHz = !isHzFull;
+			shouldBoostWw = true;
+			shouldBoostHz = true;
 		}
 
 		if (shouldBoostWw && !activeBoostWwApplied && originalWw !== null && boostWwAmount > 0 && wwPath) {
 			await adapter.setState(wwPath, { val: originalWw + boostWwAmount, ack: false });
 			activeBoostWwApplied = true;
-			writeLog(`[PV] Priority logic: Applying Hot Water boost (+${boostWwAmount}K).`, 'info');
-		} else if (!shouldBoostWw && activeBoostWwApplied && originalWw !== null && wwPath) {
-			await adapter.setState(wwPath, { val: originalWw, ack: false });
-			activeBoostWwApplied = false;
-			writeLog(`[PV] Priority logic: Target reached. Revoking Hot Water boost.`, 'info');
+			writeLog(
+				`[PV] Priority logic: Applying Hot Water boost (+${boostWwAmount}K -> ${originalWw + boostWwAmount}°C).`,
+				'info',
+			);
 		}
 
 		if (shouldBoostHz && !activeBoostHzApplied && originalHz !== null && boostHzAmount > 0 && hzPath) {
 			await adapter.setState(hzPath, { val: originalHz + boostHzAmount, ack: false });
 			activeBoostHzApplied = true;
-			writeLog(`[PV] Priority logic: Applying Heating boost (+${boostHzAmount}K).`, 'info');
-		} else if (!shouldBoostHz && activeBoostHzApplied && originalHz !== null && hzPath) {
-			await adapter.setState(hzPath, { val: originalHz, ack: false });
-			activeBoostHzApplied = false;
-			writeLog(`[PV] Priority logic: Target reached. Revoking Heating boost.`, 'info');
+			writeLog(
+				`[PV] Priority logic: Applying Heating boost (+${boostHzAmount}K -> ${originalHz + boostHzAmount}K).`,
+				'info',
+			);
 		}
 	} catch (err: unknown) {
 		const msg = err instanceof Error ? err.message : String(err);
 		writeLog(`[PV] Error evaluating boost priority: ${msg}`, 'error');
+	}
+}
+
+/**
+ * Setzt die Werte hart auf den Ursprung zurück.
+ *
+ * @param adapter Die aktuelle Adapter-Instanz.
+ */
+async function deactivateBoost(adapter: LuxtronikAdapter): Promise<void> {
+	try {
+		writeLog('[PV] Reverting values to original base targets.', 'info');
+		// KORREKTUR: Beschreibbaren Settings-Datenpunkt verwenden!
+		const wwPath = getDpPath('temperature_hot_water_target');
+		const hzPath = getDpPath('heating_temperature');
+
+		if (originalWw !== null && wwPath) {
+			await adapter.setState(wwPath, { val: originalWw, ack: false });
+		}
+		if (originalHz !== null && hzPath) {
+			await adapter.setState(hzPath, { val: originalHz, ack: false });
+		}
+
+		pvIsBoostActive = false;
+		pvWaitingForCycleEnd = false;
+		activeBoostWwApplied = false;
+		activeBoostHzApplied = false;
+		originalWw = null;
+		originalHz = null;
+
+		const dpActive = getDpPath('pv_boost_active');
+		const dpSince = getDpPath('pv_boost_active_since');
+
+		if (dpActive) {
+			await adapter.setState(dpActive, { val: false, ack: true });
+		}
+		if (dpSince) {
+			await adapter.setState(dpSince, { val: '', ack: true });
+		}
+	} catch (err: unknown) {
+		const msg = err instanceof Error ? err.message : String(err);
+		writeLog(`[PV] Error deactivating boost: ${msg}`, 'error');
 	}
 }
 
@@ -371,46 +417,6 @@ async function initiateDeactivation(adapter: LuxtronikAdapter): Promise<void> {
 	}
 
 	await deactivateBoost(adapter);
-}
-
-/**
- * Setzt die Werte hart auf den Ursprung zurück.
- *
- * @param adapter Die aktuelle Adapter-Instanz.
- */
-async function deactivateBoost(adapter: LuxtronikAdapter): Promise<void> {
-	try {
-		writeLog('[PV] Reverting values to original base targets.', 'info');
-		const wwPath = getDpPath('Wamwassertemperatur_Soll');
-		const hzPath = getDpPath('heating_temperature');
-
-		if (originalWw !== null && wwPath) {
-			await adapter.setState(wwPath, { val: originalWw, ack: false });
-		}
-		if (originalHz !== null && hzPath) {
-			await adapter.setState(hzPath, { val: originalHz, ack: false });
-		}
-
-		pvIsBoostActive = false;
-		pvWaitingForCycleEnd = false;
-		activeBoostWwApplied = false;
-		activeBoostHzApplied = false;
-		originalWw = null;
-		originalHz = null;
-
-		const dpActive = getDpPath('pv_boost_active');
-		const dpSince = getDpPath('pv_boost_active_since');
-
-		if (dpActive) {
-			await adapter.setState(dpActive, { val: false, ack: true });
-		}
-		if (dpSince) {
-			await adapter.setState(dpSince, { val: '', ack: true });
-		}
-	} catch (err: unknown) {
-		const msg = err instanceof Error ? err.message : String(err);
-		writeLog(`[PV] Error deactivating boost: ${msg}`, 'error');
-	}
 }
 
 /**
