@@ -279,7 +279,7 @@ async function evaluatePvBoost(adapter: LuxtronikAdapter): Promise<void> {
 		const boostWwAmount = Number(config.pv_boost_ww) || 0;
 		const boostHzAmount = Number(config.pv_boost_hz) || 0;
 
-		const wwPath = getDpPath('Wamwassertemperatur_Soll');
+		const wwPath = getDpPath('temperature_hot_water_target');
 		const hzPath = getDpPath('heating_temperature');
 
 		const wwIstState = await adapter.getStateAsync(getDpPath('Wamwassertemperatur_Ist'));

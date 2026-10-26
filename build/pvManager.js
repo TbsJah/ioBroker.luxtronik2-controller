@@ -229,7 +229,7 @@ async function evaluatePvBoost(adapter) {
     const priority = config.pv_priority || "both";
     const boostWwAmount = Number(config.pv_boost_ww) || 0;
     const boostHzAmount = Number(config.pv_boost_hz) || 0;
-    const wwPath = (0, import_stateMapping.getDpPath)("Wamwassertemperatur_Soll");
+    const wwPath = (0, import_stateMapping.getDpPath)("temperature_hot_water_target");
     const hzPath = (0, import_stateMapping.getDpPath)("heating_temperature");
     const wwIstState = await adapter.getStateAsync((0, import_stateMapping.getDpPath)("Wamwassertemperatur_Ist"));
     const hzIstState = await adapter.getStateAsync((0, import_stateMapping.getDpPath)("temperature_return"));
