@@ -15,6 +15,10 @@ export let pvWaitingForCycleEnd = false;
 let activeBoostWwApplied = false;
 let activeBoostHzApplied = false;
 
+// Live-Werte für die Berechnung des Gesamt-Überschusses
+let currentGridSurplusW = 0;
+let currentBatteryChargeW = 0;
+
 // Cache für die ursprünglichen Werte vor dem Boost
 let originalWw: number | null = null;
 let originalHz: number | null = null;
@@ -24,7 +28,7 @@ let originalHz: number | null = null;
 // =========================================================
 
 /**
- * Initialisiert die PV-Überwachung, abonniert den Fremd-Datenpunkt.
+ * Initialisiert die PV-Überwachung, abonniert Fremd-Datenpunkte und lädt Initialwerte.
  *
  * @param adapter Die aktuelle Adapter-Instanz.
  */
@@ -36,16 +40,42 @@ export async function initPvManagement(adapter: LuxtronikAdapter): Promise<void>
 	}
 
 	try {
-		await adapter.subscribeForeignStatesAsync(config.pv_feed_in_dp.trim());
-		writeLog(
-			`[PV] Initialized PV management. Subscribed to grid feed-in datapoint: ${config.pv_feed_in_dp}`,
-			'info',
-		);
-
+		currentGridSurplusW = 0;
+		currentBatteryChargeW = 0;
 		pvIsBoostActive = false;
 		pvWaitingForCycleEnd = false;
 		activeBoostWwApplied = false;
 		activeBoostHzApplied = false;
+
+		// 1. Netz-Datenpunkt abonnieren & Initialwert holen
+		const gridDp = config.pv_feed_in_dp.trim();
+		await adapter.subscribeForeignStatesAsync(gridDp);
+		writeLog(`[PV] Initialized PV management. Subscribed to grid feed-in: ${gridDp}`, 'info');
+
+		try {
+			const initialGridState = await adapter.getForeignStateAsync(gridDp);
+			if (initialGridState) {
+				handlePvFeedInChange(adapter, gridDp, initialGridState);
+			}
+		} catch {
+			/* ignore initial fetch error */
+		}
+
+		// 2. Batterie-Datenpunkt abonnieren & Initialwert holen (falls aktiv)
+		if (config.pv_battery_active && config.pv_battery_dp && config.pv_battery_dp.trim() !== '') {
+			const batDp = config.pv_battery_dp.trim();
+			await adapter.subscribeForeignStatesAsync(batDp);
+			writeLog(`[PV] Battery prioritization active. Subscribed to battery datapoint: ${batDp}`, 'info');
+
+			try {
+				const initialBatState = await adapter.getForeignStateAsync(batDp);
+				if (initialBatState) {
+					handlePvFeedInChange(adapter, batDp, initialBatState);
+				}
+			} catch {
+				/* ignore initial fetch error */
+			}
+		}
 
 		const dpActive = getDpPath('pv_boost_active');
 		const dpSince = getDpPath('pv_boost_active_since');
@@ -63,68 +93,92 @@ export async function initPvManagement(adapter: LuxtronikAdapter): Promise<void>
 }
 
 /**
- * Wird bei jeder Änderung eines Foreign-States aufgerufen. Prüft den Überschusswert.
+ * Wird bei jeder Änderung eines Foreign-States aufgerufen. Berechnet die Summe aus Netz + Batterie.
  *
  * @param adapter Die aktuelle Adapter-Instanz.
- * @param id Die geänderte OID.
- * @param state Der neue State.
+ * @param id Die ID (OID) des geänderten Datenpunkts.
+ * @param state Das neue ioBroker State-Objekt.
  */
 export function handlePvFeedInChange(adapter: LuxtronikAdapter, id: string, state: ioBroker.State): void {
 	const config = adapter.config;
-	if (
-		!config.pv_active ||
-		!config.pv_feed_in_dp ||
-		id !== config.pv_feed_in_dp.trim() ||
-		!state ||
-		typeof state.val !== 'number'
-	) {
+	if (!config.pv_active || !state || typeof state.val !== 'number') {
+		return;
+	}
+
+	const isGridDp = id === config.pv_feed_in_dp?.trim();
+	const isBatteryDp = config.pv_battery_active && id === config.pv_battery_dp?.trim();
+
+	// Abbrechen, wenn das Event von einem anderen (irrelevanten) Fremd-Datenpunkt kommt
+	if (!isGridDp && !isBatteryDp) {
 		return;
 	}
 
 	let rawValue = state.val;
-	if (config.pv_feed_in_unit === 'kW') {
-		rawValue = rawValue * 1000;
+
+	// Update Netz-Überschuss
+	if (isGridDp) {
+		if (config.pv_feed_in_unit === 'kW') {
+			rawValue *= 1000;
+		}
+		if (config.pv_feed_in_sign === 'negative') {
+			currentGridSurplusW = rawValue < 0 ? Math.abs(rawValue) : 0;
+		} else {
+			currentGridSurplusW = rawValue > 0 ? rawValue : 0;
+		}
 	}
 
-	let surplus = 0;
-	if (config.pv_feed_in_sign === 'negative') {
-		surplus = rawValue < 0 ? Math.abs(rawValue) : 0;
-	} else {
-		surplus = rawValue > 0 ? rawValue : 0;
+	// Update Batterie-Ladeleistung
+	if (isBatteryDp) {
+		if (config.pv_battery_unit === 'kW') {
+			rawValue *= 1000;
+		}
+		if (config.pv_battery_sign === 'negative') {
+			currentBatteryChargeW = rawValue < 0 ? Math.abs(rawValue) : 0;
+		} else {
+			currentBatteryChargeW = rawValue > 0 ? rawValue : 0;
+		}
 	}
+
+	// Effektiver Gesamtüberschuss = Reale Einspeisung + Strom, der aktuell in die Batterie fließt
+	const totalSurplus = currentGridSurplusW + currentBatteryChargeW;
 
 	const thresholdStart = config.pv_threshold_start || 2000;
 	const thresholdStop = config.pv_threshold_stop !== undefined ? Number(config.pv_threshold_stop) : 0;
 	const delayStartMs = (config.pv_delay_start || 5) * 60000;
 	const delayStopMs = (config.pv_delay_stop || 10) * 60000;
 
-	if (surplus >= thresholdStart) {
+	if (totalSurplus >= thresholdStart) {
 		if (pvStopTimer) {
 			adapter.clearTimeout(pvStopTimer);
 			pvStopTimer = undefined;
-			writeLog(`[PV] Surplus restored (${surplus} W >= ${thresholdStart} W). Stop timer cancelled.`, 'debug');
+			writeLog(
+				`[PV] Surplus restored (${totalSurplus} W >= ${thresholdStart} W). Stop timer cancelled.`,
+				'debug',
+			);
 		}
 
 		if (!pvIsBoostActive && !pvStartTimer) {
 			writeLog(
-				`[PV] Surplus of ${surplus} W exceeds start threshold (${thresholdStart} W). Starting ${config.pv_delay_start} min activation timer.`,
+				`[PV] Surplus of ${totalSurplus} W exceeds start threshold (${thresholdStart} W). Starting ${config.pv_delay_start} min activation timer.`,
 				'info',
 			);
 			pvStartTimer = adapter.setTimeout(() => activateBoost(adapter), delayStartMs);
 		} else if (pvIsBoostActive) {
-			// Periodische Überprüfung der Prioritäten bei laufendem PV-Boost
 			void evaluatePvBoost(adapter);
 		}
-	} else if (surplus <= thresholdStop) {
+	} else if (totalSurplus <= thresholdStop) {
 		if (pvStartTimer) {
 			adapter.clearTimeout(pvStartTimer);
 			pvStartTimer = undefined;
-			writeLog(`[PV] Surplus dropped to ${surplus} W (<= ${thresholdStop} W). Start timer cancelled.`, 'debug');
+			writeLog(
+				`[PV] Surplus dropped to ${totalSurplus} W (<= ${thresholdStop} W). Start timer cancelled.`,
+				'debug',
+			);
 		}
 
 		if (pvIsBoostActive && !pvStopTimer && !pvWaitingForCycleEnd) {
 			writeLog(
-				`[PV] Surplus dropped to ${surplus} W (<= stop threshold ${thresholdStop} W). Starting ${config.pv_delay_stop} min deactivation timer.`,
+				`[PV] Surplus dropped to ${totalSurplus} W (<= stop threshold ${thresholdStop} W). Starting ${config.pv_delay_stop} min deactivation timer.`,
 				'info',
 			);
 			pvStopTimer = adapter.setTimeout(() => initiateDeactivation(adapter), delayStopMs);
@@ -134,15 +188,14 @@ export function handlePvFeedInChange(adapter: LuxtronikAdapter, id: string, stat
 		if (pvStartTimer) {
 			adapter.clearTimeout(pvStartTimer);
 			pvStartTimer = undefined;
-			writeLog(`[PV] Surplus ${surplus} W is below start threshold. Start timer cancelled.`, 'debug');
+			writeLog(`[PV] Surplus ${totalSurplus} W is below start threshold. Start timer cancelled.`, 'debug');
 		}
 		if (pvStopTimer) {
 			adapter.clearTimeout(pvStopTimer);
 			pvStopTimer = undefined;
-			writeLog(`[PV] Surplus ${surplus} W is above stop threshold. Stop timer cancelled.`, 'debug');
+			writeLog(`[PV] Surplus ${totalSurplus} W is above stop threshold. Stop timer cancelled.`, 'debug');
 		}
 		if (pvIsBoostActive) {
-			// Auch in der Grauzone die Prioritäten weiter dynamisch evaluieren
 			void evaluatePvBoost(adapter);
 		}
 	}
@@ -223,7 +276,6 @@ async function evaluatePvBoost(adapter: LuxtronikAdapter): Promise<void> {
 		const config = adapter.config;
 		const priority = config.pv_priority || 'both';
 
-		// Sicherheits-Parsing: Zwingt Eingaben aus dem Config-UI garantiert zu Nummern
 		const boostWwAmount = Number(config.pv_boost_ww) || 0;
 		const boostHzAmount = Number(config.pv_boost_hz) || 0;
 
@@ -236,7 +288,6 @@ async function evaluatePvBoost(adapter: LuxtronikAdapter): Promise<void> {
 		const wwIst = wwIstState && typeof wwIstState.val === 'number' ? wwIstState.val : 0;
 		const hzIst = hzIstState && typeof hzIstState.val === 'number' ? hzIstState.val : 0;
 
-		// 0.5K Toleranz gegen Flapping, falls die Temperatur genau auf der Kante steht
 		const isWwFull = originalWw !== null && wwIst >= originalWw + boostWwAmount - 0.5;
 		const isHzFull = originalHz !== null && hzIst >= originalHz + boostHzAmount - 0.5;
 
@@ -247,21 +298,19 @@ async function evaluatePvBoost(adapter: LuxtronikAdapter): Promise<void> {
 			if (!isWwFull) {
 				shouldBoostWw = true;
 			} else {
-				shouldBoostHz = true; // Warmwasser voll -> Überschuss in die Heizung umleiten
+				shouldBoostHz = true;
 			}
 		} else if (priority === 'hz') {
 			if (!isHzFull) {
 				shouldBoostHz = true;
 			} else {
-				shouldBoostWw = true; // Heizung voll -> Überschuss in Warmwasser umleiten
+				shouldBoostWw = true;
 			}
 		} else {
-			// "both" - Hebe nur an, was noch NICHT voll ist
 			shouldBoostWw = !isWwFull;
 			shouldBoostHz = !isHzFull;
 		}
 
-		// WW-Boost anwenden oder zurückziehen
 		if (shouldBoostWw && !activeBoostWwApplied && originalWw !== null && boostWwAmount > 0 && wwPath) {
 			await adapter.setState(wwPath, { val: originalWw + boostWwAmount, ack: false });
 			activeBoostWwApplied = true;
@@ -272,7 +321,6 @@ async function evaluatePvBoost(adapter: LuxtronikAdapter): Promise<void> {
 			writeLog(`[PV] Priority logic: Target reached. Revoking Hot Water boost.`, 'info');
 		}
 
-		// HZ-Boost anwenden oder zurückziehen
 		if (shouldBoostHz && !activeBoostHzApplied && originalHz !== null && boostHzAmount > 0 && hzPath) {
 			await adapter.setState(hzPath, { val: originalHz + boostHzAmount, ack: false });
 			activeBoostHzApplied = true;

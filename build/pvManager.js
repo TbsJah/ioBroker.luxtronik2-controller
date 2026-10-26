@@ -33,6 +33,8 @@ let pvIsBoostActive = false;
 let pvWaitingForCycleEnd = false;
 let activeBoostWwApplied = false;
 let activeBoostHzApplied = false;
+let currentGridSurplusW = 0;
+let currentBatteryChargeW = 0;
 let originalWw = null;
 let originalHz = null;
 async function initPvManagement(adapter) {
@@ -42,15 +44,34 @@ async function initPvManagement(adapter) {
     return;
   }
   try {
-    await adapter.subscribeForeignStatesAsync(config.pv_feed_in_dp.trim());
-    (0, import_logger.writeLog)(
-      `[PV] Initialized PV management. Subscribed to grid feed-in datapoint: ${config.pv_feed_in_dp}`,
-      "info"
-    );
+    currentGridSurplusW = 0;
+    currentBatteryChargeW = 0;
     pvIsBoostActive = false;
     pvWaitingForCycleEnd = false;
     activeBoostWwApplied = false;
     activeBoostHzApplied = false;
+    const gridDp = config.pv_feed_in_dp.trim();
+    await adapter.subscribeForeignStatesAsync(gridDp);
+    (0, import_logger.writeLog)(`[PV] Initialized PV management. Subscribed to grid feed-in: ${gridDp}`, "info");
+    try {
+      const initialGridState = await adapter.getForeignStateAsync(gridDp);
+      if (initialGridState) {
+        handlePvFeedInChange(adapter, gridDp, initialGridState);
+      }
+    } catch {
+    }
+    if (config.pv_battery_active && config.pv_battery_dp && config.pv_battery_dp.trim() !== "") {
+      const batDp = config.pv_battery_dp.trim();
+      await adapter.subscribeForeignStatesAsync(batDp);
+      (0, import_logger.writeLog)(`[PV] Battery prioritization active. Subscribed to battery datapoint: ${batDp}`, "info");
+      try {
+        const initialBatState = await adapter.getForeignStateAsync(batDp);
+        if (initialBatState) {
+          handlePvFeedInChange(adapter, batDp, initialBatState);
+        }
+      } catch {
+      }
+    }
     const dpActive = (0, import_stateMapping.getDpPath)("pv_boost_active");
     const dpSince = (0, import_stateMapping.getDpPath)("pv_boost_active_since");
     if (dpActive) {
@@ -65,48 +86,72 @@ async function initPvManagement(adapter) {
   }
 }
 function handlePvFeedInChange(adapter, id, state) {
+  var _a, _b;
   const config = adapter.config;
-  if (!config.pv_active || !config.pv_feed_in_dp || id !== config.pv_feed_in_dp.trim() || !state || typeof state.val !== "number") {
+  if (!config.pv_active || !state || typeof state.val !== "number") {
+    return;
+  }
+  const isGridDp = id === ((_a = config.pv_feed_in_dp) == null ? void 0 : _a.trim());
+  const isBatteryDp = config.pv_battery_active && id === ((_b = config.pv_battery_dp) == null ? void 0 : _b.trim());
+  if (!isGridDp && !isBatteryDp) {
     return;
   }
   let rawValue = state.val;
-  if (config.pv_feed_in_unit === "kW") {
-    rawValue = rawValue * 1e3;
+  if (isGridDp) {
+    if (config.pv_feed_in_unit === "kW") {
+      rawValue *= 1e3;
+    }
+    if (config.pv_feed_in_sign === "negative") {
+      currentGridSurplusW = rawValue < 0 ? Math.abs(rawValue) : 0;
+    } else {
+      currentGridSurplusW = rawValue > 0 ? rawValue : 0;
+    }
   }
-  let surplus = 0;
-  if (config.pv_feed_in_sign === "negative") {
-    surplus = rawValue < 0 ? Math.abs(rawValue) : 0;
-  } else {
-    surplus = rawValue > 0 ? rawValue : 0;
+  if (isBatteryDp) {
+    if (config.pv_battery_unit === "kW") {
+      rawValue *= 1e3;
+    }
+    if (config.pv_battery_sign === "negative") {
+      currentBatteryChargeW = rawValue < 0 ? Math.abs(rawValue) : 0;
+    } else {
+      currentBatteryChargeW = rawValue > 0 ? rawValue : 0;
+    }
   }
+  const totalSurplus = currentGridSurplusW + currentBatteryChargeW;
   const thresholdStart = config.pv_threshold_start || 2e3;
   const thresholdStop = config.pv_threshold_stop !== void 0 ? Number(config.pv_threshold_stop) : 0;
   const delayStartMs = (config.pv_delay_start || 5) * 6e4;
   const delayStopMs = (config.pv_delay_stop || 10) * 6e4;
-  if (surplus >= thresholdStart) {
+  if (totalSurplus >= thresholdStart) {
     if (pvStopTimer) {
       adapter.clearTimeout(pvStopTimer);
       pvStopTimer = void 0;
-      (0, import_logger.writeLog)(`[PV] Surplus restored (${surplus} W >= ${thresholdStart} W). Stop timer cancelled.`, "debug");
+      (0, import_logger.writeLog)(
+        `[PV] Surplus restored (${totalSurplus} W >= ${thresholdStart} W). Stop timer cancelled.`,
+        "debug"
+      );
     }
     if (!pvIsBoostActive && !pvStartTimer) {
       (0, import_logger.writeLog)(
-        `[PV] Surplus of ${surplus} W exceeds start threshold (${thresholdStart} W). Starting ${config.pv_delay_start} min activation timer.`,
+        `[PV] Surplus of ${totalSurplus} W exceeds start threshold (${thresholdStart} W). Starting ${config.pv_delay_start} min activation timer.`,
         "info"
       );
       pvStartTimer = adapter.setTimeout(() => activateBoost(adapter), delayStartMs);
     } else if (pvIsBoostActive) {
       void evaluatePvBoost(adapter);
     }
-  } else if (surplus <= thresholdStop) {
+  } else if (totalSurplus <= thresholdStop) {
     if (pvStartTimer) {
       adapter.clearTimeout(pvStartTimer);
       pvStartTimer = void 0;
-      (0, import_logger.writeLog)(`[PV] Surplus dropped to ${surplus} W (<= ${thresholdStop} W). Start timer cancelled.`, "debug");
+      (0, import_logger.writeLog)(
+        `[PV] Surplus dropped to ${totalSurplus} W (<= ${thresholdStop} W). Start timer cancelled.`,
+        "debug"
+      );
     }
     if (pvIsBoostActive && !pvStopTimer && !pvWaitingForCycleEnd) {
       (0, import_logger.writeLog)(
-        `[PV] Surplus dropped to ${surplus} W (<= stop threshold ${thresholdStop} W). Starting ${config.pv_delay_stop} min deactivation timer.`,
+        `[PV] Surplus dropped to ${totalSurplus} W (<= stop threshold ${thresholdStop} W). Starting ${config.pv_delay_stop} min deactivation timer.`,
         "info"
       );
       pvStopTimer = adapter.setTimeout(() => initiateDeactivation(adapter), delayStopMs);
@@ -115,12 +160,12 @@ function handlePvFeedInChange(adapter, id, state) {
     if (pvStartTimer) {
       adapter.clearTimeout(pvStartTimer);
       pvStartTimer = void 0;
-      (0, import_logger.writeLog)(`[PV] Surplus ${surplus} W is below start threshold. Start timer cancelled.`, "debug");
+      (0, import_logger.writeLog)(`[PV] Surplus ${totalSurplus} W is below start threshold. Start timer cancelled.`, "debug");
     }
     if (pvStopTimer) {
       adapter.clearTimeout(pvStopTimer);
       pvStopTimer = void 0;
-      (0, import_logger.writeLog)(`[PV] Surplus ${surplus} W is above stop threshold. Stop timer cancelled.`, "debug");
+      (0, import_logger.writeLog)(`[PV] Surplus ${totalSurplus} W is above stop threshold. Stop timer cancelled.`, "debug");
     }
     if (pvIsBoostActive) {
       void evaluatePvBoost(adapter);

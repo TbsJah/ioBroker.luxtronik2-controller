@@ -1751,6 +1751,88 @@
 					"lg": 4,
 					"xl": 4
 				},
+				"pv_battery_active": {
+					"type": "checkbox",
+					"label": {
+						"en": "Include battery charging power (Prioritize Heat Pump)",
+						"de": "Batterieladung zum Überschuss addieren (Wärmepumpe priorisieren)"
+					},
+					"newLine": true,
+					"default": false,
+					"hidden": "!data.pv_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
+				"pv_battery_dp": {
+					"type": "objectId",
+					"label": {
+						"en": "Datapoint for battery power",
+						"de": "Datenpunkt für Batterieleistung"
+					},
+					"hidden": "!data.pv_active || !data.pv_battery_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 6,
+					"lg": 6,
+					"xl": 6
+				},
+				"pv_battery_unit": {
+					"type": "select",
+					"label": {
+						"en": "Unit",
+						"de": "Einheit"
+					},
+					"options": [
+						{
+							"label": "Watt (W)",
+							"value": "W"
+						},
+						{
+							"label": "Kilowatt (kW)",
+							"value": "kW"
+						}
+					],
+					"default": "W",
+					"hidden": "!data.pv_active || !data.pv_battery_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 2,
+					"lg": 2,
+					"xl": 2
+				},
+				"pv_battery_sign": {
+					"type": "select",
+					"label": {
+						"en": "Sign for charging",
+						"de": "Vorzeichen bei Ladung"
+					},
+					"options": [
+						{
+							"label": {
+								"en": "Positive (e.g. 1500) = Charging",
+								"de": "Positiv (z.B. 1500) = Laden"
+							},
+							"value": "positive"
+						},
+						{
+							"label": {
+								"en": "Negative (e.g. -1500) = Charging",
+								"de": "Negativ (z.B. -1500) = Laden"
+							},
+							"value": "negative"
+						}
+					],
+					"default": "positive",
+					"hidden": "!data.pv_active || !data.pv_battery_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 4,
+					"lg": 4,
+					"xl": 4
+				},
 				"header_pv_start": {
 					"type": "header",
 					"text": {
