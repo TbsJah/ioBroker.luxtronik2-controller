@@ -190,11 +190,16 @@ Integrated "PV-Ready" control: Uses your surplus solar power to turn the heat pu
 
 - **Enable PV surplus management:** Activates the logic.
 - **Datapoint for current grid power:** Link the live datapoint of your smart meter or inverter (e.g. SMA, Shelly 3EM, Kostal).
-- **Unit & Sign:** Specify whether the meter provides data in Watts (W) or Kilowatts (kW) and whether feed-in is represented by positive or negative values.
-- **Activation (Boost):** Define the _Surplus threshold_ (e.g. 2000 Watts) and a _Minimum duration_ (e.g. 5 minutes) to prevent short-cycling during variable cloud cover. Specify how many Kelvin the hot water and heating curve offset should be increased by.
+- **Include battery charging power (Prioritize Heat Pump):** Optional datapoint for your home battery. If the battery is currently charging with solar power, this energy is treated as "usable surplus". The heat pump acts as the primary thermal battery, intercepting the power before it flows into the chemical battery.
+- **Activation (Boost):**
+    - Define the _Surplus threshold_ (e.g. 2000 Watts) and a _Minimum duration_ (e.g. 5 minutes) to prevent short-cycling during variable cloud cover.
+    - Specify how many Kelvin the hot water and heating curve offset should be increased by.
+    - **Boost Priority (Sequence):** Choose whether the power is routed _Simultaneously_, _Hot Water first_, or _Heating first_. The intelligent saturation check automatically reroutes the remaining power during the boost as soon as the prioritized target reaches its maximum temperature.
 - **Deactivation (Reset):**
-    - _Delay before reset:_ Prevents an immediate shutdown if the sun is briefly covered by a cloud.
-    - _Finish active cycle to base target after reset (Hardware Protection):_ If the solar surplus drops, the setpoint is not reset abruptly. The adapter intelligently waits until the current heating or hot water cycle has naturally finished its regular (lower) target to avoid abruptly stalling the compressor.
+    - **Stop threshold (Schmitt trigger logic):** Prevents the classic feedback loop. If the surplus drops due to the power consumption of the starting heat pump, the boost is not cancelled as long as this separate threshold (e.g. 0 Watts = grid draw) is not undershot.
+    - **Delay before reset:** Prevents an immediate shutdown if the sun is briefly covered by a cloud.
+    - **Finish active cycle to base target after reset (Hardware Protection):** If the solar surplus drops, the setpoint is not reset abruptly. The adapter intelligently waits until the current heating or hot water cycle has naturally finished its regular (lower) target to avoid abruptly stalling the compressor.
+      ![Example PV](../admin/img/PV.png)
 
 ---
 

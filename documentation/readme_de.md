@@ -190,11 +190,18 @@ Integrierte "PV-Ready" Steuerung: Nutzt deinen überschüssigen Solarstrom, um d
 
 - **PV-Überschusssteuerung aktivieren:** Schaltet die Logik ein.
 - **Datenpunkt für aktuelle Netzleistung:** Verlinke hier den Live-Datenpunkt deines Smart-Meters oder Wechselrichters (z.B. SMA, Shelly 3EM, Kostal).
-- **Einheit & Vorzeichen:** Gib an, ob der Zähler in Watt (W) oder Kilowatt (kW) misst und ob Einspeisungen als positive oder negative Werte dargestellt werden.
-- **Aktivierung (Einschaltbedingungen):** Lege den _Schwellenwert_ (z.B. 2000 Watt) und eine _Mindestdauer_ (z.B. 5 Minuten) fest, um nervöses Takten bei durchziehenden Wolken zu vermeiden. Gib zudem an, um wie viel Kelvin das Warmwasser und die Heizkurve (Parallelverschiebung) angehoben werden sollen.
+- **Batterieladung zum Überschuss addieren (Wärmepumpe priorisieren):** Optionaler Datenpunkt deiner Hausbatterie. Zieht die Batterie gerade Solarstrom, wird dieser als "nutzbarer Überschuss" gewertet. Die Wärmepumpe fängt den Strom somit als primärer thermischer Akku ab, bevor er in den Haus-Akku fließt.
+- **Aktivierung (Einschaltbedingungen):**
+    - Lege den _Überschuss-Schwellenwert_ (z.B. 2000 Watt) und eine _Mindestdauer_ (z.B. 5 Minuten) fest, um nervöses Takten bei Wolken zu vermeiden.
+    - Gib an, um wie viel Kelvin das Warmwasser und die Heizkurve angehoben werden sollen.
+    - **Boost-Priorität (Reihenfolge):** Wähle, ob die Wärme _Gleichzeitig_, _Warmwasser zuerst_ oder _Heizen zuerst_ ins System geleitet wird. Die intelligente Sättigungsprüfung leitet den Strom während des Boosts automatisch um, sobald das priorisierte Ziel seine Maximaltemperatur erreicht hat.
 - **Deaktivierung (Rückfallbedingungen):**
+    - **Ausschalt-Schwellenwert (Schalthysterese):** Verhindert den klassischen Feedback-Loop. Sinkt der Überschuss durch den Eigenverbrauch der startenden Wärmepumpe, bricht der Boost nicht ab, solange dieser separate Schwellenwert (z.B. 0 Watt = Netzbezug) nicht unterschritten wird.
+    - **Verzögerung vor Rücksetzung:** Verhindert einen sofortigen Abbruch, wenn die Sonne kurz verdeckt wird.
+    - **Aktiven Takt nach Reset bis zum Normalwert zu Ende fahren (Hardware-Schutz):** Fällt der Überschuss weg, wird der Sollwert nicht sofort hart zurückgesetzt. Der Adapter wartet, bis der aktuelle Zyklus seinen regulären (niedrigeren) Zielwert erreicht hat, um den Verdichter nicht abzuwürgen.
     - _Verzögerung vor Rücksetzung:_ Verhindert einen sofortigen Abbruch, wenn die Sonne kurz verdeckt wird.
     - _Aktiven Takt nach Reset bis zum Normalwert zu Ende fahren (Hardware-Schutz):_ Fällt der Überschuss weg, wird der Sollwert nicht sofort hart zurückgesetzt. Der Adapter wartet intelligent, bis der aktuelle Heiz- oder Warmwasserzyklus seinen regulären (niedrigeren) Zielwert erreicht hat, um den Verdichter nicht abzuwürgen.
+      ![Example PV](../admin/img/PV.png)
 
 ---
 
