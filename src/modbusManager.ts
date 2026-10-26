@@ -21,6 +21,8 @@ export class ModbusManager {
 	private adapter: LuxtronikAdapter;
 	private host: string;
 	private port: number;
+	/** Promise-Queue zur Vermeidung gleichzeitiger Socket-Zugriffe auf Port 502 */
+	private operationQueue: Promise<void> = Promise.resolve();
 
 	/**
 	 * Initializes the Modbus manager with the adapter configuration.
@@ -34,6 +36,39 @@ export class ModbusManager {
 	}
 
 	/**
+	 * Reiht eine Modbus-Operation in die serielle Warteschlange ein, um Socket-Kollisionen zu verhindern.
+	 *
+	 * @param task - Die auszuführende asynchrone Funktion.
+	 * @returns Das Ergebnis der ausgeführten Funktion.
+	 */
+	private enqueue<T>(task: () => Promise<T>): Promise<T> {
+		const next = this.operationQueue.then(task, task);
+		this.operationQueue = next.then(
+			() => undefined,
+			() => undefined,
+		);
+		return next;
+	}
+
+	/**
+	 * Schließt den Modbus-Client sicher und wartet kurz, damit die Hardware den Port freigibt.
+	 *
+	 * @param client - Die geöffnete ModbusRTU-Instanz.
+	 */
+	private async safeClose(client: ModbusRTU): Promise<void> {
+		if (client.isOpen) {
+			try {
+				client.close();
+			} catch {
+				/* ignore close errors */
+			}
+			await new Promise<void>(resolve => {
+				this.adapter.setTimeout(resolve, 50);
+			});
+		}
+	}
+
+	/**
 	 * Checks if the Modbus TCP service is reachable on the heat pump.
 	 * Disables hybrid writing if the connection fails.
 	 *
@@ -44,28 +79,31 @@ export class ModbusManager {
 			return false;
 		}
 
-		const client = new ModbusRTU();
-		try {
-			client.setTimeout(2000);
-			await client.connectTCP(this.host, { port: this.port });
-			client.setID(1);
+		return this.enqueue(async () => {
+			const client = new ModbusRTU();
+			try {
+				client.setTimeout(2000);
+				await client.connectTCP(this.host, { port: this.port });
+				client.setID(1);
 
-			// Testverbindung: Wir lesen Holding 1 (Rücklauf-Soll) aus
-			await client.readHoldingRegisters(1, 1);
+				// Testverbindung: Wir lesen Holding 1 (Rücklauf-Soll) aus
+				await client.readHoldingRegisters(1, 1);
 
-			writeLog(`[Modbus] Pre-Check erfolgreich! Modbus TCP ist auf Port ${this.port} erreichbar.`, 'info');
-			this.isAvailable = true;
-			return true;
-		} catch (err: unknown) {
-			const msg = err instanceof Error ? err.message : String(err);
-			writeLog(`[Modbus] Pre-Check fehlgeschlagen: ${msg}. Hybrid-Schreibfunktionen werden deaktiviert.`, 'warn');
-			this.isAvailable = false;
-			return false;
-		} finally {
-			if (client.isOpen) {
-				client.close();
+				writeLog(`[Modbus] Pre-Check erfolgreich! Modbus TCP ist auf Port ${this.port} erreichbar.`, 'info');
+				this.isAvailable = true;
+				return true;
+			} catch (err: unknown) {
+				const msg = err instanceof Error ? err.message : String(err);
+				writeLog(
+					`[Modbus] Pre-Check fehlgeschlagen: ${msg}. Hybrid-Schreibfunktionen werden deaktiviert.`,
+					'warn',
+				);
+				this.isAvailable = false;
+				return false;
+			} finally {
+				await this.safeClose(client);
 			}
-		}
+		});
 	}
 
 	/**
@@ -78,33 +116,33 @@ export class ModbusManager {
 			return null;
 		}
 
-		const client = new ModbusRTU();
-		try {
-			client.setTimeout(2500);
-			await client.connectTCP(this.host, { port: this.port });
-			client.setID(1);
+		return this.enqueue(async () => {
+			const client = new ModbusRTU();
+			try {
+				client.setTimeout(2500);
+				await client.connectTCP(this.host, { port: this.port });
+				client.setID(1);
 
-			// 1. Holding-Register 0 bis 23 in einem Request lesen
-			const holdingRes = await client.readHoldingRegisters(0, 24);
-			// 16-Bit Signed Integer Umrechnung (für negative Außentemperaturen / Offsets)
-			const holdings = holdingRes.data.map(val => (val > 32767 ? val - 65536 : val));
+				// 1. Holding-Register 0 bis 23 in einem Request lesen
+				const holdingRes = await client.readHoldingRegisters(0, 24);
+				// 16-Bit Signed Integer Umrechnung (für negative Außentemperaturen / Offsets)
+				const holdings = holdingRes.data.map(val => (val > 32767 ? val - 65536 : val));
 
-			// 2. Coils 0 bis 13 in einem Request lesen
-			const coilRes = await client.readCoils(0, 14);
-			const coils = coilRes.data;
+				// 2. Coils 0 bis 13 in einem Request lesen
+				const coilRes = await client.readCoils(0, 14);
+				const coils = coilRes.data;
 
-			return { holdings, coils };
-		} catch (err: unknown) {
-			const msg = err instanceof Error ? err.message : String(err);
-			if (this.adapter.isDebugLogActive) {
-				writeLog(`[Modbus] Lese-Zyklus fehlgeschlagen: ${msg}`, 'debug');
+				return { holdings, coils };
+			} catch (err: unknown) {
+				const msg = err instanceof Error ? err.message : String(err);
+				if (this.adapter.isDebugLogActive) {
+					writeLog(`[Modbus] Lese-Zyklus fehlgeschlagen: ${msg}`, 'debug');
+				}
+				return null;
+			} finally {
+				await this.safeClose(client);
 			}
-			return null;
-		} finally {
-			if (client.isOpen) {
-				client.close();
-			}
-		}
+		});
 	}
 
 	/**
@@ -121,33 +159,33 @@ export class ModbusManager {
 			return;
 		}
 
-		const client = new ModbusRTU();
-		try {
-			client.setTimeout(3000);
-			await client.connectTCP(this.host, { port: this.port });
-			client.setID(1);
+		return this.enqueue(async () => {
+			const client = new ModbusRTU();
+			try {
+				client.setTimeout(3000);
+				await client.connectTCP(this.host, { port: this.port });
+				client.setID(1);
 
-			if (isCoil) {
-				const coilVal = value === 1 || Boolean(value);
-				await client.writeCoil(register, coilVal);
-				if (this.adapter.isDebugLogActive) {
-					writeLog(`[Modbus] Coil ${register} erfolgreich auf ${coilVal} gesetzt.`, 'debug');
+				if (isCoil) {
+					const coilVal = value === 1 || Boolean(value);
+					await client.writeCoil(register, coilVal);
+					if (this.adapter.isDebugLogActive) {
+						writeLog(`[Modbus] Coil ${register} erfolgreich auf ${coilVal} gesetzt.`, 'debug');
+					}
+				} else {
+					const rounded = Math.round(Number(value));
+					const wireValue = rounded < 0 ? 65536 + rounded : rounded;
+					await client.writeRegister(register, wireValue);
+					if (this.adapter.isDebugLogActive) {
+						writeLog(`[Modbus] Holding-Register ${register} erfolgreich auf ${rounded} gesetzt.`, 'debug');
+					}
 				}
-			} else {
-				const rounded = Math.round(Number(value));
-				const wireValue = rounded < 0 ? 65536 + rounded : rounded;
-				await client.writeRegister(register, wireValue);
-				if (this.adapter.isDebugLogActive) {
-					writeLog(`[Modbus] Holding-Register ${register} erfolgreich auf ${rounded} gesetzt.`, 'debug');
-				}
+			} catch (err: unknown) {
+				const msg = err instanceof Error ? err.message : String(err);
+				writeLog(`[Modbus] Schreibfehler auf Register ${register}: ${msg}`, 'error');
+			} finally {
+				await this.safeClose(client);
 			}
-		} catch (err: unknown) {
-			const msg = err instanceof Error ? err.message : String(err);
-			writeLog(`[Modbus] Schreibfehler auf Register ${register}: ${msg}`, 'error');
-		} finally {
-			if (client.isOpen) {
-				client.close();
-			}
-		}
+		});
 	}
 }

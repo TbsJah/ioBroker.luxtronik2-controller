@@ -2,6 +2,8 @@ import * as schedule from 'node-schedule';
 import { writeLog } from './logger';
 import type { LuxtronikAdapter } from './types';
 
+const BACKUP_TIMEOUT_MS = 30000;
+
 /**
  * Initialisiert den automatischen Backup-Zeitplan basierend auf der ioBroker-Konfiguration.
  *
@@ -9,11 +11,10 @@ import type { LuxtronikAdapter } from './types';
  */
 export function initAutoBackup(adapter: LuxtronikAdapter): void {
 	const config = adapter.config;
-	stopAutoBackup(adapter); // <- Adapter muss jetzt übergeben werden
+	stopAutoBackup(adapter);
 
 	if (config.autoBackupActive && config.autoBackupCron) {
 		writeLog(`Initializing automated DTA backup with cron schedule: ${config.autoBackupCron}`, 'info');
-		// Den Job direkt IN der Adapter-Instanz speichern
 		adapter.backupJob = schedule.scheduleJob(config.autoBackupCron, async () => {
 			await executeDtaBackup(adapter);
 		});
@@ -40,19 +41,26 @@ export async function executeDtaBackup(adapter: LuxtronikAdapter): Promise<void>
 	try {
 		writeLog('Fetching live DTA file (/NewProc)...', 'debug');
 
-		const isLive = true;
+		let isLive = true;
 		let arrayBuffer: ArrayBuffer | null = null;
 
-		// 1. NewProc liefert den DTA-Speicher als direkten Datei-Stream
-		let response = await fetch(`http://${ip}/NewProc`).catch(() => null);
+		// 1. NewProc liefert den DTA-Speicher als direkten Datei-Stream (mit 30s Timeout)
+		let response = await fetch(`http://${ip}/NewProc`, {
+			signal: AbortSignal.timeout(BACKUP_TIMEOUT_MS),
+		}).catch(() => null);
+
 		if (response && response.ok) {
 			arrayBuffer = await response.arrayBuffer();
 		}
 
-		// 2. Fallbacks, falls NewProc leer ist oder fehlt
+		// 2. Fallback auf /procdta, falls NewProc leer ist oder fehlt
 		if (!arrayBuffer || arrayBuffer.byteLength < 1000) {
 			writeLog('/NewProc did not return a valid file. Trying /procdta...', 'debug');
-			response = await fetch(`http://${ip}/procdta`).catch(() => null);
+			isLive = false;
+			response = await fetch(`http://${ip}/procdta`, {
+				signal: AbortSignal.timeout(BACKUP_TIMEOUT_MS),
+			}).catch(() => null);
+
 			if (response && response.ok) {
 				arrayBuffer = await response.arrayBuffer();
 			}
@@ -74,7 +82,6 @@ export async function executeDtaBackup(adapter: LuxtronikAdapter): Promise<void>
 		const timestamp = `${y}-${m}-${d}T${h}-${min}-${s}`;
 		const filePrefix = isLive ? 'dta_live' : 'dta_history';
 
-		// DER KUGELSICHERE WEG: Speichern in 0_userdata.0
 		const targetId = '0_userdata.0';
 		const fileName = `luxtronik_backups/${filePrefix}_${timestamp}.dta`;
 

@@ -24,6 +24,14 @@ module.exports = __toCommonJS(copManager_exports);
 var import_logger = require("./logger");
 var import_stateMapping = require("./stateMapping");
 let isInitialized = false;
+const ensuredObjects = /* @__PURE__ */ new Set();
+async function ensureCopObject(adapter, id, obj) {
+  if (ensuredObjects.has(id)) {
+    return;
+  }
+  await adapter.setObjectNotExistsAsync(id, obj);
+  ensuredObjects.add(id);
+}
 async function processCopData(adapter, bzVal) {
   const config = adapter.config;
   if (!config.cop_calculation_active) {
@@ -58,12 +66,12 @@ async function processCopData(adapter, bzVal) {
     const rawPowerId = "hidden.cop_buckets.last_raw_power";
     const rawThermalId = "hidden.cop_buckets.last_raw_thermal";
     if (!isInitialized) {
-      await adapter.setObjectNotExistsAsync(rawPowerId, {
+      await ensureCopObject(adapter, rawPowerId, {
         type: "state",
         common: { name: "Last Raw Power", type: "number", role: "value", read: true, write: false },
         native: {}
       });
-      await adapter.setObjectNotExistsAsync(rawThermalId, {
+      await ensureCopObject(adapter, rawThermalId, {
         type: "state",
         common: { name: "Last Raw Thermal", type: "number", role: "value", read: true, write: false },
         native: {}
@@ -117,17 +125,17 @@ async function processCopData(adapter, bzVal) {
 async function handleTimeRollover(adapter) {
   (0, import_logger.writeLog)(`Pr\xFCfe Tageswechsel und lege Ordner an...`, "debug");
   const dateStateId = "hidden.cop_buckets.last_date";
-  await adapter.setObjectNotExistsAsync("hidden", {
+  await ensureCopObject(adapter, "hidden", {
     type: "folder",
     common: { name: "Hidden System Data" },
     native: {}
   });
-  await adapter.setObjectNotExistsAsync("hidden.cop_buckets", {
+  await ensureCopObject(adapter, "hidden.cop_buckets", {
     type: "folder",
     common: { name: "COP Data Buckets" },
     native: {}
   });
-  await adapter.setObjectNotExistsAsync(dateStateId, {
+  await ensureCopObject(adapter, dateStateId, {
     type: "state",
     common: { name: "Last calculation date", type: "string", role: "date", read: true, write: false },
     native: {}
@@ -163,7 +171,7 @@ async function handleTimeRollover(adapter) {
 }
 async function getAbsoluteValue(adapter, category, type) {
   const id = `hidden.cop_buckets.${category}_${type}_absolute`;
-  await adapter.setObjectNotExistsAsync(id, {
+  await ensureCopObject(adapter, id, {
     type: "state",
     common: { name: `${category} ${type} Absolute`, type: "number", role: "value", read: true, write: false },
     native: {}
@@ -174,7 +182,7 @@ async function getAbsoluteValue(adapter, category, type) {
 async function setSnapshot(adapter, category, timeframe, power, thermal) {
   const powerId = `hidden.cop_buckets.${category}_power_start_${timeframe}`;
   const thermalId = `hidden.cop_buckets.${category}_thermal_start_${timeframe}`;
-  await adapter.setObjectNotExistsAsync(powerId, {
+  await ensureCopObject(adapter, powerId, {
     type: "state",
     common: {
       name: `${category} Power Start ${timeframe}`,
@@ -185,7 +193,7 @@ async function setSnapshot(adapter, category, timeframe, power, thermal) {
     },
     native: {}
   });
-  await adapter.setObjectNotExistsAsync(thermalId, {
+  await ensureCopObject(adapter, thermalId, {
     type: "state",
     common: {
       name: `${category} Thermal Start ${timeframe}`,
@@ -201,7 +209,7 @@ async function setSnapshot(adapter, category, timeframe, power, thermal) {
 }
 async function update7DaysHistory(adapter, category, currentPower, currentThermal) {
   const historyId = `hidden.cop_buckets.${category}_history_7d`;
-  await adapter.setObjectNotExistsAsync(historyId, {
+  await ensureCopObject(adapter, historyId, {
     type: "state",
     common: { name: `${category} 7 Days History`, type: "string", role: "json", read: true, write: false },
     native: {}

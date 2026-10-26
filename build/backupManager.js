@@ -35,6 +35,7 @@ __export(backupManager_exports, {
 module.exports = __toCommonJS(backupManager_exports);
 var schedule = __toESM(require("node-schedule"));
 var import_logger = require("./logger");
+const BACKUP_TIMEOUT_MS = 3e4;
 function initAutoBackup(adapter) {
   const config = adapter.config;
   stopAutoBackup(adapter);
@@ -54,15 +55,20 @@ async function executeDtaBackup(adapter) {
   }
   try {
     (0, import_logger.writeLog)("Fetching live DTA file (/NewProc)...", "debug");
-    const isLive = true;
+    let isLive = true;
     let arrayBuffer = null;
-    let response = await fetch(`http://${ip}/NewProc`).catch(() => null);
+    let response = await fetch(`http://${ip}/NewProc`, {
+      signal: AbortSignal.timeout(BACKUP_TIMEOUT_MS)
+    }).catch(() => null);
     if (response && response.ok) {
       arrayBuffer = await response.arrayBuffer();
     }
     if (!arrayBuffer || arrayBuffer.byteLength < 1e3) {
       (0, import_logger.writeLog)("/NewProc did not return a valid file. Trying /procdta...", "debug");
-      response = await fetch(`http://${ip}/procdta`).catch(() => null);
+      isLive = false;
+      response = await fetch(`http://${ip}/procdta`, {
+        signal: AbortSignal.timeout(BACKUP_TIMEOUT_MS)
+      }).catch(() => null);
       if (response && response.ok) {
         arrayBuffer = await response.arrayBuffer();
       }

@@ -141,7 +141,7 @@ async function checkFirmwareUpdate(adapter) {
       return;
     }
     const filename = filenameMatch[1].replace(/"/g, "");
-    const versionMatch = filename.match(/[BV]\d+\.\d+\.\d+(?:-\d+)?/);
+    const versionMatch = filename.match(/(?:[BVF]|WWB|smo)\d+\.\d+(?:\.\d+)?(?:-\d+)?/i);
     const availableVersion = versionMatch ? versionMatch[0].split("-")[0] : null;
     if (!availableVersion) {
       return;

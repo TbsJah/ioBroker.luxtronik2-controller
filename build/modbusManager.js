@@ -39,6 +39,8 @@ class ModbusManager {
   adapter;
   host;
   port;
+  /** Promise-Queue zur Vermeidung gleichzeitiger Socket-Zugriffe auf Port 502 */
+  operationQueue = Promise.resolve();
   /**
    * Initializes the Modbus manager with the adapter configuration.
    *
@@ -50,6 +52,36 @@ class ModbusManager {
     this.port = adapter.config.modbus_port ? Number(adapter.config.modbus_port) : 502;
   }
   /**
+   * Reiht eine Modbus-Operation in die serielle Warteschlange ein, um Socket-Kollisionen zu verhindern.
+   *
+   * @param task - Die auszuführende asynchrone Funktion.
+   * @returns Das Ergebnis der ausgeführten Funktion.
+   */
+  enqueue(task) {
+    const next = this.operationQueue.then(task, task);
+    this.operationQueue = next.then(
+      () => void 0,
+      () => void 0
+    );
+    return next;
+  }
+  /**
+   * Schließt den Modbus-Client sicher und wartet kurz, damit die Hardware den Port freigibt.
+   *
+   * @param client - Die geöffnete ModbusRTU-Instanz.
+   */
+  async safeClose(client) {
+    if (client.isOpen) {
+      try {
+        client.close();
+      } catch {
+      }
+      await new Promise((resolve) => {
+        this.adapter.setTimeout(resolve, 50);
+      });
+    }
+  }
+  /**
    * Checks if the Modbus TCP service is reachable on the heat pump.
    * Disables hybrid writing if the connection fails.
    *
@@ -59,25 +91,28 @@ class ModbusManager {
     if (!this.adapter.config.modbus_active) {
       return false;
     }
-    const client = new import_modbus_serial.default();
-    try {
-      client.setTimeout(2e3);
-      await client.connectTCP(this.host, { port: this.port });
-      client.setID(1);
-      await client.readHoldingRegisters(1, 1);
-      (0, import_logger.writeLog)(`[Modbus] Pre-Check erfolgreich! Modbus TCP ist auf Port ${this.port} erreichbar.`, "info");
-      this.isAvailable = true;
-      return true;
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      (0, import_logger.writeLog)(`[Modbus] Pre-Check fehlgeschlagen: ${msg}. Hybrid-Schreibfunktionen werden deaktiviert.`, "warn");
-      this.isAvailable = false;
-      return false;
-    } finally {
-      if (client.isOpen) {
-        client.close();
+    return this.enqueue(async () => {
+      const client = new import_modbus_serial.default();
+      try {
+        client.setTimeout(2e3);
+        await client.connectTCP(this.host, { port: this.port });
+        client.setID(1);
+        await client.readHoldingRegisters(1, 1);
+        (0, import_logger.writeLog)(`[Modbus] Pre-Check erfolgreich! Modbus TCP ist auf Port ${this.port} erreichbar.`, "info");
+        this.isAvailable = true;
+        return true;
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        (0, import_logger.writeLog)(
+          `[Modbus] Pre-Check fehlgeschlagen: ${msg}. Hybrid-Schreibfunktionen werden deaktiviert.`,
+          "warn"
+        );
+        this.isAvailable = false;
+        return false;
+      } finally {
+        await this.safeClose(client);
       }
-    }
+    });
   }
   /**
    * Liest alle relevanten Holding-Register (0..23) und Coils (0..13) in einem schnellen Batch-Durchgang aus.
@@ -88,27 +123,27 @@ class ModbusManager {
     if (!this.isAvailable || !this.adapter.config.modbus_active) {
       return null;
     }
-    const client = new import_modbus_serial.default();
-    try {
-      client.setTimeout(2500);
-      await client.connectTCP(this.host, { port: this.port });
-      client.setID(1);
-      const holdingRes = await client.readHoldingRegisters(0, 24);
-      const holdings = holdingRes.data.map((val) => val > 32767 ? val - 65536 : val);
-      const coilRes = await client.readCoils(0, 14);
-      const coils = coilRes.data;
-      return { holdings, coils };
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      if (this.adapter.isDebugLogActive) {
-        (0, import_logger.writeLog)(`[Modbus] Lese-Zyklus fehlgeschlagen: ${msg}`, "debug");
+    return this.enqueue(async () => {
+      const client = new import_modbus_serial.default();
+      try {
+        client.setTimeout(2500);
+        await client.connectTCP(this.host, { port: this.port });
+        client.setID(1);
+        const holdingRes = await client.readHoldingRegisters(0, 24);
+        const holdings = holdingRes.data.map((val) => val > 32767 ? val - 65536 : val);
+        const coilRes = await client.readCoils(0, 14);
+        const coils = coilRes.data;
+        return { holdings, coils };
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        if (this.adapter.isDebugLogActive) {
+          (0, import_logger.writeLog)(`[Modbus] Lese-Zyklus fehlgeschlagen: ${msg}`, "debug");
+        }
+        return null;
+      } finally {
+        await this.safeClose(client);
       }
-      return null;
-    } finally {
-      if (client.isOpen) {
-        client.close();
-      }
-    }
+    });
   }
   /**
    * Writes a volatile value to the heat pump's RAM via Modbus TCP.
@@ -123,33 +158,33 @@ class ModbusManager {
       (0, import_logger.writeLog)(`[Modbus] Abbruch: Modbus nicht erreichbar. Kann Register ${register} nicht schreiben.`, "warn");
       return;
     }
-    const client = new import_modbus_serial.default();
-    try {
-      client.setTimeout(3e3);
-      await client.connectTCP(this.host, { port: this.port });
-      client.setID(1);
-      if (isCoil) {
-        const coilVal = value === 1 || Boolean(value);
-        await client.writeCoil(register, coilVal);
-        if (this.adapter.isDebugLogActive) {
-          (0, import_logger.writeLog)(`[Modbus] Coil ${register} erfolgreich auf ${coilVal} gesetzt.`, "debug");
+    return this.enqueue(async () => {
+      const client = new import_modbus_serial.default();
+      try {
+        client.setTimeout(3e3);
+        await client.connectTCP(this.host, { port: this.port });
+        client.setID(1);
+        if (isCoil) {
+          const coilVal = value === 1 || Boolean(value);
+          await client.writeCoil(register, coilVal);
+          if (this.adapter.isDebugLogActive) {
+            (0, import_logger.writeLog)(`[Modbus] Coil ${register} erfolgreich auf ${coilVal} gesetzt.`, "debug");
+          }
+        } else {
+          const rounded = Math.round(Number(value));
+          const wireValue = rounded < 0 ? 65536 + rounded : rounded;
+          await client.writeRegister(register, wireValue);
+          if (this.adapter.isDebugLogActive) {
+            (0, import_logger.writeLog)(`[Modbus] Holding-Register ${register} erfolgreich auf ${rounded} gesetzt.`, "debug");
+          }
         }
-      } else {
-        const rounded = Math.round(Number(value));
-        const wireValue = rounded < 0 ? 65536 + rounded : rounded;
-        await client.writeRegister(register, wireValue);
-        if (this.adapter.isDebugLogActive) {
-          (0, import_logger.writeLog)(`[Modbus] Holding-Register ${register} erfolgreich auf ${rounded} gesetzt.`, "debug");
-        }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        (0, import_logger.writeLog)(`[Modbus] Schreibfehler auf Register ${register}: ${msg}`, "error");
+      } finally {
+        await this.safeClose(client);
       }
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      (0, import_logger.writeLog)(`[Modbus] Schreibfehler auf Register ${register}: ${msg}`, "error");
-    } finally {
-      if (client.isOpen) {
-        client.close();
-      }
-    }
+    });
   }
 }
 // Annotate the CommonJS export names for ESM import in node:

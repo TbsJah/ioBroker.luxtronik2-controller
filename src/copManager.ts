@@ -3,6 +3,23 @@ import { getDpPath } from './stateMapping';
 import type { LuxtronikAdapter } from './types';
 
 let isInitialized = false;
+/** Cache für bereits angelegte Datenbank-Objekte zur Vermeidung unnötiger DB-Zugriffe */
+const ensuredObjects = new Set<string>();
+
+/**
+ * Stellt einmalig pro Adapter-Laufzeit sicher, dass ein internes COP-Objekt existiert.
+ *
+ * @param adapter Die Instanz des ioBroker-Adapters.
+ * @param id Die Objekt-ID.
+ * @param obj Die Objekt-Definition.
+ */
+async function ensureCopObject(adapter: LuxtronikAdapter, id: string, obj: ioBroker.SettableObject): Promise<void> {
+	if (ensuredObjects.has(id)) {
+		return;
+	}
+	await adapter.setObjectNotExistsAsync(id, obj);
+	ensuredObjects.add(id);
+}
 
 /**
  * Verarbeitet die COP-Daten und berechnet Live-Werte anhand von absoluten Zählern und Snapshots.
@@ -48,17 +65,17 @@ export async function processCopData(adapter: LuxtronikAdapter, bzVal: string): 
 			}
 		}
 
-		// --- NEU: ABSOLUT SICHERE INITIALISIERUNG AUS DER DATENBANK ---
+		// --- ABSOLUT SICHERE INITIALISIERUNG AUS DER DATENBANK ---
 		const rawPowerId = 'hidden.cop_buckets.last_raw_power';
 		const rawThermalId = 'hidden.cop_buckets.last_raw_thermal';
 
 		if (!isInitialized) {
-			await adapter.setObjectNotExistsAsync(rawPowerId, {
+			await ensureCopObject(adapter, rawPowerId, {
 				type: 'state',
 				common: { name: 'Last Raw Power', type: 'number', role: 'value', read: true, write: false },
 				native: {},
 			});
-			await adapter.setObjectNotExistsAsync(rawThermalId, {
+			await ensureCopObject(adapter, rawThermalId, {
 				type: 'state',
 				common: { name: 'Last Raw Thermal', type: 'number', role: 'value', read: true, write: false },
 				native: {},
@@ -133,24 +150,24 @@ export async function processCopData(adapter: LuxtronikAdapter, bzVal: string): 
 }
 
 /**
- * Prüft auf Tages-, Monats- oder Jahreswechsel und erstellt Snapshots der Endloszähler.
+ * Prüft auf Tages-, Monats- oder Jahreswechsel (lokale Systemzeit) und erstellt Snapshots der Endloszähler.
  *
  * @param adapter Die Instanz des ioBroker-Adapters.
  */
 async function handleTimeRollover(adapter: LuxtronikAdapter): Promise<void> {
 	writeLog(`Prüfe Tageswechsel und lege Ordner an...`, 'debug');
 	const dateStateId = 'hidden.cop_buckets.last_date';
-	await adapter.setObjectNotExistsAsync('hidden', {
+	await ensureCopObject(adapter, 'hidden', {
 		type: 'folder',
 		common: { name: 'Hidden System Data' },
 		native: {},
 	});
-	await adapter.setObjectNotExistsAsync('hidden.cop_buckets', {
+	await ensureCopObject(adapter, 'hidden.cop_buckets', {
 		type: 'folder',
 		common: { name: 'COP Data Buckets' },
 		native: {},
 	});
-	await adapter.setObjectNotExistsAsync(dateStateId, {
+	await ensureCopObject(adapter, dateStateId, {
 		type: 'state',
 		common: { name: 'Last calculation date', type: 'string', role: 'date', read: true, write: false },
 		native: {},
@@ -163,9 +180,9 @@ async function handleTimeRollover(adapter: LuxtronikAdapter): Promise<void> {
 	const y = now.getFullYear();
 	const m = String(now.getMonth() + 1).padStart(2, '0');
 	const d = String(now.getDate()).padStart(2, '0');
-	const currentDate = `${y}-${m}-${d}`; // Lokales Datum YYYY-MM-DD
-	const currentMonth = `${y}-${m}`; // Lokaler Monat YYYY-MM
-	const currentYear = `${y}`; // Lokales Jahr YYYY
+	const currentDate = `${y}-${m}-${d}`; // Lokales Datum: YYYY-MM-DD
+	const currentMonth = `${y}-${m}`; // Lokaler Monat: YYYY-MM
+	const currentYear = `${y}`; // Lokales Jahr: YYYY
 
 	if (lastDate !== currentDate) {
 		const lastMonth = lastDate ? lastDate.substring(0, 7) : '';
@@ -212,7 +229,7 @@ async function getAbsoluteValue(
 	type: 'power' | 'thermal',
 ): Promise<number> {
 	const id = `hidden.cop_buckets.${category}_${type}_absolute`;
-	await adapter.setObjectNotExistsAsync(id, {
+	await ensureCopObject(adapter, id, {
 		type: 'state',
 		common: { name: `${category} ${type} Absolute`, type: 'number', role: 'value', read: true, write: false },
 		native: {},
@@ -240,7 +257,7 @@ async function setSnapshot(
 	const powerId = `hidden.cop_buckets.${category}_power_start_${timeframe}`;
 	const thermalId = `hidden.cop_buckets.${category}_thermal_start_${timeframe}`;
 
-	await adapter.setObjectNotExistsAsync(powerId, {
+	await ensureCopObject(adapter, powerId, {
 		type: 'state',
 		common: {
 			name: `${category} Power Start ${timeframe}`,
@@ -251,7 +268,7 @@ async function setSnapshot(
 		},
 		native: {},
 	});
-	await adapter.setObjectNotExistsAsync(thermalId, {
+	await ensureCopObject(adapter, thermalId, {
 		type: 'state',
 		common: {
 			name: `${category} Thermal Start ${timeframe}`,
@@ -282,7 +299,7 @@ async function update7DaysHistory(
 	currentThermal: number,
 ): Promise<void> {
 	const historyId = `hidden.cop_buckets.${category}_history_7d`;
-	await adapter.setObjectNotExistsAsync(historyId, {
+	await ensureCopObject(adapter, historyId, {
 		type: 'state',
 		common: { name: `${category} 7 Days History`, type: 'string', role: 'json', read: true, write: false },
 		native: {},
@@ -341,7 +358,6 @@ async function calculateAndWriteCop(adapter: LuxtronikAdapter, category: string)
 	const currentPower = await getAbsoluteValue(adapter, category, 'power');
 	const currentThermal = await getAbsoluteValue(adapter, category, 'thermal');
 
-	// Mapping der Ziel-Datenpunkte
 	const dpMap: Record<string, Record<string, string>> = {
 		Total: { today: 'cop_total_today', '7d': 'cop_total_7d', month: 'cop_total_month', year: 'cop_total_year' },
 		Heating: {
@@ -384,7 +400,7 @@ async function calculateAndWriteCop(adapter: LuxtronikAdapter, category: string)
 		try {
 			const history = JSON.parse(hState.val);
 			if (history.length > 0) {
-				const oldest = history[0]; // Das ist der Stand vor bis zu 7 Tagen
+				const oldest = history[0];
 				const pUsed = currentPower - oldest.power;
 				const tGen = currentThermal - oldest.thermal;
 				if (pUsed > 0) {
