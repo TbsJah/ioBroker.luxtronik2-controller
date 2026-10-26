@@ -1841,6 +1841,20 @@
 					"lg": 12,
 					"xl": 12
 				},
+				"pv_threshold_stop": {
+					"type": "number",
+					"label": {
+						"en": "Stop threshold (Watt, e.g. 0 = grid draw)",
+						"de": "Ausschalt-Schwellenwert (Watt, z.B. 0 = Netzbezug)"
+					},
+					"default": 0,
+					"hidden": "!data.pv_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 6,
+					"lg": 6,
+					"xl": 6
+				},
 				"pv_delay_stop": {
 					"type": "number",
 					"label": {

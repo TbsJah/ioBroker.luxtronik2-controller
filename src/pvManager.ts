@@ -91,39 +91,56 @@ export function handlePvFeedInChange(adapter: LuxtronikAdapter, id: string, stat
 		surplus = rawValue > 0 ? rawValue : 0;
 	}
 
-	const threshold = config.pv_threshold_start || 2000;
+	const thresholdStart = config.pv_threshold_start || 2000;
+	// Neue Ausschalt-Schwelle (Standard = 0 Watt)
+	const thresholdStop = config.pv_threshold_stop !== undefined ? Number(config.pv_threshold_stop) : 0;
 	const delayStartMs = (config.pv_delay_start || 5) * 60000;
 	const delayStopMs = (config.pv_delay_stop || 10) * 60000;
 
-	// 3. Überschuss ist hoch genug
-	if (surplus >= threshold) {
+	// 3. Status-Entscheidung (Hysterese-Logik)
+	if (surplus >= thresholdStart) {
+		// Überschuss hoch genug -> Starten / am Leben halten
 		if (pvStopTimer) {
 			adapter.clearTimeout(pvStopTimer);
 			pvStopTimer = undefined;
-			writeLog(`[PV] Surplus restored (${surplus} W). Stop timer cancelled.`, 'debug');
+			writeLog(`[PV] Surplus restored (${surplus} W >= ${thresholdStart} W). Stop timer cancelled.`, 'debug');
 		}
 
 		if (!pvIsBoostActive && !pvStartTimer) {
 			writeLog(
-				`[PV] Surplus of ${surplus} W exceeds threshold (${threshold} W). Starting ${config.pv_delay_start} min activation timer.`,
+				`[PV] Surplus of ${surplus} W exceeds start threshold (${thresholdStart} W). Starting ${config.pv_delay_start} min activation timer.`,
 				'info',
 			);
 			pvStartTimer = adapter.setTimeout(() => activateBoost(adapter), delayStartMs);
 		}
-	} else {
-		// 4. Überschuss ist eingebrochen
+	} else if (surplus <= thresholdStop) {
+		// Überschuss kritisch niedrig (Netzbezug) -> Beenden
 		if (pvStartTimer) {
 			adapter.clearTimeout(pvStartTimer);
 			pvStartTimer = undefined;
-			writeLog(`[PV] Surplus dropped to ${surplus} W. Start timer cancelled.`, 'debug');
+			writeLog(`[PV] Surplus dropped to ${surplus} W (<= ${thresholdStop} W). Start timer cancelled.`, 'debug');
 		}
 
 		if (pvIsBoostActive && !pvStopTimer && !pvWaitingForCycleEnd) {
 			writeLog(
-				`[PV] Surplus dropped to ${surplus} W (below ${threshold} W). Starting ${config.pv_delay_stop} min deactivation timer.`,
+				`[PV] Surplus dropped to ${surplus} W (<= stop threshold ${thresholdStop} W). Starting ${config.pv_delay_stop} min deactivation timer.`,
 				'info',
 			);
 			pvStopTimer = adapter.setTimeout(() => initiateDeactivation(adapter), delayStopMs);
+		}
+	} else {
+		// GRAUZONE: Der Wert liegt zwischen Start- und Stop-Schwelle (z.B. 600 W).
+		// - Reicht nicht zum neuen Einschalten (Start-Timer abbrechen).
+		// - Reicht aber, um einen bereits laufenden Boost am Leben zu erhalten (Stop-Timer abbrechen).
+		if (pvStartTimer) {
+			adapter.clearTimeout(pvStartTimer);
+			pvStartTimer = undefined;
+			writeLog(`[PV] Surplus ${surplus} W is below start threshold. Start timer cancelled.`, 'debug');
+		}
+		if (pvStopTimer) {
+			adapter.clearTimeout(pvStopTimer);
+			pvStopTimer = undefined;
+			writeLog(`[PV] Surplus ${surplus} W is above stop threshold. Stop timer cancelled.`, 'debug');
 		}
 	}
 }
@@ -148,8 +165,22 @@ async function activateBoost(adapter: LuxtronikAdapter): Promise<void> {
 		const currentWwState = wwPath ? await adapter.getStateAsync(wwPath) : null;
 		const currentHzState = hzPath ? await adapter.getStateAsync(hzPath) : null;
 
-		originalWw = currentWwState && typeof currentWwState.val === 'number' ? currentWwState.val : null;
-		originalHz = currentHzState && typeof currentHzState.val === 'number' ? currentHzState.val : null;
+		let baseWw = currentWwState && typeof currentWwState.val === 'number' ? currentWwState.val : null;
+		let baseHz = currentHzState && typeof currentHzState.val === 'number' ? currentHzState.val : null;
+
+		// FIX: Bevorzuge die sicheren Config-Standardwerte als Basis, falls die Hardware-Schutz-Vorgaben aktiv sind.
+		// Das verhindert, dass künstliche Werte der Takt-Optimierung als "normal" eingestuft und weiter gepusht werden.
+		if (config.idle_defaults_aktiv) {
+			if (config.sync_warmwater_target_temperature) {
+				baseWw = Number(config.sync_warmwater_target_temperature);
+			}
+			if (config.fusspunkt) {
+				baseHz = Number(config.fusspunkt);
+			}
+		}
+
+		originalWw = baseWw;
+		originalHz = baseHz;
 
 		const boostWw = config.pv_boost_ww || 0;
 		const boostHz = config.pv_boost_hz || 0;

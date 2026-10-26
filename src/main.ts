@@ -552,6 +552,15 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 						await this.setIdleDefaults();
 					}
 				} else if (istHeizen) {
+					// FIX: Wenn wir von WW direkt ins Heizen wechseln (ohne Leerlauf),
+					// muss der künstliche WW-Sollwert der Takt-Optimierung zwingend auf den Standard zurückgesetzt werden!
+					if (this.lastBzVal === '1' && config.idle_defaults_aktiv === true) {
+						await this.syncConfigValue(
+							'temperature_hot_water_target',
+							config.sync_warmwater_target_temperature ?? 54,
+						);
+					}
+
 					if (config.zip_optimierung_aktiv === true) {
 						await this.syncConfigValue('zip_aktiv', config.zip_aktiv ?? 0);
 					}

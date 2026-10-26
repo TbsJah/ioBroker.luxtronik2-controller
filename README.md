@@ -97,6 +97,7 @@ You might see red error messages in the installation log related to `node-gyp`, 
 **🚀 New Features**
 
 - **PV Surplus Management (PV-Ready):** Introduced a fully integrated, automated PV surplus control system.
+- **PV Hysteresis Control:** Added a dedicated stop threshold (`pv_threshold_stop`) to the PV surplus manager. This prevents the heat pump from cancelling its own boost cycle by consuming the solar surplus (feedback loop). The system now supports independent start and stop boundaries (Schmitt trigger logic).
 - **Dynamic Setpoint Boost:** Automatically raises hot water and heating setpoints (wear-free via Modbus RAM) based on your current grid feed-in.
 - **Smart Timers:** Includes customizable start and stop delay timers to prevent compressor short-cycling during variable cloud cover.
 - **Cycle Protection:** Added a "finish cycle" safety feature. If the solar surplus drops, the adapter intelligently waits for an active heating or hot water cycle to finish before reverting the setpoints, protecting the compressor hardware.
@@ -104,6 +105,7 @@ You might see red error messages in the installation log related to `node-gyp`, 
 
 **🐛 Bugfixes & Tweaks**
 
+- **Cycle Optimization vs. PV Logic:** Fixed an edge-case bug where a temporary high target temperature from the cycle optimization module leaked into the PV surplus manager if the heat pump skipped the standby/idle state. The adapter now explicitly resets cross-cycle targets and forces the PV manager to reference the secure baseline configuration limits.
 - **Modbus Stability:** Fixed a critical race condition in the Modbus manager. Concurrent read and write operations no longer share a single global client, preventing connection collisions and adapter crashes during hybrid mode operations.
 - **API Modernization:** Replaced deprecated `setStateAsync` calls in the PV manager with the modern Promise-based `setState` API to comply with the latest ioBroker adapter guidelines and resolve TypeScript warnings.
 - **Unit Conversion:** The PV feed-in datapoint now natively supports kilowatts (kW) via a new toggle in the configuration UI, automatically converting it to Watts internally.
