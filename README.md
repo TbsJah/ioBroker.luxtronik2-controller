@@ -96,8 +96,7 @@ You might see red error messages in the installation log related to `node-gyp`, 
 //### **WORK IN PROGRESS**
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 0.21.0 (2026-10-26)
 
 **🚀 New Features**
 
@@ -149,15 +148,6 @@ You might see red error messages in the installation log related to `node-gyp`, 
 
 - **Modbus Factor Correction:** Explicitly set the scaling factor for the heating target temperature offset (Luxtronik ID 1 / Holding 23) to `10` to correctly handle and display Modbus TCP values in tenths of a degree (e.g., 5.0 °C instead of 50).
 - **Configuration UI:** Clarified the English and German labels for heating parameters (such as base point and parallel offset) in the adapter settings to prevent mapping confusion.
-
-### 0.20.0 (2026-10-22)
-
-**🚀 Features & Enhancements**
-
-- **Automatic Firmware Update Check:** Added a background service to automatically check the official AIT download portal for new heat pump firmware updates.
-- **Update Notifications:** Added a new configuration tab to set a custom cron schedule and enable optional Telegram notifications when a new firmware version is released.
-- **New Update Datapoints:** Added `firmware_available`, `firmware_update_available`, and `firmware_changelog` to the system info tree to directly expose update states and release notes in ioBroker.
-- **Manual Trigger Button:** Added a `check_firmware` button to manually initiate the update check process at any time.
 
 ## License
 

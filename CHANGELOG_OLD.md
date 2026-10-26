@@ -23,6 +23,15 @@
 ### 0.1.0 (2026-07-09)
 
 - initial release
+## 0.20.0 (2026-10-22)
+
+**🚀 Features & Enhancements**
+
+- **Automatic Firmware Update Check:** Added a background service to automatically check the official AIT download portal for new heat pump firmware updates.
+- **Update Notifications:** Added a new configuration tab to set a custom cron schedule and enable optional Telegram notifications when a new firmware version is released.
+- **New Update Datapoints:** Added `firmware_available`, `firmware_update_available`, and `firmware_changelog` to the system info tree to directly expose update states and release notes in ioBroker.
+- **Manual Trigger Button:** Added a `check_firmware` button to manually initiate the update check process at any time.
+
 ## 0.19.6 (2026-10-22)
 
 **🚀 Features & Enhancements**
