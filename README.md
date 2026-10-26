@@ -94,16 +94,9 @@ You might see red error messages in the installation log related to `node-gyp`, 
 
 [Info English](documentation/readme_en.md)
 //### **WORK IN PROGRESS**
-
-### **WORK IN PROGRESS**
+### 0.22.0 (2026-10-26)
 
 **🐛 Performance & Tweaks**
-
-## Changelog
-
-- **Modbus Queue & Socket Protection:** Added a sequential operation queue (mutex) with a 50ms socket release delay in `ModbusManager` to prevent TCP port 502 connection collisions when polling and event-driven writes occur simultaneously.
-- **COP Database Optimization:** Added an in-memory object cache (`ensuredObjects`) to `copManager`, eliminating redundant `setObjectNotExistsAsync` database calls during every polling cycle.
-- **DTA Backup & Firmware Check Improvements:** Added a 30-second request timeout (`AbortSignal.timeout`) and proper `dta_history` file naming on fallback to `backupManager`, and expanded the version regex in `updateManager` to support `F1.`, `WWB`, and `smo` firmware strings.
 
 ### 0.21.1 (2026-10-26)
 
@@ -146,20 +139,6 @@ You might see red error messages in the installation log related to `node-gyp`, 
 **🔧 Maintenance & Compatibility**
 
 - **Node.js Requirement:** Updated minimum Node.js requirement to `>= 22` in `package.json` and `io-package.json` to meet current adapter standards.
-
-### 0.20.2 (2026-10-24)
-
-**🔧 Maintenance & Compatibility**
-
-- **Repository Checker Fixes:** Addressed multiple warnings from the ioBroker repository checker.
-- **Node.js Requirement:** Updated minimum Node.js requirement to `>= 22` in `package.json` and `io-package.json` to meet current adapter standards.
-- **UI Layout:** Added missing responsive size attributes (`xs`, `sm`, `md`, `lg`, `xl`) to elements in the new updates configuration tab.
-- **Translations:** Added missing i18n translations for all supported languages in the configuration dropdown menus (COP sources and ZIP control mode).
-- **Metadata:** Removed non-existent version entries from the `news` section in `io-package.json`.
-
-**✨ Features & Enhancements**
-
-- **Notification Center:** Introduced a dedicated notification category (`lwpSystem`) for firmware updates and system info to cleanly separate them from critical heat pump errors in the ioBroker UI.
 
 ## License
 

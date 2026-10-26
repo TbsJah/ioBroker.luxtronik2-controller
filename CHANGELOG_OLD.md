@@ -23,6 +23,20 @@
 ### 0.1.0 (2026-07-09)
 
 - initial release
+## 0.20.2 (2026-10-24)
+
+**🔧 Maintenance & Compatibility**
+
+- **Repository Checker Fixes:** Addressed multiple warnings from the ioBroker repository checker.
+- **Node.js Requirement:** Updated minimum Node.js requirement to `>= 22` in `package.json` and `io-package.json` to meet current adapter standards.
+- **UI Layout:** Added missing responsive size attributes (`xs`, `sm`, `md`, `lg`, `xl`) to elements in the new updates configuration tab.
+- **Translations:** Added missing i18n translations for all supported languages in the configuration dropdown menus (COP sources and ZIP control mode).
+- **Metadata:** Removed non-existent version entries from the `news` section in `io-package.json`.
+
+**✨ Features & Enhancements**
+
+- **Notification Center:** Introduced a dedicated notification category (`lwpSystem`) for firmware updates and system info to cleanly separate them from critical heat pump errors in the ioBroker UI.
+
 ## 0.20.1 (2026-10-22)
 
 **🐛 Bugfixes & Tweaks**
