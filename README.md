@@ -96,8 +96,7 @@ You might see red error messages in the installation log related to `node-gyp`, 
 //### **WORK IN PROGRESS**
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 0.22.1 (2026-10-28)
 
 **🔧 Maintenance & Compatibility**
 
@@ -143,12 +142,6 @@ You might see red error messages in the installation log related to `node-gyp`, 
 - **Admin UI Polish:** Replaced HTML-based information blocks in the configuration UI with native ioBroker JSON components to bypass React XSS-filtering issues and ensure clean rendering.
 
 ### 0.20.4 (2026-10-24)
-
-**🔧 Maintenance & Compatibility**
-
-- **Node.js Requirement:** Updated minimum Node.js requirement to `>= 22` in `package.json` and `io-package.json` to meet current adapter standards.
-
-### 0.20.3 (2026-10-24)
 
 **🔧 Maintenance & Compatibility**
 

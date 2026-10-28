@@ -23,6 +23,12 @@
 ### 0.1.0 (2026-07-09)
 
 - initial release
+## 0.20.3 (2026-10-24)
+
+**🔧 Maintenance & Compatibility**
+
+- **Node.js Requirement:** Updated minimum Node.js requirement to `>= 22` in `package.json` and `io-package.json` to meet current adapter standards.
+
 ## 0.20.2 (2026-10-24)
 
 **🔧 Maintenance & Compatibility**
