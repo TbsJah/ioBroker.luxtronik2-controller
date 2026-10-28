@@ -810,10 +810,7 @@
 						"fusspunkt": "${data.fusspunkt}",
 						"endpunkt": "${data.endpunkt}"
 					},
-					"alsoDependsOn": [
-						"fusspunkt",
-						"endpunkt"
-					],
+					"alsoDependsOn": ["fusspunkt", "endpunkt"],
 					"style": {
 						"maxWidth": "800px",
 						"marginTop": "20px",
@@ -901,14 +898,32 @@
 						{
 							"label": {
 								"en": "Internal (Luxtronik estimates)",
-								"de": "Intern (Luxtronik Schätzwerte)"
+								"de": "Intern (Luxtronik Schätzwerte)",
+								"ru": "Внутренний (оценки Luxtronik)",
+								"pt": "Interno (estimativas Luxtronik)",
+								"nl": "Intern (Luxtronik schattingen)",
+								"fr": "Interne (estimations Luxtronik)",
+								"it": "Interno (stime Luxtronik)",
+								"es": "Interno (estimaciones Luxtronik)",
+								"pl": "Wewnętrzne (szacunki Luxtronik)",
+								"uk": "Внутрішній (оцінки Luxtronik)",
+								"zh-cn": "内部 (Luxtronik 估计值)"
 							},
 							"value": "internal"
 						},
 						{
 							"label": {
 								"en": "External Object ID (e.g. Shelly)",
-								"de": "Externe Objekt-ID (z.B. Shelly)"
+								"de": "Externe Objekt-ID (z.B. Shelly)",
+								"ru": "Внешний Object ID (например, Shelly)",
+								"pt": "ID do objeto externo (ex. Shelly)",
+								"nl": "Externe Object-ID (bijv. Shelly)",
+								"fr": "ID d'objet externe (ex. Shelly)",
+								"it": "ID oggetto esterno (es. Shelly)",
+								"es": "ID de objeto externo (ej. Shelly)",
+								"pl": "Zewnętrzne ID obiektu (np. Shelly)",
+								"uk": "Зовнішній Object ID (наприклад, Shelly)",
+								"zh-cn": "外部对象 ID (例如 Shelly)"
 							},
 							"value": "external"
 						}
@@ -960,14 +975,32 @@
 						{
 							"label": {
 								"en": "Internal (Luxtronik meters)",
-								"de": "Intern (Luxtronik Zähler)"
+								"de": "Intern (Luxtronik Zähler)",
+								"ru": "Внутренний (счетчики Luxtronik)",
+								"pt": "Interno (medidores Luxtronik)",
+								"nl": "Intern (Luxtronik meters)",
+								"fr": "Interne (compteurs Luxtronik)",
+								"it": "Interno (contatori Luxtronik)",
+								"es": "Interno (medidores Luxtronik)",
+								"pl": "Wewnętrzne (liczniki Luxtronik)",
+								"uk": "Внутрішній (лічильники Luxtronik)",
+								"zh-cn": "内部 (Luxtronik 仪表)"
 							},
 							"value": "internal"
 						},
 						{
 							"label": {
 								"en": "External Object ID (e.g. M-Bus meter)",
-								"de": "Externe Objekt-ID (z.B. M-Bus Zähler)"
+								"de": "Externe Objekt-ID (z.B. M-Bus Zähler)",
+								"ru": "Внешний Object ID (например, счетчик M-Bus)",
+								"pt": "ID do objeto externo (ex. medidor M-Bus)",
+								"nl": "Externe Object-ID (bijv. M-Bus meter)",
+								"fr": "ID d'objet externe (ex. compteur M-Bus)",
+								"it": "ID oggetto esterno (es. contatore M-Bus)",
+								"es": "ID de objeto externo (ej. medidor M-Bus)",
+								"pl": "Zewnętrzne ID obiektu (np. licznik M-Bus)",
+								"uk": "Зовнішній Object ID (наприклад, лічильник M-Bus)",
+								"zh-cn": "外部对象 ID (例如 M-Bus 仪表)"
 							},
 							"value": "external"
 						}
@@ -1731,14 +1764,32 @@
 						{
 							"label": {
 								"en": "Negative (e.g. -2500) = Feed-in",
-								"de": "Negativ (z.B. -2500) = Einspeisung"
+								"de": "Negativ (z.B. -2500) = Einspeisung",
+								"ru": "Отрицательный (например, -2500) = подача",
+								"pt": "Negativo (ex. -2500) = injeção",
+								"nl": "Negatief (bijv. -2500) = teruglevering",
+								"fr": "Négatif (ex. -2500) = injection",
+								"it": "Negativo (es. -2500) = immissione",
+								"es": "Negativo (ej. -2500) = inyección",
+								"pl": "Ujemny (np. -2500) = wprowadzanie",
+								"uk": "Негативний (наприклад, -2500) = подача",
+								"zh-cn": "负值 (例如 -2500) = 馈入"
 							},
 							"value": "negative"
 						},
 						{
 							"label": {
 								"en": "Positive (e.g. 2500) = Feed-in",
-								"de": "Positiv (z.B. 2500) = Einspeisung"
+								"de": "Positiv (z.B. 2500) = Einspeisung",
+								"ru": "Положительный (например, 2500) = подача",
+								"pt": "Positivo (ex. 2500) = injeção",
+								"nl": "Positief (bijv. 2500) = teruglevering",
+								"fr": "Positif (ex. 2500) = injection",
+								"it": "Positivo (es. 2500) = immissione",
+								"es": "Positivo (ej. 2500) = inyección",
+								"pl": "Dodatni (np. 2500) = wprowadzanie",
+								"uk": "Позитивний (наприклад, 2500) = подача",
+								"zh-cn": "正值 (例如 2500) = 馈入"
 							},
 							"value": "positive"
 						}
@@ -1813,14 +1864,32 @@
 						{
 							"label": {
 								"en": "Positive (e.g. 1500) = Charging",
-								"de": "Positiv (z.B. 1500) = Laden"
+								"de": "Positiv (z.B. 1500) = Laden",
+								"ru": "Положительный (например, 1500) = Зарядка",
+								"pt": "Positivo (ex. 1500) = Carregando",
+								"nl": "Positief (bijv. 1500) = Opladen",
+								"fr": "Positif (ex. 1500) = Charge",
+								"it": "Positivo (es. 1500) = In carica",
+								"es": "Positivo (ej. 1500) = Cargando",
+								"pl": "Dodatni (np. 1500) = Ładowanie",
+								"uk": "Позитивний (наприклад, 1500) = Заряджання",
+								"zh-cn": "正值 (例如 1500) = 充电"
 							},
 							"value": "positive"
 						},
 						{
 							"label": {
 								"en": "Negative (e.g. -1500) = Charging",
-								"de": "Negativ (z.B. -1500) = Laden"
+								"de": "Negativ (z.B. -1500) = Laden",
+								"ru": "Отрицательный (например, -1500) = Зарядка",
+								"pt": "Negativo (ex. -1500) = Carregando",
+								"nl": "Negatief (bijv. -1500) = Opladen",
+								"fr": "Négatif (ex. -1500) = Charge",
+								"it": "Negativo (es. -1500) = In carica",
+								"es": "Negativo (ej. -1500) = Cargando",
+								"pl": "Ujemny (np. -1500) = Ładowanie",
+								"uk": "Негативний (наприклад, -1500) = Заряджання",
+								"zh-cn": "负值 (例如 -1500) = 充电"
 							},
 							"value": "negative"
 						}
@@ -1919,21 +1988,48 @@
 						{
 							"label": {
 								"en": "Simultaneous (Default)",
-								"de": "Gleichzeitig (Standard)"
+								"de": "Gleichzeitig (Standard)",
+								"ru": "Одновременно (по умолчанию)",
+								"pt": "Simultâneo (Padrão)",
+								"nl": "Gelijktijdig (Standaard)",
+								"fr": "Simultané (Par défaut)",
+								"it": "Simultaneo (Predefinito)",
+								"es": "Simultáneo (Por defecto)",
+								"pl": "Jednocześnie (Domyślnie)",
+								"uk": "Одночасно (За замовчуванням)",
+								"zh-cn": "同时 (默认)"
 							},
 							"value": "both"
 						},
 						{
 							"label": {
 								"en": "Hot Water first, then Heating",
-								"de": "Warmwasser zuerst, dann Heizen"
+								"de": "Warmwasser zuerst, dann Heizen",
+								"ru": "Сначала горячая вода, затем отопление",
+								"pt": "Água Quente primeiro, depois Aquecimento",
+								"nl": "Eerst warm water, dan verwarming",
+								"fr": "Eau chaude d'abord, puis chauffage",
+								"it": "Prima Acqua Calda, poi Riscaldamento",
+								"es": "Primero Agua Caliente, luego Calefacción",
+								"pl": "Najpierw ciepła woda, potem ogrzewanie",
+								"uk": "Спочатку гаряча вода, потім опалення",
+								"zh-cn": "先热水，后加热"
 							},
 							"value": "ww"
 						},
 						{
 							"label": {
 								"en": "Heating first, then Hot Water",
-								"de": "Heizen zuerst, dann Warmwasser"
+								"de": "Heizen zuerst, dann Warmwasser",
+								"ru": "Сначала отопление, затем горячая вода",
+								"pt": "Aquecimento primeiro, depois Água Quente",
+								"nl": "Eerst verwarming, dan warm water",
+								"fr": "Chauffage d'abord, puis eau chaude",
+								"it": "Prima Riscaldamento, poi Acqua Calda",
+								"es": "Primero Calefacción, luego Agua Caliente",
+								"pl": "Najpierw ogrzewanie, potem ciepła woda",
+								"uk": "Спочатку опалення, потім гаряча вода",
+								"zh-cn": "先加热，后热水"
 							},
 							"value": "hz"
 						}

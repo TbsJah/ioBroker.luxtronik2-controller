@@ -95,6 +95,15 @@ You might see red error messages in the installation log related to `node-gyp`, 
 [Info English](documentation/readme_en.md)
 //### **WORK IN PROGRESS**
 
+## Changelog
+
+### **WORK IN PROGRESS**
+
+**🔧 Maintenance & Compatibility**
+
+- **Repository Compliance:** Added missing multi-language translations (i18n) for all configuration dropdown menus (e.g. COP sources, PV modes) to meet strict ioBroker stable repository requirements.
+- **Cleanup:** Removed unpublished ghost versions from the `io-package.json` news section and fixed markdown formatting for the changelog header in the README.
+
 ### 0.22.0 (2026-10-26)
 
 **🐛 Performance & Tweaks**
