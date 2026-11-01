@@ -96,8 +96,7 @@ You might see red error messages in the installation log related to `node-gyp`, 
 //### **WORK IN PROGRESS**
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 0.22.3 (2026-11-01)
 
 - **Notifications & Alarming:**
     - Fixed an initialization bug where `lastKnownErrorTimestamp` and `lastKnownOutageTimestamp` were not set on adapter startup if the history remained unchanged, which previously caused the first genuine error or outage after a restart to be silently ignored.
@@ -167,26 +166,6 @@ You might see red error messages in the installation log related to `node-gyp`, 
 - **ZIP Controller Timer Fix:** Fixed a bug in `zipManager` (internal controller mode) where hot water timer slots (`WW_MoSo_...`) were backed up and overwritten instead of the circulation pump timer slots (`Zirkulation_MoSo_...`), and improved time string restoration.
 - **COP Calculation Accuracy:** Fixed a UTC timezone offset in the daily rollover check so COP snapshots occur accurately at local midnight (00:00). Included defrosting cycles (`WP_BZ_akt = 4`) in the heating COP bucket and added clamping against negative deltas if external energy meters are reset.
 - **Object Management & Virtual States:** Removed a redundant loop in `onReady` that recreated disabled virtual datapoints on startup, and fixed `PREFIX_MAPPING` for weekend timer tables (`SaSo`) to properly reference the `52SatSun` configuration flags.
-
-### 0.21.0 (2026-10-26)
-
-**🚀 New Features**
-
-- **PV Surplus Management (PV-Ready):** Introduced a fully integrated, automated PV surplus control system.
-- **PV Hysteresis Control:** Added a dedicated stop threshold (`pv_threshold_stop`) to the PV surplus manager. This prevents the heat pump from cancelling its own boost cycle by consuming the solar surplus (feedback loop). The system now supports independent start and stop boundaries (Schmitt trigger logic).
-- **Dynamic Setpoint Boost:** Automatically raises hot water and heating setpoints (wear-free via Modbus RAM) based on your current grid feed-in.
-- **Smart Timers:** Includes customizable start and stop delay timers to prevent compressor short-cycling during variable cloud cover.
-- **Cycle Protection:** Added a "finish cycle" safety feature. If the solar surplus drops, the adapter intelligently waits for an active heating or hot water cycle to finish before reverting the setpoints, protecting the compressor hardware.
-- **PV Telemetry:** Added three new virtual datapoints under `Information.17_PV_Surplus` (`pv_boost_active`, `pv_boost_active_since`, and `pv_boost_last_activation`) to make the current surplus control status transparently available for external ioBroker visualizations.
-- **Battery Prioritization (PV):** Added an optional feature to include your home battery's charging power into the PV surplus calculation. This allows you to treat the heat pump as the primary thermal battery, intercepting the solar power to heat up the house or hot water _before_ it flows into your chemical battery.
-
-**🐛 Bugfixes & Tweaks**
-
-- **Cycle Optimization vs. PV Logic:** Fixed an edge-case bug where a temporary high target temperature from the cycle optimization module leaked into the PV surplus manager if the heat pump skipped the standby/idle state. The adapter now explicitly resets cross-cycle targets and forces the PV manager to reference the secure baseline configuration limits.
-- **Modbus Stability:** Fixed a critical race condition in the Modbus manager. Concurrent read and write operations no longer share a single global client, preventing connection collisions and adapter crashes during hybrid mode operations.
-- **API Modernization:** Replaced deprecated `setStateAsync` calls in the PV manager with the modern Promise-based `setState` API to comply with the latest ioBroker adapter guidelines and resolve TypeScript warnings.
-- **Unit Conversion:** The PV feed-in datapoint now natively supports kilowatts (kW) via a new toggle in the configuration UI, automatically converting it to Watts internally.
-- **Admin UI Polish:** Replaced HTML-based information blocks in the configuration UI with native ioBroker JSON components to bypass React XSS-filtering issues and ensure clean rendering.
 
 ## License
 
