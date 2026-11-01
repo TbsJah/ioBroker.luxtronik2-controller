@@ -39,6 +39,16 @@ let currentGridSurplusW = 0;
 let currentBatteryChargeW = 0;
 let originalWw = null;
 let originalHz = null;
+function parseConfigFloat(val, fallback = 0) {
+  if (typeof val === "number" && !isNaN(val)) {
+    return val;
+  }
+  if (typeof val === "string" && val.trim() !== "") {
+    const parsed = parseFloat(val.replace(",", "."));
+    return isNaN(parsed) ? fallback : parsed;
+  }
+  return fallback;
+}
 async function initPvManagement(adapter) {
   const config = adapter.config;
   if (!config.pv_active || !config.pv_feed_in_dp || config.pv_feed_in_dp.trim() === "") {
@@ -52,16 +62,24 @@ async function initPvManagement(adapter) {
     pvWaitingForCycleEnd = false;
     activeBoostWwApplied = false;
     activeBoostHzApplied = false;
+    const dpActive = (0, import_stateMapping.getDpPath)("pv_boost_active");
+    const dpSince = (0, import_stateMapping.getDpPath)("pv_boost_active_since");
+    const prevActiveState = dpActive ? await adapter.getStateAsync(dpActive) : null;
+    if ((prevActiveState == null ? void 0 : prevActiveState.val) === true || config.idle_defaults_aktiv) {
+      const defaultWw = parseConfigFloat(config.sync_warmwater_target_temperature, 54);
+      (0, import_logger.writeLog)(`[PV] Ensuring clean baseline on startup (WW: ${defaultWw}\xB0C, Heating Offset: 0K).`, "info");
+      await adapter.syncConfigValue("temperature_hot_water_target", defaultWw);
+      await adapter.syncConfigValue("heating_temperature", 0);
+    }
+    if (dpActive) {
+      await adapter.setState(dpActive, { val: false, ack: true });
+    }
+    if (dpSince) {
+      await adapter.setState(dpSince, { val: "", ack: true });
+    }
     const gridDp = config.pv_feed_in_dp.trim();
     await adapter.subscribeForeignStatesAsync(gridDp);
     (0, import_logger.writeLog)(`[PV] Initialized PV management. Subscribed to grid feed-in: ${gridDp}`, "info");
-    try {
-      const initialGridState = await adapter.getForeignStateAsync(gridDp);
-      if (initialGridState) {
-        handlePvFeedInChange(adapter, gridDp, initialGridState);
-      }
-    } catch {
-    }
     if (config.pv_battery_active && config.pv_battery_dp && config.pv_battery_dp.trim() !== "") {
       const batDp = config.pv_battery_dp.trim();
       await adapter.subscribeForeignStatesAsync(batDp);
@@ -74,13 +92,12 @@ async function initPvManagement(adapter) {
       } catch {
       }
     }
-    const dpActive = (0, import_stateMapping.getDpPath)("pv_boost_active");
-    const dpSince = (0, import_stateMapping.getDpPath)("pv_boost_active_since");
-    if (dpActive) {
-      await adapter.setState(dpActive, { val: false, ack: true });
-    }
-    if (dpSince) {
-      await adapter.setState(dpSince, { val: "", ack: true });
+    try {
+      const initialGridState = await adapter.getForeignStateAsync(gridDp);
+      if (initialGridState) {
+        handlePvFeedInChange(adapter, gridDp, initialGridState);
+      }
+    } catch {
     }
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
@@ -90,7 +107,7 @@ async function initPvManagement(adapter) {
 function handlePvFeedInChange(adapter, id, state) {
   var _a, _b;
   const config = adapter.config;
-  if (!config.pv_active || !state || typeof state.val !== "number") {
+  if (!config.pv_active || !state || state.val === null || state.val === void 0) {
     return;
   }
   const isGridDp = id === ((_a = config.pv_feed_in_dp) == null ? void 0 : _a.trim());
@@ -98,7 +115,10 @@ function handlePvFeedInChange(adapter, id, state) {
   if (!isGridDp && !isBatteryDp) {
     return;
   }
-  let rawValue = state.val;
+  let rawValue = parseConfigFloat(state.val, NaN);
+  if (isNaN(rawValue)) {
+    return;
+  }
   if (isGridDp) {
     if (config.pv_feed_in_unit === "kW") {
       rawValue *= 1e3;
@@ -119,20 +139,18 @@ function handlePvFeedInChange(adapter, id, state) {
       currentBatteryChargeW = rawValue > 0 ? rawValue : 0;
     }
   }
-  const totalSurplus = currentGridSurplusW + currentBatteryChargeW;
-  const thresholdStart = config.pv_threshold_start || 2e3;
-  const thresholdStop = config.pv_threshold_stop !== void 0 ? Number(config.pv_threshold_stop) : 0;
-  const delayStartMs = (config.pv_delay_start || 5) * 6e4;
-  const delayStopMs = (config.pv_delay_stop || 10) * 6e4;
+  const totalSurplus = Math.round(currentGridSurplusW + currentBatteryChargeW);
+  const thresholdStart = parseConfigFloat(config.pv_threshold_start, 2e3);
+  const thresholdStop = parseConfigFloat(config.pv_threshold_stop, 0);
+  const delayStartMs = parseConfigFloat(config.pv_delay_start, 5) * 6e4;
+  const delayStopMs = parseConfigFloat(config.pv_delay_stop, 10) * 6e4;
   if (totalSurplus >= thresholdStart) {
     if (pvStopTimer) {
       adapter.clearTimeout(pvStopTimer);
       pvStopTimer = void 0;
-      (0, import_logger.writeLog)(
-        `[PV] Surplus restored (${totalSurplus} W >= ${thresholdStart} W). Stop timer cancelled.`,
-        "debug"
-      );
+      (0, import_logger.writeLog)(`[PV] Surplus restored (${totalSurplus} W >= ${thresholdStart} W). Stop timer cancelled.`, "info");
     }
+    pvWaitingForCycleEnd = false;
     if (!pvIsBoostActive && !pvStartTimer) {
       (0, import_logger.writeLog)(
         `[PV] Surplus of ${totalSurplus} W exceeds start threshold (${thresholdStart} W). Starting ${config.pv_delay_start} min activation timer.`,
@@ -164,11 +182,6 @@ function handlePvFeedInChange(adapter, id, state) {
       pvStartTimer = void 0;
       (0, import_logger.writeLog)(`[PV] Surplus ${totalSurplus} W is below start threshold. Start timer cancelled.`, "debug");
     }
-    if (pvStopTimer) {
-      adapter.clearTimeout(pvStopTimer);
-      pvStopTimer = void 0;
-      (0, import_logger.writeLog)(`[PV] Surplus ${totalSurplus} W is above stop threshold. Stop timer cancelled.`, "debug");
-    }
     if (pvIsBoostActive) {
       void evaluatePvBoost(adapter);
     }
@@ -188,9 +201,7 @@ async function activateBoost(adapter) {
     let baseWw = currentWwState && typeof currentWwState.val === "number" ? currentWwState.val : 54;
     let baseHz = currentHzState && typeof currentHzState.val === "number" ? currentHzState.val : 0;
     if (config.idle_defaults_aktiv) {
-      if (config.sync_warmwater_target_temperature) {
-        baseWw = Number(config.sync_warmwater_target_temperature);
-      }
+      baseWw = parseConfigFloat(config.sync_warmwater_target_temperature, 54);
       baseHz = 0;
     }
     originalWw = baseWw;
@@ -200,7 +211,7 @@ async function activateBoost(adapter) {
     activeBoostWwApplied = false;
     activeBoostHzApplied = false;
     (0, import_logger.writeLog)("[PV] Timer finished. Activating boost logic...", "info");
-    await evaluatePvBoost(adapter);
+    await evaluatePvBoost(adapter, true);
     const nowStr = (/* @__PURE__ */ new Date()).toISOString().replace("T", " ").substring(0, 19);
     const dpActive = (0, import_stateMapping.getDpPath)("pv_boost_active");
     const dpSince = (0, import_stateMapping.getDpPath)("pv_boost_active_since");
@@ -220,21 +231,19 @@ async function activateBoost(adapter) {
   }
 }
 async function evaluatePvBoost(adapter, forceReapply = false) {
-  if (!pvIsBoostActive) {
+  if (!pvIsBoostActive || pvWaitingForCycleEnd) {
     return;
   }
   try {
     const config = adapter.config;
     const priority = config.pv_priority || "both";
-    const boostWwAmount = Number(config.pv_boost_ww) || 0;
-    const boostHzAmount = Number(config.pv_boost_hz) || 0;
+    const boostWwAmount = parseConfigFloat(config.pv_boost_ww, 0);
+    const boostHzAmount = parseConfigFloat(config.pv_boost_hz, 0);
     const wwDone = activeBoostWwApplied || boostWwAmount <= 0;
     const hzDone = activeBoostHzApplied || boostHzAmount <= 0;
     if (!forceReapply && wwDone && hzDone) {
       return;
     }
-    const wwPath = (0, import_stateMapping.getDpPath)("temperature_hot_water_target");
-    const hzPath = (0, import_stateMapping.getDpPath)("heating_temperature");
     const [wwIstState, rlIstState, rlSollState, hzHystState, hzLimitState, mittelTempState, threshLimitState] = await Promise.all([
       adapter.getStateAsync((0, import_stateMapping.getDpPath)("Wamwassertemperatur_Ist")),
       adapter.getStateAsync((0, import_stateMapping.getDpPath)("temperature_return")),
@@ -267,27 +276,27 @@ async function evaluatePvBoost(adapter, forceReapply = false) {
       shouldBoostWw = true;
       shouldBoostHz = true;
     }
-    if (shouldBoostWw && (!activeBoostWwApplied || forceReapply) && originalWw !== null && boostWwAmount > 0 && wwPath) {
-      await adapter.setState(wwPath, { val: originalWw + boostWwAmount, ack: false });
+    if (shouldBoostWw && (!activeBoostWwApplied || forceReapply) && originalWw !== null && boostWwAmount > 0) {
+      await adapter.syncConfigValue("temperature_hot_water_target", originalWw + boostWwAmount);
       activeBoostWwApplied = true;
       (0, import_logger.writeLog)(
         `[PV] Priority logic: Applying Hot Water boost (+${boostWwAmount}K -> ${originalWw + boostWwAmount}\xB0C).`,
         "info"
       );
-    } else if (!shouldBoostWw && activeBoostWwApplied && originalWw !== null && wwPath) {
-      await adapter.setState(wwPath, { val: originalWw, ack: false });
+    } else if (!shouldBoostWw && activeBoostWwApplied && originalWw !== null) {
+      await adapter.syncConfigValue("temperature_hot_water_target", originalWw);
       activeBoostWwApplied = false;
       (0, import_logger.writeLog)(`[PV] Priority logic: Target reached. Revoking Hot Water boost.`, "info");
     }
-    if (shouldBoostHz && (!activeBoostHzApplied || forceReapply) && originalHz !== null && boostHzAmount > 0 && hzPath) {
-      await adapter.setState(hzPath, { val: originalHz + boostHzAmount, ack: false });
+    if (shouldBoostHz && (!activeBoostHzApplied || forceReapply) && originalHz !== null && boostHzAmount > 0) {
+      await adapter.syncConfigValue("heating_temperature", originalHz + boostHzAmount);
       activeBoostHzApplied = true;
       (0, import_logger.writeLog)(
         `[PV] Priority logic: Applying Heating boost (+${boostHzAmount}K -> ${originalHz + boostHzAmount}K).`,
         "info"
       );
-    } else if (!shouldBoostHz && activeBoostHzApplied && originalHz !== null && hzPath) {
-      await adapter.setState(hzPath, { val: originalHz, ack: false });
+    } else if (!shouldBoostHz && activeBoostHzApplied && originalHz !== null) {
+      await adapter.syncConfigValue("heating_temperature", originalHz);
       activeBoostHzApplied = false;
       (0, import_logger.writeLog)(`[PV] Priority logic: Target reached. Revoking Heating boost.`, "info");
     }
@@ -298,15 +307,12 @@ async function evaluatePvBoost(adapter, forceReapply = false) {
 }
 async function deactivateBoost(adapter) {
   try {
-    (0, import_logger.writeLog)("[PV] Reverting values to original base targets.", "info");
-    const wwPath = (0, import_stateMapping.getDpPath)("temperature_hot_water_target");
-    const hzPath = (0, import_stateMapping.getDpPath)("heating_temperature");
-    if (originalWw !== null && wwPath) {
-      await adapter.setState(wwPath, { val: originalWw, ack: false });
-    }
-    if (originalHz !== null && hzPath) {
-      await adapter.setState(hzPath, { val: originalHz, ack: false });
-    }
+    const config = adapter.config;
+    const targetWw = originalWw != null ? originalWw : parseConfigFloat(config.sync_warmwater_target_temperature, 54);
+    const targetHz = originalHz != null ? originalHz : 0;
+    (0, import_logger.writeLog)(`[PV] Reverting values to original base targets (WW: ${targetWw}\xB0C, Hz: ${targetHz}K).`, "info");
+    await adapter.syncConfigValue("temperature_hot_water_target", targetWw);
+    await adapter.syncConfigValue("heating_temperature", targetHz);
     pvIsBoostActive = false;
     pvWaitingForCycleEnd = false;
     activeBoostWwApplied = false;
@@ -332,18 +338,33 @@ async function initiateDeactivation(adapter) {
     return;
   }
   const config = adapter.config;
+  const targetWw = originalWw != null ? originalWw : parseConfigFloat(config.sync_warmwater_target_temperature, 54);
+  const targetHz = originalHz != null ? originalHz : 0;
   (0, import_logger.writeLog)("[PV] Deactivation timer finished.", "info");
   if (config.pv_finish_cycle) {
     try {
       const bzPath = (0, import_stateMapping.getDpPath)("WP_BZ_akt");
       const bzState = bzPath ? await adapter.getStateAsync(bzPath) : null;
-      const bzVal = bzState ? Number(bzState.val) : 5;
-      if (bzVal !== 5) {
+      const bzVal = bzState && bzState.val !== null ? Number(bzState.val) : 5;
+      const runningMinutes = (bzState == null ? void 0 : bzState.lc) ? (Date.now() - bzState.lc) / 6e4 : 999;
+      if (bzVal === 0 || bzVal === 4) {
+        await adapter.syncConfigValue("temperature_hot_water_target", targetWw);
+        activeBoostWwApplied = false;
+      } else if (bzVal === 1) {
+        await adapter.syncConfigValue("heating_temperature", targetHz);
+        activeBoostHzApplied = false;
+      }
+      if (bzVal !== 5 && runningMinutes < 10) {
+        const remainingMs = Math.max(1e4, Math.ceil((10 - runningMinutes) * 6e4));
         (0, import_logger.writeLog)(
-          `[PV] Compressor is active (Status: ${bzVal}). Waiting for cycle to finish before resetting values.`,
+          `[PV] Compressor running for ${Math.round(runningMinutes)} min (< 10 min minimum runtime). Delaying final reset by ${Math.ceil(remainingMs / 6e4)} min.`,
           "info"
         );
         pvWaitingForCycleEnd = true;
+        pvStopTimer = adapter.setTimeout(() => {
+          pvStopTimer = void 0;
+          void deactivateBoost(adapter);
+        }, remainingMs);
         return;
       }
     } catch (err) {
@@ -355,12 +376,16 @@ async function initiateDeactivation(adapter) {
 }
 async function handlePvCycleCheck(adapter, newBzVal) {
   if (pvWaitingForCycleEnd && newBzVal === 5) {
+    if (pvStopTimer) {
+      adapter.clearTimeout(pvStopTimer);
+      pvStopTimer = void 0;
+    }
     (0, import_logger.writeLog)("[PV] Compressor finished cycle (Status: 5). Resetting PV boost targets now.", "info");
     await deactivateBoost(adapter);
   }
 }
 async function forceResetPvBoost(adapter) {
-  if (pvIsBoostActive) {
+  if (pvIsBoostActive || pvStartTimer || pvStopTimer) {
     (0, import_logger.writeLog)("[PV] Manual override triggered. Cancelling active PV boost...", "info");
     if (pvStartTimer) {
       adapter.clearTimeout(pvStartTimer);

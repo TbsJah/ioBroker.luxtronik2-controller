@@ -23,6 +23,24 @@ let currentBatteryChargeW = 0;
 let originalWw: number | null = null;
 let originalHz: number | null = null;
 
+/**
+ * Hilfsfunktion zum sicheren Parsen von Zahlen (fängt deutsche Kommas wie "1,5" ab).
+ *
+ * @param val - Der zu parsende Konfigurationswert.
+ * @param fallback - Fallback-Wert bei ungültiger Eingabe.
+ * @returns Die geparste Zahl.
+ */
+function parseConfigFloat(val: unknown, fallback = 0): number {
+	if (typeof val === 'number' && !isNaN(val)) {
+		return val;
+	}
+	if (typeof val === 'string' && val.trim() !== '') {
+		const parsed = parseFloat(val.replace(',', '.'));
+		return isNaN(parsed) ? fallback : parsed;
+	}
+	return fallback;
+}
+
 // =========================================================
 // MAIN LOGIC
 // =========================================================
@@ -30,7 +48,7 @@ let originalHz: number | null = null;
 /**
  * Initialisiert die PV-Überwachung, abonniert Fremd-Datenpunkte und lädt Initialwerte.
  *
- * @param adapter Die aktuelle Adapter-Instanz.
+ * @param adapter - Die aktuelle Adapter-Instanz.
  */
 export async function initPvManagement(adapter: LuxtronikAdapter): Promise<void> {
 	const config = adapter.config;
@@ -47,19 +65,31 @@ export async function initPvManagement(adapter: LuxtronikAdapter): Promise<void>
 		activeBoostWwApplied = false;
 		activeBoostHzApplied = false;
 
-		// 1. Netz-Datenpunkt abonnieren & Initialwert holen
+		const dpActive = getDpPath('pv_boost_active');
+		const dpSince = getDpPath('pv_boost_active_since');
+
+		// RECOVERY NACH ADAPTER-NEUSTART:
+		// Falls vor einem Adapter-Neustart noch ein Boost aktiv war, setzen wir die Sollwerte
+		// sauber auf die Normalwerte zurück, damit keine 60°C als Geisterwert hängen bleiben.
+		const prevActiveState = dpActive ? await adapter.getStateAsync(dpActive) : null;
+		if (prevActiveState?.val === true || config.idle_defaults_aktiv) {
+			const defaultWw = parseConfigFloat(config.sync_warmwater_target_temperature, 54);
+			writeLog(`[PV] Ensuring clean baseline on startup (WW: ${defaultWw}°C, Heating Offset: 0K).`, 'info');
+			await adapter.syncConfigValue('temperature_hot_water_target', defaultWw);
+			await adapter.syncConfigValue('heating_temperature', 0);
+		}
+
+		if (dpActive) {
+			await adapter.setState(dpActive, { val: false, ack: true });
+		}
+		if (dpSince) {
+			await adapter.setState(dpSince, { val: '', ack: true });
+		}
+
+		// 1. Netz-Datenpunkt abonnieren
 		const gridDp = config.pv_feed_in_dp.trim();
 		await adapter.subscribeForeignStatesAsync(gridDp);
 		writeLog(`[PV] Initialized PV management. Subscribed to grid feed-in: ${gridDp}`, 'info');
-
-		try {
-			const initialGridState = await adapter.getForeignStateAsync(gridDp);
-			if (initialGridState) {
-				handlePvFeedInChange(adapter, gridDp, initialGridState);
-			}
-		} catch {
-			/* ignore initial fetch error */
-		}
 
 		// 2. Batterie-Datenpunkt abonnieren & Initialwert holen (falls aktiv)
 		if (config.pv_battery_active && config.pv_battery_dp && config.pv_battery_dp.trim() !== '') {
@@ -77,14 +107,13 @@ export async function initPvManagement(adapter: LuxtronikAdapter): Promise<void>
 			}
 		}
 
-		const dpActive = getDpPath('pv_boost_active');
-		const dpSince = getDpPath('pv_boost_active_since');
-
-		if (dpActive) {
-			await adapter.setState(dpActive, { val: false, ack: true });
-		}
-		if (dpSince) {
-			await adapter.setState(dpSince, { val: '', ack: true });
+		try {
+			const initialGridState = await adapter.getForeignStateAsync(gridDp);
+			if (initialGridState) {
+				handlePvFeedInChange(adapter, gridDp, initialGridState);
+			}
+		} catch {
+			/* ignore initial fetch error */
 		}
 	} catch (err: unknown) {
 		const msg = err instanceof Error ? err.message : String(err);
@@ -95,25 +124,27 @@ export async function initPvManagement(adapter: LuxtronikAdapter): Promise<void>
 /**
  * Wird bei jeder Änderung eines Foreign-States aufgerufen. Berechnet die Summe aus Netz + Batterie.
  *
- * @param adapter Die aktuelle Adapter-Instanz.
- * @param id Die ID (OID) des geänderten Datenpunkts.
- * @param state Das neue ioBroker State-Objekt.
+ * @param adapter - Die aktuelle Adapter-Instanz.
+ * @param id - Die ID (OID) des geänderten Datenpunkts.
+ * @param state - Das neue ioBroker State-Objekt.
  */
 export function handlePvFeedInChange(adapter: LuxtronikAdapter, id: string, state: ioBroker.State): void {
 	const config = adapter.config;
-	if (!config.pv_active || !state || typeof state.val !== 'number') {
+	if (!config.pv_active || !state || state.val === null || state.val === undefined) {
 		return;
 	}
 
 	const isGridDp = id === config.pv_feed_in_dp?.trim();
 	const isBatteryDp = config.pv_battery_active && id === config.pv_battery_dp?.trim();
 
-	// Abbrechen, wenn das Event von einem anderen (irrelevanten) Fremd-Datenpunkt kommt
 	if (!isGridDp && !isBatteryDp) {
 		return;
 	}
 
-	let rawValue = state.val;
+	let rawValue = parseConfigFloat(state.val, NaN);
+	if (isNaN(rawValue)) {
+		return;
+	}
 
 	// Update Netz-Überschuss
 	if (isGridDp) {
@@ -140,22 +171,20 @@ export function handlePvFeedInChange(adapter: LuxtronikAdapter, id: string, stat
 	}
 
 	// Effektiver Gesamtüberschuss = Reale Einspeisung + Strom, der aktuell in die Batterie fließt
-	const totalSurplus = currentGridSurplusW + currentBatteryChargeW;
+	const totalSurplus = Math.round(currentGridSurplusW + currentBatteryChargeW);
 
-	const thresholdStart = config.pv_threshold_start || 2000;
-	const thresholdStop = config.pv_threshold_stop !== undefined ? Number(config.pv_threshold_stop) : 0;
-	const delayStartMs = (config.pv_delay_start || 5) * 60000;
-	const delayStopMs = (config.pv_delay_stop || 10) * 60000;
+	const thresholdStart = parseConfigFloat(config.pv_threshold_start, 2000);
+	const thresholdStop = parseConfigFloat(config.pv_threshold_stop, 0);
+	const delayStartMs = parseConfigFloat(config.pv_delay_start, 5) * 60000;
+	const delayStopMs = parseConfigFloat(config.pv_delay_stop, 10) * 60000;
 
 	if (totalSurplus >= thresholdStart) {
 		if (pvStopTimer) {
 			adapter.clearTimeout(pvStopTimer);
 			pvStopTimer = undefined;
-			writeLog(
-				`[PV] Surplus restored (${totalSurplus} W >= ${thresholdStart} W). Stop timer cancelled.`,
-				'debug',
-			);
+			writeLog(`[PV] Surplus restored (${totalSurplus} W >= ${thresholdStart} W). Stop timer cancelled.`, 'info');
 		}
+		pvWaitingForCycleEnd = false;
 
 		if (!pvIsBoostActive && !pvStartTimer) {
 			writeLog(
@@ -184,16 +213,13 @@ export function handlePvFeedInChange(adapter: LuxtronikAdapter, id: string, stat
 			pvStopTimer = adapter.setTimeout(() => initiateDeactivation(adapter), delayStopMs);
 		}
 	} else {
-		// Grauzone (Hysterese)
+		// Grauzone (zwischen thresholdStop und thresholdStart, z.B. 1 W bis 1499 W):
+		// Nur den Start-Timer abbrechen! Den pvStopTimer NICHT abbrechen, damit kurzes
+		// Ausregeln des Wechselrichters (z.B. 10 W) nicht das Abschalten verhindert.
 		if (pvStartTimer) {
 			adapter.clearTimeout(pvStartTimer);
 			pvStartTimer = undefined;
 			writeLog(`[PV] Surplus ${totalSurplus} W is below start threshold. Start timer cancelled.`, 'debug');
-		}
-		if (pvStopTimer) {
-			adapter.clearTimeout(pvStopTimer);
-			pvStopTimer = undefined;
-			writeLog(`[PV] Surplus ${totalSurplus} W is above stop threshold. Stop timer cancelled.`, 'debug');
 		}
 		if (pvIsBoostActive) {
 			void evaluatePvBoost(adapter);
@@ -204,7 +230,7 @@ export function handlePvFeedInChange(adapter: LuxtronikAdapter, id: string, stat
 /**
  * Legt die Originalwerte ab und startet den dynamischen Boost.
  *
- * @param adapter Die aktuelle Adapter-Instanz.
+ * @param adapter - Die aktuelle Adapter-Instanz.
  */
 async function activateBoost(adapter: LuxtronikAdapter): Promise<void> {
 	pvStartTimer = undefined;
@@ -214,7 +240,6 @@ async function activateBoost(adapter: LuxtronikAdapter): Promise<void> {
 
 	const config = adapter.config;
 	try {
-		// KORREKTUR: Beschreibbaren Settings-Datenpunkt verwenden!
 		const wwPath = getDpPath('temperature_hot_water_target');
 		const hzPath = getDpPath('heating_temperature');
 
@@ -225,10 +250,7 @@ async function activateBoost(adapter: LuxtronikAdapter): Promise<void> {
 		let baseHz = currentHzState && typeof currentHzState.val === 'number' ? currentHzState.val : 0;
 
 		if (config.idle_defaults_aktiv) {
-			if (config.sync_warmwater_target_temperature) {
-				baseWw = Number(config.sync_warmwater_target_temperature);
-			}
-			// KORREKTUR: Parallelverschiebung hat im Normalbetrieb die Basis 0 K (nicht config.fusspunkt!)
+			baseWw = parseConfigFloat(config.sync_warmwater_target_temperature, 54);
 			baseHz = 0;
 		}
 
@@ -240,7 +262,7 @@ async function activateBoost(adapter: LuxtronikAdapter): Promise<void> {
 		activeBoostHzApplied = false;
 
 		writeLog('[PV] Timer finished. Activating boost logic...', 'info');
-		await evaluatePvBoost(adapter);
+		await evaluatePvBoost(adapter, true);
 
 		const nowStr = new Date().toISOString().replace('T', ' ').substring(0, 19);
 		const dpActive = getDpPath('pv_boost_active');
@@ -265,11 +287,11 @@ async function activateBoost(adapter: LuxtronikAdapter): Promise<void> {
 /**
  * Evaluiert fortlaufend die Prioritäten und gibt das sekundäre Ziel frei, sobald das primäre Ziel erreicht ist.
  *
- * @param adapter Die aktuelle Adapter-Instanz.
- * @param forceReapply Erzwingt das erneute Schreiben der PV-Sollwerte (z.B. nach einem Leerlauf-Reset).
+ * @param adapter - Die aktuelle Adapter-Instanz.
+ * @param forceReapply - Erzwingt das erneute Schreiben der PV-Sollwerte (z.B. nach einem Leerlauf-Reset).
  */
 export async function evaluatePvBoost(adapter: LuxtronikAdapter, forceReapply = false): Promise<void> {
-	if (!pvIsBoostActive) {
+	if (!pvIsBoostActive || pvWaitingForCycleEnd) {
 		return;
 	}
 
@@ -277,19 +299,14 @@ export async function evaluatePvBoost(adapter: LuxtronikAdapter, forceReapply = 
 		const config = adapter.config;
 		const priority = config.pv_priority || 'both';
 
-		const boostWwAmount = Number(config.pv_boost_ww) || 0;
-		const boostHzAmount = Number(config.pv_boost_hz) || 0;
+		const boostWwAmount = parseConfigFloat(config.pv_boost_ww, 0);
+		const boostHzAmount = parseConfigFloat(config.pv_boost_hz, 0);
 
-		// OPTIMIERUNG: Wenn kein Re-Apply erzwungen wird und bereits alle gewünschten Boosts aktiv sind,
-		// sofort abbrechen -> spart tausende DB-Abfragen bei sekündlichen Smart-Meter-Updates!
 		const wwDone = activeBoostWwApplied || boostWwAmount <= 0;
 		const hzDone = activeBoostHzApplied || boostHzAmount <= 0;
 		if (!forceReapply && wwDone && hzDone) {
 			return;
 		}
-
-		const wwPath = getDpPath('temperature_hot_water_target');
-		const hzPath = getDpPath('heating_temperature');
 
 		const [wwIstState, rlIstState, rlSollState, hzHystState, hzLimitState, mittelTempState, threshLimitState] =
 			await Promise.all([
@@ -307,7 +324,6 @@ export async function evaluatePvBoost(adapter: LuxtronikAdapter, forceReapply = 
 		const rlSoll = rlSollState && typeof rlSollState.val === 'number' ? rlSollState.val : 0;
 		const hzHyst = hzHystState && typeof hzHystState.val === 'number' ? hzHystState.val : 1.5;
 
-		// Prüfen, ob die Heizung wegen aktiver Heizgrenze überhaupt laufen darf
 		const heatingBlockedByLimit =
 			Number(hzLimitState?.val) === 1 && Number(mittelTempState?.val) >= Number(threshLimitState?.val);
 
@@ -332,40 +348,28 @@ export async function evaluatePvBoost(adapter: LuxtronikAdapter, forceReapply = 
 			shouldBoostHz = true;
 		}
 
-		if (
-			shouldBoostWw &&
-			(!activeBoostWwApplied || forceReapply) &&
-			originalWw !== null &&
-			boostWwAmount > 0 &&
-			wwPath
-		) {
-			await adapter.setState(wwPath, { val: originalWw + boostWwAmount, ack: false });
+		if (shouldBoostWw && (!activeBoostWwApplied || forceReapply) && originalWw !== null && boostWwAmount > 0) {
+			await adapter.syncConfigValue('temperature_hot_water_target', originalWw + boostWwAmount);
 			activeBoostWwApplied = true;
 			writeLog(
 				`[PV] Priority logic: Applying Hot Water boost (+${boostWwAmount}K -> ${originalWw + boostWwAmount}°C).`,
 				'info',
 			);
-		} else if (!shouldBoostWw && activeBoostWwApplied && originalWw !== null && wwPath) {
-			await adapter.setState(wwPath, { val: originalWw, ack: false });
+		} else if (!shouldBoostWw && activeBoostWwApplied && originalWw !== null) {
+			await adapter.syncConfigValue('temperature_hot_water_target', originalWw);
 			activeBoostWwApplied = false;
 			writeLog(`[PV] Priority logic: Target reached. Revoking Hot Water boost.`, 'info');
 		}
 
-		if (
-			shouldBoostHz &&
-			(!activeBoostHzApplied || forceReapply) &&
-			originalHz !== null &&
-			boostHzAmount > 0 &&
-			hzPath
-		) {
-			await adapter.setState(hzPath, { val: originalHz + boostHzAmount, ack: false });
+		if (shouldBoostHz && (!activeBoostHzApplied || forceReapply) && originalHz !== null && boostHzAmount > 0) {
+			await adapter.syncConfigValue('heating_temperature', originalHz + boostHzAmount);
 			activeBoostHzApplied = true;
 			writeLog(
 				`[PV] Priority logic: Applying Heating boost (+${boostHzAmount}K -> ${originalHz + boostHzAmount}K).`,
 				'info',
 			);
-		} else if (!shouldBoostHz && activeBoostHzApplied && originalHz !== null && hzPath) {
-			await adapter.setState(hzPath, { val: originalHz, ack: false });
+		} else if (!shouldBoostHz && activeBoostHzApplied && originalHz !== null) {
+			await adapter.syncConfigValue('heating_temperature', originalHz);
 			activeBoostHzApplied = false;
 			writeLog(`[PV] Priority logic: Target reached. Revoking Heating boost.`, 'info');
 		}
@@ -378,21 +382,18 @@ export async function evaluatePvBoost(adapter: LuxtronikAdapter, forceReapply = 
 /**
  * Setzt die Werte hart auf den Ursprung zurück.
  *
- * @param adapter Die aktuelle Adapter-Instanz.
+ * @param adapter - Die aktuelle Adapter-Instanz.
  */
 async function deactivateBoost(adapter: LuxtronikAdapter): Promise<void> {
 	try {
-		writeLog('[PV] Reverting values to original base targets.', 'info');
-		// KORREKTUR: Beschreibbaren Settings-Datenpunkt verwenden!
-		const wwPath = getDpPath('temperature_hot_water_target');
-		const hzPath = getDpPath('heating_temperature');
+		const config = adapter.config;
+		const targetWw = originalWw ?? parseConfigFloat(config.sync_warmwater_target_temperature, 54);
+		const targetHz = originalHz ?? 0;
 
-		if (originalWw !== null && wwPath) {
-			await adapter.setState(wwPath, { val: originalWw, ack: false });
-		}
-		if (originalHz !== null && hzPath) {
-			await adapter.setState(hzPath, { val: originalHz, ack: false });
-		}
+		writeLog(`[PV] Reverting values to original base targets (WW: ${targetWw}°C, Hz: ${targetHz}K).`, 'info');
+
+		await adapter.syncConfigValue('temperature_hot_water_target', targetWw);
+		await adapter.syncConfigValue('heating_temperature', targetHz);
 
 		pvIsBoostActive = false;
 		pvWaitingForCycleEnd = false;
@@ -417,9 +418,11 @@ async function deactivateBoost(adapter: LuxtronikAdapter): Promise<void> {
 }
 
 /**
- * Startet den Abbruch. Prüft, ob der Verdichter-Takt noch beendet werden soll.
+ * Startet den Abbruch nach Ablauf der Ausschaltverzögerung.
+ * Setzt die Sollwerte auf Normalwerte zurück, damit ein laufender Takt nur noch bis zum Normalwert
+ * zu Ende gefahren wird (inkl. 10-Minuten-Mindestlaufzeitschutz gegen Kurztakte).
  *
- * @param adapter Die aktuelle Adapter-Instanz.
+ * @param adapter - Die aktuelle Adapter-Instanz.
  */
 async function initiateDeactivation(adapter: LuxtronikAdapter): Promise<void> {
 	pvStopTimer = undefined;
@@ -428,20 +431,41 @@ async function initiateDeactivation(adapter: LuxtronikAdapter): Promise<void> {
 	}
 
 	const config = adapter.config;
+	const targetWw = originalWw ?? parseConfigFloat(config.sync_warmwater_target_temperature, 54);
+	const targetHz = originalHz ?? 0;
+
 	writeLog('[PV] Deactivation timer finished.', 'info');
 
 	if (config.pv_finish_cycle) {
 		try {
 			const bzPath = getDpPath('WP_BZ_akt');
 			const bzState = bzPath ? await adapter.getStateAsync(bzPath) : null;
-			const bzVal = bzState ? Number(bzState.val) : 5;
+			const bzVal = bzState && bzState.val !== null ? Number(bzState.val) : 5;
+			const runningMinutes = bzState?.lc ? (Date.now() - bzState.lc) / 60000 : 999;
 
-			if (bzVal !== 5) {
+			// 1. Inaktive Betriebsart IMMER sofort auf Normalwert zurücksetzen!
+			if (bzVal === 0 || bzVal === 4) {
+				await adapter.syncConfigValue('temperature_hot_water_target', targetWw);
+				activeBoostWwApplied = false;
+			} else if (bzVal === 1) {
+				await adapter.syncConfigValue('heating_temperature', targetHz);
+				activeBoostHzApplied = false;
+			}
+
+			// 2. Falls der Verdichter gerade erst angelaufen ist (< 10 Min), warten wir exakt
+			// die restliche Zeit bis zur 10-Minuten-Mindestlaufzeit ab, bevor wir die aktive
+			// Betriebsart auf Normalwert zurücksetzen (verhindert Kurztakte).
+			if (bzVal !== 5 && runningMinutes < 10) {
+				const remainingMs = Math.max(10000, Math.ceil((10 - runningMinutes) * 60000));
 				writeLog(
-					`[PV] Compressor is active (Status: ${bzVal}). Waiting for cycle to finish before resetting values.`,
+					`[PV] Compressor running for ${Math.round(runningMinutes)} min (< 10 min minimum runtime). Delaying final reset by ${Math.ceil(remainingMs / 60000)} min.`,
 					'info',
 				);
 				pvWaitingForCycleEnd = true;
+				pvStopTimer = adapter.setTimeout(() => {
+					pvStopTimer = undefined;
+					void deactivateBoost(adapter);
+				}, remainingMs);
 				return;
 			}
 		} catch (err: unknown) {
@@ -456,11 +480,15 @@ async function initiateDeactivation(adapter: LuxtronikAdapter): Promise<void> {
 /**
  * Überwacht den Betriebszustand (WP_BZ_akt). Wird aus der main.ts aufgerufen.
  *
- * @param adapter Die aktuelle Adapter-Instanz.
- * @param newBzVal Der neue Wert von WP_BZ_akt.
+ * @param adapter - Die aktuelle Adapter-Instanz.
+ * @param newBzVal - Der neue Wert von WP_BZ_akt.
  */
 export async function handlePvCycleCheck(adapter: LuxtronikAdapter, newBzVal: number): Promise<void> {
 	if (pvWaitingForCycleEnd && newBzVal === 5) {
+		if (pvStopTimer) {
+			adapter.clearTimeout(pvStopTimer);
+			pvStopTimer = undefined;
+		}
 		writeLog('[PV] Compressor finished cycle (Status: 5). Resetting PV boost targets now.', 'info');
 		await deactivateBoost(adapter);
 	}
@@ -469,13 +497,12 @@ export async function handlePvCycleCheck(adapter: LuxtronikAdapter, newBzVal: nu
 /**
  * Bricht den PV-Boost manuell ab (z.B. wenn der Benutzer den Reset-Button drückt).
  *
- * @param adapter Die aktuelle Adapter-Instanz.
+ * @param adapter - Die aktuelle Adapter-Instanz.
  */
 export async function forceResetPvBoost(adapter: LuxtronikAdapter): Promise<void> {
-	if (pvIsBoostActive) {
+	if (pvIsBoostActive || pvStartTimer || pvStopTimer) {
 		writeLog('[PV] Manual override triggered. Cancelling active PV boost...', 'info');
 
-		// Laufende Timer sofort aufräumen
 		if (pvStartTimer) {
 			adapter.clearTimeout(pvStartTimer);
 			pvStartTimer = undefined;
