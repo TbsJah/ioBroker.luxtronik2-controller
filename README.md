@@ -96,8 +96,7 @@ You might see red error messages in the installation log related to `node-gyp`, 
 //### **WORK IN PROGRESS**
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 0.22.2 (2026-11-01)
 
 **🐛 Bugfixes & Tweaks**
 
@@ -173,12 +172,6 @@ You might see red error messages in the installation log related to `node-gyp`, 
 - **API Modernization:** Replaced deprecated `setStateAsync` calls in the PV manager with the modern Promise-based `setState` API to comply with the latest ioBroker adapter guidelines and resolve TypeScript warnings.
 - **Unit Conversion:** The PV feed-in datapoint now natively supports kilowatts (kW) via a new toggle in the configuration UI, automatically converting it to Watts internally.
 - **Admin UI Polish:** Replaced HTML-based information blocks in the configuration UI with native ioBroker JSON components to bypass React XSS-filtering issues and ensure clean rendering.
-
-### 0.20.4 (2026-10-24)
-
-**🔧 Maintenance & Compatibility**
-
-- **Node.js Requirement:** Updated minimum Node.js requirement to `>= 22` in `package.json` and `io-package.json` to meet current adapter standards.
 
 ## License
 
