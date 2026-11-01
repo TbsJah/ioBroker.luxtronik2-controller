@@ -52,7 +52,7 @@ export async function writePumpSafe(adapter: LuxtronikAdapter, cmd: string | num
 	const paramId = typeof cmd === 'string' ? parseInt(cmd, 10) : cmd;
 	// WICHTIG: Das ist der noch fehlende Teil von Schritt 2!
 	// Zwingendes Runden: Luxtronik V1.x stürzt bei Fließkommazahlen ab.
-	let value = typeof val === 'string' ? parseInt(val, 10) : typeof val === 'number' ? Math.round(val) : val;
+	let value = typeof val === 'string' ? Math.round(Number(val)) : typeof val === 'number' ? Math.round(val) : val;
 
 	if (typeof value === 'boolean') {
 		value = value ? 1 : 0;
@@ -330,8 +330,8 @@ function readAllRawTcp(adapter: LuxtronikAdapter, command: number): Promise<numb
 				finish(err instanceof Error ? err : new Error(String(err)));
 			}
 		});
-
 		client.on('error', (err: Error) => finish(err));
+		client.on('close', () => finish(new Error('TCP connection closed unexpectedly before response completed.')));
 	});
 }
 
@@ -406,6 +406,7 @@ function writeRawParameterTcp(adapter: LuxtronikAdapter, paramId: number, value:
 		});
 
 		client.on('error', (err: Error) => finish(err));
+		client.on('close', () => finish(new Error('TCP connection closed unexpectedly before response completed.')));
 	});
 }
 
@@ -456,10 +457,12 @@ export async function dumpAllRawToLog(adapter: LuxtronikAdapter): Promise<void> 
  * @returns A promise that completes once the queue executes this task.
  */
 export async function queueWrite(adapter: LuxtronikAdapter, cmd: string | number, val: any): Promise<void> {
-	// 1. Firmware-Schutzschild: Version aus ioBroker auslesen
-	const fwState = await adapter.getStateAsync('Information.12_SystemInfo.firmware');
-	const fw = typeof fwState?.val === 'string' ? fwState.val : '';
-
+	// 1. Firmware-Schutzschild direkt aus dem RAM-Cache (funktioniert auch bei deaktiviertem Datenpunkt)
+	let fw = adapter.systemFirmware || '';
+	if (!fw) {
+		const fwState = await adapter.getStateAsync('Information.12_SystemInfo.firmware');
+		fw = typeof fwState?.val === 'string' ? fwState.val : '';
+	}
 	// 2. Prüfen, ob es sich um eine der fehlerhaften .90 Versionen handelt
 	if (fw.includes('1.90') || fw.includes('2.90')) {
 		adapter.log.warn(

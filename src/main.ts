@@ -314,27 +314,6 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 			);
 		}
 
-		for (const [key, stateDef] of Object.entries(STATE_MAPPING as Record<string, any>)) {
-			// Wenn der Punkt als virtuell markiert ist, legen wir ihn direkt beim Start an
-			if (stateDef.isVirtual) {
-				await this.setObjectNotExistsAsync(`${stateDef.folder}.${key}`, {
-					type: 'state',
-					common: {
-						name: stateDef.name,
-						type: stateDef.type as ioBroker.CommonType,
-						role: stateDef.role,
-						read: true,
-						write: stateDef.write || false,
-						def: stateDef.def !== undefined ? stateDef.def : null,
-					},
-					native: {
-						luxWriteId: stateDef.luxWriteId || null,
-						dataSource: stateDef.dataSource || null,
-					},
-				});
-			}
-		}
-
 		// --- FIRMWARE UPDATE TIMER ---
 		if (config.update_check_active === true) {
 			// Erste Prüfung 15 Sekunden nach Adapter-Start (damit die aktuelle Firmware bereits gelesen wurde)
@@ -419,18 +398,26 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 			);
 
 			if ((definition.write === true || isModbusEnabled) && !definition.isVirtual && definition.luxWriteId) {
+				let appliedFactor = definition.factor;
+				if (
+					mappingKey === 'heating_system_circ_pump_voltage_nominal' ||
+					mappingKey === 'heating_system_circ_pump_voltage_minimal'
+				) {
+					appliedFactor = config.hup_voltage_factor !== undefined ? Number(config.hup_voltage_factor) : 100;
+				}
+
 				let valueToWrite: any = val;
 				if (typeof valueToWrite === 'boolean') {
 					valueToWrite = valueToWrite ? 1 : 0;
-				} else if (definition.factor && typeof val === 'number') {
-					valueToWrite = val * definition.factor;
+				} else if (appliedFactor && typeof val === 'number') {
+					valueToWrite = val * appliedFactor;
 				}
 
 				const isRawWrite =
 					definition.dataSource === 'raw_parameter' ||
 					definition.dataSource === 'raw_value' ||
 					(!definition.dataSource && /^\d+$/.test(definition.luxWriteId || ''));
-				if (isRawWrite && definition.unit === '°C' && typeof val === 'number' && !definition.factor) {
+				if (isRawWrite && definition.unit === '°C' && typeof val === 'number' && !appliedFactor) {
 					valueToWrite = val * 10;
 				}
 
@@ -563,7 +550,7 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 			if (bzVal !== this.lastBzVal) {
 				if (istLeerlauf) {
 					// FIX: Leerlauf-Vorgaben nur setzen, wenn PV-Boost NICHT aktiv ist
-					if (config.idle_defaults_aktiv === true && !pvIsBoostActive) {
+					if (config.idle_defaults_aktiv === true) {
 						await this.setIdleDefaults();
 					}
 				} else if (istHeizen) {
@@ -682,7 +669,7 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 			// 2. CONTINUOUS IN-SERVICE TELEMETRY EVALUATION
 			// =========================================================
 			if (istHeizen) {
-				if (isRegelungAktiv && aelterAls10 && vd1) {
+				if (aelterAls10 && vd1) {
 					const fusspunkt = (await this.getStateAsync(getDpPath('heating_curve_parallel_offset')))?.val;
 					if (fusspunkt === 35) {
 						const fallbackFusspunkt = config.fusspunkt ?? 21.7;
@@ -713,7 +700,7 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 					}
 
 					// Warmwassertakt erzwingen (NUR wenn kein PV-Boost aktiv ist!)
-					if (!pvIsBoostActive && wwSoll - wwIst > 2 && ruecklauf >= ruecklaufSoll + heizenHysterese - 0.1) {
+					if (wwSoll - wwIst > 2 && ruecklauf >= ruecklaufSoll + heizenHysterese - 0.1) {
 						// Neuen Sollwert berechnen: Ist-Wert + aktuelle Hysterese + 1.5K Puffer
 						let forceSoll = wwIst + wwHysterese + 1.5;
 
@@ -746,7 +733,7 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 					}
 				}
 
-				if (isRegelungAktiv && !pvIsBoostActive) {
+				if (isRegelungAktiv) {
 					if (wwSoll - wwIst >= wwHysterese - 1.5 && ruecklauf <= ruecklaufSoll && isHeatingAllowedByLimit) {
 						await this.syncConfigValue('heating_curve_parallel_offset', 35);
 					}
@@ -975,8 +962,8 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 			}
 
 			await Promise.all(statePromises);
-			await calculateTotalThermalEnergy(this);
-			await calculateTotalEnergy(this);
+			await calculateTotalThermalEnergy(this, rawValues);
+			await calculateTotalEnergy(this, rawValues);
 
 			// ----------------------------------------------------
 			// Fehler-Historie abarbeiten & Alarmieren
@@ -1250,6 +1237,14 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 
 			await this.setState(relativeId, { val: state.val, ack: true });
 
+			let appliedFactor = definition.factor;
+			if (
+				mappingKey === 'heating_system_circ_pump_voltage_nominal' ||
+				mappingKey === 'heating_system_circ_pump_voltage_minimal'
+			) {
+				appliedFactor = config.hup_voltage_factor !== undefined ? Number(config.hup_voltage_factor) : 100;
+			}
+
 			let valueToWrite: any = state.val;
 
 			if (typeof valueToWrite === 'boolean') {
@@ -1260,11 +1255,11 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 				definition.role === 'value.time'
 			) {
 				valueToWrite = timeStringToSeconds(state.val);
-			} else if (definition.factor && typeof state.val === 'number') {
-				valueToWrite = state.val * definition.factor;
+			} else if (appliedFactor && typeof state.val === 'number') {
+				valueToWrite = state.val * appliedFactor;
 			}
 
-			if (definition.unit === '°C' && typeof state.val === 'number' && !definition.factor) {
+			if (definition.unit === '°C' && typeof state.val === 'number' && !appliedFactor) {
 				valueToWrite = state.val * 10;
 			}
 

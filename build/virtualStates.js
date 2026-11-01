@@ -33,15 +33,23 @@ var import_codes = require("./codes");
 var import_logger = require("./logger");
 var import_objectManager = require("./objectManager");
 var import_stateMapping = require("./stateMapping");
-async function calculateSum(adapter, sourceId1, sourceId2, targetId, logName) {
+async function calculateSum(adapter, sourceId1, sourceId2, targetId, logName, rawValues, rawIndex1, rawIndex2, factor = 0.1) {
   try {
     const [state1, state2, currentState] = await Promise.all([
       adapter.getStateAsync(sourceId1),
       adapter.getStateAsync(sourceId2),
       adapter.getStateAsync(targetId)
     ]);
-    const val1 = state1 && typeof state1.val === "number" ? state1.val : 0;
-    const val2 = state2 && typeof state2.val === "number" ? state2.val : 0;
+    let val1 = state1 && typeof state1.val === "number" ? state1.val : 0;
+    let val2 = state2 && typeof state2.val === "number" ? state2.val : 0;
+    if ((val1 === 0 || val2 === 0) && rawValues && rawIndex1 !== void 0 && rawIndex2 !== void 0) {
+      const rawVal1 = rawValues[rawIndex1];
+      const rawVal2 = rawValues[rawIndex2];
+      if (rawVal1 !== void 0 && rawVal2 !== void 0) {
+        val1 = rawVal1 * factor;
+        val2 = rawVal2 * factor;
+      }
+    }
     const newSum = val1 + val2;
     const currentVal = currentState && typeof currentState.val === "number" ? currentState.val : 0;
     if (newSum >= currentVal) {
@@ -52,22 +60,30 @@ async function calculateSum(adapter, sourceId1, sourceId2, targetId, logName) {
     (0, import_logger.writeLog)(`Error calculating ${logName}: ${msg}`, "error");
   }
 }
-async function calculateTotalThermalEnergy(adapter) {
+async function calculateTotalThermalEnergy(adapter, rawValues) {
   await calculateSum(
     adapter,
     (0, import_stateMapping.getDpPath)("thermalenergy_heating"),
     (0, import_stateMapping.getDpPath)("thermalenergy_warmwater"),
     (0, import_stateMapping.getDpPath)("thermalenergy_total"),
-    "Total Thermal Energy"
+    "Total Thermal Energy",
+    rawValues,
+    151,
+    152,
+    0.1
   );
 }
-async function calculateTotalEnergy(adapter) {
+async function calculateTotalEnergy(adapter, rawValues) {
   await calculateSum(
     adapter,
     (0, import_stateMapping.getDpPath)("energy_heating"),
     (0, import_stateMapping.getDpPath)("energy_warmwater"),
     (0, import_stateMapping.getDpPath)("energy_total"),
-    "Total Energy"
+    "Total Energy",
+    rawValues,
+    156,
+    157,
+    0.1
   );
 }
 async function updateHistory(adapter, rawValues, timeStartIndex, codeStartIndex, targetStateId, fallbackPrefix, codeMap) {
@@ -371,7 +387,7 @@ async function updateTimerTables(adapter) {
       }
     };
     const configs = [
-      { target: "heatingOperationTimerTableWeek", prefix: "HZ_MoSo_", end: "End1", slots: 3 },
+      { target: "heatingOperationTimerTableWeek", prefix: "HZ_MoSo_", end: "End", slots: 3 },
       { target: "heatingOperationTimerTable52MonFri", prefix: "HZ_MoFr_", end: "Ende", slots: 3 },
       { target: "heatingOperationTimerTable52SatSun", prefix: "HZ_SaSo_", end: "Ende", slots: 3 },
       { target: "heatingOperationTimerTableDayMonday", prefix: "HZ_Montag_", end: "Ende", slots: 3 },

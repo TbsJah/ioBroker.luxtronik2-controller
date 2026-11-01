@@ -219,7 +219,7 @@ async function activateBoost(adapter) {
     (0, import_logger.writeLog)(`[PV] Error activating boost: ${msg}`, "error");
   }
 }
-async function evaluatePvBoost(adapter) {
+async function evaluatePvBoost(adapter, forceReapply = false) {
   if (!pvIsBoostActive) {
     return;
   }
@@ -228,20 +228,29 @@ async function evaluatePvBoost(adapter) {
     const priority = config.pv_priority || "both";
     const boostWwAmount = Number(config.pv_boost_ww) || 0;
     const boostHzAmount = Number(config.pv_boost_hz) || 0;
+    const wwDone = activeBoostWwApplied || boostWwAmount <= 0;
+    const hzDone = activeBoostHzApplied || boostHzAmount <= 0;
+    if (!forceReapply && wwDone && hzDone) {
+      return;
+    }
     const wwPath = (0, import_stateMapping.getDpPath)("temperature_hot_water_target");
     const hzPath = (0, import_stateMapping.getDpPath)("heating_temperature");
-    const [wwIstState, rlIstState, rlSollState, hzHystState] = await Promise.all([
+    const [wwIstState, rlIstState, rlSollState, hzHystState, hzLimitState, mittelTempState, threshLimitState] = await Promise.all([
       adapter.getStateAsync((0, import_stateMapping.getDpPath)("Wamwassertemperatur_Ist")),
       adapter.getStateAsync((0, import_stateMapping.getDpPath)("temperature_return")),
       adapter.getStateAsync((0, import_stateMapping.getDpPath)("temperature_target_return")),
-      adapter.getStateAsync((0, import_stateMapping.getDpPath)("returnTemperatureHysteresis"))
+      adapter.getStateAsync((0, import_stateMapping.getDpPath)("returnTemperatureHysteresis")),
+      adapter.getStateAsync((0, import_stateMapping.getDpPath)("heatingLimit")),
+      adapter.getStateAsync((0, import_stateMapping.getDpPath)("Mitteltemperatur")),
+      adapter.getStateAsync((0, import_stateMapping.getDpPath)("thresholdHeatingLimit"))
     ]);
     const wwIst = wwIstState && typeof wwIstState.val === "number" ? wwIstState.val : 0;
     const rlIst = rlIstState && typeof rlIstState.val === "number" ? rlIstState.val : 0;
     const rlSoll = rlSollState && typeof rlSollState.val === "number" ? rlSollState.val : 0;
     const hzHyst = hzHystState && typeof hzHystState.val === "number" ? hzHystState.val : 1.5;
-    const isWwFull = originalWw !== null && wwIst >= originalWw + boostWwAmount;
-    const isHzFull = rlSoll > 0 && rlIst >= rlSoll + hzHyst;
+    const heatingBlockedByLimit = Number(hzLimitState == null ? void 0 : hzLimitState.val) === 1 && Number(mittelTempState == null ? void 0 : mittelTempState.val) >= Number(threshLimitState == null ? void 0 : threshLimitState.val);
+    const isWwFull = boostWwAmount <= 0 || originalWw !== null && wwIst >= originalWw + boostWwAmount;
+    const isHzFull = boostHzAmount <= 0 || heatingBlockedByLimit || rlSoll > 0 && rlIst >= rlSoll + hzHyst;
     let shouldBoostWw = false;
     let shouldBoostHz = false;
     if (priority === "ww") {
@@ -258,21 +267,29 @@ async function evaluatePvBoost(adapter) {
       shouldBoostWw = true;
       shouldBoostHz = true;
     }
-    if (shouldBoostWw && !activeBoostWwApplied && originalWw !== null && boostWwAmount > 0 && wwPath) {
+    if (shouldBoostWw && (!activeBoostWwApplied || forceReapply) && originalWw !== null && boostWwAmount > 0 && wwPath) {
       await adapter.setState(wwPath, { val: originalWw + boostWwAmount, ack: false });
       activeBoostWwApplied = true;
       (0, import_logger.writeLog)(
         `[PV] Priority logic: Applying Hot Water boost (+${boostWwAmount}K -> ${originalWw + boostWwAmount}\xB0C).`,
         "info"
       );
+    } else if (!shouldBoostWw && activeBoostWwApplied && originalWw !== null && wwPath) {
+      await adapter.setState(wwPath, { val: originalWw, ack: false });
+      activeBoostWwApplied = false;
+      (0, import_logger.writeLog)(`[PV] Priority logic: Target reached. Revoking Hot Water boost.`, "info");
     }
-    if (shouldBoostHz && !activeBoostHzApplied && originalHz !== null && boostHzAmount > 0 && hzPath) {
+    if (shouldBoostHz && (!activeBoostHzApplied || forceReapply) && originalHz !== null && boostHzAmount > 0 && hzPath) {
       await adapter.setState(hzPath, { val: originalHz + boostHzAmount, ack: false });
       activeBoostHzApplied = true;
       (0, import_logger.writeLog)(
         `[PV] Priority logic: Applying Heating boost (+${boostHzAmount}K -> ${originalHz + boostHzAmount}K).`,
         "info"
       );
+    } else if (!shouldBoostHz && activeBoostHzApplied && originalHz !== null && hzPath) {
+      await adapter.setState(hzPath, { val: originalHz, ack: false });
+      activeBoostHzApplied = false;
+      (0, import_logger.writeLog)(`[PV] Priority logic: Target reached. Revoking Heating boost.`, "info");
     }
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);

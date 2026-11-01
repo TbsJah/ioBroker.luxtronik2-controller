@@ -40,13 +40,13 @@ async function handleHupOptimization(adapter, istHeizen, spreizung, hupAktiv, la
   } catch {
   }
   const now = Date.now();
-  const checkIntervalMs = ((_a = config.hup_interval_min) != null ? _a : 10) * 6e4;
+  const checkIntervalMs = Number((_a = config.hup_interval_min) != null ? _a : 10) * 6e4;
   if (now - lastPumpOptimization > checkIntervalMs) {
-    const minSpreizung = (_b = config.hup_spreizung_min) != null ? _b : 6.5;
-    const maxSpreizung = (_c = config.hup_spreizung_max) != null ? _c : 7.5;
-    const step = (_d = config.hup_voltage_step) != null ? _d : 0.25;
-    const minVolt = (_e = config.hup_voltage_limit_min) != null ? _e : 3;
-    const maxVolt = (_f = config.hup_voltage_limit_max) != null ? _f : 10;
+    const minSpreizung = Number((_b = config.hup_spreizung_min) != null ? _b : 6.5);
+    const maxSpreizung = Number((_c = config.hup_spreizung_max) != null ? _c : 7.5);
+    const step = Number((_d = config.hup_voltage_step) != null ? _d : 0.25);
+    const minVolt = Number((_e = config.hup_voltage_limit_min) != null ? _e : 3);
+    const maxVolt = Number((_f = config.hup_voltage_limit_max) != null ? _f : 10);
     if (spreizung < minSpreizung && hupAktiv > minVolt) {
       const newVolt = Math.max(minVolt, Math.round((hupAktiv - step) * 100) / 100);
       await adapter.syncConfigValue("heating_system_circ_pump_voltage_nominal", newVolt);

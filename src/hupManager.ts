@@ -41,15 +41,15 @@ export async function handleHupOptimization(
 	}
 
 	const now = Date.now();
-	const checkIntervalMs = (config.hup_interval_min ?? 10) * 60000;
+	const checkIntervalMs = Number(config.hup_interval_min ?? 10) * 60000;
 
 	// Prüfen, ob das Schutz-Intervall abgelaufen ist
 	if (now - lastPumpOptimization > checkIntervalMs) {
-		const minSpreizung = config.hup_spreizung_min ?? 6.5;
-		const maxSpreizung = config.hup_spreizung_max ?? 7.5;
-		const step = config.hup_voltage_step ?? 0.25;
-		const minVolt = config.hup_voltage_limit_min ?? 3.0;
-		const maxVolt = config.hup_voltage_limit_max ?? 10.0;
+		const minSpreizung = Number(config.hup_spreizung_min ?? 6.5);
+		const maxSpreizung = Number(config.hup_spreizung_max ?? 7.5);
+		const step = Number(config.hup_voltage_step ?? 0.25);
+		const minVolt = Number(config.hup_voltage_limit_min ?? 3.0);
+		const maxVolt = Number(config.hup_voltage_limit_max ?? 10.0);
 
 		if (spreizung < minSpreizung && hupAktiv > minVolt) {
 			const newVolt = Math.max(minVolt, Math.round((hupAktiv - step) * 100) / 100);

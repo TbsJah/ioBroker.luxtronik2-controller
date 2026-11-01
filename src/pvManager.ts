@@ -280,23 +280,39 @@ export async function evaluatePvBoost(adapter: LuxtronikAdapter, forceReapply = 
 		const boostWwAmount = Number(config.pv_boost_ww) || 0;
 		const boostHzAmount = Number(config.pv_boost_hz) || 0;
 
+		// OPTIMIERUNG: Wenn kein Re-Apply erzwungen wird und bereits alle gewünschten Boosts aktiv sind,
+		// sofort abbrechen -> spart tausende DB-Abfragen bei sekündlichen Smart-Meter-Updates!
+		const wwDone = activeBoostWwApplied || boostWwAmount <= 0;
+		const hzDone = activeBoostHzApplied || boostHzAmount <= 0;
+		if (!forceReapply && wwDone && hzDone) {
+			return;
+		}
+
 		const wwPath = getDpPath('temperature_hot_water_target');
 		const hzPath = getDpPath('heating_temperature');
 
-		const [wwIstState, rlIstState, rlSollState, hzHystState] = await Promise.all([
-			adapter.getStateAsync(getDpPath('Wamwassertemperatur_Ist')),
-			adapter.getStateAsync(getDpPath('temperature_return')),
-			adapter.getStateAsync(getDpPath('temperature_target_return')),
-			adapter.getStateAsync(getDpPath('returnTemperatureHysteresis')),
-		]);
+		const [wwIstState, rlIstState, rlSollState, hzHystState, hzLimitState, mittelTempState, threshLimitState] =
+			await Promise.all([
+				adapter.getStateAsync(getDpPath('Wamwassertemperatur_Ist')),
+				adapter.getStateAsync(getDpPath('temperature_return')),
+				adapter.getStateAsync(getDpPath('temperature_target_return')),
+				adapter.getStateAsync(getDpPath('returnTemperatureHysteresis')),
+				adapter.getStateAsync(getDpPath('heatingLimit')),
+				adapter.getStateAsync(getDpPath('Mitteltemperatur')),
+				adapter.getStateAsync(getDpPath('thresholdHeatingLimit')),
+			]);
 
 		const wwIst = wwIstState && typeof wwIstState.val === 'number' ? wwIstState.val : 0;
 		const rlIst = rlIstState && typeof rlIstState.val === 'number' ? rlIstState.val : 0;
 		const rlSoll = rlSollState && typeof rlSollState.val === 'number' ? rlSollState.val : 0;
 		const hzHyst = hzHystState && typeof hzHystState.val === 'number' ? hzHystState.val : 1.5;
 
-		const isWwFull = originalWw !== null && wwIst >= originalWw + boostWwAmount;
-		const isHzFull = rlSoll > 0 && rlIst >= rlSoll + hzHyst;
+		// Prüfen, ob die Heizung wegen aktiver Heizgrenze überhaupt laufen darf
+		const heatingBlockedByLimit =
+			Number(hzLimitState?.val) === 1 && Number(mittelTempState?.val) >= Number(threshLimitState?.val);
+
+		const isWwFull = boostWwAmount <= 0 || (originalWw !== null && wwIst >= originalWw + boostWwAmount);
+		const isHzFull = boostHzAmount <= 0 || heatingBlockedByLimit || (rlSoll > 0 && rlIst >= rlSoll + hzHyst);
 
 		let shouldBoostWw = false;
 		let shouldBoostHz = false;

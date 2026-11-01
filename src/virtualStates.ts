@@ -9,13 +9,18 @@ import { getDpPath, getLuxIdByKey } from './stateMapping';
 // ==========================================
 
 /**
- * Universal helper function to add two values from the ioBroker state tree.
+ * Universal helper function to add two values from the ioBroker state tree,
+ * with an automatic fallback to raw values if individual states are disabled.
  *
  * @param adapter - ioBroker adapter instance
  * @param sourceId1 - Path of the first source state
  * @param sourceId2 - Path of the second source state
  * @param targetId - Path of the target state where the result will be written
  * @param logName - Name used for log entries
+ * @param rawValues - Raw values array from the heat pump (fallback)
+ * @param rawIndex1 - Raw index for value 1
+ * @param rawIndex2 - Raw index for value 2
+ * @param factor - Scaling factor for raw values (e.g. 0.1)
  * @returns A promise resolving after the addition completes
  */
 async function calculateSum(
@@ -24,23 +29,34 @@ async function calculateSum(
 	sourceId2: string,
 	targetId: string,
 	logName: string,
+	rawValues?: number[],
+	rawIndex1?: number,
+	rawIndex2?: number,
+	factor: number = 0.1,
 ): Promise<void> {
 	try {
-		// Wir lesen zusätzlich den ZIEL-Datenpunkt (den bisherigen Höchststand) mit aus
 		const [state1, state2, currentState] = await Promise.all([
 			adapter.getStateAsync(sourceId1),
 			adapter.getStateAsync(sourceId2),
 			adapter.getStateAsync(targetId),
 		]);
 
-		const val1 = state1 && typeof state1.val === 'number' ? state1.val : 0;
-		const val2 = state2 && typeof state2.val === 'number' ? state2.val : 0;
-		const newSum = val1 + val2;
+		let val1 = state1 && typeof state1.val === 'number' ? state1.val : 0;
+		let val2 = state2 && typeof state2.val === 'number' ? state2.val : 0;
 
+		// Fallback auf rawValues, falls die Einzel-States im Baum deaktiviert sind oder 0 liefern
+		if ((val1 === 0 || val2 === 0) && rawValues && rawIndex1 !== undefined && rawIndex2 !== undefined) {
+			const rawVal1 = rawValues[rawIndex1];
+			const rawVal2 = rawValues[rawIndex2];
+			if (rawVal1 !== undefined && rawVal2 !== undefined) {
+				val1 = rawVal1 * factor;
+				val2 = rawVal2 * factor;
+			}
+		}
+
+		const newSum = val1 + val2;
 		const currentVal = currentState && typeof currentState.val === 'number' ? currentState.val : 0;
 
-		// ROOT-CAUSE-FIX: Ein Energiezähler darf niemals schrumpfen!
-		// Fällt ein Luxtronik-Zähler kurzzeitig auf 0, ist newSum kleiner als currentVal und wird knallhart ignoriert.
 		if (newSum >= currentVal) {
 			await adapter.setStateChangedAsync(targetId, newSum, true);
 		}
@@ -54,15 +70,20 @@ async function calculateSum(
  * Calculates the total thermal energy (heating + hot water) and writes it to the target state.
  *
  * @param adapter - ioBroker adapter instance
+ * @param rawValues - Raw values array from the device
  * @returns A promise resolving upon completion
  */
-export async function calculateTotalThermalEnergy(adapter: AdapterInstance): Promise<void> {
+export async function calculateTotalThermalEnergy(adapter: AdapterInstance, rawValues?: number[]): Promise<void> {
 	await calculateSum(
 		adapter,
 		getDpPath('thermalenergy_heating'),
 		getDpPath('thermalenergy_warmwater'),
 		getDpPath('thermalenergy_total'),
 		'Total Thermal Energy',
+		rawValues,
+		151,
+		152,
+		0.1,
 	);
 }
 
@@ -70,15 +91,20 @@ export async function calculateTotalThermalEnergy(adapter: AdapterInstance): Pro
  * Calculates the total energy consumed (heating + hot water) and writes it to the target state.
  *
  * @param adapter - ioBroker adapter instance
+ * @param rawValues - Raw values array from the device
  * @returns A promise resolving upon completion
  */
-export async function calculateTotalEnergy(adapter: AdapterInstance): Promise<void> {
+export async function calculateTotalEnergy(adapter: AdapterInstance, rawValues?: number[]): Promise<void> {
 	await calculateSum(
 		adapter,
 		getDpPath('energy_heating'),
 		getDpPath('energy_warmwater'),
 		getDpPath('energy_total'),
 		'Total Energy',
+		rawValues,
+		156,
+		157,
+		0.1,
 	);
 }
 
@@ -568,7 +594,7 @@ export async function updateTimerTables(adapter: AdapterInstance): Promise<void>
 		};
 
 		const configs = [
-			{ target: 'heatingOperationTimerTableWeek', prefix: 'HZ_MoSo_', end: 'End1', slots: 3 },
+			{ target: 'heatingOperationTimerTableWeek', prefix: 'HZ_MoSo_', end: 'End', slots: 3 },
 			{ target: 'heatingOperationTimerTable52MonFri', prefix: 'HZ_MoFr_', end: 'Ende', slots: 3 },
 			{ target: 'heatingOperationTimerTable52SatSun', prefix: 'HZ_SaSo_', end: 'Ende', slots: 3 },
 			{ target: 'heatingOperationTimerTableDayMonday', prefix: 'HZ_Montag_', end: 'Ende', slots: 3 },

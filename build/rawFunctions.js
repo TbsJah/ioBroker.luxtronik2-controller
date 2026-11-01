@@ -63,7 +63,7 @@ const CONSTANTS = {
 const TCP_PORTS = /* @__PURE__ */ new Set([8888, 8889]);
 async function writePumpSafe(adapter, cmd, val) {
   const paramId = typeof cmd === "string" ? parseInt(cmd, 10) : cmd;
-  let value = typeof val === "string" ? parseInt(val, 10) : typeof val === "number" ? Math.round(val) : val;
+  let value = typeof val === "string" ? Math.round(Number(val)) : typeof val === "number" ? Math.round(val) : val;
   if (typeof value === "boolean") {
     value = value ? 1 : 0;
   }
@@ -249,6 +249,7 @@ function readAllRawTcp(adapter, command) {
       }
     });
     client.on("error", (err) => finish(err));
+    client.on("close", () => finish(new Error("TCP connection closed unexpectedly before response completed.")));
   });
 }
 function writeRawParameter(adapter, paramId, value) {
@@ -296,6 +297,7 @@ function writeRawParameterTcp(adapter, paramId, value) {
       }
     });
     client.on("error", (err) => finish(err));
+    client.on("close", () => finish(new Error("TCP connection closed unexpectedly before response completed.")));
   });
 }
 async function dumpAllRawToLog(adapter) {
@@ -323,8 +325,11 @@ async function dumpAllRawToLog(adapter) {
   }
 }
 async function queueWrite(adapter, cmd, val) {
-  const fwState = await adapter.getStateAsync("Information.12_SystemInfo.firmware");
-  const fw = typeof (fwState == null ? void 0 : fwState.val) === "string" ? fwState.val : "";
+  let fw = adapter.systemFirmware || "";
+  if (!fw) {
+    const fwState = await adapter.getStateAsync("Information.12_SystemInfo.firmware");
+    fw = typeof (fwState == null ? void 0 : fwState.val) === "string" ? fwState.val : "";
+  }
   if (fw.includes("1.90") || fw.includes("2.90")) {
     adapter.log.warn(
       `[PROTECTION] Write command to register ${cmd} blocked! Firmware ${fw} has a known manufacturer bug causing hardware crashes. Please downgrade to <= V X.89. | Schreibbefehl blockiert! Firmware ${fw} verursacht Systemabst\xFCrze. Bitte auf <= V X.89 downgraden.`
