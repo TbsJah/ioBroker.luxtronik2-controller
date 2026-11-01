@@ -810,7 +810,10 @@
 						"fusspunkt": "${data.fusspunkt}",
 						"endpunkt": "${data.endpunkt}"
 					},
-					"alsoDependsOn": ["fusspunkt", "endpunkt"],
+					"alsoDependsOn": [
+						"fusspunkt",
+						"endpunkt"
+					],
 					"style": {
 						"maxWidth": "800px",
 						"marginTop": "20px",
@@ -898,32 +901,14 @@
 						{
 							"label": {
 								"en": "Internal (Luxtronik estimates)",
-								"de": "Intern (Luxtronik Schätzwerte)",
-								"ru": "Внутренний (оценки Luxtronik)",
-								"pt": "Interno (estimativas Luxtronik)",
-								"nl": "Intern (Luxtronik schattingen)",
-								"fr": "Interne (estimations Luxtronik)",
-								"it": "Interno (stime Luxtronik)",
-								"es": "Interno (estimaciones Luxtronik)",
-								"pl": "Wewnętrzne (szacunki Luxtronik)",
-								"uk": "Внутрішній (оцінки Luxtronik)",
-								"zh-cn": "内部 (Luxtronik 估计值)"
+								"de": "Intern (Luxtronik Schätzwerte)"
 							},
 							"value": "internal"
 						},
 						{
 							"label": {
 								"en": "External Object ID (e.g. Shelly)",
-								"de": "Externe Objekt-ID (z.B. Shelly)",
-								"ru": "Внешний Object ID (например, Shelly)",
-								"pt": "ID do objeto externo (ex. Shelly)",
-								"nl": "Externe Object-ID (bijv. Shelly)",
-								"fr": "ID d'objet externe (ex. Shelly)",
-								"it": "ID oggetto esterno (es. Shelly)",
-								"es": "ID de objeto externo (ej. Shelly)",
-								"pl": "Zewnętrzne ID obiektu (np. Shelly)",
-								"uk": "Зовнішній Object ID (наприклад, Shelly)",
-								"zh-cn": "外部对象 ID (例如 Shelly)"
+								"de": "Externe Objekt-ID (z.B. Shelly)"
 							},
 							"value": "external"
 						}
@@ -975,32 +960,14 @@
 						{
 							"label": {
 								"en": "Internal (Luxtronik meters)",
-								"de": "Intern (Luxtronik Zähler)",
-								"ru": "Внутренний (счетчики Luxtronik)",
-								"pt": "Interno (medidores Luxtronik)",
-								"nl": "Intern (Luxtronik meters)",
-								"fr": "Interne (compteurs Luxtronik)",
-								"it": "Interno (contatori Luxtronik)",
-								"es": "Interno (medidores Luxtronik)",
-								"pl": "Wewnętrzne (liczniki Luxtronik)",
-								"uk": "Внутрішній (лічильники Luxtronik)",
-								"zh-cn": "内部 (Luxtronik 仪表)"
+								"de": "Intern (Luxtronik Zähler)"
 							},
 							"value": "internal"
 						},
 						{
 							"label": {
 								"en": "External Object ID (e.g. M-Bus meter)",
-								"de": "Externe Objekt-ID (z.B. M-Bus Zähler)",
-								"ru": "Внешний Object ID (например, счетчик M-Bus)",
-								"pt": "ID do objeto externo (ex. medidor M-Bus)",
-								"nl": "Externe Object-ID (bijv. M-Bus meter)",
-								"fr": "ID d'objet externe (ex. compteur M-Bus)",
-								"it": "ID oggetto esterno (es. contatore M-Bus)",
-								"es": "ID de objeto externo (ej. medidor M-Bus)",
-								"pl": "Zewnętrzne ID obiektu (np. licznik M-Bus)",
-								"uk": "Зовнішній Object ID (наприклад, лічильник M-Bus)",
-								"zh-cn": "外部对象 ID (例如 M-Bus 仪表)"
+								"de": "Externe Objekt-ID (z.B. M-Bus Zähler)"
 							},
 							"value": "external"
 						}

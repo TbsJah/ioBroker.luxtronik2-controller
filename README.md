@@ -96,8 +96,7 @@ You might see red error messages in the installation log related to `node-gyp`, 
 //### **WORK IN PROGRESS**
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 0.22.5 (2026-11-01)
 
 **🔧 Maintenance & Compatibility**
 
@@ -167,14 +166,6 @@ You might see red error messages in the installation log related to `node-gyp`, 
 
 - **Repository Compliance:** Added missing multi-language translations (i18n) for all configuration dropdown menus (e.g. COP sources, PV modes) to meet strict ioBroker stable repository requirements.
 - **Cleanup:** Removed unpublished ghost versions from the `io-package.json` news section and fixed markdown formatting for the changelog header in the README.
-
-### 0.22.0 (2026-10-26)
-
-**🐛 Performance & Tweaks**
-
-- **Modbus Queue & Socket Protection:** Added a sequential operation queue (mutex) with a 50ms socket release delay in `ModbusManager` to prevent TCP port 502 connection collisions when polling and event-driven writes occur simultaneously.
-- **COP Database Optimization:** Added an in-memory object cache (`ensuredObjects`) to `copManager`, eliminating redundant `setObjectNotExistsAsync` database calls during every polling cycle.
-- **DTA Backup & Firmware Check Improvements:** Added a 30-second request timeout (`AbortSignal.timeout`) and proper `dta_history` file naming on fallback to `backupManager`, and expanded the version regex in `updateManager` to support `F1.`, `WWB`, and `smo` firmware strings.
 
 ## License
 
