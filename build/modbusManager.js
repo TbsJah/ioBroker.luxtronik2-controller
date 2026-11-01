@@ -71,11 +71,13 @@ class ModbusManager {
    * @param client - Die geöffnete ModbusRTU-Instanz.
    */
   async safeClose(client) {
-    if (client.isOpen) {
-      try {
-        client.close();
-      } catch {
-      }
+    const wasOpen = client.isOpen;
+    try {
+      client.close(() => {
+      });
+    } catch {
+    }
+    if (wasOpen) {
       await new Promise((resolve) => {
         this.adapter.setTimeout(resolve, 50);
       });

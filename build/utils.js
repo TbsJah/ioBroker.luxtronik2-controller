@@ -23,7 +23,14 @@ __export(utils_exports, {
 });
 module.exports = __toCommonJS(utils_exports);
 function getNumber(state, fallback = 0) {
-  return typeof (state == null ? void 0 : state.val) === "number" ? state.val : fallback;
+  if (typeof (state == null ? void 0 : state.val) === "number" && !isNaN(state.val)) {
+    return state.val;
+  }
+  if (typeof (state == null ? void 0 : state.val) === "string" && state.val.trim() !== "") {
+    const parsed = Number(state.val);
+    return isNaN(parsed) ? fallback : parsed;
+  }
+  return fallback;
 }
 function delay(adapter, ms) {
   return new Promise((resolve) => adapter.setTimeout(resolve, ms));

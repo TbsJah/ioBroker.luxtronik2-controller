@@ -40,10 +40,15 @@ function initAutoBackup(adapter) {
   const config = adapter.config;
   stopAutoBackup(adapter);
   if (config.autoBackupActive && config.autoBackupCron) {
-    (0, import_logger.writeLog)(`Initializing automated DTA backup with cron schedule: ${config.autoBackupCron}`, "info");
-    adapter.backupJob = schedule.scheduleJob(config.autoBackupCron, async () => {
-      await executeDtaBackup(adapter);
-    });
+    try {
+      (0, import_logger.writeLog)(`Initializing automated DTA backup with cron schedule: ${config.autoBackupCron}`, "info");
+      adapter.backupJob = schedule.scheduleJob(String(config.autoBackupCron).trim(), async () => {
+        await executeDtaBackup(adapter);
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      (0, import_logger.writeLog)(`Failed to initialize DTA backup cron (${config.autoBackupCron}): ${msg}`, "error");
+    }
   }
 }
 async function executeDtaBackup(adapter) {

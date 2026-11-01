@@ -223,9 +223,12 @@ async function stopZipAndDeaeration(adapter) {
     }
   }
   try {
-    const activateZipState = await adapter.getStateAsync((0, import_stateMapping.getDpPath)("Activate_Zip"));
-    const runDeaerateState = await adapter.getStateAsync((0, import_stateMapping.getDpPath)("runDeaerate"));
-    const isZipActive = (activateZipState == null ? void 0 : activateZipState.val) === true || adapter.originalZipConfig !== null;
+    const [activateZipState, virtualZipState, runDeaerateState] = await Promise.all([
+      adapter.getStateAsync((0, import_stateMapping.getDpPath)("Activate_Zip")),
+      adapter.getStateAsync((0, import_stateMapping.getDpPath)("Virtual_ZIP_Status")),
+      adapter.getStateAsync((0, import_stateMapping.getDpPath)("runDeaerate"))
+    ]);
+    const isZipActive = (activateZipState == null ? void 0 : activateZipState.val) === true || (virtualZipState == null ? void 0 : virtualZipState.val) === true || adapter.originalZipConfig !== null;
     const isDeaerateActive = (runDeaerateState == null ? void 0 : runDeaerateState.val) === 1 || (runDeaerateState == null ? void 0 : runDeaerateState.val) === true;
     if (mode === "controller" && (isZipActive || isDeaerateActive)) {
       if (adapter.isDebugLogActive) {
@@ -377,8 +380,16 @@ async function handleActivateZip(adapter, id, durationSeconds) {
       const states = await Promise.all(keysToSave.map((key) => adapter.getStateAsync((0, import_stateMapping.getDpPath)(key))));
       adapter.originalZipConfig = {};
       keysToSave.forEach((key, index) => {
+        var _a, _b, _c;
         if (adapter.originalZipConfig) {
-          adapter.originalZipConfig[key] = states[index] ? states[index].val : null;
+          const stateVal = (_a = states[index]) == null ? void 0 : _a.val;
+          if (stateVal !== void 0 && stateVal !== null) {
+            adapter.originalZipConfig[key] = stateVal;
+          } else {
+            const luxId = Number((_b = import_stateMapping.STATE_MAPPING[key]) == null ? void 0 : _b.luxWriteId);
+            const rawFallback = !isNaN(luxId) ? (_c = adapter.currentRawParams) == null ? void 0 : _c[luxId] : void 0;
+            adapter.originalZipConfig[key] = rawFallback !== void 0 ? rawFallback : null;
+          }
         }
       });
     }

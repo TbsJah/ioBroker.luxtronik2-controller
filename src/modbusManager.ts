@@ -56,12 +56,15 @@ export class ModbusManager {
 	 * @param client - Die geöffnete ModbusRTU-Instanz.
 	 */
 	private async safeClose(client: ModbusRTU): Promise<void> {
-		if (client.isOpen) {
-			try {
-				client.close();
-			} catch {
-				/* ignore close errors */
-			}
+		const wasOpen = client.isOpen;
+		try {
+			client.close(() => {
+				/* ignore callback */
+			});
+		} catch {
+			/* ignore close errors */
+		}
+		if (wasOpen) {
 			await new Promise<void>(resolve => {
 				this.adapter.setTimeout(resolve, 50);
 			});

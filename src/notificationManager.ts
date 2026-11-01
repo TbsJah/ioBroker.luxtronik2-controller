@@ -188,7 +188,7 @@ export async function checkAndSendErrorNotifications(
 	oldFehlerVal: string | undefined,
 	newFehlerVal: string | undefined,
 ): Promise<void> {
-	if (!newFehlerVal || newFehlerVal === oldFehlerVal) {
+	if (!newFehlerVal) {
 		return;
 	}
 
@@ -205,13 +205,14 @@ export async function checkAndSendErrorNotifications(
 		return;
 	}
 
+	// FIX: Initialisierung MUSS auch dann greifen, wenn sich der State beim Start nicht geändert hat!
 	if (adapter.lastKnownErrorTimestamp === undefined || adapter.lastKnownErrorTimestamp === null) {
 		adapter.lastKnownErrorTimestamp = currentErrorTimestamp;
 		writeLog('Error monitoring initialized. Last known error timestamp set silently.', 'debug');
 		return;
 	}
 
-	if (currentErrorTimestamp <= adapter.lastKnownErrorTimestamp) {
+	if (newFehlerVal === oldFehlerVal || currentErrorTimestamp <= adapter.lastKnownErrorTimestamp) {
 		return;
 	}
 
@@ -235,7 +236,7 @@ export async function checkAndSendOutageNotifications(
 	oldOutageVal: string | undefined,
 	newOutageVal: string | undefined,
 ): Promise<void> {
-	if (!newOutageVal || newOutageVal === oldOutageVal) {
+	if (!newOutageVal) {
 		return;
 	}
 
@@ -248,45 +249,51 @@ export async function checkAndSendOutageNotifications(
 	const currentOutageTimestamp = newestOutage.timestamp;
 	const currentOutageCode = newestOutage.code;
 
-	// Timestamp muss vorhanden und valide sein.
-	// WICHTIG: currentOutageCode === 0 DARF HIER NICHT blockieren, da Code 0 = "Wärmepumpen-Störung" ist!
 	if (currentOutageTimestamp === undefined || currentOutageTimestamp <= 0) {
 		return;
 	}
 
-	// Filter für Störungen und Durchflussprobleme
-	const descLower = newestOutage.beschreibung.toLowerCase();
-	const isFlowIssue = descLower.includes('durchfluss') || descLower.includes('flow');
-	const isMalfunction =
-		descLower.includes('störung') ||
-		descLower.includes('stoerung') ||
-		descLower.includes('wpstörung') ||
-		currentOutageCode === 0;
-
-	if (!isFlowIssue && !isMalfunction) {
-		return;
-	}
-
+	// FIX: Auch beim Adapter-Start initialisieren, bevor auf Gleichheit geprüft wird
 	if (adapter.lastKnownOutageTimestamp === undefined || adapter.lastKnownOutageTimestamp === null) {
 		adapter.lastKnownOutageTimestamp = currentOutageTimestamp;
 		writeLog('Outage monitoring initialized. Last known outage timestamp set silently.', 'debug');
 		return;
 	}
 
-	if (currentOutageTimestamp <= adapter.lastKnownOutageTimestamp) {
-		return; // Kein neuer Eintrag
+	if (newOutageVal === oldOutageVal || currentOutageTimestamp <= adapter.lastKnownOutageTimestamp) {
+		return;
 	}
 
-	// Spam-Schutz: Max 1 Nachricht pro Stunde für denselben Abschalt-Typ
+	// Sprachunabhängige Code-Prüfung + Text-Fallback
+	const descLower = newestOutage.beschreibung.toLowerCase();
+	const isFlowIssue =
+		currentOutageCode === 11 ||
+		currentOutageCode === 18 ||
+		descLower.includes('durchfluss') ||
+		descLower.includes('flow');
+	const isMalfunction =
+		currentOutageCode === 0 ||
+		currentOutageCode === 1 ||
+		descLower.includes('störung') ||
+		descLower.includes('stoerung') ||
+		descLower.includes('fault');
+
+	if (!isFlowIssue && !isMalfunction) {
+		return;
+	}
+
+	// FIX: 60-Minuten-Cooldown NUR für Durchfluss-Warnungen anwenden, niemals für echte Störungen!
 	const now = Date.now();
-	if (adapter.lastFlowNotificationTime && now - adapter.lastFlowNotificationTime < 60 * 60 * 1000) {
+	if (!isMalfunction && adapter.lastFlowNotificationTime && now - adapter.lastFlowNotificationTime < 60 * 60 * 1000) {
 		adapter.lastKnownOutageTimestamp = currentOutageTimestamp;
 		writeLog('Outage registered, but notification skipped due to 60-minute cooldown spam protection.', 'info');
 		return;
 	}
 
 	adapter.lastKnownOutageTimestamp = currentOutageTimestamp;
-	adapter.lastFlowNotificationTime = now;
+	if (!isMalfunction) {
+		adapter.lastFlowNotificationTime = now;
+	}
 
 	let msg = '';
 	if (isMalfunction) {

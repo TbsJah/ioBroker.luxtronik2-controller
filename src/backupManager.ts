@@ -14,10 +14,15 @@ export function initAutoBackup(adapter: LuxtronikAdapter): void {
 	stopAutoBackup(adapter);
 
 	if (config.autoBackupActive && config.autoBackupCron) {
-		writeLog(`Initializing automated DTA backup with cron schedule: ${config.autoBackupCron}`, 'info');
-		adapter.backupJob = schedule.scheduleJob(config.autoBackupCron, async () => {
-			await executeDtaBackup(adapter);
-		});
+		try {
+			writeLog(`Initializing automated DTA backup with cron schedule: ${config.autoBackupCron}`, 'info');
+			adapter.backupJob = schedule.scheduleJob(String(config.autoBackupCron).trim(), async () => {
+				await executeDtaBackup(adapter);
+			});
+		} catch (err: unknown) {
+			const msg = err instanceof Error ? err.message : String(err);
+			writeLog(`Failed to initialize DTA backup cron (${config.autoBackupCron}): ${msg}`, 'error');
+		}
 	}
 }
 

@@ -304,10 +304,14 @@ export async function stopZipAndDeaeration(adapter: LuxtronikAdapter): Promise<v
 
 	// 3. Internen Luxtronik-Regler zurücksetzen (falls Modus = 'controller' oder noch ein altes Makro lief)
 	try {
-		const activateZipState = await adapter.getStateAsync(getDpPath('Activate_Zip'));
-		const runDeaerateState = await adapter.getStateAsync(getDpPath('runDeaerate'));
+		const [activateZipState, virtualZipState, runDeaerateState] = await Promise.all([
+			adapter.getStateAsync(getDpPath('Activate_Zip')),
+			adapter.getStateAsync(getDpPath('Virtual_ZIP_Status')),
+			adapter.getStateAsync(getDpPath('runDeaerate')),
+		]);
 
-		const isZipActive = activateZipState?.val === true || adapter.originalZipConfig !== null;
+		const isZipActive =
+			activateZipState?.val === true || virtualZipState?.val === true || adapter.originalZipConfig !== null;
 		const isDeaerateActive = runDeaerateState?.val === 1 || runDeaerateState?.val === true;
 
 		if (mode === 'controller' && (isZipActive || isDeaerateActive)) {
@@ -509,7 +513,15 @@ export async function handleActivateZip(adapter: LuxtronikAdapter, id: string, d
 			adapter.originalZipConfig = {};
 			keysToSave.forEach((key, index) => {
 				if (adapter.originalZipConfig) {
-					adapter.originalZipConfig[key] = states[index] ? states[index].val : null;
+					const stateVal = states[index]?.val;
+					if (stateVal !== undefined && stateVal !== null) {
+						adapter.originalZipConfig[key] = stateVal;
+					} else {
+						// Fallback direkt auf den RAM-Cache der Rohparameter, falls Datenpunkt im Admin deaktiviert ist
+						const luxId = Number(STATE_MAPPING[key]?.luxWriteId);
+						const rawFallback = !isNaN(luxId) ? adapter.currentRawParams?.[luxId] : undefined;
+						adapter.originalZipConfig[key] = rawFallback !== undefined ? rawFallback : null;
+					}
 				}
 			});
 		}

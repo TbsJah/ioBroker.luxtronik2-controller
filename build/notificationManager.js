@@ -132,7 +132,7 @@ ${history}`;
   }
 }
 async function checkAndSendErrorNotifications(adapter, oldFehlerVal, newFehlerVal) {
-  if (!newFehlerVal || newFehlerVal === oldFehlerVal) {
+  if (!newFehlerVal) {
     return;
   }
   const newList = safeParse(newFehlerVal);
@@ -150,7 +150,7 @@ async function checkAndSendErrorNotifications(adapter, oldFehlerVal, newFehlerVa
     (0, import_logger.writeLog)("Error monitoring initialized. Last known error timestamp set silently.", "debug");
     return;
   }
-  if (currentErrorTimestamp <= adapter.lastKnownErrorTimestamp) {
+  if (newFehlerVal === oldFehlerVal || currentErrorTimestamp <= adapter.lastKnownErrorTimestamp) {
     return;
   }
   adapter.lastKnownErrorTimestamp = currentErrorTimestamp;
@@ -163,7 +163,7 @@ An error was registered on the heat pump:
   await sendNotification(adapter, msg);
 }
 async function checkAndSendOutageNotifications(adapter, oldOutageVal, newOutageVal) {
-  if (!newOutageVal || newOutageVal === oldOutageVal) {
+  if (!newOutageVal) {
     return;
   }
   const newList = safeParse(newOutageVal);
@@ -176,28 +176,30 @@ async function checkAndSendOutageNotifications(adapter, oldOutageVal, newOutageV
   if (currentOutageTimestamp === void 0 || currentOutageTimestamp <= 0) {
     return;
   }
-  const descLower = newestOutage.beschreibung.toLowerCase();
-  const isFlowIssue = descLower.includes("durchfluss") || descLower.includes("flow");
-  const isMalfunction = descLower.includes("st\xF6rung") || descLower.includes("stoerung") || descLower.includes("wpst\xF6rung") || currentOutageCode === 0;
-  if (!isFlowIssue && !isMalfunction) {
-    return;
-  }
   if (adapter.lastKnownOutageTimestamp === void 0 || adapter.lastKnownOutageTimestamp === null) {
     adapter.lastKnownOutageTimestamp = currentOutageTimestamp;
     (0, import_logger.writeLog)("Outage monitoring initialized. Last known outage timestamp set silently.", "debug");
     return;
   }
-  if (currentOutageTimestamp <= adapter.lastKnownOutageTimestamp) {
+  if (newOutageVal === oldOutageVal || currentOutageTimestamp <= adapter.lastKnownOutageTimestamp) {
+    return;
+  }
+  const descLower = newestOutage.beschreibung.toLowerCase();
+  const isFlowIssue = currentOutageCode === 11 || currentOutageCode === 18 || descLower.includes("durchfluss") || descLower.includes("flow");
+  const isMalfunction = currentOutageCode === 0 || currentOutageCode === 1 || descLower.includes("st\xF6rung") || descLower.includes("stoerung") || descLower.includes("fault");
+  if (!isFlowIssue && !isMalfunction) {
     return;
   }
   const now = Date.now();
-  if (adapter.lastFlowNotificationTime && now - adapter.lastFlowNotificationTime < 60 * 60 * 1e3) {
+  if (!isMalfunction && adapter.lastFlowNotificationTime && now - adapter.lastFlowNotificationTime < 60 * 60 * 1e3) {
     adapter.lastKnownOutageTimestamp = currentOutageTimestamp;
     (0, import_logger.writeLog)("Outage registered, but notification skipped due to 60-minute cooldown spam protection.", "info");
     return;
   }
   adapter.lastKnownOutageTimestamp = currentOutageTimestamp;
-  adapter.lastFlowNotificationTime = now;
+  if (!isMalfunction) {
+    adapter.lastFlowNotificationTime = now;
+  }
   let msg = "";
   if (isMalfunction) {
     msg = `\u{1F6A8} *Alarm: W\xE4rmepumpen-Abschaltung (St\xF6rung)!*

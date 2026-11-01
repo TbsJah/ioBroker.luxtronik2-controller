@@ -96,6 +96,21 @@ You might see red error messages in the installation log related to `node-gyp`, 
 //### **WORK IN PROGRESS**
 
 ## Changelog
+
+### **WORK IN PROGRESS**
+
+- **Notifications & Alarming:**
+    - Fixed an initialization bug where `lastKnownErrorTimestamp` and `lastKnownOutageTimestamp` were not set on adapter startup if the history remained unchanged, which previously caused the first genuine error or outage after a restart to be silently ignored.
+    - Decoupled the 60-minute flow warning cooldown (`lastFlowNotificationTime`) from critical heat pump malfunctions so genuine fault alarms are never suppressed by preceding flow warnings.
+    - Added language-independent outage code detection (codes 0, 1, 11, 18) alongside text-based fallbacks.
+- **ZIP Circulation Control:**
+    - Added a raw parameter fallback (`currentRawParams`) when backing up `originalZipConfig` to prevent timer schedules from being overwritten with `null` if the corresponding timer states are disabled in the object tree.
+    - Fixed an issue in `stopZipAndDeaeration` where manually disabling `Activate_Zip` did not stop the hardware deaeration program (`runDeaerate`) by checking `Virtual_ZIP_Status` in addition to the trigger state.
+- **Stability & Helpers:**
+    - Wrapped the automated DTA backup cron job initialization (`initAutoBackup`) in a `try/catch` block to prevent startup crashes on malformed cron expressions.
+    - Hardened `safeClose` in `ModbusManager` to cleanly terminate sockets even if a connection timeout occurs before the socket is marked as open.
+    - Improved input validation in `formatTimerSecondsToTime` (guarding against negative values and `NaN`) and `getNumber` (supporting numeric strings).
+
 ### 0.22.2 (2026-11-01)
 
 **🐛 Bugfixes & Tweaks**

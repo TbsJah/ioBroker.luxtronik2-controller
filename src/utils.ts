@@ -8,7 +8,14 @@ import type { AdapterInstance } from '@iobroker/adapter-core';
  * @returns Die ausgelesene Zahl oder der Fallback-Wert.
  */
 export function getNumber(state: ioBroker.State | null | undefined, fallback = 0): number {
-	return typeof state?.val === 'number' ? state.val : fallback;
+	if (typeof state?.val === 'number' && !isNaN(state.val)) {
+		return state.val;
+	}
+	if (typeof state?.val === 'string' && state.val.trim() !== '') {
+		const parsed = Number(state.val);
+		return isNaN(parsed) ? fallback : parsed;
+	}
+	return fallback;
 }
 
 /**
