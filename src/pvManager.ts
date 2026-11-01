@@ -266,8 +266,9 @@ async function activateBoost(adapter: LuxtronikAdapter): Promise<void> {
  * Evaluiert fortlaufend die Prioritäten und gibt das sekundäre Ziel frei, sobald das primäre Ziel erreicht ist.
  *
  * @param adapter Die aktuelle Adapter-Instanz.
+ * @param forceReapply Erzwingt das erneute Schreiben der PV-Sollwerte (z.B. nach einem Leerlauf-Reset).
  */
-export async function evaluatePvBoost(adapter: LuxtronikAdapter): Promise<void> {
+export async function evaluatePvBoost(adapter: LuxtronikAdapter, forceReapply = false): Promise<void> {
 	if (!pvIsBoostActive) {
 		return;
 	}
@@ -294,7 +295,6 @@ export async function evaluatePvBoost(adapter: LuxtronikAdapter): Promise<void> 
 		const rlSoll = rlSollState && typeof rlSollState.val === 'number' ? rlSollState.val : 0;
 		const hzHyst = hzHystState && typeof hzHystState.val === 'number' ? hzHystState.val : 1.5;
 
-		// KORREKTUR: Physikalisch korrekte Sättigungsprüfung
 		const isWwFull = originalWw !== null && wwIst >= originalWw + boostWwAmount;
 		const isHzFull = rlSoll > 0 && rlIst >= rlSoll + hzHyst;
 
@@ -303,13 +303,11 @@ export async function evaluatePvBoost(adapter: LuxtronikAdapter): Promise<void> 
 
 		if (priority === 'ww') {
 			shouldBoostWw = true;
-			// Sobald WW voll ist, zusätzlich Heizen freigeben (und aktiv lassen!)
 			if (isWwFull || activeBoostHzApplied) {
 				shouldBoostHz = true;
 			}
 		} else if (priority === 'hz') {
 			shouldBoostHz = true;
-			// Sobald Heizen voll ist, zusätzlich WW freigeben (und aktiv lassen!)
 			if (isHzFull || activeBoostWwApplied) {
 				shouldBoostWw = true;
 			}
@@ -318,22 +316,42 @@ export async function evaluatePvBoost(adapter: LuxtronikAdapter): Promise<void> 
 			shouldBoostHz = true;
 		}
 
-		if (shouldBoostWw && !activeBoostWwApplied && originalWw !== null && boostWwAmount > 0 && wwPath) {
+		if (
+			shouldBoostWw &&
+			(!activeBoostWwApplied || forceReapply) &&
+			originalWw !== null &&
+			boostWwAmount > 0 &&
+			wwPath
+		) {
 			await adapter.setState(wwPath, { val: originalWw + boostWwAmount, ack: false });
 			activeBoostWwApplied = true;
 			writeLog(
 				`[PV] Priority logic: Applying Hot Water boost (+${boostWwAmount}K -> ${originalWw + boostWwAmount}°C).`,
 				'info',
 			);
+		} else if (!shouldBoostWw && activeBoostWwApplied && originalWw !== null && wwPath) {
+			await adapter.setState(wwPath, { val: originalWw, ack: false });
+			activeBoostWwApplied = false;
+			writeLog(`[PV] Priority logic: Target reached. Revoking Hot Water boost.`, 'info');
 		}
 
-		if (shouldBoostHz && !activeBoostHzApplied && originalHz !== null && boostHzAmount > 0 && hzPath) {
+		if (
+			shouldBoostHz &&
+			(!activeBoostHzApplied || forceReapply) &&
+			originalHz !== null &&
+			boostHzAmount > 0 &&
+			hzPath
+		) {
 			await adapter.setState(hzPath, { val: originalHz + boostHzAmount, ack: false });
 			activeBoostHzApplied = true;
 			writeLog(
 				`[PV] Priority logic: Applying Heating boost (+${boostHzAmount}K -> ${originalHz + boostHzAmount}K).`,
 				'info',
 			);
+		} else if (!shouldBoostHz && activeBoostHzApplied && originalHz !== null && hzPath) {
+			await adapter.setState(hzPath, { val: originalHz, ack: false });
+			activeBoostHzApplied = false;
+			writeLog(`[PV] Priority logic: Target reached. Revoking Heating boost.`, 'info');
 		}
 	} catch (err: unknown) {
 		const msg = err instanceof Error ? err.message : String(err);

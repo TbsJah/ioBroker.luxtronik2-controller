@@ -96,6 +96,13 @@ You might see red error messages in the installation log related to `node-gyp`, 
 //### **WORK IN PROGRESS**
 
 ## Changelog
+
+### **WORK IN PROGRESS**
+
+- **Repository Compliance:** Added missing multi-language translations (i18n) for all configuration dropdown menus (e.g. COP sources, PV modes) to meet strict ioBroker stable repository requirements.
+  **🐛 Bugfixes & Tweaks**
+- **Cycle Optimization & PV Integration:** Fixed an issue where the cycle optimization was blocked during an active PV boost. The adapter now correctly forces seamless transitions between heating and hot water (without compressor shutdown and anti-cycle delays) even when solar surplus is available. A new handshake mechanism ensures that PV target temperatures are immediately and safely restored after the cycle optimization resets the baseline idle defaults.
+
 ### 0.22.1 (2026-10-28)
 
 **🔧 Maintenance & Compatibility**

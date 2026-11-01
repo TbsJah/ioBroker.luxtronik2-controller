@@ -25,6 +25,7 @@ import {
 	isStateEnabled,
 } from './objectManager';
 import {
+	evaluatePvBoost,
 	forceResetPvBoost,
 	handlePvCycleCheck,
 	handlePvFeedInChange,
@@ -493,6 +494,7 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 			const config = this.config as Record<string, any>;
 			await this.syncConfigValue('heating_curve_end_point', config.endpunkt ?? 23);
 			await this.syncConfigValue('heating_curve_parallel_offset', config.fusspunkt ?? 21.7);
+			await this.syncConfigValue('heating_temperature', 0);
 			await this.syncConfigValue(
 				'heating_system_circ_pump_voltage_minimal',
 				config.sync_heating_system_circ_pump_voltage_minimal_heating ?? 3,
@@ -505,6 +507,11 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 			await this.syncConfigValue('returnTemperatureHysteresis', config.sync_return_temperature_hysteresis ?? 1.5);
 			await this.syncConfigValue('zip_aktiv', config.zip_aktiv ?? 0);
 			await this.syncConfigValue('Heizen_nach_Wasser', config.Heating_after_warmwater ?? false);
+
+			// WICHTIG: Wenn der PV-Boost aktiv ist, PV-Sollwerte sofort wieder über die Leerlauf-Werte bügeln!
+			if (pvIsBoostActive) {
+				await evaluatePvBoost(this, true);
+			}
 		} catch (err: any) {
 			writeLog(`Failed to apply the baseline idle configuration defaults: ${err.message}`, 'error');
 		}
@@ -560,12 +567,15 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 						await this.setIdleDefaults();
 					}
 				} else if (istHeizen) {
-					// FIX: WW-Reset nur ausführen, wenn PV-Boost NICHT aktiv ist
-					if (this.lastBzVal === '1' && config.idle_defaults_aktiv === true && !pvIsBoostActive) {
+					// FIX: WW-Reset ausführen, aber bei PV-Boost sofort wieder überbügeln
+					if (this.lastBzVal === '1' && config.idle_defaults_aktiv === true) {
 						await this.syncConfigValue(
 							'temperature_hot_water_target',
 							config.sync_warmwater_target_temperature ?? 54,
 						);
+						if (pvIsBoostActive) {
+							await evaluatePvBoost(this, true);
+						}
 					}
 
 					if (config.zip_optimierung_aktiv === true) {
