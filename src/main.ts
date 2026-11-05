@@ -373,22 +373,53 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 		if (val === undefined || val === null) {
 			return;
 		}
+		const definition = STATE_MAPPING[mappingKey];
+		if (!definition) {
+			return;
+		}
+
 		const id = getDpPath(mappingKey);
 		const state = await this.getStateAsync(id);
 
-		if (!state || state.val !== val) {
-			const definition = STATE_MAPPING[mappingKey];
-			if (!definition) {
-				return;
-			}
+		const config = this.config as Record<string, any>;
+		let appliedFactor = definition.factor;
+		if (
+			mappingKey === 'heating_system_circ_pump_voltage_nominal' ||
+			mappingKey === 'heating_system_circ_pump_voltage_minimal'
+		) {
+			appliedFactor = config.hup_voltage_factor !== undefined ? Number(config.hup_voltage_factor) : 100;
+		}
 
+		let valueToWrite: any = val;
+		if (typeof valueToWrite === 'boolean') {
+			valueToWrite = valueToWrite ? 1 : 0;
+		} else if (appliedFactor && typeof val === 'number') {
+			valueToWrite = val * appliedFactor;
+		}
+
+		const isRawWrite =
+			definition.dataSource === 'raw_parameter' ||
+			definition.dataSource === 'raw_value' ||
+			(!definition.dataSource && /^\d+$/.test(definition.luxWriteId || ''));
+		if (isRawWrite && definition.unit === '°C' && typeof val === 'number' && !appliedFactor) {
+			valueToWrite = val * 10;
+		}
+
+		const writeId = definition.luxWriteId ? parseInt(definition.luxWriteId, 10) : NaN;
+		const hardwareOutOfSync =
+			!definition.isVirtual &&
+			!isNaN(writeId) &&
+			writeId < 9990 &&
+			this.currentRawParams.length > writeId &&
+			this.currentRawParams[writeId] !== Math.round(Number(valueToWrite));
+
+		if (!state || state.val !== val || hardwareOutOfSync) {
 			await this.setState(id, { val: val, ack: true });
 
 			if (this.isDebugLogActive) {
 				writeLog(`Writing value directly into heat pump controller: ${mappingKey} = ${val}`, 'info');
 			}
 
-			const config = this.config as Record<string, any>;
 			const isModbusEnabled = Boolean(
 				this.modbusManager &&
 				this.modbusManager.isAvailable &&
@@ -398,29 +429,6 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 			);
 
 			if ((definition.write === true || isModbusEnabled) && !definition.isVirtual && definition.luxWriteId) {
-				let appliedFactor = definition.factor;
-				if (
-					mappingKey === 'heating_system_circ_pump_voltage_nominal' ||
-					mappingKey === 'heating_system_circ_pump_voltage_minimal'
-				) {
-					appliedFactor = config.hup_voltage_factor !== undefined ? Number(config.hup_voltage_factor) : 100;
-				}
-
-				let valueToWrite: any = val;
-				if (typeof valueToWrite === 'boolean') {
-					valueToWrite = valueToWrite ? 1 : 0;
-				} else if (appliedFactor && typeof val === 'number') {
-					valueToWrite = val * appliedFactor;
-				}
-
-				const isRawWrite =
-					definition.dataSource === 'raw_parameter' ||
-					definition.dataSource === 'raw_value' ||
-					(!definition.dataSource && /^\d+$/.test(definition.luxWriteId || ''));
-				if (isRawWrite && definition.unit === '°C' && typeof val === 'number' && !appliedFactor) {
-					valueToWrite = val * 10;
-				}
-
 				try {
 					if (isModbusEnabled && definition.modbus) {
 						const isCoil = definition.modbus.type === 'coil';
@@ -429,11 +437,8 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 							Number(valueToWrite),
 							isCoil,
 						);
-					} else {
-						const writeId = parseInt(definition.luxWriteId, 10);
-						if (!isNaN(writeId) && writeId < 9990) {
-							await queueWrite(this, writeId, valueToWrite);
-						}
+					} else if (!isNaN(writeId) && writeId < 9990) {
+						await queueWrite(this, writeId, valueToWrite);
 					}
 					await new Promise(r => global.setTimeout(r, 200));
 				} catch (err: any) {
@@ -523,13 +528,20 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 	 * Primary intelligent engine analyzing live telemetry values to execute continuous performance optimizations.
 	 * Manages dynamic heating curves, anti-cycling protective delays, and voltage scaling algorithms.
 	 *
+	 * @param rawValues - Optional raw telemetry values array from command 3004 as fallback.
+	 * @param rawParams - Optional raw parameters array from command 3003 as fallback.
 	 * @returns A promise that resolves when the execution cycle finishes.
 	 */
-	private async runOptimizationSchedule(): Promise<void> {
+	private async runOptimizationSchedule(rawValues: number[] = [], rawParams: number[] = []): Promise<void> {
 		try {
 			const config = this.config as Record<string, any>;
 			const bzState = await this.getStateAsync(getDpPath('WP_BZ_akt'));
-			const bzVal = bzState && bzState.val !== null ? String(bzState.val).trim() : '';
+			const bzVal =
+				bzState && bzState.val !== null
+					? String(bzState.val).trim()
+					: rawValues[80] !== undefined
+						? String(rawValues[80])
+						: '';
 
 			// Live-Status des ioBroker Schalters "Regelung_Aktiv" auslesen
 			const regelungAktivState = await this.getStateAsync(getDpPath('Regelung_Aktiv'));
@@ -549,12 +561,10 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 			// =========================================================
 			if (bzVal !== this.lastBzVal) {
 				if (istLeerlauf) {
-					// FIX: Leerlauf-Vorgaben nur setzen, wenn PV-Boost NICHT aktiv ist
 					if (config.idle_defaults_aktiv === true) {
 						await this.setIdleDefaults();
 					}
 				} else if (istHeizen) {
-					// FIX: WW-Reset ausführen, aber bei PV-Boost sofort wieder überbügeln
 					if (this.lastBzVal === '1' && config.idle_defaults_aktiv === true) {
 						await this.syncConfigValue(
 							'temperature_hot_water_target',
@@ -593,7 +603,6 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 							(mode === 'actor' && validActors.length > 0) ||
 							(mode === 'modbus' && this.modbusManager?.isAvailable);
 
-						// Wenn Aktoren oder Modbus aktiv sind -> 0 Flash-Schreibvorgänge!
 						if (canRunWearFree) {
 							if (this.isDebugLogActive) {
 								this.log.debug(
@@ -621,6 +630,7 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 
 			const [
 				wwSollState,
+				wwTargetParamState,
 				wwIstState,
 				ruecklaufState,
 				spreizungState,
@@ -631,11 +641,12 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 				heizenHystereseState,
 				nachWasserState,
 				mitteltempState,
-				thresholdHeatingLimitstate,
+				thresholdHeatingLimitState,
 				heatingLimitState,
 				aelterAls10,
 			] = await Promise.all([
 				this.getStateAsync(getDpPath('Wamwassertemperatur_Soll')),
+				this.getStateAsync(getDpPath('temperature_hot_water_target')),
 				this.getStateAsync(getDpPath('Wamwassertemperatur_Ist')),
 				this.getStateAsync(getDpPath('temperature_return')),
 				this.getStateAsync(getDpPath('spreizung_vorlauf_ruecklauf')),
@@ -651,34 +662,103 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 				this.istBetriebszustandAelterAls10Min(),
 			]);
 
-			const wwSoll = (wwSollState?.val as number) ?? 0;
-			const wwIst = (wwIstState?.val as number) ?? 0;
-			const ruecklauf = (ruecklaufState?.val as number) ?? 0;
-			const spreizung = (spreizungState?.val as number) ?? 0;
-			const vd1 = vd1State?.val === 1;
-			const wwHysterese = (wwHystereseState?.val as number) ?? 0;
-			const ruecklaufSoll = (ruecklaufSollState?.val as number) ?? 0;
+			// Sichere Auswertung mit Rohdaten-Fallback (falls Datenpunkte im Objektbaum deaktiviert sind)
+			const wwSoll =
+				typeof wwSollState?.val === 'number'
+					? wwSollState.val
+					: typeof wwTargetParamState?.val === 'number'
+						? wwTargetParamState.val
+						: rawValues[18] !== undefined
+							? rawValues[18] / 10
+							: rawParams[105] !== undefined
+								? rawParams[105] / 10
+								: 54;
+			const wwIst =
+				typeof wwIstState?.val === 'number'
+					? wwIstState.val
+					: rawValues[17] !== undefined
+						? rawValues[17] / 10
+						: 0;
+			const ruecklauf =
+				typeof ruecklaufState?.val === 'number'
+					? ruecklaufState.val
+					: rawValues[11] !== undefined
+						? rawValues[11] / 10
+						: 0;
+			const ruecklaufSoll =
+				typeof ruecklaufSollState?.val === 'number'
+					? ruecklaufSollState.val
+					: rawValues[12] !== undefined
+						? rawValues[12] / 10
+						: 0;
+			const spreizung =
+				typeof spreizungState?.val === 'number'
+					? spreizungState.val
+					: rawValues[10] !== undefined && rawValues[11] !== undefined
+						? (rawValues[10] - rawValues[11]) / 10
+						: 0;
+
+			// FIX: VD1out kann im State als boolean (true) oder number (1) vorliegen!
+			const vd1 =
+				vd1State?.val !== undefined && vd1State?.val !== null
+					? vd1State.val === 1 || vd1State.val === true || String(vd1State.val).toLowerCase() === 'true'
+					: rawValues[44] === 1;
+
+			const wwHysterese =
+				typeof wwHystereseState?.val === 'number'
+					? wwHystereseState.val
+					: rawParams[74] !== undefined
+						? rawParams[74] / 10
+						: 2.0;
 			const currentHupVolt = (currentHupVoltState?.val as number) ?? 7.0;
-			const heizenHysterese = (heizenHystereseState?.val as number) ?? 0;
-			const mitteltemperatur = (mitteltempState?.val as number) ?? 0;
-			const thresholdHeatingLimit = (thresholdHeatingLimitstate?.val as number) ?? 0;
-			const heatingLimit = (heatingLimitState?.val as number) ?? 0;
-			const nachWasser = nachWasserState?.val;
+			const heizenHysterese =
+				typeof heizenHystereseState?.val === 'number'
+					? heizenHystereseState.val
+					: rawParams[88] !== undefined
+						? rawParams[88] / 10
+						: 1.5;
+			const mitteltemperatur =
+				typeof mitteltempState?.val === 'number'
+					? mitteltempState.val
+					: rawValues[16] !== undefined
+						? rawValues[16] / 10
+						: 0;
+			const thresholdHeatingLimit =
+				typeof thresholdHeatingLimitState?.val === 'number'
+					? thresholdHeatingLimitState.val
+					: rawParams[700] !== undefined
+						? rawParams[700] / 10
+						: 15;
+
+			// FIX: heatingLimit typsicher auf Boolean (true/false) UND Number (1/0) prüfen!
+			const isHeatingLimitEnabled =
+				heatingLimitState?.val !== undefined && heatingLimitState?.val !== null
+					? heatingLimitState.val === 1 ||
+						heatingLimitState.val === true ||
+						String(heatingLimitState.val) === '1' ||
+						String(heatingLimitState.val).toLowerCase() === 'true'
+					: rawParams[699] === 1;
+
+			const nachWasser = Boolean(nachWasserState?.val);
 
 			// =========================================================
 			// 2. CONTINUOUS IN-SERVICE TELEMETRY EVALUATION
 			// =========================================================
 			if (istHeizen) {
 				if (aelterAls10 && vd1) {
-					const fusspunkt = (await this.getStateAsync(getDpPath('heating_curve_parallel_offset')))?.val;
-					if (fusspunkt === 35) {
+					const fusspunktState = await this.getStateAsync(getDpPath('heating_curve_parallel_offset'));
+					const currentFusspunkt =
+						typeof fusspunktState?.val === 'number'
+							? fusspunktState.val
+							: rawParams[13] !== undefined
+								? rawParams[13] / 10
+								: 0;
+					if (currentFusspunkt === 35) {
 						const fallbackFusspunkt = config.fusspunkt ?? 21.7;
 						await this.syncConfigValue('heating_curve_parallel_offset', fallbackFusspunkt);
 					}
 				}
 
-				// FIX: HUP-Optimierung nur aufrufen, wenn die Anlage mindestens 10 Minuten heizt
-				// UND der Verdichter (vd1) läuft. Vorher ist die Spreizung physikalisch nicht aussagekräftig.
 				if (aelterAls10 && vd1) {
 					this.lastPumpOptimization = await handleHupOptimization(
 						this,
@@ -690,7 +770,6 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 				}
 
 				if (isRegelungAktiv) {
-					// WICHTIG: Heizen_nach_Wasser Logik (Reset & Setzen)
 					if (ruecklauf >= ruecklaufSoll + heizenHysterese - 0.1) {
 						if (aelterAls10) {
 							await this.syncConfigValue('Heizen_nach_Wasser', false);
@@ -699,26 +778,20 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 						await this.syncConfigValue('Heizen_nach_Wasser', true);
 					}
 
-					// Warmwassertakt erzwingen (NUR wenn kein PV-Boost aktiv ist!)
+					// Warmwassertakt am Ende des Heiztaktes erzwingen
 					if (wwSoll - wwIst > 2 && ruecklauf >= ruecklaufSoll + heizenHysterese - 0.1) {
-						// Neuen Sollwert berechnen: Ist-Wert + aktuelle Hysterese + 1.5K Puffer
 						let forceSoll = wwIst + wwHysterese + 1.5;
-
-						// Sicherheitsprüfung: Maximaltemperatur kappen (Passend zu actionHandlers = 70°C)
 						if (forceSoll > 70) {
 							forceSoll = 70;
 						}
 						forceSoll = Math.round(forceSoll * 10) / 10;
-
-						// Statt Hysterese wird nun der Sollwert temporär erhöht, um den WW-Takt künstlich anzustoßen
 						await this.syncConfigValue('temperature_hot_water_target', forceSoll);
 					}
 				}
 			}
 
-			// Sprachunabhängige Prüfung, ob die Heizgrenze das Heizen erlaubt
-			const isHeatingAllowedByLimit =
-				(heatingLimit === 1 && mitteltemperatur < thresholdHeatingLimit) || heatingLimit === 0;
+			// Typsichere Prüfung, ob die Heizgrenze das Heizen erlaubt
+			const isHeatingAllowedByLimit = !isHeatingLimitEnabled || mitteltemperatur < thresholdHeatingLimit;
 
 			if (istWarmwasser && nachWasser) {
 				if (isRegelungAktiv && isHeatingAllowedByLimit) {
@@ -735,6 +808,12 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 
 				if (isRegelungAktiv) {
 					if (wwSoll - wwIst >= wwHysterese - 1.5 && ruecklauf <= ruecklaufSoll && isHeatingAllowedByLimit) {
+						if (this.isDebugLogActive) {
+							writeLog(
+								`[CycleOpt] Pre-starting heating before WW (WW: ${wwIst}/${wwSoll}°C, Hyst: ${wwHysterese}K, RL: ${ruecklauf}/${ruecklaufSoll}°C). Setting base point to 35°C.`,
+								'info',
+							);
+						}
 						await this.syncConfigValue('heating_curve_parallel_offset', 35);
 					}
 				}
@@ -1007,7 +1086,7 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 			writeLog(`=> Rufe jetzt den COP Manager auf. BZ ist: ${currentBzVal}`, 'debug');
 			await processCopData(this, currentBzVal);
 
-			await this.runOptimizationSchedule();
+			await this.runOptimizationSchedule(rawValues, rawParams);
 		} catch (err: any) {
 			this.errorCount++;
 			writeLog(

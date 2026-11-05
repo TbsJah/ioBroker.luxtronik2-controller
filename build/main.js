@@ -292,36 +292,38 @@ class Luxtronik2Controller extends utils.Adapter {
     if (val === void 0 || val === null) {
       return;
     }
+    const definition = import_stateMapping.STATE_MAPPING[mappingKey];
+    if (!definition) {
+      return;
+    }
     const id = (0, import_stateMapping.getDpPath)(mappingKey);
     const state = await this.getStateAsync(id);
-    if (!state || state.val !== val) {
-      const definition = import_stateMapping.STATE_MAPPING[mappingKey];
-      if (!definition) {
-        return;
-      }
+    const config = this.config;
+    let appliedFactor = definition.factor;
+    if (mappingKey === "heating_system_circ_pump_voltage_nominal" || mappingKey === "heating_system_circ_pump_voltage_minimal") {
+      appliedFactor = config.hup_voltage_factor !== void 0 ? Number(config.hup_voltage_factor) : 100;
+    }
+    let valueToWrite = val;
+    if (typeof valueToWrite === "boolean") {
+      valueToWrite = valueToWrite ? 1 : 0;
+    } else if (appliedFactor && typeof val === "number") {
+      valueToWrite = val * appliedFactor;
+    }
+    const isRawWrite = definition.dataSource === "raw_parameter" || definition.dataSource === "raw_value" || !definition.dataSource && /^\d+$/.test(definition.luxWriteId || "");
+    if (isRawWrite && definition.unit === "\xB0C" && typeof val === "number" && !appliedFactor) {
+      valueToWrite = val * 10;
+    }
+    const writeId = definition.luxWriteId ? parseInt(definition.luxWriteId, 10) : NaN;
+    const hardwareOutOfSync = !definition.isVirtual && !isNaN(writeId) && writeId < 9990 && this.currentRawParams.length > writeId && this.currentRawParams[writeId] !== Math.round(Number(valueToWrite));
+    if (!state || state.val !== val || hardwareOutOfSync) {
       await this.setState(id, { val, ack: true });
       if (this.isDebugLogActive) {
         (0, import_logger.writeLog)(`Writing value directly into heat pump controller: ${mappingKey} = ${val}`, "info");
       }
-      const config = this.config;
       const isModbusEnabled = Boolean(
         this.modbusManager && this.modbusManager.isAvailable && config.modbus_active && definition.modbus && config[definition.modbus.configKey] === true
       );
       if ((definition.write === true || isModbusEnabled) && !definition.isVirtual && definition.luxWriteId) {
-        let appliedFactor = definition.factor;
-        if (mappingKey === "heating_system_circ_pump_voltage_nominal" || mappingKey === "heating_system_circ_pump_voltage_minimal") {
-          appliedFactor = config.hup_voltage_factor !== void 0 ? Number(config.hup_voltage_factor) : 100;
-        }
-        let valueToWrite = val;
-        if (typeof valueToWrite === "boolean") {
-          valueToWrite = valueToWrite ? 1 : 0;
-        } else if (appliedFactor && typeof val === "number") {
-          valueToWrite = val * appliedFactor;
-        }
-        const isRawWrite = definition.dataSource === "raw_parameter" || definition.dataSource === "raw_value" || !definition.dataSource && /^\d+$/.test(definition.luxWriteId || "");
-        if (isRawWrite && definition.unit === "\xB0C" && typeof val === "number" && !appliedFactor) {
-          valueToWrite = val * 10;
-        }
         try {
           if (isModbusEnabled && definition.modbus) {
             const isCoil = definition.modbus.type === "coil";
@@ -330,11 +332,8 @@ class Luxtronik2Controller extends utils.Adapter {
               Number(valueToWrite),
               isCoil
             );
-          } else {
-            const writeId = parseInt(definition.luxWriteId, 10);
-            if (!isNaN(writeId) && writeId < 9990) {
-              await (0, import_rawFunctions.queueWrite)(this, writeId, valueToWrite);
-            }
+          } else if (!isNaN(writeId) && writeId < 9990) {
+            await (0, import_rawFunctions.queueWrite)(this, writeId, valueToWrite);
           }
           await new Promise((r) => global.setTimeout(r, 200));
         } catch (err) {
@@ -420,14 +419,16 @@ class Luxtronik2Controller extends utils.Adapter {
    * Primary intelligent engine analyzing live telemetry values to execute continuous performance optimizations.
    * Manages dynamic heating curves, anti-cycling protective delays, and voltage scaling algorithms.
    *
+   * @param rawValues - Optional raw telemetry values array from command 3004 as fallback.
+   * @param rawParams - Optional raw parameters array from command 3003 as fallback.
    * @returns A promise that resolves when the execution cycle finishes.
    */
-  async runOptimizationSchedule() {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t, _u, _v;
+  async runOptimizationSchedule(rawValues = [], rawParams = []) {
+    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k;
     try {
       const config = this.config;
       const bzState = await this.getStateAsync((0, import_stateMapping.getDpPath)("WP_BZ_akt"));
-      const bzVal = bzState && bzState.val !== null ? String(bzState.val).trim() : "";
+      const bzVal = bzState && bzState.val !== null ? String(bzState.val).trim() : rawValues[80] !== void 0 ? String(rawValues[80]) : "";
       const regelungAktivState = await this.getStateAsync((0, import_stateMapping.getDpPath)("Regelung_Aktiv"));
       const isRegelungAktiv = (regelungAktivState == null ? void 0 : regelungAktivState.val) === true;
       const istHeizen = bzVal === "0";
@@ -501,6 +502,7 @@ class Luxtronik2Controller extends utils.Adapter {
       }
       const [
         wwSollState,
+        wwTargetParamState,
         wwIstState,
         ruecklaufState,
         spreizungState,
@@ -511,11 +513,12 @@ class Luxtronik2Controller extends utils.Adapter {
         heizenHystereseState,
         nachWasserState,
         mitteltempState,
-        thresholdHeatingLimitstate,
+        thresholdHeatingLimitState,
         heatingLimitState,
         aelterAls10
       ] = await Promise.all([
         this.getStateAsync((0, import_stateMapping.getDpPath)("Wamwassertemperatur_Soll")),
+        this.getStateAsync((0, import_stateMapping.getDpPath)("temperature_hot_water_target")),
         this.getStateAsync((0, import_stateMapping.getDpPath)("Wamwassertemperatur_Ist")),
         this.getStateAsync((0, import_stateMapping.getDpPath)("temperature_return")),
         this.getStateAsync((0, import_stateMapping.getDpPath)("spreizung_vorlauf_ruecklauf")),
@@ -530,24 +533,25 @@ class Luxtronik2Controller extends utils.Adapter {
         this.getStateAsync((0, import_stateMapping.getDpPath)("heatingLimit")),
         this.istBetriebszustandAelterAls10Min()
       ]);
-      const wwSoll = (_j = wwSollState == null ? void 0 : wwSollState.val) != null ? _j : 0;
-      const wwIst = (_k = wwIstState == null ? void 0 : wwIstState.val) != null ? _k : 0;
-      const ruecklauf = (_l = ruecklaufState == null ? void 0 : ruecklaufState.val) != null ? _l : 0;
-      const spreizung = (_m = spreizungState == null ? void 0 : spreizungState.val) != null ? _m : 0;
-      const vd1 = (vd1State == null ? void 0 : vd1State.val) === 1;
-      const wwHysterese = (_n = wwHystereseState == null ? void 0 : wwHystereseState.val) != null ? _n : 0;
-      const ruecklaufSoll = (_o = ruecklaufSollState == null ? void 0 : ruecklaufSollState.val) != null ? _o : 0;
-      const currentHupVolt = (_p = currentHupVoltState == null ? void 0 : currentHupVoltState.val) != null ? _p : 7;
-      const heizenHysterese = (_q = heizenHystereseState == null ? void 0 : heizenHystereseState.val) != null ? _q : 0;
-      const mitteltemperatur = (_r = mitteltempState == null ? void 0 : mitteltempState.val) != null ? _r : 0;
-      const thresholdHeatingLimit = (_s = thresholdHeatingLimitstate == null ? void 0 : thresholdHeatingLimitstate.val) != null ? _s : 0;
-      const heatingLimit = (_t = heatingLimitState == null ? void 0 : heatingLimitState.val) != null ? _t : 0;
-      const nachWasser = nachWasserState == null ? void 0 : nachWasserState.val;
+      const wwSoll = typeof (wwSollState == null ? void 0 : wwSollState.val) === "number" ? wwSollState.val : typeof (wwTargetParamState == null ? void 0 : wwTargetParamState.val) === "number" ? wwTargetParamState.val : rawValues[18] !== void 0 ? rawValues[18] / 10 : rawParams[105] !== void 0 ? rawParams[105] / 10 : 54;
+      const wwIst = typeof (wwIstState == null ? void 0 : wwIstState.val) === "number" ? wwIstState.val : rawValues[17] !== void 0 ? rawValues[17] / 10 : 0;
+      const ruecklauf = typeof (ruecklaufState == null ? void 0 : ruecklaufState.val) === "number" ? ruecklaufState.val : rawValues[11] !== void 0 ? rawValues[11] / 10 : 0;
+      const ruecklaufSoll = typeof (ruecklaufSollState == null ? void 0 : ruecklaufSollState.val) === "number" ? ruecklaufSollState.val : rawValues[12] !== void 0 ? rawValues[12] / 10 : 0;
+      const spreizung = typeof (spreizungState == null ? void 0 : spreizungState.val) === "number" ? spreizungState.val : rawValues[10] !== void 0 && rawValues[11] !== void 0 ? (rawValues[10] - rawValues[11]) / 10 : 0;
+      const vd1 = (vd1State == null ? void 0 : vd1State.val) !== void 0 && (vd1State == null ? void 0 : vd1State.val) !== null ? vd1State.val === 1 || vd1State.val === true || String(vd1State.val).toLowerCase() === "true" : rawValues[44] === 1;
+      const wwHysterese = typeof (wwHystereseState == null ? void 0 : wwHystereseState.val) === "number" ? wwHystereseState.val : rawParams[74] !== void 0 ? rawParams[74] / 10 : 2;
+      const currentHupVolt = (_j = currentHupVoltState == null ? void 0 : currentHupVoltState.val) != null ? _j : 7;
+      const heizenHysterese = typeof (heizenHystereseState == null ? void 0 : heizenHystereseState.val) === "number" ? heizenHystereseState.val : rawParams[88] !== void 0 ? rawParams[88] / 10 : 1.5;
+      const mitteltemperatur = typeof (mitteltempState == null ? void 0 : mitteltempState.val) === "number" ? mitteltempState.val : rawValues[16] !== void 0 ? rawValues[16] / 10 : 0;
+      const thresholdHeatingLimit = typeof (thresholdHeatingLimitState == null ? void 0 : thresholdHeatingLimitState.val) === "number" ? thresholdHeatingLimitState.val : rawParams[700] !== void 0 ? rawParams[700] / 10 : 15;
+      const isHeatingLimitEnabled = (heatingLimitState == null ? void 0 : heatingLimitState.val) !== void 0 && (heatingLimitState == null ? void 0 : heatingLimitState.val) !== null ? heatingLimitState.val === 1 || heatingLimitState.val === true || String(heatingLimitState.val) === "1" || String(heatingLimitState.val).toLowerCase() === "true" : rawParams[699] === 1;
+      const nachWasser = Boolean(nachWasserState == null ? void 0 : nachWasserState.val);
       if (istHeizen) {
         if (aelterAls10 && vd1) {
-          const fusspunkt = (_u = await this.getStateAsync((0, import_stateMapping.getDpPath)("heating_curve_parallel_offset"))) == null ? void 0 : _u.val;
-          if (fusspunkt === 35) {
-            const fallbackFusspunkt = (_v = config.fusspunkt) != null ? _v : 21.7;
+          const fusspunktState = await this.getStateAsync((0, import_stateMapping.getDpPath)("heating_curve_parallel_offset"));
+          const currentFusspunkt = typeof (fusspunktState == null ? void 0 : fusspunktState.val) === "number" ? fusspunktState.val : rawParams[13] !== void 0 ? rawParams[13] / 10 : 0;
+          if (currentFusspunkt === 35) {
+            const fallbackFusspunkt = (_k = config.fusspunkt) != null ? _k : 21.7;
             await this.syncConfigValue("heating_curve_parallel_offset", fallbackFusspunkt);
           }
         }
@@ -578,7 +582,7 @@ class Luxtronik2Controller extends utils.Adapter {
           }
         }
       }
-      const isHeatingAllowedByLimit = heatingLimit === 1 && mitteltemperatur < thresholdHeatingLimit || heatingLimit === 0;
+      const isHeatingAllowedByLimit = !isHeatingLimitEnabled || mitteltemperatur < thresholdHeatingLimit;
       if (istWarmwasser && nachWasser) {
         if (isRegelungAktiv && isHeatingAllowedByLimit) {
           await this.syncConfigValue("heating_curve_parallel_offset", 35);
@@ -592,6 +596,12 @@ class Luxtronik2Controller extends utils.Adapter {
         }
         if (isRegelungAktiv) {
           if (wwSoll - wwIst >= wwHysterese - 1.5 && ruecklauf <= ruecklaufSoll && isHeatingAllowedByLimit) {
+            if (this.isDebugLogActive) {
+              (0, import_logger.writeLog)(
+                `[CycleOpt] Pre-starting heating before WW (WW: ${wwIst}/${wwSoll}\xB0C, Hyst: ${wwHysterese}K, RL: ${ruecklauf}/${ruecklaufSoll}\xB0C). Setting base point to 35\xB0C.`,
+                "info"
+              );
+            }
             await this.syncConfigValue("heating_curve_parallel_offset", 35);
           }
         }
@@ -783,7 +793,7 @@ class Luxtronik2Controller extends utils.Adapter {
       const currentBzVal = bzState && bzState.val !== null ? String(bzState.val).trim() : "";
       (0, import_logger.writeLog)(`=> Rufe jetzt den COP Manager auf. BZ ist: ${currentBzVal}`, "debug");
       await (0, import_copManager.processCopData)(this, currentBzVal);
-      await this.runOptimizationSchedule();
+      await this.runOptimizationSchedule(rawValues, rawParams);
     } catch (err) {
       this.errorCount++;
       (0, import_logger.writeLog)(

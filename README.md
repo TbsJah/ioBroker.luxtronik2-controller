@@ -96,6 +96,16 @@ You might see red error messages in the installation log related to `node-gyp`, 
 //### **WORK IN PROGRESS**
 
 ## Changelog
+
+### **WORK IN PROGRESS**
+
+**🐛 Bugfixes**
+
+- **Cycle Optimization & Hardware Sync (`main.ts`):**
+    - **Pre-Heating & Heating Limit Type Fix:** Fixed strict type comparison bugs (`boolean` vs. `number`) when evaluating `heatingLimit` and `VD1out` (`vd1`). Previously, boolean state values caused `isHeatingAllowedByLimit` and `vd1` to evaluate to `false`, which blocked pre-heating before hot water generation (raising `heating_curve_parallel_offset` to 35 °C), prevented the 10-minute base point reset, and skipped HUP voltage optimization.
+    - **Raw Data Fallbacks (`rawValues` / `rawParams`):** Added direct fallbacks to raw heat pump telemetry and parameter arrays in `runOptimizationSchedule` so cycle optimization, HUP control, and heating limit checks remain fully functional even if individual datapoints (`thresholdHeatingLimit`, `Mitteltemperatur`, `heatingLimit`, `VD1out`, etc.) are disabled in the ioBroker object tree.
+    - **Hardware Out-of-Sync Verification:** Enhanced `syncConfigValue` to verify target values against the live hardware parameter cache (`currentRawParams`), ensuring parameters are reliably written to the controller even if the local ioBroker state is disabled or out of sync with the heat pump.
+
 ### 0.22.5 (2026-11-01)
 
 **🔧 Maintenance & Compatibility**
