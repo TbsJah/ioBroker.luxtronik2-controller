@@ -39,81 +39,133 @@ async function processCopData(adapter, bzVal) {
   }
   try {
     (0, import_logger.writeLog)(`COP Manager gestartet. Modus: ${bzVal}`, "debug");
-    let currentPower = 0;
-    if (config.cop_source_power === "external" && config.cop_oid_power_total) {
+    const isExternalPower = config.cop_source_power === "external" && Boolean(config.cop_oid_power_total);
+    const isExternalThermal = config.cop_source_thermal === "external" && Boolean(config.cop_oid_thermal_total);
+    let currentPowerTotal = 0;
+    let currentPowerHeating = 0;
+    let currentPowerWater = 0;
+    if (isExternalPower) {
       const state = await adapter.getForeignStateAsync(config.cop_oid_power_total);
       if (state && typeof state.val === "number") {
-        currentPower = state.val;
+        currentPowerTotal = state.val;
       }
     } else {
-      const state = await adapter.getStateAsync((0, import_stateMapping.getDpPath)("energy_total"));
-      if (state && typeof state.val === "number") {
-        currentPower = state.val;
+      const [sTotal, sHeat, sWater] = await Promise.all([
+        adapter.getStateAsync((0, import_stateMapping.getDpPath)("energy_total")),
+        adapter.getStateAsync((0, import_stateMapping.getDpPath)("energy_heating")),
+        adapter.getStateAsync((0, import_stateMapping.getDpPath)("energy_warmwater"))
+      ]);
+      if (sTotal && typeof sTotal.val === "number") {
+        currentPowerTotal = sTotal.val;
+      }
+      if (sHeat && typeof sHeat.val === "number") {
+        currentPowerHeating = sHeat.val;
+      }
+      if (sWater && typeof sWater.val === "number") {
+        currentPowerWater = sWater.val;
       }
     }
-    let currentThermal = 0;
-    if (config.cop_source_thermal === "external" && config.cop_oid_thermal_total) {
+    let currentThermalTotal = 0;
+    let currentThermalHeating = 0;
+    let currentThermalWater = 0;
+    if (isExternalThermal) {
       const state = await adapter.getForeignStateAsync(config.cop_oid_thermal_total);
       if (state && typeof state.val === "number") {
-        currentThermal = state.val;
+        currentThermalTotal = state.val;
       }
     } else {
-      const state = await adapter.getStateAsync((0, import_stateMapping.getDpPath)("thermalenergy_total"));
-      if (state && typeof state.val === "number") {
-        currentThermal = state.val;
+      const [sTotal, sHeat, sWater] = await Promise.all([
+        adapter.getStateAsync((0, import_stateMapping.getDpPath)("thermalenergy_total")),
+        adapter.getStateAsync((0, import_stateMapping.getDpPath)("thermalenergy_heating")),
+        adapter.getStateAsync((0, import_stateMapping.getDpPath)("thermalenergy_warmwater"))
+      ]);
+      if (sTotal && typeof sTotal.val === "number") {
+        currentThermalTotal = sTotal.val;
+      }
+      if (sHeat && typeof sHeat.val === "number") {
+        currentThermalHeating = sHeat.val;
+      }
+      if (sWater && typeof sWater.val === "number") {
+        currentThermalWater = sWater.val;
       }
     }
-    const rawPowerId = "hidden.cop_buckets.last_raw_power";
-    const rawThermalId = "hidden.cop_buckets.last_raw_thermal";
+    const rawPowerTotalId = "hidden.cop_buckets.last_raw_power";
+    const rawPowerHeatId = "hidden.cop_buckets.last_raw_power_heating";
+    const rawPowerWaterId = "hidden.cop_buckets.last_raw_power_water";
+    const rawThermalTotalId = "hidden.cop_buckets.last_raw_thermal";
+    const rawThermalHeatId = "hidden.cop_buckets.last_raw_thermal_heating";
+    const rawThermalWaterId = "hidden.cop_buckets.last_raw_thermal_water";
+    const rawTrackers = [
+      { id: rawPowerTotalId, name: "Last Raw Power Total", current: currentPowerTotal },
+      { id: rawPowerHeatId, name: "Last Raw Power Heating", current: currentPowerHeating },
+      { id: rawPowerWaterId, name: "Last Raw Power Water", current: currentPowerWater },
+      { id: rawThermalTotalId, name: "Last Raw Thermal Total", current: currentThermalTotal },
+      { id: rawThermalHeatId, name: "Last Raw Thermal Heating", current: currentThermalHeating },
+      { id: rawThermalWaterId, name: "Last Raw Thermal Water", current: currentThermalWater }
+    ];
     if (!isInitialized) {
-      await ensureCopObject(adapter, rawPowerId, {
-        type: "state",
-        common: { name: "Last Raw Power", type: "number", role: "value", read: true, write: false },
-        native: {}
-      });
-      await ensureCopObject(adapter, rawThermalId, {
-        type: "state",
-        common: { name: "Last Raw Thermal", type: "number", role: "value", read: true, write: false },
-        native: {}
-      });
-      const lastPowerStateInit = await adapter.getStateAsync(rawPowerId);
-      const lastThermalStateInit = await adapter.getStateAsync(rawThermalId);
-      if (!lastPowerStateInit || lastPowerStateInit.val === null) {
-        await adapter.setState(rawPowerId, { val: currentPower, ack: true });
-      }
-      if (!lastThermalStateInit || lastThermalStateInit.val === null) {
-        await adapter.setState(rawThermalId, { val: currentThermal, ack: true });
+      for (const tracker of rawTrackers) {
+        await ensureCopObject(adapter, tracker.id, {
+          type: "state",
+          common: { name: tracker.name, type: "number", role: "value", read: true, write: false },
+          native: {}
+        });
+        const stateInit = await adapter.getStateAsync(tracker.id);
+        if (!stateInit || stateInit.val === null) {
+          await adapter.setState(tracker.id, { val: tracker.current, ack: true });
+        }
       }
       isInitialized = true;
       await handleTimeRollover(adapter);
       return;
     }
-    const lastPowerState = await adapter.getStateAsync(rawPowerId);
-    const lastThermalState = await adapter.getStateAsync(rawThermalId);
-    const lastPower = lastPowerState && typeof lastPowerState.val === "number" ? lastPowerState.val : currentPower;
-    const lastThermal = lastThermalState && typeof lastThermalState.val === "number" ? lastThermalState.val : currentThermal;
-    const deltaPower = Math.max(0, currentPower - lastPower);
-    const deltaThermal = Math.max(0, currentThermal - lastThermal);
-    if (currentPower < lastPower) {
-      await adapter.setState(rawPowerId, { val: currentPower, ack: true });
-    }
-    if (currentThermal < lastThermal) {
-      await adapter.setState(rawThermalId, { val: currentThermal, ack: true });
-    }
-    if (deltaPower > 0) {
-      await adapter.setState(rawPowerId, { val: currentPower, ack: true });
-    }
-    if (deltaThermal > 0) {
-      await adapter.setState(rawThermalId, { val: currentThermal, ack: true });
-    }
-    await handleTimeRollover(adapter);
-    if (deltaPower > 0 || deltaThermal > 0) {
-      await addDeltaToBucket(adapter, "Total", deltaPower, deltaThermal);
-      if (bzVal === "0" || bzVal === "4") {
-        await addDeltaToBucket(adapter, "Heating", deltaPower, deltaThermal);
-      } else if (bzVal === "1") {
-        await addDeltaToBucket(adapter, "HotWater", deltaPower, deltaThermal);
+    const readAndCalcDelta = async (id, currentVal) => {
+      const lastState = await adapter.getStateAsync(id);
+      const lastVal = lastState && typeof lastState.val === "number" ? lastState.val : currentVal;
+      const delta = Math.max(0, currentVal - lastVal);
+      if (currentVal !== lastVal) {
+        await adapter.setState(id, { val: currentVal, ack: true });
       }
+      return delta;
+    };
+    const deltaPowerTotal = await readAndCalcDelta(rawPowerTotalId, currentPowerTotal);
+    const deltaPowerHeating = await readAndCalcDelta(rawPowerHeatId, currentPowerHeating);
+    const deltaPowerWater = await readAndCalcDelta(rawPowerWaterId, currentPowerWater);
+    const deltaThermalTotal = await readAndCalcDelta(rawThermalTotalId, currentThermalTotal);
+    const deltaThermalHeating = await readAndCalcDelta(rawThermalHeatId, currentThermalHeating);
+    const deltaThermalWater = await readAndCalcDelta(rawThermalWaterId, currentThermalWater);
+    await handleTimeRollover(adapter);
+    let modeDeltaPower = 0;
+    let modeDeltaThermal = 0;
+    if (bzVal === "0" || bzVal === "4") {
+      modeDeltaPower = isExternalPower ? deltaPowerTotal : deltaPowerHeating > 0 ? deltaPowerHeating : deltaPowerTotal;
+      modeDeltaThermal = isExternalThermal ? deltaThermalTotal : deltaThermalHeating > 0 ? deltaThermalHeating : deltaThermalTotal;
+      if (modeDeltaPower > 0 || modeDeltaThermal > 0) {
+        await addDeltaToBucket(adapter, "Heating", modeDeltaPower, modeDeltaThermal);
+      }
+    } else if (bzVal === "1") {
+      modeDeltaPower = isExternalPower ? deltaPowerTotal : deltaPowerWater > 0 ? deltaPowerWater : deltaPowerTotal;
+      modeDeltaThermal = isExternalThermal ? deltaThermalTotal : deltaThermalWater > 0 ? deltaThermalWater : deltaThermalTotal;
+      if (!isExternalPower && deltaPowerWater === 0 && deltaPowerTotal > 0) {
+        (0, import_logger.writeLog)(
+          `[COP] WW-Stromz\xE4hler meldet 0 Delta. Nutze Delta von energy_total (${deltaPowerTotal} kWh) als Fallback.`,
+          "debug"
+        );
+      }
+      if (!isExternalThermal && deltaThermalWater === 0 && deltaThermalTotal > 0) {
+        (0, import_logger.writeLog)(
+          `[COP] WW-W\xE4rmez\xE4hler meldet 0 Delta. Nutze Delta von thermalenergy_total (${deltaThermalTotal} kWh) als Fallback.`,
+          "debug"
+        );
+      }
+      if (modeDeltaPower > 0 || modeDeltaThermal > 0) {
+        await addDeltaToBucket(adapter, "HotWater", modeDeltaPower, modeDeltaThermal);
+      }
+    }
+    const totalBucketPower = deltaPowerTotal > 0 ? deltaPowerTotal : modeDeltaPower;
+    const totalBucketThermal = deltaThermalTotal > 0 ? deltaThermalTotal : modeDeltaThermal;
+    if (totalBucketPower > 0 || totalBucketThermal > 0) {
+      await addDeltaToBucket(adapter, "Total", totalBucketPower, totalBucketThermal);
     }
     await calculateAndWriteCop(adapter, "Total");
     await calculateAndWriteCop(adapter, "Heating");
