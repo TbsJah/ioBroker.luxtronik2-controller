@@ -23,6 +23,12 @@
 ### 0.1.0 (2026-07-09)
 
 - initial release
+## 0.22.5 (2026-11-01)
+
+**🔧 Maintenance & Compatibility**
+
+- **Repository Compliance:** Added missing multi-language translations (i18n) for all configuration dropdown menus (e.g. COP sources, PV modes) to meet strict ioBroker stable repository requirements.
+
 ## 0.22.4 (2026-11-01)
 
 **🐛 Bugfixes & Tweaks**
