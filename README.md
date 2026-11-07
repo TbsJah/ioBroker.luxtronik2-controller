@@ -96,8 +96,7 @@ You might see red error messages in the installation log related to `node-gyp`, 
 //### **WORK IN PROGRESS**
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 0.23.2 (2026-11-07)
 
 - **COP & Efficiency Calculation (`copManager.ts`):**
     - **Isolated Counter Tracking:** Introduced dedicated reference states for Total, Heating, and Hot Water counters (`last_raw_power_*` and `last_raw_thermal_*`). Each counter is now compared strictly against its own previous value, completely preventing cross-mode "ghost deltas" and astronomical COP spikes during cycle transitions.
@@ -134,15 +133,6 @@ You might see red error messages in the installation log related to `node-gyp`, 
 - **PV Surplus Management & Cycle Optimization:**
     - **Zero-Drift Baseline Calculation:** Rewrote the PV boost baseline logic in `pvManager.ts`. The adapter no longer reads live datapoint states to calculate the boost, but strictly enforces the configured baseline values (`sync_warmwater_target_temperature` and `0K` for heating). This permanently resolves the "snowball effect" where the hot water target could incrementally drift up to the 70 °C safety limit.
     - **Cycle Coupling Handshake:** Enhanced the intelligent cycle optimization (`main.ts`) during active PV surplus. At the end of a heating cycle, the adapter now seamlessly couples a hot water cycle and intelligently enforces the PV boost target (e.g., 60 °C) to maximize solar self-consumption, without interfering with the strict baseline logic.
-
-### 0.22.6 (2026-11-05)
-
-**🐛 Bugfixes**
-
-- **Cycle Optimization & Hardware Sync (`main.ts`):**
-    - **Pre-Heating & Heating Limit Type Fix:** Fixed strict type comparison bugs (`boolean` vs. `number`) when evaluating `heatingLimit` and `VD1out` (`vd1`). Previously, boolean state values caused `isHeatingAllowedByLimit` and `vd1` to evaluate to `false`, which blocked pre-heating before hot water generation (raising `heating_curve_parallel_offset` to 35 °C), prevented the 10-minute base point reset, and skipped HUP voltage optimization.
-    - **Raw Data Fallbacks (`rawValues` / `rawParams`):** Added direct fallbacks to raw heat pump telemetry and parameter arrays in `runOptimizationSchedule` so cycle optimization, HUP control, and heating limit checks remain fully functional even if individual datapoints (`thresholdHeatingLimit`, `Mitteltemperatur`, `heatingLimit`, `VD1out`, etc.) are disabled in the ioBroker object tree.
-    - **Hardware Out-of-Sync Verification:** Enhanced `syncConfigValue` to verify target values against the live hardware parameter cache (`currentRawParams`), ensuring parameters are reliably written to the controller even if the local ioBroker state is disabled or out of sync with the heat pump.
 
 ## License
 
