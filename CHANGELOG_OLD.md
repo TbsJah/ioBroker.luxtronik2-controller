@@ -23,6 +23,38 @@
 ### 0.1.0 (2026-07-09)
 
 - initial release
+## 0.22.2 (2026-11-01)
+
+**🐛 Bugfixes & Tweaks**
+
+- **Cycle Optimization & PV Integration:** Fixed an issue where the cycle optimization was blocked during an active PV boost. The adapter now correctly forces seamless transitions between heating and hot water (without compressor shutdown and anti-cycle delays) even when solar surplus is available. A new handshake mechanism ensures that PV target temperatures are immediately and safely restored after the cycle optimization resets the baseline idle defaults.
+
+- **PV Surplus Management & Compressor Optimization:**
+    - Fixed read-only datapoint errors in `activateBoost` and `deactivateBoost` (now correctly targeting `temperature_hot_water_target`).
+    - Resolved baseline configuration mix-ups between `fusspunkt` and the heating parallel offset (`heating_temperature`).
+    - Fixed the heating saturation check (`isHzFull`) to prevent premature boost revocation.
+    - Implemented a seamless "PV-Boost Handshake" allowing cycle optimization to force hot water transitions even during active solar surplus without triggering anti-cycle compressor delays.
+
+- **ZIP Circulation & Timer Logic:**
+    - Fixed a bug where hot water timer slots (`WW_MoSo_...`) were mistakenly backed up and overwritten instead of circulation pump slots (`Zirkulation_MoSo_...`).
+    - Improved time string conversions and state restoration robustness.
+- **COP Calculation & Virtual States:**
+    - Fixed a UTC timezone offset in daily rollovers so COP snapshots trigger precisely at local midnight.
+    - Included defrosting cycles (`WP_BZ_akt = 4`) into the heating COP calculations and added clamping protection against negative energy deltas.
+    - Added an in-memory object cache (`ensuredObjects`) to drastically reduce redundant database write calls.
+    - Added a raw value fallback for total energy and thermal energy calculations if individual states are disabled in the object tree.
+- **Modbus & Raw Communication Stability:**
+    - Implemented a strict serial operation queue (mutex) with a 50ms release delay in `ModbusManager` to prevent TCP port 502 connection collisions.
+    - Added a 30-second request timeout (`AbortSignal.timeout`) to DTA backups and corrected file naming for fallback paths (`dta_history`).
+    - Expanded firmware version regex in `updateManager` to support `F1.`, `WWB`, and `smo` firmware formats.
+    - Added socket `close` event listeners and safe number roundings for raw write operations.
+- **Repository Compliance & Maintenance:**
+    - Added complete multi-language translations (i18n) for all configuration dropdown menus to meet strict ioBroker stable repository requirements.
+    - Cleaned up unpublished ghost versions from the `io-package.json` news section.
+    - Standardized the README changelog header format (`## Changelog`).
+
+    - **Repository Compliance:** Added missing multi-language translations (i18n) for all configuration dropdown menus (e.g. COP sources, PV modes) to meet strict ioBroker stable repository requirements.
+
 ## 0.22.1 (2026-10-28)
 
 **🔧 Maintenance & Compatibility**
