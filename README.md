@@ -96,8 +96,7 @@ You might see red error messages in the installation log related to `node-gyp`, 
 //### **WORK IN PROGRESS**
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 0.23.0 (2026-11-07)
 
 **🐛 Bugfixes & Tweaks**
 
@@ -136,18 +135,6 @@ You might see red error messages in the installation log related to `node-gyp`, 
 **🔧 Maintenance & Compatibility**
 
 - **Repository Compliance:** Added missing multi-language translations (i18n) for all configuration dropdown menus (e.g. COP sources, PV modes) to meet strict ioBroker stable repository requirements.
-
-### 0.22.4 (2026-11-01)
-
-**🐛 Bugfixes & Tweaks**
-
-- **PV Surplus Management (`pvManager.ts`):**
-    - **Cycle Completion & Reset Deadlock:** Fixed a critical bug in `initiateDeactivation` when `pv_finish_cycle` was enabled: the inactive operating mode (e.g., hot water while heating is running) is now immediately reset to baseline[cite: 26, 28, 29]. This prevents infinite cycle loops where cycle optimization erroneously triggered forced 60 °C hot water runs at the end of a heating cycle[cite: 25, 28].
-    - **Target Reset vs. PV Max:** Corrected cycle completion behavior so active compressor runs finish at normal baseline setpoints instead of continuing to heat to elevated PV boost targets with grid/battery power[cite: 26, 28, 29]. Added a dynamic timer to enforce the 10-minute minimum compressor run time before final reset[cite: 26].
-    - **Hysteresis Deadband & Timer Protection:** Prevented the deactivation timer (`pvStopTimer`) from being aborted by minor meter/battery balancing fluctuations in the deadband between the stop threshold and start threshold[cite: 26, 27, 29].
-    - **Startup Recovery:** Added baseline recovery during `initPvManagement` to clear orphaned boost targets left behind after an adapter update or reboot.
-    - **Input Parsing:** Added `parseConfigFloat` to safely parse decimal values formatted with commas (e.g., `"1,5"`) in the admin configuration[cite: 26, 29].
-    - **Direct Hardware Sync:** Switched state updates to `syncConfigValue` for immediate, queue-safe synchronization via native TCP and Modbus[cite: 25, 26].
 
 ## License
 
