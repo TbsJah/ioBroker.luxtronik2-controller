@@ -193,24 +193,26 @@ async function activateBoost(adapter) {
     return;
   }
   const config = adapter.config;
+  const thresholdStart = parseConfigFloat(config.pv_threshold_start, 2e3);
+  const totalSurplus = currentGridSurplusW + currentBatteryChargeW;
+  if (totalSurplus < thresholdStart) {
+    (0, import_logger.writeLog)(
+      `[PV] Activation aborted: Current surplus (${totalSurplus} W) is below start threshold (${thresholdStart} W).`,
+      "info"
+    );
+    return;
+  }
   try {
-    const wwPath = (0, import_stateMapping.getDpPath)("temperature_hot_water_target");
-    const hzPath = (0, import_stateMapping.getDpPath)("heating_temperature");
-    const currentWwState = wwPath ? await adapter.getStateAsync(wwPath) : null;
-    const currentHzState = hzPath ? await adapter.getStateAsync(hzPath) : null;
-    let baseWw = currentWwState && typeof currentWwState.val === "number" ? currentWwState.val : 54;
-    let baseHz = currentHzState && typeof currentHzState.val === "number" ? currentHzState.val : 0;
-    if (config.idle_defaults_aktiv) {
-      baseWw = parseConfigFloat(config.sync_warmwater_target_temperature, 54);
-      baseHz = 0;
-    }
-    originalWw = baseWw;
-    originalHz = baseHz;
+    originalWw = parseConfigFloat(config.sync_warmwater_target_temperature, 54);
+    originalHz = 0;
     pvIsBoostActive = true;
     pvWaitingForCycleEnd = false;
     activeBoostWwApplied = false;
     activeBoostHzApplied = false;
-    (0, import_logger.writeLog)("[PV] Timer finished. Activating boost logic...", "info");
+    (0, import_logger.writeLog)(
+      `[PV] Timer finished. Activating boost logic with clean config base (WW: ${originalWw}\xB0C, Hz: ${originalHz}K)...`,
+      "info"
+    );
     await evaluatePvBoost(adapter, true);
     const nowStr = (/* @__PURE__ */ new Date()).toISOString().replace("T", " ").substring(0, 19);
     const dpActive = (0, import_stateMapping.getDpPath)("pv_boost_active");
@@ -308,8 +310,8 @@ async function evaluatePvBoost(adapter, forceReapply = false) {
 async function deactivateBoost(adapter) {
   try {
     const config = adapter.config;
-    const targetWw = originalWw != null ? originalWw : parseConfigFloat(config.sync_warmwater_target_temperature, 54);
-    const targetHz = originalHz != null ? originalHz : 0;
+    const targetWw = parseConfigFloat(config.sync_warmwater_target_temperature, 54);
+    const targetHz = 0;
     (0, import_logger.writeLog)(`[PV] Reverting values to original base targets (WW: ${targetWw}\xB0C, Hz: ${targetHz}K).`, "info");
     await adapter.syncConfigValue("temperature_hot_water_target", targetWw);
     await adapter.syncConfigValue("heating_temperature", targetHz);

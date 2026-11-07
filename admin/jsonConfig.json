@@ -889,49 +889,81 @@
 				},
 				"cop_source_power": {
 					"type": "select",
+
 					"label": {
 						"en": "Data source for power consumption",
+
 						"de": "Datenquelle für Stromverbrauch"
 					},
+
 					"disabled": "!data.cop_calculation_active",
+
 					"options": [
 						{
 							"label": {
 								"en": "Internal (Luxtronik estimates)",
+
 								"de": "Intern (Luxtronik Schätzwerte)",
+
 								"ru": "Внутренний (оценки Luxtronik)",
+
 								"pt": "Interno (estimativas Luxtronik)",
+
 								"nl": "Intern (Luxtronik schattingen)",
+
 								"fr": "Interne (estimations Luxtronik)",
+
 								"it": "Interno (stime Luxtronik)",
+
 								"es": "Interno (estimaciones Luxtronik)",
+
 								"pl": "Wewnętrzne (szacunki Luxtronik)",
+
 								"uk": "Внутрішній (оцінки Luxtronik)",
+
 								"zh-cn": "内部 (Luxtronik 估计值)"
 							},
+
 							"value": "internal"
 						},
+
 						{
 							"label": {
 								"en": "External Object ID (e.g. Shelly)",
+
 								"de": "Externe Objekt-ID (z.B. Shelly)",
+
 								"ru": "Внешний Object ID (например, Shelly)",
+
 								"pt": "ID do objeto externo (ex. Shelly)",
+
 								"nl": "Externe Object-ID (bijv. Shelly)",
+
 								"fr": "ID d'objet externe (ex. Shelly)",
+
 								"it": "ID oggetto esterno (es. Shelly)",
+
 								"es": "ID de objeto externo (ej. Shelly)",
+
 								"pl": "Zewnętrzne ID obiektu (np. Shelly)",
+
 								"uk": "Зовнішній Object ID (наприклад, Shelly)",
+
 								"zh-cn": "外部对象 ID (例如 Shelly)"
 							},
+
 							"value": "external"
 						}
 					],
+
 					"xs": 12,
+
 					"sm": 12,
+
 					"md": 6,
+
 					"lg": 6,
+
 					"xl": 6
 				},
 				"cop_oid_power_total": {
@@ -1004,12 +1036,7 @@
 							},
 							"value": "external"
 						}
-					],
-					"xs": 12,
-					"sm": 12,
-					"md": 6,
-					"lg": 6,
-					"xl": 6
+					]
 				},
 				"cop_oid_thermal_total": {
 					"type": "objectId",

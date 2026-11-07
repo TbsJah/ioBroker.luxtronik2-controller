@@ -96,6 +96,15 @@ You might see red error messages in the installation log related to `node-gyp`, 
 //### **WORK IN PROGRESS**
 
 ## Changelog
+
+### **WORK IN PROGRESS**
+
+**🐛 Bugfixes**
+
+- **PV Surplus Management & Cycle Optimization:**
+    - **Zero-Drift Baseline Calculation:** Rewrote the PV boost baseline logic in `pvManager.ts`. The adapter no longer reads live datapoint states to calculate the boost, but strictly enforces the configured baseline values (`sync_warmwater_target_temperature` and `0K` for heating). This permanently resolves the "snowball effect" where the hot water target could incrementally drift up to the 70 °C safety limit.
+    - **Cycle Coupling Handshake:** Enhanced the intelligent cycle optimization (`main.ts`) during active PV surplus. At the end of a heating cycle, the adapter now seamlessly couples a hot water cycle and intelligently enforces the PV boost target (e.g., 60 °C) to maximize solar self-consumption, without interfering with the strict baseline logic.
+
 ### 0.22.6 (2026-11-05)
 
 **🐛 Bugfixes**

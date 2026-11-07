@@ -228,7 +228,7 @@ export function handlePvFeedInChange(adapter: LuxtronikAdapter, id: string, stat
 }
 
 /**
- * Legt die Originalwerte ab und startet den dynamischen Boost.
+ * Startet den dynamischen PV-Boost basierend auf den strikten Konfigurationswerten.
  *
  * @param adapter - Die aktuelle Adapter-Instanz.
  */
@@ -239,29 +239,33 @@ async function activateBoost(adapter: LuxtronikAdapter): Promise<void> {
 	}
 
 	const config = adapter.config;
+
+	// SICHERHEITS-CHECK: Prüfen, ob jetzt im Moment überhaupt noch genügend Überschuss da ist!
+	const thresholdStart = parseConfigFloat(config.pv_threshold_start, 2000);
+	const totalSurplus = currentGridSurplusW + currentBatteryChargeW;
+	if (totalSurplus < thresholdStart) {
+		writeLog(
+			`[PV] Activation aborted: Current surplus (${totalSurplus} W) is below start threshold (${thresholdStart} W).`,
+			'info',
+		);
+		return;
+	}
+
 	try {
-		const wwPath = getDpPath('temperature_hot_water_target');
-		const hzPath = getDpPath('heating_temperature');
+		// GENIAL EINFACH & SICHER: Wir lesen NIEMALS den aktuellen (vielleicht verstellten) Datenpunkt aus!
+		// Basis ist immer strikt der Vorgabewert aus der Adapter-Konfiguration + 0 K für Heizung.
+		originalWw = parseConfigFloat(config.sync_warmwater_target_temperature, 54);
+		originalHz = 0;
 
-		const currentWwState = wwPath ? await adapter.getStateAsync(wwPath) : null;
-		const currentHzState = hzPath ? await adapter.getStateAsync(hzPath) : null;
-
-		let baseWw = currentWwState && typeof currentWwState.val === 'number' ? currentWwState.val : 54;
-		let baseHz = currentHzState && typeof currentHzState.val === 'number' ? currentHzState.val : 0;
-
-		if (config.idle_defaults_aktiv) {
-			baseWw = parseConfigFloat(config.sync_warmwater_target_temperature, 54);
-			baseHz = 0;
-		}
-
-		originalWw = baseWw;
-		originalHz = baseHz;
 		pvIsBoostActive = true;
 		pvWaitingForCycleEnd = false;
 		activeBoostWwApplied = false;
 		activeBoostHzApplied = false;
 
-		writeLog('[PV] Timer finished. Activating boost logic...', 'info');
+		writeLog(
+			`[PV] Timer finished. Activating boost logic with clean config base (WW: ${originalWw}°C, Hz: ${originalHz}K)...`,
+			'info',
+		);
 		await evaluatePvBoost(adapter, true);
 
 		const nowStr = new Date().toISOString().replace('T', ' ').substring(0, 19);
@@ -380,15 +384,17 @@ export async function evaluatePvBoost(adapter: LuxtronikAdapter, forceReapply = 
 }
 
 /**
- * Setzt die Werte hart auf den Ursprung zurück.
+ * Setzt die Werte hart auf die Konfigurations-Standards zurück.
  *
  * @param adapter - Die aktuelle Adapter-Instanz.
  */
 async function deactivateBoost(adapter: LuxtronikAdapter): Promise<void> {
 	try {
 		const config = adapter.config;
-		const targetWw = originalWw ?? parseConfigFloat(config.sync_warmwater_target_temperature, 54);
-		const targetHz = originalHz ?? 0;
+
+		// Rückfallwerte IMMER aus der Konfiguration nehmen
+		const targetWw = parseConfigFloat(config.sync_warmwater_target_temperature, 54);
+		const targetHz = 0;
 
 		writeLog(`[PV] Reverting values to original base targets (WW: ${targetWw}°C, Hz: ${targetHz}K).`, 'info');
 

@@ -574,6 +574,12 @@ class Luxtronik2Controller extends utils.Adapter {
           }
           if (wwSoll - wwIst > 2 && ruecklauf >= ruecklaufSoll + heizenHysterese - 0.1) {
             let forceSoll = wwIst + wwHysterese + 1.5;
+            if (import_pvManager.pvIsBoostActive) {
+              const baseWw = parseFloat(String(config.sync_warmwater_target_temperature).replace(",", ".")) || 54;
+              const boostWw = parseFloat(String(config.pv_boost_ww).replace(",", ".")) || 0;
+              const pvTarget = baseWw + boostWw;
+              forceSoll = Math.max(forceSoll, pvTarget);
+            }
             if (forceSoll > 70) {
               forceSoll = 70;
             }

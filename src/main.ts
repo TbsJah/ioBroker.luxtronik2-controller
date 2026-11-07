@@ -781,6 +781,20 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 					// Warmwassertakt am Ende des Heiztaktes erzwingen
 					if (wwSoll - wwIst > 2 && ruecklauf >= ruecklaufSoll + heizenHysterese - 0.1) {
 						let forceSoll = wwIst + wwHysterese + 1.5;
+
+						// Handshake mit dem PV-Manager:
+						// Wenn PV aktiv ist, stellen wir sicher, dass der Takt mindestens bis zum PV-Sollwert gefahren wird
+						if (pvIsBoostActive) {
+							const baseWw =
+								parseFloat(String(config.sync_warmwater_target_temperature).replace(',', '.')) || 54;
+							const boostWw = parseFloat(String(config.pv_boost_ww).replace(',', '.')) || 0;
+							const pvTarget = baseWw + boostWw;
+
+							// Nimmt den höheren Wert: Entweder das reguläre PV-Ziel (z.B. 60) oder
+							// den Wert, der minimal nötig ist, um den Takt jetzt künstlich anzustoßen (z.B. 60.5)
+							forceSoll = Math.max(forceSoll, pvTarget);
+						}
+
 						if (forceSoll > 70) {
 							forceSoll = 70;
 						}
