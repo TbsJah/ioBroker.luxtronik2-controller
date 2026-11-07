@@ -96,6 +96,15 @@ You might see red error messages in the installation log related to `node-gyp`, 
 //### **WORK IN PROGRESS**
 
 ## Changelog
+
+### **WORK IN PROGRESS**
+
+**🐛 Bugfixes & Tweaks**
+
+- **Configuration & Baseline Logic:**
+    - **Custom Heating Offset Baseline:** Added a new configuration field in the "Idle Defaults" tab for the default heating target temperature offset (Parallelverschiebung)[cite: 10].
+    - **Preserved Baselines:** The idle reset mechanism (`main.ts`) and the PV surplus manager (`pvManager.ts`) now respect this custom baseline (e.g., +1 K) instead of hard-resetting the offset to `0 K`[cite: 7, 13]. This ensures that your manual baseline heating curve is perfectly preserved when returning from a PV boost or entering standby.
+
 ### 0.22.8 (2026-11-07)
 
 **🐛 Bugfixes & Tweaks**

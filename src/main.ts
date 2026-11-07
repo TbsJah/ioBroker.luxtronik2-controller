@@ -486,7 +486,10 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 			const config = this.config as Record<string, any>;
 			await this.syncConfigValue('heating_curve_end_point', config.endpunkt ?? 23);
 			await this.syncConfigValue('heating_curve_parallel_offset', config.fusspunkt ?? 21.7);
-			await this.syncConfigValue('heating_temperature', 0);
+
+			// FIX: Hier nicht mehr hart auf 0, sondern auf deinen eigenen Config-Wert setzen
+			await this.syncConfigValue('heating_temperature', config.sync_heating_temperature ?? 0);
+
 			await this.syncConfigValue(
 				'heating_system_circ_pump_voltage_minimal',
 				config.sync_heating_system_circ_pump_voltage_minimal_heating ?? 3,

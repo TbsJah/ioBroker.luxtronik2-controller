@@ -375,24 +375,24 @@ class Luxtronik2Controller extends utils.Adapter {
    * @returns A promise that resolves when all default configuration tasks resolve.
    */
   async setIdleDefaults() {
-    var _a, _b, _c, _d, _e, _f, _g, _h;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _i;
     try {
       const config = this.config;
       await this.syncConfigValue("heating_curve_end_point", (_a = config.endpunkt) != null ? _a : 23);
       await this.syncConfigValue("heating_curve_parallel_offset", (_b = config.fusspunkt) != null ? _b : 21.7);
-      await this.syncConfigValue("heating_temperature", 0);
+      await this.syncConfigValue("heating_temperature", (_c = config.sync_heating_temperature) != null ? _c : 0);
       await this.syncConfigValue(
         "heating_system_circ_pump_voltage_minimal",
-        (_c = config.sync_heating_system_circ_pump_voltage_minimal_heating) != null ? _c : 3
+        (_d = config.sync_heating_system_circ_pump_voltage_minimal_heating) != null ? _d : 3
       );
       await this.syncConfigValue(
         "heating_system_circ_pump_voltage_nominal",
-        (_d = config.sync_heating_system_circ_pump_voltage_nominal_heating) != null ? _d : 7
+        (_e = config.sync_heating_system_circ_pump_voltage_nominal_heating) != null ? _e : 7
       );
-      await this.syncConfigValue("temperature_hot_water_target", (_e = config.sync_warmwater_target_temperature) != null ? _e : 54);
-      await this.syncConfigValue("returnTemperatureHysteresis", (_f = config.sync_return_temperature_hysteresis) != null ? _f : 1.5);
-      await this.syncConfigValue("zip_aktiv", (_g = config.zip_aktiv) != null ? _g : 0);
-      await this.syncConfigValue("Heizen_nach_Wasser", (_h = config.Heating_after_warmwater) != null ? _h : false);
+      await this.syncConfigValue("temperature_hot_water_target", (_f = config.sync_warmwater_target_temperature) != null ? _f : 54);
+      await this.syncConfigValue("returnTemperatureHysteresis", (_g = config.sync_return_temperature_hysteresis) != null ? _g : 1.5);
+      await this.syncConfigValue("zip_aktiv", (_h = config.zip_aktiv) != null ? _h : 0);
+      await this.syncConfigValue("Heizen_nach_Wasser", (_i = config.Heating_after_warmwater) != null ? _i : false);
       if (import_pvManager.pvIsBoostActive) {
         await (0, import_pvManager.evaluatePvBoost)(this, true);
       }

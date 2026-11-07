@@ -691,6 +691,21 @@
 					"lg": 4,
 					"xl": 4
 				},
+				"sync_heating_temperature": {
+					"type": "number",
+					"label": {
+						"en": "Heating target temp offset (K)",
+						"de": "Heizen Parallelverschiebung (K)"
+					},
+					"hidden": "!data.idle_defaults_aktiv",
+					"default": 0,
+					"step": 0.5,
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"lg": 4,
+					"xl": 4
+				},
 				"sync_return_temperature_hysteresis": {
 					"type": "number",
 					"label": {

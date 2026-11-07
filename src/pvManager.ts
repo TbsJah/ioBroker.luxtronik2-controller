@@ -252,10 +252,9 @@ async function activateBoost(adapter: LuxtronikAdapter): Promise<void> {
 	}
 
 	try {
-		// GENIAL EINFACH & SICHER: Wir lesen NIEMALS den aktuellen (vielleicht verstellten) Datenpunkt aus!
-		// Basis ist immer strikt der Vorgabewert aus der Adapter-Konfiguration + 0 K für Heizung.
+		// GENIAL EINFACH & SICHER: Wir nehmen den Vorgabewert aus der Konfiguration
 		originalWw = parseConfigFloat(config.sync_warmwater_target_temperature, 54);
-		originalHz = 0;
+		originalHz = parseConfigFloat(config.sync_heating_temperature, 0);
 
 		pvIsBoostActive = true;
 		pvWaitingForCycleEnd = false;
@@ -394,7 +393,7 @@ async function deactivateBoost(adapter: LuxtronikAdapter): Promise<void> {
 
 		// Rückfallwerte IMMER aus der Konfiguration nehmen
 		const targetWw = parseConfigFloat(config.sync_warmwater_target_temperature, 54);
-		const targetHz = 0;
+		const targetHz = parseConfigFloat(config.sync_heating_temperature, 0);
 
 		writeLog(`[PV] Reverting values to original base targets (WW: ${targetWw}°C, Hz: ${targetHz}K).`, 'info');
 
@@ -437,8 +436,9 @@ async function initiateDeactivation(adapter: LuxtronikAdapter): Promise<void> {
 	}
 
 	const config = adapter.config;
-	const targetWw = originalWw ?? parseConfigFloat(config.sync_warmwater_target_temperature, 54);
-	const targetHz = originalHz ?? 0;
+	// Rückfallwerte IMMER aus der Konfiguration nehmen
+	const targetWw = parseConfigFloat(config.sync_warmwater_target_temperature, 54);
+	const targetHz = parseConfigFloat(config.sync_heating_temperature, 0);
 
 	writeLog('[PV] Deactivation timer finished.', 'info');
 

@@ -204,7 +204,7 @@ async function activateBoost(adapter) {
   }
   try {
     originalWw = parseConfigFloat(config.sync_warmwater_target_temperature, 54);
-    originalHz = 0;
+    originalHz = parseConfigFloat(config.sync_heating_temperature, 0);
     pvIsBoostActive = true;
     pvWaitingForCycleEnd = false;
     activeBoostWwApplied = false;
@@ -311,7 +311,7 @@ async function deactivateBoost(adapter) {
   try {
     const config = adapter.config;
     const targetWw = parseConfigFloat(config.sync_warmwater_target_temperature, 54);
-    const targetHz = 0;
+    const targetHz = parseConfigFloat(config.sync_heating_temperature, 0);
     (0, import_logger.writeLog)(`[PV] Reverting values to original base targets (WW: ${targetWw}\xB0C, Hz: ${targetHz}K).`, "info");
     await adapter.syncConfigValue("temperature_hot_water_target", targetWw);
     await adapter.syncConfigValue("heating_temperature", targetHz);
@@ -340,8 +340,8 @@ async function initiateDeactivation(adapter) {
     return;
   }
   const config = adapter.config;
-  const targetWw = originalWw != null ? originalWw : parseConfigFloat(config.sync_warmwater_target_temperature, 54);
-  const targetHz = originalHz != null ? originalHz : 0;
+  const targetWw = parseConfigFloat(config.sync_warmwater_target_temperature, 54);
+  const targetHz = parseConfigFloat(config.sync_heating_temperature, 0);
   (0, import_logger.writeLog)("[PV] Deactivation timer finished.", "info");
   if (config.pv_finish_cycle) {
     try {
