@@ -96,6 +96,16 @@ You might see red error messages in the installation log related to `node-gyp`, 
 //### **WORK IN PROGRESS**
 
 ## Changelog
+
+### **WORK IN PROGRESS**
+
+**🐛 Bugfixes & Tweaks**
+
+- **COP & Efficiency Calculation (`copManager.ts`):**
+    - **Hot Water Hardware Bug Fallback:** Added a dynamic fallback mechanism to bypass a hardware bug present in several Luxtronik and Novelan firmwares where the internal electrical meter for hot water (`energy_warmwater`) permanently reports `0`.
+    - **Smart Delta Routing:** When the heat pump is actively generating hot water (`WP_BZ_akt === 1`), the COP manager now checks if the internal DHW power meter is stuck at zero. If so, it automatically intercepts the delta from the total energy meter (`energy_total`) over the last polling interval and securely routes it into the Hot Water COP bucket.
+    - **Continuous Standby Sync:** Enhanced the database tracking to ensure the total energy fallback counter is continuously synced even during standby or heating modes. This prevents idle power consumption from accumulating in the background and falsely distorting the next hot water efficiency calculation.
+
 ### 0.22.7 (2026-11-07)
 
 **🐛 Bugfixes**

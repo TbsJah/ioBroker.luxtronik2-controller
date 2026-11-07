@@ -37,17 +37,28 @@ export async function processCopData(adapter: LuxtronikAdapter, bzVal: string): 
 	try {
 		writeLog(`COP Manager gestartet. Modus: ${bzVal}`, 'debug');
 
-		// 1. STROMVERBRAUCH ABRUFEN
+		// 1. STROMVERBRAUCH ABRUFEN (inkl. Gesamt-Zähler als Fallback für WW)
 		let currentPower = 0;
+		let currentPowerTotalFallback = 0;
+
 		if (config.cop_source_power === 'external' && config.cop_oid_power_total) {
 			const state = await adapter.getForeignStateAsync(config.cop_oid_power_total);
 			if (state && typeof state.val === 'number') {
 				currentPower = state.val;
+				currentPowerTotalFallback = state.val;
 			}
 		} else {
-			const state = await adapter.getStateAsync(getDpPath('energy_total'));
-			if (state && typeof state.val === 'number') {
-				currentPower = state.val;
+			// INTERN: Hole spezifischen Zähler je nach Betriebsart (Heizen/WW)
+			const dpSuffix = bzVal === '1' ? 'energy_warmwater' : 'energy_heating';
+			const stateSpecific = await adapter.getStateAsync(getDpPath(dpSuffix));
+			if (stateSpecific && typeof stateSpecific.val === 'number') {
+				currentPower = stateSpecific.val;
+			}
+
+			// Zusätzlich IMMER den Gesamtzähler als Fallback auslesen
+			const stateTotal = await adapter.getStateAsync(getDpPath('energy_total'));
+			if (stateTotal && typeof stateTotal.val === 'number') {
+				currentPowerTotalFallback = stateTotal.val;
 			}
 		}
 
@@ -59,7 +70,9 @@ export async function processCopData(adapter: LuxtronikAdapter, bzVal: string): 
 				currentThermal = state.val;
 			}
 		} else {
-			const state = await adapter.getStateAsync(getDpPath('thermalenergy_total'));
+			// INTERN: Hole spezifischen Wärmemengenzähler je nach Betriebsart
+			const dpSuffix = bzVal === '1' ? 'thermalenergy_warmwater' : 'thermalenergy_heating';
+			const state = await adapter.getStateAsync(getDpPath(dpSuffix));
 			if (state && typeof state.val === 'number') {
 				currentThermal = state.val;
 			}
@@ -67,12 +80,24 @@ export async function processCopData(adapter: LuxtronikAdapter, bzVal: string): 
 
 		// --- ABSOLUT SICHERE INITIALISIERUNG AUS DER DATENBANK ---
 		const rawPowerId = 'hidden.cop_buckets.last_raw_power';
+		const rawPowerTotalId = 'hidden.cop_buckets.last_raw_power_total_fallback';
 		const rawThermalId = 'hidden.cop_buckets.last_raw_thermal';
 
 		if (!isInitialized) {
 			await ensureCopObject(adapter, rawPowerId, {
 				type: 'state',
 				common: { name: 'Last Raw Power', type: 'number', role: 'value', read: true, write: false },
+				native: {},
+			});
+			await ensureCopObject(adapter, rawPowerTotalId, {
+				type: 'state',
+				common: {
+					name: 'Last Raw Power Total Fallback',
+					type: 'number',
+					role: 'value',
+					read: true,
+					write: false,
+				},
 				native: {},
 			});
 			await ensureCopObject(adapter, rawThermalId, {
@@ -82,11 +107,14 @@ export async function processCopData(adapter: LuxtronikAdapter, bzVal: string): 
 			});
 
 			const lastPowerStateInit = await adapter.getStateAsync(rawPowerId);
+			const lastPowerTotalStateInit = await adapter.getStateAsync(rawPowerTotalId);
 			const lastThermalStateInit = await adapter.getStateAsync(rawThermalId);
 
-			// Wenn noch nie was gespeichert wurde, nimm den aktuellen Wert
 			if (!lastPowerStateInit || lastPowerStateInit.val === null) {
 				await adapter.setState(rawPowerId, { val: currentPower, ack: true });
+			}
+			if (!lastPowerTotalStateInit || lastPowerTotalStateInit.val === null) {
+				await adapter.setState(rawPowerTotalId, { val: currentPowerTotalFallback, ack: true });
 			}
 			if (!lastThermalStateInit || lastThermalStateInit.val === null) {
 				await adapter.setState(rawThermalId, { val: currentThermal, ack: true });
@@ -97,33 +125,59 @@ export async function processCopData(adapter: LuxtronikAdapter, bzVal: string): 
 			return;
 		}
 
-		// 3. LETZTE ZÄHLERSTÄNDE AUS DER DATENBANK LADEN (Überlebt jeden Neustart!)
+		// 3. LETZTE ZÄHLERSTÄNDE AUS DER DATENBANK LADEN
 		const lastPowerState = await adapter.getStateAsync(rawPowerId);
+		const lastPowerTotalState = await adapter.getStateAsync(rawPowerTotalId);
 		const lastThermalState = await adapter.getStateAsync(rawThermalId);
 
+		const lastPower = lastPowerState && typeof lastPowerState.val === 'number' ? lastPowerState.val : currentPower;
 		const lastPowerTotal =
-			lastPowerState && typeof lastPowerState.val === 'number' ? lastPowerState.val : currentPower;
-		const lastThermalTotal =
+			lastPowerTotalState && typeof lastPowerTotalState.val === 'number'
+				? lastPowerTotalState.val
+				: currentPowerTotalFallback;
+		const lastThermal =
 			lastThermalState && typeof lastThermalState.val === 'number' ? lastThermalState.val : currentThermal;
 
 		// 4. DELTA BERECHNEN (Gegen negative Werte absichern)
-		const deltaPower = Math.max(0, currentPower - lastPowerTotal);
-		const deltaThermal = Math.max(0, currentThermal - lastThermalTotal);
+		let deltaPower = Math.max(0, currentPower - lastPower);
+		const deltaThermal = Math.max(0, currentThermal - lastThermal);
 
-		// Falls ein externer Zähler genullt wurde (Reset), Referenzwert nachziehen
-		if (currentPower < lastPowerTotal) {
+		// =========================================================
+		// HOT WATER FALLBACK (Wenn interner WW-Zähler 0 meldet)
+		// =========================================================
+		if (bzVal === '1' && config.cop_source_power === 'internal' && deltaPower === 0) {
+			const deltaTotalFallback = Math.max(0, currentPowerTotalFallback - lastPowerTotal);
+			if (deltaTotalFallback > 0) {
+				deltaPower = deltaTotalFallback;
+				writeLog(
+					`[COP] Hardware bug detected: Hot water power meter stays at 0. Using total energy delta (${deltaPower} kWh) as fallback.`,
+					'debug',
+				);
+			}
+		}
+
+		// Referenzwerte nachziehen, falls externe Zähler genullt wurden
+		if (currentPower < lastPower) {
 			await adapter.setState(rawPowerId, { val: currentPower, ack: true });
 		}
-		if (currentThermal < lastThermalTotal) {
+		if (currentPowerTotalFallback < lastPowerTotal) {
+			await adapter.setState(rawPowerTotalId, { val: currentPowerTotalFallback, ack: true });
+		}
+		if (currentThermal < lastThermal) {
 			await adapter.setState(rawThermalId, { val: currentThermal, ack: true });
 		}
 
 		// 5. NEUE ZÄHLERSTÄNDE SOFORT FÜR DEN NÄCHSTEN DURCHLAUF IN DB SPEICHERN
-		if (deltaPower > 0) {
+		if (deltaPower > 0 || (bzVal === '1' && deltaPower === 0)) {
 			await adapter.setState(rawPowerId, { val: currentPower, ack: true });
 		}
 		if (deltaThermal > 0) {
 			await adapter.setState(rawThermalId, { val: currentThermal, ack: true });
+		}
+		// WICHTIG: Den Total-Fallback-Zähler IMMER nachziehen, wenn er gestiegen ist (auch im Standby/Heizen),
+		// damit sich kein Leerlauf-Strom anstaut und fälschlicherweise beim nächsten WW-Start addiert wird!
+		if (currentPowerTotalFallback > lastPowerTotal) {
+			await adapter.setState(rawPowerTotalId, { val: currentPowerTotalFallback, ack: true });
 		}
 
 		// 6. ZEITWECHSEL PRÜFEN (Hat ein neuer Tag/Monat/Jahr begonnen?)
@@ -131,6 +185,8 @@ export async function processCopData(adapter: LuxtronikAdapter, bzVal: string): 
 
 		// 7. WERTE IN DIE ENDLOS-ZÄHLER VERTEILEN (inkl. Abtauen = '4' für Heizung)
 		if (deltaPower > 0 || deltaThermal > 0) {
+			// Wenn 'Intern' gewählt ist, haben wir oben bereits das modusspezifische Delta ermittelt.
+			// Bei 'Extern' (Gesamtzähler) wird das Gesamtdelta in die Kategorien gefiltert.
 			await addDeltaToBucket(adapter, 'Total', deltaPower, deltaThermal);
 
 			if (bzVal === '0' || bzVal === '4') {

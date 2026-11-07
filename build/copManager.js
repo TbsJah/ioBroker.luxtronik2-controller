@@ -40,15 +40,22 @@ async function processCopData(adapter, bzVal) {
   try {
     (0, import_logger.writeLog)(`COP Manager gestartet. Modus: ${bzVal}`, "debug");
     let currentPower = 0;
+    let currentPowerTotalFallback = 0;
     if (config.cop_source_power === "external" && config.cop_oid_power_total) {
       const state = await adapter.getForeignStateAsync(config.cop_oid_power_total);
       if (state && typeof state.val === "number") {
         currentPower = state.val;
+        currentPowerTotalFallback = state.val;
       }
     } else {
-      const state = await adapter.getStateAsync((0, import_stateMapping.getDpPath)("energy_total"));
-      if (state && typeof state.val === "number") {
-        currentPower = state.val;
+      const dpSuffix = bzVal === "1" ? "energy_warmwater" : "energy_heating";
+      const stateSpecific = await adapter.getStateAsync((0, import_stateMapping.getDpPath)(dpSuffix));
+      if (stateSpecific && typeof stateSpecific.val === "number") {
+        currentPower = stateSpecific.val;
+      }
+      const stateTotal = await adapter.getStateAsync((0, import_stateMapping.getDpPath)("energy_total"));
+      if (stateTotal && typeof stateTotal.val === "number") {
+        currentPowerTotalFallback = stateTotal.val;
       }
     }
     let currentThermal = 0;
@@ -58,17 +65,30 @@ async function processCopData(adapter, bzVal) {
         currentThermal = state.val;
       }
     } else {
-      const state = await adapter.getStateAsync((0, import_stateMapping.getDpPath)("thermalenergy_total"));
+      const dpSuffix = bzVal === "1" ? "thermalenergy_warmwater" : "thermalenergy_heating";
+      const state = await adapter.getStateAsync((0, import_stateMapping.getDpPath)(dpSuffix));
       if (state && typeof state.val === "number") {
         currentThermal = state.val;
       }
     }
     const rawPowerId = "hidden.cop_buckets.last_raw_power";
+    const rawPowerTotalId = "hidden.cop_buckets.last_raw_power_total_fallback";
     const rawThermalId = "hidden.cop_buckets.last_raw_thermal";
     if (!isInitialized) {
       await ensureCopObject(adapter, rawPowerId, {
         type: "state",
         common: { name: "Last Raw Power", type: "number", role: "value", read: true, write: false },
+        native: {}
+      });
+      await ensureCopObject(adapter, rawPowerTotalId, {
+        type: "state",
+        common: {
+          name: "Last Raw Power Total Fallback",
+          type: "number",
+          role: "value",
+          read: true,
+          write: false
+        },
         native: {}
       });
       await ensureCopObject(adapter, rawThermalId, {
@@ -77,9 +97,13 @@ async function processCopData(adapter, bzVal) {
         native: {}
       });
       const lastPowerStateInit = await adapter.getStateAsync(rawPowerId);
+      const lastPowerTotalStateInit = await adapter.getStateAsync(rawPowerTotalId);
       const lastThermalStateInit = await adapter.getStateAsync(rawThermalId);
       if (!lastPowerStateInit || lastPowerStateInit.val === null) {
         await adapter.setState(rawPowerId, { val: currentPower, ack: true });
+      }
+      if (!lastPowerTotalStateInit || lastPowerTotalStateInit.val === null) {
+        await adapter.setState(rawPowerTotalId, { val: currentPowerTotalFallback, ack: true });
       }
       if (!lastThermalStateInit || lastThermalStateInit.val === null) {
         await adapter.setState(rawThermalId, { val: currentThermal, ack: true });
@@ -89,22 +113,40 @@ async function processCopData(adapter, bzVal) {
       return;
     }
     const lastPowerState = await adapter.getStateAsync(rawPowerId);
+    const lastPowerTotalState = await adapter.getStateAsync(rawPowerTotalId);
     const lastThermalState = await adapter.getStateAsync(rawThermalId);
-    const lastPowerTotal = lastPowerState && typeof lastPowerState.val === "number" ? lastPowerState.val : currentPower;
-    const lastThermalTotal = lastThermalState && typeof lastThermalState.val === "number" ? lastThermalState.val : currentThermal;
-    const deltaPower = Math.max(0, currentPower - lastPowerTotal);
-    const deltaThermal = Math.max(0, currentThermal - lastThermalTotal);
-    if (currentPower < lastPowerTotal) {
+    const lastPower = lastPowerState && typeof lastPowerState.val === "number" ? lastPowerState.val : currentPower;
+    const lastPowerTotal = lastPowerTotalState && typeof lastPowerTotalState.val === "number" ? lastPowerTotalState.val : currentPowerTotalFallback;
+    const lastThermal = lastThermalState && typeof lastThermalState.val === "number" ? lastThermalState.val : currentThermal;
+    let deltaPower = Math.max(0, currentPower - lastPower);
+    const deltaThermal = Math.max(0, currentThermal - lastThermal);
+    if (bzVal === "1" && config.cop_source_power === "internal" && deltaPower === 0) {
+      const deltaTotalFallback = Math.max(0, currentPowerTotalFallback - lastPowerTotal);
+      if (deltaTotalFallback > 0) {
+        deltaPower = deltaTotalFallback;
+        (0, import_logger.writeLog)(
+          `[COP] Hardware bug detected: Hot water power meter stays at 0. Using total energy delta (${deltaPower} kWh) as fallback.`,
+          "debug"
+        );
+      }
+    }
+    if (currentPower < lastPower) {
       await adapter.setState(rawPowerId, { val: currentPower, ack: true });
     }
-    if (currentThermal < lastThermalTotal) {
+    if (currentPowerTotalFallback < lastPowerTotal) {
+      await adapter.setState(rawPowerTotalId, { val: currentPowerTotalFallback, ack: true });
+    }
+    if (currentThermal < lastThermal) {
       await adapter.setState(rawThermalId, { val: currentThermal, ack: true });
     }
-    if (deltaPower > 0) {
+    if (deltaPower > 0 || bzVal === "1" && deltaPower === 0) {
       await adapter.setState(rawPowerId, { val: currentPower, ack: true });
     }
     if (deltaThermal > 0) {
       await adapter.setState(rawThermalId, { val: currentThermal, ack: true });
+    }
+    if (currentPowerTotalFallback > lastPowerTotal) {
+      await adapter.setState(rawPowerTotalId, { val: currentPowerTotalFallback, ack: true });
     }
     await handleTimeRollover(adapter);
     if (deltaPower > 0 || deltaThermal > 0) {
