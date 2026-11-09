@@ -102,8 +102,7 @@ You might see red error messages in the installation log related to `node-gyp`, 
 //### **WORK IN PROGRESS**
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 0.24.0 (2026-11-09)
 
 **🐛 Bugfixes & Tweaks**
 
@@ -142,14 +141,6 @@ You might see red error messages in the installation log related to `node-gyp`, 
     - **Hot Water Hardware Bug Fallback:** Added a dynamic fallback mechanism to bypass a hardware bug present in several Luxtronik and Novelan firmwares where the internal electrical meter for hot water (`energy_warmwater`) permanently reports `0`.
     - **Smart Delta Routing:** When the heat pump is actively generating hot water (`WP_BZ_akt === 1`), the COP manager now checks if the internal DHW power meter is stuck at zero. If so, it automatically intercepts the delta from the total energy meter (`energy_total`) over the last polling interval and securely routes it into the Hot Water COP bucket.
     - **Continuous Standby Sync:** Enhanced the database tracking to ensure the total energy fallback counter is continuously synced even during standby or heating modes. This prevents idle power consumption from accumulating in the background and falsely distorting the next hot water efficiency calculation.
-
-### 0.22.7 (2026-11-07)
-
-**🐛 Bugfixes**
-
-- **PV Surplus Management & Cycle Optimization:**
-    - **Zero-Drift Baseline Calculation:** Rewrote the PV boost baseline logic in `pvManager.ts`. The adapter no longer reads live datapoint states to calculate the boost, but strictly enforces the configured baseline values (`sync_warmwater_target_temperature` and `0K` for heating). This permanently resolves the "snowball effect" where the hot water target could incrementally drift up to the 70 °C safety limit.
-    - **Cycle Coupling Handshake:** Enhanced the intelligent cycle optimization (`main.ts`) during active PV surplus. At the end of a heating cycle, the adapter now seamlessly couples a hot water cycle and intelligently enforces the PV boost target (e.g., 60 °C) to maximize solar self-consumption, without interfering with the strict baseline logic.
 
 ## License
 
