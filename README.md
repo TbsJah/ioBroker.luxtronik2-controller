@@ -13,7 +13,7 @@
 
 This ioBroker adapter enables the local control, optimization, and monitoring of heat pumps with [Luxtronik 2.x / 3.x controllers](https://www.alpha-innotec.com/en/products/accessories/control/luxtronik) (e.g., Alpha Innotec, Novelan). The adapter is written entirely in TypeScript.
 
-Wer einen Kaffee spendieren will: https://paypal.me/TJahnke
+**If you like this project and want to support its development, feel free to drop a tip here: https://paypal.me/TJahnke**
 
 ## Acknowledgements & History
 
