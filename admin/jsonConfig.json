@@ -88,6 +88,137 @@
 					"lg": 12,
 					"xl": 12
 				},
+				"divider_operation_mode": {
+					"type": "divider",
+					"color": "primary",
+					"style": {
+						"marginBottom": "15px",
+						"marginTop": "15px"
+					},
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
+				"headerOperationMode": {
+					"type": "header",
+					"text": {
+						"en": "Operating Mode & Hardware Write Access",
+						"de": "Betriebsmodus & Hardware-Schreibzugriff"
+					},
+					"size": 4,
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
+				"operation_mode": {
+					"type": "select",
+					"label": {
+						"en": "Select Operating Mode",
+						"de": "Betriebsmodus auswählen"
+					},
+					"options": [
+						{
+							"label": {
+								"en": "🔒 Read-Only (Monitoring only – 0% flash wear, all optimizations disabled)",
+								"de": "🔒 Nur Lesend (Reines Monitoring – 0% Flash-Verschleiß, alle Optimierungen deaktiviert)"
+							},
+							"value": "readonly"
+						},
+						{
+							"label": {
+								"en": "✍️ Read & Write: Without Modbus (Native via Port 8889 – writes to EEPROM)",
+								"de": "✍️ Schreibend: Ohne Modbus (Nativ über Port 8889 – schreibt in EEPROM)"
+							},
+							"value": "native"
+						},
+						{
+							"label": {
+								"en": "⚡ Read & Write: With Modbus TCP (Hybrid – wear-free RAM access)",
+								"de": "⚡ Schreibend: Mit Modbus TCP (Hybrid – verschleißfreier RAM-Zugriff)"
+							},
+							"value": "modbus"
+						}
+					],
+					"default": "readonly",
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
+				"infoModeReadonly": {
+					"type": "staticText",
+					"text": {
+						"en": "🔒 <b>Read-Only Mode active:</b> The adapter only reads telemetry and parameters. All write-related tabs (Modbus, Idle Defaults, Cycle Optimization, HUP, ZIP, PV Surplus) are disabled and grayed out. Manual changes in the object tree are blocked.",
+						"de": "🔒 <b>Nur-Lesen-Modus aktiv:</b> Der Adapter liest ausschließlich Messwerte und Parameter aus (z.B. für Visualisierungen und COP-Berechnung). Alle schreibenden Reiter (Modbus, Vorgaben, Takt-Optimierung, HUP, ZIP, PV-Überschuss) sind komplett deaktiviert und ausgegraut. Es finden garantiert keine Schreibzugriffe auf die Wärmepumpe statt."
+					},
+					"hidden": "data.operation_mode !== 'readonly'",
+					"style": {
+						"marginTop": "10px",
+						"marginBottom": "15px",
+						"fontSize": "13px",
+						"backgroundColor": "#e3f2fd",
+						"color": "#0d47a1",
+						"padding": "12px",
+						"borderRadius": "5px",
+						"borderLeft": "5px solid #1976d2"
+					},
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
+				"infoModeNative": {
+					"type": "staticText",
+					"text": {
+						"en": "✍️ <b>Write Mode (Without Modbus / Native Port 8889):</b> Active optimizations and parameter changes are written directly to the Luxtronik EEPROM via port 8889. Please enable 'Idle Defaults' when using optimizations and monitor daily flash write cycles.",
+						"de": "✍️ <b>Schreibmodus (Ohne Modbus / Nativ über Port 8889):</b> Aktive Optimierungen (Takt, HUP, ZIP, PV) und Parameter-Änderungen werden direkt über Port 8889 in den EEPROM-Speicher der Luxtronik geschrieben. Der Reiter 'Modbus (Hybrid)' ist deaktiviert."
+					},
+					"hidden": "data.operation_mode !== 'native'",
+					"style": {
+						"marginTop": "10px",
+						"marginBottom": "15px",
+						"fontSize": "13px",
+						"backgroundColor": "#fff3e0",
+						"color": "#e65100",
+						"padding": "12px",
+						"borderRadius": "5px",
+						"borderLeft": "5px solid #ff9800"
+					},
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
+				"infoModeModbus": {
+					"type": "staticText",
+					"text": {
+						"en": "⚡ <b>Hybrid Mode (Write with Modbus TCP):</b> Volatile parameters (setpoints, offsets, coils) are written directly into the controller's RAM via Modbus TCP without causing EEPROM flash wear. Please select your active registers in the 'Modbus (Hybrid)' tab.",
+						"de": "⚡ <b>Hybrid-Modus (Schreibend mit Modbus TCP):</b> Flüchtige Parameter (Sollwerte, Parallelverschiebung, Coils) werden ohne EEPROM-Verschleiß direkt über Modbus TCP in den Arbeitsspeicher (RAM) geschrieben. Bitte wähle im Reiter 'Modbus (Hybrid)' die gewünschten Register aus."
+					},
+					"hidden": "data.operation_mode !== 'modbus'",
+					"style": {
+						"marginTop": "10px",
+						"marginBottom": "15px",
+						"fontSize": "13px",
+						"backgroundColor": "#e8f5e9",
+						"color": "#1b5e20",
+						"padding": "12px",
+						"borderRadius": "5px",
+						"borderLeft": "5px solid #4caf50"
+					},
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
 				"headerOption": {
 					"type": "header",
 					"text": {
@@ -584,6 +715,7 @@
 		},
 		"idleTab": {
 			"type": "panel",
+			"disabled": "data.operation_mode === 'readonly'",
 			"label": {
 				"en": "Idle Defaults",
 				"de": "Vorgaben"
@@ -632,6 +764,7 @@
 						"de": "Standardwerte im Leerlauf erzwingen"
 					},
 					"default": false,
+					"disabled": "data.operation_mode === 'readonly'",
 					"confirm": {
 						"condition": "data.idle_defaults_aktiv === true",
 						"text": {
@@ -1011,6 +1144,7 @@
 		},
 		"cycleOptimizationTab": {
 			"type": "panel",
+			"disabled": "data.operation_mode === 'readonly'",
 			"label": {
 				"en": "Cycle Optimization",
 				"de": "Takt-Optimierung"
@@ -1039,6 +1173,7 @@
 						"en": "Enable intelligent cycle optimization",
 						"de": "Intelligente Takt-Optimierung aktivieren"
 					},
+					"disabled": "data.operation_mode === 'readonly'",
 					"default": false,
 					"confirm": {
 						"condition": "data.regelung_aktiv === true && data.idle_defaults_aktiv !== true",
@@ -1059,6 +1194,7 @@
 				},
 				"Heating_after_warmwater": {
 					"type": "checkbox",
+					"disabled": "data.operation_mode === 'readonly'",
 					"label": {
 						"en": "Heating after hot water",
 						"de": "Heizen nach Warmwasser erzwingen"
@@ -1093,6 +1229,7 @@
 		},
 		"hupTab": {
 			"type": "panel",
+			"disabled": "data.operation_mode === 'readonly'",
 			"label": {
 				"en": "HUP control",
 				"de": "HUP Steuerung"
@@ -1117,6 +1254,7 @@
 				},
 				"hup_voltage_factor": {
 					"type": "select",
+					"disabled": "data.operation_mode === 'readonly'",
 					"label": {
 						"en": "Hardware voltage scale",
 						"de": "Hardware Spannungs-Faktor"
@@ -1144,6 +1282,7 @@
 				},
 				"hup_optimierung_aktiv": {
 					"type": "checkbox",
+					"disabled": "data.operation_mode === 'readonly'",
 					"label": {
 						"en": "Enable dynamic HUP spread control",
 						"de": "Dynamische HUP-Spreizungsregelung aktivieren"
@@ -1315,6 +1454,7 @@
 		},
 		"zipTab": {
 			"type": "panel",
+			"disabled": "data.operation_mode === 'readonly'",
 			"label": {
 				"en": "Circulation pump",
 				"de": "ZIP Steuerung"
@@ -1323,6 +1463,7 @@
 			"items": {
 				"zip_control_mode": {
 					"type": "select",
+					"disabled": "data.operation_mode === 'readonly'",
 					"label": {
 						"en": "How is your circulation pump (ZIP) controlled?",
 						"de": "Wie wird deine Zirkulationspumpe (ZIP) gesteuert?"
@@ -1440,6 +1581,7 @@
 				},
 				"zip_lWP_aktiv": {
 					"type": "checkbox",
+					"disabled": "data.operation_mode === 'readonly'",
 					"label": {
 						"en": "Disable base ZIP values (Set Luxtronik timers to 0)",
 						"de": "Deaktiviere reguläre ZIP Werte (Luxtronik-Timer auf 0)"
@@ -1454,6 +1596,7 @@
 				},
 				"zip_optimierung_aktiv": {
 					"type": "checkbox",
+					"disabled": "data.operation_mode === 'readonly'",
 					"label": {
 						"en": "Allow ZIP optimization",
 						"de": "ZIP-Optimierung zulassen"
@@ -1538,6 +1681,7 @@
 				},
 				"motion_sensors_aktiv": {
 					"type": "checkbox",
+					"disabled": "data.operation_mode === 'readonly'",
 					"label": {
 						"en": "Actively use motion sensors",
 						"de": "Bewegungssensoren aktiv nutzen"
@@ -1652,6 +1796,7 @@
 		},
 		"pvTab": {
 			"type": "panel",
+			"disabled": "data.operation_mode === 'readonly'",
 			"label": {
 				"en": "PV / Surplus",
 				"de": "PV-Überschuss"
@@ -1660,6 +1805,7 @@
 			"items": {
 				"pv_active": {
 					"type": "checkbox",
+					"disabled": "data.operation_mode === 'readonly'",
 					"label": {
 						"en": "Enable PV surplus management",
 						"de": "PV-Überschusssteuerung aktivieren"

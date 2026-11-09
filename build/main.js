@@ -153,11 +153,29 @@ class Luxtronik2Controller extends utils.Adapter {
       configUpdated = true;
       (0, import_logger.writeLog)(`[Migration] Updated zip_control_mode to '${migratedMode}' based on legacy settings.`, "info");
     }
+    if (config.operation_mode === void 0) {
+      if (config.modbus_active === true) {
+        config.operation_mode = "modbus";
+      } else if (config.idle_defaults_aktiv === true || config.regelung_aktiv === true || config.hup_optimierung_aktiv === true || config.pv_active === true || config.zip_optimierung_aktiv === true) {
+        config.operation_mode = "native";
+      } else {
+        config.operation_mode = "readonly";
+      }
+      configUpdated = true;
+      (0, import_logger.writeLog)(`[Migration] Set operation_mode to '${config.operation_mode}' based on legacy settings.`, "info");
+    }
+    const shouldModbusBeActive = config.operation_mode === "modbus";
+    if (config.modbus_active !== shouldModbusBeActive) {
+      config.modbus_active = shouldModbusBeActive;
+      configUpdated = true;
+    }
     if (configUpdated) {
       try {
         const obj = await this.getForeignObjectAsync(`system.adapter.${this.namespace}`);
         if (obj && obj.native) {
           obj.native.zip_control_mode = config.zip_control_mode;
+          obj.native.operation_mode = config.operation_mode;
+          obj.native.modbus_active = config.modbus_active;
           await this.setForeignObject(`system.adapter.${this.namespace}`, obj);
         }
       } catch (err) {
@@ -194,21 +212,36 @@ class Luxtronik2Controller extends utils.Adapter {
     await (0, import_objectManager.ensureCustomObjectsExist)(this);
     (0, import_backupManager.initAutoBackup)(this);
     await this.subscribeStatesAsync("Information.12_SystemInfo.check_firmware");
-    await this.setState((0, import_stateMapping.getDpPath)("Regelung_Aktiv"), { val: config.regelung_aktiv === true, ack: true });
+    const isReadOnly = config.operation_mode === "readonly";
+    if (isReadOnly) {
+      (0, import_logger.writeLog)(
+        "\u{1F512} Operating Mode: READ-ONLY. All hardware write operations and optimizations are disabled.",
+        "info"
+      );
+      await this.setState((0, import_stateMapping.getDpPath)("Regelung_Aktiv"), { val: false, ack: true });
+    } else if (config.operation_mode === "modbus") {
+      (0, import_logger.writeLog)("\u26A1 Operating Mode: READ/WRITE WITH MODBUS TCP (Hybrid).", "info");
+      await this.setState((0, import_stateMapping.getDpPath)("Regelung_Aktiv"), { val: config.regelung_aktiv === true, ack: true });
+    } else {
+      (0, import_logger.writeLog)("\u270D\uFE0F Operating Mode: READ/WRITE WITHOUT MODBUS (Native TCP Port 8889).", "info");
+      await this.setState((0, import_stateMapping.getDpPath)("Regelung_Aktiv"), { val: config.regelung_aktiv === true, ack: true });
+    }
     const debugState = await this.getStateAsync((0, import_stateMapping.getDpPath)("Schreibe_Debug_Log"));
     this.isDebugLogActive = (debugState == null ? void 0 : debugState.val) === true;
     (0, import_logger.setCustomDebug)(this.isDebugLogActive);
-    await (0, import_zipManager.disableHardwareZipTimer)(this);
     const cycleTodayState = await this.getStateAsync((0, import_stateMapping.getDpPath)("write_cycles_today"));
     this.writeCyclesToday = cycleTodayState && typeof cycleTodayState.val === "number" ? cycleTodayState.val : 0;
     const cycleTotalState = await this.getStateAsync((0, import_stateMapping.getDpPath)("write_cycles_total"));
     this.writeCyclesTotal = cycleTotalState && typeof cycleTotalState.val === "number" ? cycleTotalState.val : 0;
     this.scheduleMidnightReset();
-    (0, import_zipManager.subscribeMotionSensors)(this);
-    await (0, import_pvManager.initPvManagement)(this);
+    if (!isReadOnly) {
+      await (0, import_zipManager.disableHardwareZipTimer)(this);
+      (0, import_zipManager.subscribeMotionSensors)(this);
+      await (0, import_pvManager.initPvManagement)(this);
+    }
     this.subscribeStates("*");
     this.modbusManager = new import_modbusManager.ModbusManager(this);
-    if (config.modbus_active) {
+    if (!isReadOnly && config.modbus_active) {
       (0, import_logger.writeLog)("Checking Modbus TCP availability for hybrid operations...", "info");
       await this.modbusManager.checkAvailability();
     }
@@ -289,6 +322,10 @@ class Luxtronik2Controller extends utils.Adapter {
    * @returns A promise that resolves when the synchronization task finishes.
    */
   async syncConfigValue(mappingKey, val) {
+    const config = this.config;
+    if (config.operation_mode === "readonly") {
+      return;
+    }
     if (val === void 0 || val === null) {
       return;
     }
@@ -298,7 +335,6 @@ class Luxtronik2Controller extends utils.Adapter {
     }
     const id = (0, import_stateMapping.getDpPath)(mappingKey);
     const state = await this.getStateAsync(id);
-    const config = this.config;
     let appliedFactor = definition.factor;
     if (mappingKey === "heating_system_circ_pump_voltage_nominal" || mappingKey === "heating_system_circ_pump_voltage_minimal") {
       appliedFactor = config.hup_voltage_factor !== void 0 ? Number(config.hup_voltage_factor) : 100;
@@ -427,6 +463,9 @@ class Luxtronik2Controller extends utils.Adapter {
     var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k;
     try {
       const config = this.config;
+      if (config.operation_mode === "readonly") {
+        return;
+      }
       const bzState = await this.getStateAsync((0, import_stateMapping.getDpPath)("WP_BZ_akt"));
       const bzVal = bzState && bzState.val !== null ? String(bzState.val).trim() : rawValues[80] !== void 0 ? String(rawValues[80]) : "";
       const regelungAktivState = await this.getStateAsync((0, import_stateMapping.getDpPath)("Regelung_Aktiv"));
@@ -862,18 +901,25 @@ class Luxtronik2Controller extends utils.Adapter {
     if (!state) {
       return;
     }
+    const config = this.config;
+    const isReadOnly = config.operation_mode === "readonly";
     if (!id.startsWith(`${this.namespace}.`)) {
+      if (isReadOnly) {
+        return;
+      }
       (0, import_pvManager.handlePvFeedInChange)(this, id, state);
     }
-    const isMotionSensor = await (0, import_zipManager.checkAndHandleMotionSensor)(this, id, state);
-    if (isMotionSensor) {
-      return;
+    if (!isReadOnly) {
+      const isMotionSensor = await (0, import_zipManager.checkAndHandleMotionSensor)(this, id, state);
+      if (isMotionSensor) {
+        return;
+      }
     }
     if (!id.startsWith(`${this.namespace}.`)) {
       return;
     }
     if (state.ack) {
-      if (id.endsWith("WP_BZ_akt")) {
+      if (!isReadOnly && id.endsWith("WP_BZ_akt")) {
         await (0, import_pvManager.handlePvCycleCheck)(this, Number(state.val));
       }
       return;
@@ -884,11 +930,34 @@ class Luxtronik2Controller extends utils.Adapter {
       void (0, import_updateManager.checkFirmwareUpdate)(this);
       return;
     }
+    const mappingKey = id.split(".").pop();
+    const relativeId = id.replace(`${this.namespace}.`, "");
+    if (mappingKey === "Schreibe_Debug_Log") {
+      await this.setState(relativeId, { val: state.val, ack: true });
+      this.isDebugLogActive = state.val === true;
+      (0, import_logger.setCustomDebug)(this.isDebugLogActive);
+      (0, import_logger.writeLog)(
+        `Extended debugging telemetry logging mode has been ${this.isDebugLogActive ? "enabled" : "disabled"}.`,
+        "info"
+      );
+      return;
+    }
+    if (mappingKey === "Dump_Raw_To_Log" && state.val === true) {
+      await this.setState(relativeId, { val: false, ack: true });
+      await (0, import_rawFunctions.dumpAllRawToLog)(this);
+      return;
+    }
+    if (isReadOnly) {
+      (0, import_logger.writeLog)(
+        `[Read-Only] Write attempt to '${id}' blocked! Change Operating Mode in adapter settings to enable hardware writes.`,
+        "warn"
+      );
+      return;
+    }
     if (id.startsWith(`${this.namespace}.Custom.`)) {
       try {
         const obj = await this.getObjectAsync(id);
         if (obj && obj.native && obj.native.source === "parameter") {
-          const relativeId = id.replace(`${this.namespace}.`, "");
           await this.setState(relativeId, { val: state.val, ack: true });
           let valueToWrite = state.val;
           if (obj.native.customType === "boolean") {
@@ -916,7 +985,6 @@ class Luxtronik2Controller extends utils.Adapter {
       }
       return;
     }
-    const mappingKey = id.split(".").pop();
     if (!mappingKey) {
       return;
     }
@@ -925,17 +993,6 @@ class Luxtronik2Controller extends utils.Adapter {
       return;
     }
     try {
-      const relativeId = id.replace(`${this.namespace}.`, "");
-      if (mappingKey === "Schreibe_Debug_Log") {
-        await this.setState(relativeId, { val: state.val, ack: true });
-        this.isDebugLogActive = state.val === true;
-        (0, import_logger.setCustomDebug)(this.isDebugLogActive);
-        (0, import_logger.writeLog)(
-          `Extended debugging telemetry logging mode has been ${this.isDebugLogActive ? "enabled" : "disabled"}.`,
-          "info"
-        );
-        return;
-      }
       if (mappingKey === "Regelung_Aktiv" || mappingKey === "zip_aktiv") {
         await this.setState(relativeId, { val: state.val, ack: true });
         return;
@@ -944,11 +1001,6 @@ class Luxtronik2Controller extends utils.Adapter {
         await this.setState(relativeId, { val: false, ack: true });
         await (0, import_pvManager.forceResetPvBoost)(this);
         await this.setIdleDefaults();
-        return;
-      }
-      if (mappingKey === "Dump_Raw_To_Log" && state.val === true) {
-        await this.setState(relativeId, { val: false, ack: true });
-        await (0, import_rawFunctions.dumpAllRawToLog)(this);
         return;
       }
       if (mappingKey === "Zwangswarmwasser") {
@@ -974,7 +1026,6 @@ class Luxtronik2Controller extends utils.Adapter {
         }
         return;
       }
-      const config = this.config;
       const isModbusEnabled = Boolean(
         this.modbusManager && this.modbusManager.isAvailable && config.modbus_active && definition.modbus && config[definition.modbus.configKey] === true
       );
