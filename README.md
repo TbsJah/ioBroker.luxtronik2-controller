@@ -104,8 +104,7 @@ You might see red error messages in the installation log related to `node-gyp`, 
 ## Changelog
 
 **WORK IN PROGRESS**
-
-### **WORK IN PROGRESS**
+### 0.25.0-alpha.0 (2026-11-15)
 
 - **Operating Mode & UI Protection (`jsonConfig.json`, `main.ts`):**
     - **Explicit Operating Mode Selection:** Added a central selector in the Connection tab with color-coded status banners to clearly distinguish between **Read-Only (Monitoring)**, **Read & Write without Modbus (Native via Port 8889)**, and **Read & Write with Modbus TCP (Hybrid RAM access)**.
@@ -151,15 +150,6 @@ You might see red error messages in the installation log related to `node-gyp`, 
 - **Configuration & Baseline Logic:**
     - **Custom Heating Offset Baseline:** Added a new configuration field in the "Idle Defaults" tab for the default heating target temperature offset (Parallelverschiebung)[cite: 10].
     - **Preserved Baselines:** The idle reset mechanism (`main.ts`) and the PV surplus manager (`pvManager.ts`) now respect this custom baseline (e.g., +1 K) instead of hard-resetting the offset to `0 K`[cite: 7, 13]. This ensures that your manual baseline heating curve is perfectly preserved when returning from a PV boost or entering standby.
-
-### 0.22.8 (2026-11-07)
-
-**🐛 Bugfixes & Tweaks**
-
-- **COP & Efficiency Calculation (`copManager.ts`):**
-    - **Hot Water Hardware Bug Fallback:** Added a dynamic fallback mechanism to bypass a hardware bug present in several Luxtronik and Novelan firmwares where the internal electrical meter for hot water (`energy_warmwater`) permanently reports `0`.
-    - **Smart Delta Routing:** When the heat pump is actively generating hot water (`WP_BZ_akt === 1`), the COP manager now checks if the internal DHW power meter is stuck at zero. If so, it automatically intercepts the delta from the total energy meter (`energy_total`) over the last polling interval and securely routes it into the Hot Water COP bucket.
-    - **Continuous Standby Sync:** Enhanced the database tracking to ensure the total energy fallback counter is continuously synced even during standby or heating modes. This prevents idle power consumption from accumulating in the background and falsely distorting the next hot water efficiency calculation.
 
 ## License
 
