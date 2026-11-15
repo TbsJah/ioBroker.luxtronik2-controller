@@ -1,56 +1,38 @@
 import * as net from 'node:net';
-import { WebSocket, type RawData } from 'ws';
 import { writeLog } from './logger';
 import { getDpPath } from './stateMapping';
 import type { LuxtronikAdapter } from './types';
 import { delay } from './utils';
+
 // =========================================================
 // KONSTANTEN
 // =========================================================
 
-/**
- * Enthält alle festen Befehlsnummern, Ports und Timeouts für die Kommunikation.
- */
 const CONSTANTS = {
-	/** Schreib-Befehl für einen Parameter */
 	CMD_WRITE: 3002,
-	/** Lese-Befehl für die Parameterliste */
 	CMD_READ_PARAM: 3003,
-	/** Lese-Befehl für die Messwerteliste */
 	CMD_READ_VALUE: 3004,
-	/** Lese-Befehl für die Sichtbarkeiten (Visibilities) */
 	CMD_READ_VISIBILITY: 3005,
-	/** Standard-TCP-Port der Luxtronik */
 	PORT_TCP: 8889,
-	/** Standard-WebSocket-Port neuerer Firmwares */
-	PORT_WS: 8214,
-	/** Maximales Timeout für Lese-Vorgänge in ms */
 	TIMEOUT_READ: 8000,
-	/** Maximales Timeout für Schreib-Vorgänge in ms */
 	TIMEOUT_WRITE: 5000,
-	/** Wartezeit in ms zwischen Neuverbindungen (z.B. beim Raw-Dump) */
 	DELAY_RECONNECT: 1000,
 };
-
-/**
- * Liste der bekannten klassischen TCP-Ports der Luxtronik-Steuerung.
- */
-const TCP_PORTS = new Set([8888, 8889]);
 
 // =========================================================
 // INTELLIGENTE SCHREIB-FUNKTION (READ-BEFORE-WRITE)
 // =========================================================
-
 /**
- * Schreibt einen Wert nur dann über das Netzwerk, wenn er vom Ist-Zustand abweicht.
+ * Schreibt einen Wert nur dann über das Netzwerk, wenn er vom Ist-Zustand abweicht (Read-before-Write).
+ * Erhöht außerdem die internen Schreibzähler.
  *
- * @param adapter Die erweiterte ioBroker Adapter-Instanz
+ * @param adapter Die ioBroker Adapter-Instanz
  * @param cmd Die Parameter-ID (Register)
- * @param val Der zu schreibende Wert
+ * @param val Der zu schreibende Wert (wird bei Bedarf gerundet)
+ * @returns Ein Promise, das nach Abschluss des Schreibvorgangs aufgelöst wird
  */
 export async function writePumpSafe(adapter: LuxtronikAdapter, cmd: string | number, val: any): Promise<void> {
 	const paramId = typeof cmd === 'string' ? parseInt(cmd, 10) : cmd;
-	// WICHTIG: Das ist der noch fehlende Teil von Schritt 2!
 	// Zwingendes Runden: Luxtronik V1.x stürzt bei Fließkommazahlen ab.
 	let value = typeof val === 'string' ? Math.round(Number(val)) : typeof val === 'number' ? Math.round(val) : val;
 
@@ -58,7 +40,6 @@ export async function writePumpSafe(adapter: LuxtronikAdapter, cmd: string | num
 		value = value ? 1 : 0;
 	}
 
-	// 1. GLOBAL READ-BEFORE-WRITE PRÜFUNG
 	if (adapter.currentRawParams && adapter.currentRawParams[paramId] === value) {
 		if (adapter.isDebugLogActive) {
 			writeLog(
@@ -73,15 +54,12 @@ export async function writePumpSafe(adapter: LuxtronikAdapter, cmd: string | num
 		writeLog(`writePumpSafe: Sende an Luxtronik -> Register ${paramId}, Wert: ${value}`, 'debug');
 	}
 
-	// 2. ECHTER NETZWERK-BEFEHL
 	await writeRawParameter(adapter, paramId, value);
 
-	// 3. OPTIMISTISCHES CACHE-UPDATE
 	if (adapter.currentRawParams) {
 		adapter.currentRawParams[paramId] = value;
 	}
 
-	// 4. BEIDE ZÄHLER HOCHZÄHLEN UND SPEICHERN
 	if (typeof adapter.writeCyclesToday === 'number') {
 		adapter.writeCyclesToday++;
 		adapter.writeCyclesTotal++;
@@ -90,7 +68,6 @@ export async function writePumpSafe(adapter: LuxtronikAdapter, cmd: string | num
 		const dpTotal = getDpPath('write_cycles_total');
 
 		if (dpToday) {
-			// Fire-and-Forget: Klassisches setState ohne Promise-Zwang
 			void adapter.setState(dpToday, { val: adapter.writeCyclesToday, ack: true });
 		}
 		if (dpTotal) {
@@ -99,23 +76,6 @@ export async function writePumpSafe(adapter: LuxtronikAdapter, cmd: string | num
 	}
 }
 
-/**
- * Ermittelt anhand des konfigurierten Ports, ob die WebSocket- oder TCP-Verbindung genutzt werden soll.
- *
- * @param adapter Die Instanz des ioBroker-Adapters.
- * @returns True, wenn WebSocket genutzt werden soll (Port ungleich 8888/8889).
- */
-function shouldUseWs(adapter: LuxtronikAdapter): boolean {
-	const port = adapter.config.port ? Number(adapter.config.port) : CONSTANTS.PORT_TCP;
-	return !TCP_PORTS.has(port);
-}
-
-/**
- * Baut einen Buffer für den Versand von Befehlen an die Luxtronik effizient zusammen.
- *
- * @param values Eine variable Anzahl an 32-Bit Integer-Werten, die in den Buffer geschrieben werden sollen.
- * @returns Der fertige, sendebereite Buffer.
- */
 function createCommandBuffer(...values: number[]): Buffer {
 	const buffer = Buffer.alloc(values.length * 4);
 	for (let i = 0; i < values.length; i++) {
@@ -124,21 +84,12 @@ function createCommandBuffer(...values: number[]): Buffer {
 	return buffer;
 }
 
-/**
- * Gemeinsame Logik zum Parsen der rohen Binärdaten der Wärmepumpe.
- * Überprüft Header, Befehls-ID und Elementanzahl auf Gültigkeit und
- * unterscheidet dynamisch zwischen 4-Byte und 1-Byte Antworten.
- *
- * @param responseData Der vollständige Buffer mit den empfangenen Daten.
- * @param command Der erwartete Befehlscode (z.B. 3003 oder 3005).
- * @returns Ein Array mit den ausgelesenen Zahlenwerten oder null, falls noch Datenpakete (Chunks) fehlen.
- */
 function parseRawResponse(responseData: Buffer, command: number): number[] | null {
 	const headerSize = command === CONSTANTS.CMD_READ_VALUE ? 12 : 8;
 	const lengthOffset = command === CONSTANTS.CMD_READ_VALUE ? 8 : 4;
 
 	if (responseData.length < headerSize) {
-		return null; // Header noch nicht komplett empfangen
+		return null;
 	}
 
 	const responseCommand = responseData.readInt32BE(0);
@@ -151,163 +102,69 @@ function parseRawResponse(responseData: Buffer, command: number): number[] | nul
 		throw new Error(`Invalid element count (${totalItems}) in response ${command}`);
 	}
 
-	// NEU: Erkennen, ob es sich um Visibilities (1 Byte) oder Parameter/Werte (4 Byte) handelt
 	const isVisibility = command === CONSTANTS.CMD_READ_VISIBILITY;
 	const bytesPerItem = isVisibility ? 1 : 4;
-
-	// Gesamtgröße dynamisch berechnen
 	const totalRequiredLength = headerSize + totalItems * bytesPerItem;
 
 	if (responseData.length < totalRequiredLength) {
-		return null; // Es fehlen noch TCP-Chunks, weiter sammeln!
+		return null;
 	}
 
 	const allValues = new Array<number>(totalItems);
 	for (let i = 0; i < totalItems; i++) {
 		if (isVisibility) {
-			// Visibilities sind nur 1 Byte groß (Boolean-Flags)
 			allValues[i] = responseData.readInt8(headerSize + i);
 		} else {
-			// Klassische Werte und Parameter sind 4 Byte (Int32BE) groß
 			allValues[i] = responseData.readInt32BE(headerSize + i * 4);
 		}
 	}
 
 	return allValues;
 }
-// =========================================================
-// ZENTRALER VERBINDUNGS-HANDLER (DRY-Prinzip)
-// =========================================================
-
-interface ConnectionContext<T> {
-	adapter: LuxtronikAdapter;
-	socket: net.Socket | WebSocket;
-	timeout?: ioBroker.Timeout;
-	resolve: (val: T | PromiseLike<T>) => void;
-	reject: (err: Error) => void;
-}
-
-function createFinisher<T>(ctx: ConnectionContext<T>): (err?: Error, data?: T) => void {
-	let finished = false;
-	return (err?: Error, data?: T): void => {
-		if (finished) {
-			return;
-		}
-		finished = true;
-
-		if (ctx.timeout) {
-			ctx.adapter.clearTimeout(ctx.timeout);
-		}
-
-		if ('destroy' in ctx.socket) {
-			ctx.socket.setTimeout(0);
-			ctx.socket.destroy();
-			if (err) {
-				ctx.reject(err);
-			} else {
-				ctx.resolve(data as T);
-			}
-		} else {
-			const ws = ctx.socket;
-			const isWsActive = ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING;
-			if (err) {
-				if (isWsActive) {
-					ws.close();
-				}
-				ctx.reject(err);
-			} else {
-				if (isWsActive) {
-					ws.once('close', () => ctx.resolve(data as T));
-					ws.close();
-				} else {
-					ctx.resolve(data as T);
-				}
-			}
-		}
-	};
-}
 
 // =========================================================
-// LESE-FUNKTIONEN
+// LESE- & SCHREIB-FUNKTIONEN (REIN TCP)
 // =========================================================
 
 /**
- * Reads all raw data for the given command.
+ * Reads all raw data for the given command via TCP.
  *
  * @param adapter The adapter instance
- * @param command The command number
+ * @param command The command number (e.g., 3003, 3004)
  * @returns Promise with the raw data as number array
  */
 export function readAllRaw(adapter: LuxtronikAdapter, command: number): Promise<number[]> {
-	if (shouldUseWs(adapter)) {
-		return readAllRawWs(adapter, command);
-	}
-	return readAllRawTcp(adapter, command);
-}
-
-function readAllRawWs(adapter: LuxtronikAdapter, command: number): Promise<number[]> {
-	return new Promise<number[]>((resolve, reject) => {
-		const host = adapter.config.host || '127.0.0.1';
-		const port = adapter.config.port ? Number(adapter.config.port) : CONSTANTS.PORT_WS;
-		//const pwd = adapter.config.password ? adapter.config.password.toString() : '999999';
-		const ws = new WebSocket(`ws://${host}:${port}`, 'luxnet');
-		ws.binaryType = 'nodebuffer';
-
-		const ctx: ConnectionContext<number[]> = { adapter, socket: ws, resolve, reject };
-		const finish = createFinisher(ctx);
-
-		ctx.timeout = adapter.setTimeout(
-			() => finish(new Error(`WebSocket Timeout reading list ${command}.`)),
-			CONSTANTS.TIMEOUT_READ,
-		);
-
-		const chunks: Buffer[] = [];
-		let totalLength = 0;
-
-		ws.on('open', () => {
-			ws.send(createCommandBuffer(command, 0), { binary: true });
-		});
-
-		ws.on('message', (data: RawData) => {
-			let chunk: Buffer;
-			if (Buffer.isBuffer(data)) {
-				chunk = data;
-			} else if (Array.isArray(data)) {
-				chunk = Buffer.concat(data);
-			} else {
-				chunk = Buffer.from(data);
-			}
-
-			chunks.push(chunk);
-			totalLength += chunk.length;
-
-			try {
-				const values = parseRawResponse(Buffer.concat(chunks, totalLength), command);
-				if (values !== null) {
-					finish(undefined, values);
-				}
-			} catch (err: unknown) {
-				finish(err instanceof Error ? err : new Error(String(err)));
-			}
-		});
-
-		ws.on('error', (err: Error) => finish(err));
-	});
-}
-
-function readAllRawTcp(adapter: LuxtronikAdapter, command: number): Promise<number[]> {
 	return new Promise<number[]>((resolve, reject) => {
 		const host = adapter.config.host || '127.0.0.1';
 		const port = adapter.config.port ? Number(adapter.config.port) : CONSTANTS.PORT_TCP;
 		const client = new net.Socket();
 
-		const ctx: ConnectionContext<number[]> = { adapter, socket: client, resolve, reject };
-		const finish = createFinisher(ctx);
+		let finished = false;
 
-		ctx.timeout = adapter.setTimeout(
-			() => finish(new Error(`Timeout reading TCP list ${command}.`)),
-			CONSTANTS.TIMEOUT_READ,
-		);
+		const timeout = adapter.setTimeout(() => {
+			if (finished) {
+				return;
+			}
+			finished = true;
+			client.setTimeout(0);
+			client.destroy();
+			reject(new Error(`Timeout reading TCP list ${command}.`));
+		}, CONSTANTS.TIMEOUT_READ);
+
+		const finish = (err?: Error, data?: number[]): void => {
+			if (finished) {
+				return;
+			}
+			finished = true;
+			adapter.clearTimeout(timeout);
+			client.setTimeout(0);
+			client.destroy();
+			if (err) {
+				reject(err);
+			} else {
+				resolve(data as number[]);
+			}
+		};
 
 		const chunks: Buffer[] = [];
 		let totalLength = 0;
@@ -317,7 +174,6 @@ function readAllRawTcp(adapter: LuxtronikAdapter, command: number): Promise<numb
 		});
 
 		client.on('data', (chunk: Buffer) => {
-			//writeLog(`Chunk empfangen, Länge: ${chunk.length}`, 'debug');
 			chunks.push(chunk);
 			totalLength += chunk.length;
 
@@ -335,65 +191,46 @@ function readAllRawTcp(adapter: LuxtronikAdapter, command: number): Promise<numb
 	});
 }
 
-// =========================================================
-// SCHREIB-FUNKTIONEN
-// =========================================================
-
 /**
- * Write a raw parameter to the Luxtronik device.
+ * Write a raw parameter to the Luxtronik device via TCP.
  *
- * @param adapter - The adapter instance
- * @param paramId - Parameter ID to write
- * @param value - Value to write
+ * @param adapter The adapter instance
+ * @param paramId Parameter ID to write
+ * @param value Value to write
  * @returns Promise that resolves when write completes
  */
 export function writeRawParameter(adapter: LuxtronikAdapter, paramId: number, value: number): Promise<void> {
-	if (shouldUseWs(adapter)) {
-		return writeRawParameterWs(adapter, paramId, value);
-	}
-	return writeRawParameterTcp(adapter, paramId, value);
-}
-
-function writeRawParameterWs(adapter: LuxtronikAdapter, paramId: number, value: number): Promise<void> {
-	return new Promise<void>((resolve, reject) => {
-		const host = adapter.config.host || '127.0.0.1';
-		const port = adapter.config.port ? Number(adapter.config.port) : CONSTANTS.PORT_WS;
-		//const pwd = adapter.config.password ? adapter.config.password.toString() : '999999';
-
-		// Übergabe beider Protokolle ('luxnet' UND das Passwort) als Array
-		const ws = new WebSocket(`ws://${host}:${port}`, 'luxnet');
-		ws.binaryType = 'nodebuffer';
-
-		const ctx: ConnectionContext<void> = { adapter, socket: ws, resolve, reject };
-		const finish = createFinisher(ctx);
-
-		ctx.timeout = adapter.setTimeout(
-			() => finish(new Error(`WebSocket Timeout writing parameter ${paramId}.`)),
-			CONSTANTS.TIMEOUT_WRITE,
-		);
-
-		ws.on('open', () => {
-			ws.send(createCommandBuffer(CONSTANTS.CMD_WRITE, paramId, value), { binary: true });
-		});
-
-		ws.on('message', () => finish());
-		ws.on('error', (err: Error) => finish(err));
-	});
-}
-
-function writeRawParameterTcp(adapter: LuxtronikAdapter, paramId: number, value: number): Promise<void> {
 	return new Promise<void>((resolve, reject) => {
 		const host = adapter.config.host || '127.0.0.1';
 		const port = adapter.config.port ? Number(adapter.config.port) : CONSTANTS.PORT_TCP;
 		const client = new net.Socket();
 
-		const ctx: ConnectionContext<void> = { adapter, socket: client, resolve, reject };
-		const finish = createFinisher(ctx);
+		let finished = false;
 
-		ctx.timeout = adapter.setTimeout(
-			() => finish(new Error(`Timeout writing TCP parameter ${paramId}.`)),
-			CONSTANTS.TIMEOUT_WRITE,
-		);
+		const timeout = adapter.setTimeout(() => {
+			if (finished) {
+				return;
+			}
+			finished = true;
+			client.setTimeout(0);
+			client.destroy();
+			reject(new Error(`Timeout writing TCP parameter ${paramId}.`));
+		}, CONSTANTS.TIMEOUT_WRITE);
+
+		const finish = (err?: Error): void => {
+			if (finished) {
+				return;
+			}
+			finished = true;
+			adapter.clearTimeout(timeout);
+			client.setTimeout(0);
+			client.destroy();
+			if (err) {
+				reject(err);
+			} else {
+				resolve();
+			}
+		};
 
 		client.connect(port, host, () => {
 			client.write(createCommandBuffer(CONSTANTS.CMD_WRITE, paramId, value));
@@ -415,33 +252,49 @@ function writeRawParameterTcp(adapter: LuxtronikAdapter, paramId: number, value:
 // =========================================================
 
 /**
- * Dump all raw parameters and values to the adapter log.
+ * Dump all raw parameters, values, visibilities, and Modbus diagnostic results to the adapter log.
  *
- * @param adapter - The ioBroker adapter instance used for logging and timing.
+ * @param adapter The ioBroker adapter instance used for logging and timing.
  */
 export async function dumpAllRawToLog(adapter: LuxtronikAdapter): Promise<void> {
-	const useWs = shouldUseWs(adapter);
-
 	try {
 		const dumpList = async (command: number, title: string): Promise<void> => {
 			await delay(adapter, CONSTANTS.DELAY_RECONNECT);
 
 			writeLog('=======================================================', 'info');
-			writeLog(`START COMPACT RAW DUMP: LIST ${command} (${title}) via ${useWs ? 'WebSocket' : 'TCP'}`, 'info');
+			writeLog(`START COMPACT RAW DUMP: LIST ${command} (${title}) via TCP`, 'info');
 			writeLog('=======================================================', 'info');
 
-			const data = await readAllRaw(adapter, command);
-			for (let i = 0; i < data.length; i++) {
-				writeLog(`[RAW ${command}] Index ${i.toString().padStart(3, ' ')} = ${data[i]}`, 'info');
+			try {
+				const data = await readAllRaw(adapter, command);
+				for (let i = 0; i < data.length; i++) {
+					writeLog(`[RAW ${command}] Index ${i.toString().padStart(3, ' ')} = ${data[i]}`, 'info');
+				}
+				writeLog(`--- END OF LIST ${command} (Total ${data.length} indices logged) ---`, 'info');
+			} catch (listErr: unknown) {
+				const msg = listErr instanceof Error ? listErr.message : String(listErr);
+				writeLog(`--- LIST ${command} FAILED: ${msg} ---`, 'warn');
 			}
-			writeLog(`--- END OF LIST ${command} (Total ${data.length} indices logged) ---`, 'info');
 			writeLog('=======================================================', 'info');
 		};
 
 		await delay(adapter, CONSTANTS.DELAY_RECONNECT);
 		await dumpList(CONSTANTS.CMD_READ_PARAM, 'PARAMETERS');
 		await dumpList(CONSTANTS.CMD_READ_VALUE, 'VALUES');
-		await dumpList(CONSTANTS.CMD_READ_VISIBILITY, 'VISIBILITIES'); // <-- NEU: Sichtbarkeits-Log
+		await dumpList(CONSTANTS.CMD_READ_VISIBILITY, 'VISIBILITIES');
+
+		if (adapter.modbusManager) {
+			await delay(adapter, CONSTANTS.DELAY_RECONNECT);
+			writeLog('=======================================================', 'info');
+			writeLog('START MODBUS TCP DIAGNOSTIC DUMP (PORT 502)', 'info');
+			writeLog('=======================================================', 'info');
+			const modbusLines = await adapter.modbusManager.runDiagnosticDump();
+			for (const line of modbusLines) {
+				writeLog(line, 'info');
+			}
+			writeLog('--- END OF MODBUS DIAGNOSTIC DUMP ---', 'info');
+			writeLog('=======================================================', 'info');
+		}
 	} catch (err: unknown) {
 		const msg = err instanceof Error ? err.message : String(err);
 		writeLog(`Error executing raw dump: ${msg}`, 'error');
@@ -451,27 +304,24 @@ export async function dumpAllRawToLog(adapter: LuxtronikAdapter): Promise<void> 
 /**
  * Pushes a hardware write task into a single-threaded execution queue to guarantee transmission safety.
  *
- * @param adapter - The adapter instance.
- * @param cmd - Target parameter register ID.
- * @param val - The value payload to map.
+ * @param adapter The adapter instance.
+ * @param cmd Target parameter register ID.
+ * @param val The value payload to map.
  * @returns A promise that completes once the queue executes this task.
  */
 export async function queueWrite(adapter: LuxtronikAdapter, cmd: string | number, val: any): Promise<void> {
-	// 1. Firmware-Schutzschild direkt aus dem RAM-Cache (funktioniert auch bei deaktiviertem Datenpunkt)
 	let fw = adapter.systemFirmware || '';
 	if (!fw) {
 		const fwState = await adapter.getStateAsync('Information.12_SystemInfo.firmware');
 		fw = typeof fwState?.val === 'string' ? fwState.val : '';
 	}
-	// 2. Prüfen, ob es sich um eine der fehlerhaften .90 Versionen handelt
 	if (fw.includes('1.90') || fw.includes('2.90')) {
 		adapter.log.warn(
 			`[PROTECTION] Write command to register ${cmd} blocked! Firmware ${fw} has a known manufacturer bug causing hardware crashes. Please downgrade to <= V X.89. | Schreibbefehl blockiert! Firmware ${fw} verursacht Systemabstürze. Bitte auf <= V X.89 downgraden.`,
 		);
-		return; // Bricht die Funktion hart ab!
+		return;
 	}
 
-	// 3. Normaler Schreibvorgang für sichere Firmwares
 	return new Promise((resolve, reject) => {
 		adapter.writeQueue.push(async () => {
 			try {
@@ -485,12 +335,6 @@ export async function queueWrite(adapter: LuxtronikAdapter, cmd: string | number
 	});
 }
 
-/**
- * Iteratively processes sequential write tasks inside the internal queue buffer.
- * Enforces defensive execution delay separation spacing to secure hardware stability.
- *
- * @param adapter - The adapter instance.
- */
 async function processQueue(adapter: LuxtronikAdapter): Promise<void> {
 	if (adapter.isWriting || adapter.writeQueue.length === 0) {
 		return;
@@ -498,21 +342,16 @@ async function processQueue(adapter: LuxtronikAdapter): Promise<void> {
 
 	adapter.isWriting = true;
 
-	// Wir prüfen, ob es sich um die instabile V1.x Hardware handelt
 	const isOldFirmware =
 		adapter.systemFirmware && (adapter.systemFirmware.startsWith('1.') || adapter.systemFirmware.startsWith('V1.'));
 
-	// Dynamische Pause: 500ms für alte Anlagen, schnelle 100ms für alle anderen
 	const delayBetweenWrites = isOldFirmware ? 500 : 100;
 
 	try {
 		while (adapter.writeQueue.length > 0) {
-			// Den Schreibvorgang NUR bei V1.x pausieren, falls gerade gelesen wird.
-			// Moderne Anlagen können das ohne Absturz abarbeiten.
 			if (isOldFirmware) {
 				let waitCounter = 0;
 				while (adapter.updateRunning && waitCounter < 20) {
-					// Max 5 Sekunden (20 * 250ms) warten
 					await new Promise<void>(resolve => adapter.setTimeout(resolve, 250));
 					waitCounter++;
 				}
@@ -526,7 +365,6 @@ async function processQueue(adapter: LuxtronikAdapter): Promise<void> {
 			if (task) {
 				try {
 					await task();
-					// Dynamische Sicherheitspause nach jedem Schreibvorgang
 					await new Promise<void>(resolve => adapter.setTimeout(resolve, delayBetweenWrites));
 				} catch (taskError: any) {
 					writeLog(

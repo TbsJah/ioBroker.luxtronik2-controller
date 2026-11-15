@@ -44,8 +44,8 @@
 						"de": "Wärmepumpen Port"
 					},
 					"help": {
-						"en": "Standard TCP: 8889 | Firmware > 3.81 (WebSockets): 8214",
-						"de": "Standard TCP: 8889 | Firmware > 3.81 (WebSockets): 8214"
+						"en": "Standard Native TCP: 8889 (For very old V1.x firmwares: 8888)",
+						"de": "Standard Native TCP: 8889 (Bei sehr alten V1.x Firmwares: 8888)"
 					},
 					"min": 1,
 					"max": 65535,
@@ -116,30 +116,18 @@
 				},
 				"operation_mode": {
 					"type": "select",
-					"label": {
-						"en": "Select Operating Mode",
-						"de": "Betriebsmodus auswählen"
-					},
+					"label": "Select Operating Mode",
 					"options": [
 						{
-							"label": {
-								"en": "🔒 Read-Only (Monitoring only – 0% flash wear, all optimizations disabled)",
-								"de": "🔒 Nur Lesend (Reines Monitoring – 0% Flash-Verschleiß, alle Optimierungen deaktiviert)"
-							},
+							"label": "🔒 Read-Only (Monitoring only – 0% flash wear, all optimizations disabled)",
 							"value": "readonly"
 						},
 						{
-							"label": {
-								"en": "✍️ Read & Write: Without Modbus (Native via Port 8889 – writes to EEPROM)",
-								"de": "✍️ Schreibend: Ohne Modbus (Nativ über Port 8889 – schreibt in EEPROM)"
-							},
+							"label": "✍️ Read & Write: Without Modbus (Native via Port 8889 – writes to EEPROM)",
 							"value": "native"
 						},
 						{
-							"label": {
-								"en": "⚡ Read & Write: With Modbus TCP (Hybrid – wear-free RAM access)",
-								"de": "⚡ Schreibend: Mit Modbus TCP (Hybrid – verschleißfreier RAM-Zugriff)"
-							},
+							"label": "⚡ Read & Write: With Modbus TCP (Hybrid – wear-free RAM access)",
 							"value": "modbus"
 						}
 					],
@@ -366,8 +354,8 @@
 				"sync_modbus_holding_1": {
 					"type": "checkbox",
 					"label": {
-						"en": "Target return temperature (Holding 1)",
-						"de": "Rücklauf Soll (Holding 1)"
+						"en": "Target temp room thermostat (Holding 10060)",
+						"de": "Zieltemperatur Raumthermostat (Holding 10060)"
 					},
 					"default": false,
 					"disabled": "!data.modbus_active",

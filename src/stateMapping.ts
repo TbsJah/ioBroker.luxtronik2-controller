@@ -45,11 +45,19 @@ export interface StateDefinition {
 	visiIndex?: number;
 	/** Optional: Definition für flüchtiges Schreiben über Modbus TCP */
 	modbus?: {
-		/** Handelt es sich um ein Holding-Register oder Coil? */
 		type: 'holding' | 'coil';
-		/** Die Registernummer laut Alpha Innotec Doku */
+		/** Klassisches Register (0..23) */
 		register: number;
-		/** Der Name der Checkbox aus der jsonConfig.json */
+		/** Neues V3.9x SHI Register (10000+) */
+		shiRegister?: number;
+		/** Typ im SHI-Protokoll (Standard: 'holding', für Messwerte 'input') */
+		shiType?: 'holding' | 'input';
+		/** Optionales SHI-Mode-Register, das beim Schreiben mitgeschaltet werden muss (z. B. 10000 oder 10005) */
+		shiModeRegister?: number;
+		/** Wert für das SHI-Mode-Register bei aktivem Schreibbefehl (1 = Setpoint, 2 = Offset) */
+		shiModeValue?: number;
+		/** Setzt shiModeRegister wieder auf 0 (no influence), sobald der geschriebene Wert 0 ist (ideal für Offset 10002!) */
+		shiResetModeOnZero?: boolean;
 		configKey: string;
 	};
 }

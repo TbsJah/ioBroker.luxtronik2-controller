@@ -37,6 +37,7 @@ const SETTINGS_MAPPING = {
       de: { 0: "Automatik", 1: "Zweiter Erzeuger", 2: "Party", 3: "Urlaub", 4: "Aus" }
     },
     dataSource: "raw_parameter",
+    // Hinweis: Im SHI entspricht 10050 (Heating block: 0=free, 1=blocked -> Ba_Hz==4)
     modbus: { type: "holding", register: 7, configKey: "sync_modbus_holding_7" }
   },
   warmwater_operation_mode: {
@@ -102,7 +103,19 @@ const SETTINGS_MAPPING = {
     min: -5,
     max: 5,
     dataSource: "raw_parameter",
-    modbus: { type: "holding", register: 23, configKey: "sync_modbus_holding_23" }
+    modbus: {
+      type: "holding",
+      register: 23,
+      shiRegister: 10002,
+      // CSV: Heating: return offset (INT16, 0.1 K, -200..200)
+      shiType: "holding",
+      shiModeRegister: 1e4,
+      // CSV: Heating: SHI mode (2 = offset)
+      shiModeValue: 2,
+      shiResetModeOnZero: true,
+      // Bei Offset 0 K wieder auf Mode 0 (no influence) schalten!
+      configKey: "sync_modbus_holding_23"
+    }
   },
   returnTemperatureHysteresis: {
     folder: "Settings.02_Heating",
@@ -166,12 +179,21 @@ const SETTINGS_MAPPING = {
     unit: "\xB0C",
     write: true,
     luxWriteId: "17",
-    // P0017_HEATING_FLOW_OUT_TEMPERATURE_TARGET
     factor: 10,
     min: 15,
     max: 60,
     dataSource: "raw_parameter",
-    modbus: { type: "holding", register: 2, configKey: "sync_modbus_holding_2" }
+    modbus: {
+      type: "holding",
+      register: 2,
+      shiRegister: 10001,
+      // CSV: Heating: return setpoint (UINT16, 0.1 °C, 150..750)
+      shiType: "holding",
+      shiModeRegister: 1e4,
+      // CSV: Heating: SHI mode (1 = setpoint)
+      shiModeValue: 1,
+      configKey: "sync_modbus_holding_2"
+    }
   },
   // ==========================================
   // ZUSATZ: Heizung & Thermostate
@@ -209,8 +231,15 @@ const SETTINGS_MAPPING = {
     write: true,
     luxWriteId: "1148",
     factor: 10,
-    dataSource: "raw_parameter"
-    // P1148
+    dataSource: "raw_parameter",
+    // NEU aus CSV: 10060 (RBE_Raumtemperatur_Soll, 0.1 °C, Parameter 1148)
+    modbus: {
+      type: "holding",
+      register: 10060,
+      shiRegister: 10060,
+      shiType: "holding",
+      configKey: "sync_modbus_holding_1"
+    }
   },
   heating_max_flow_out_increase: {
     folder: "Settings.02_Heating",
@@ -258,7 +287,17 @@ const SETTINGS_MAPPING = {
     factor: 10,
     dataSource: "raw_parameter",
     required: true,
-    modbus: { type: "holding", register: 5, configKey: "sync_modbus_holding_5" }
+    modbus: {
+      type: "holding",
+      register: 5,
+      shiRegister: 10006,
+      // CSV: DHW: setpoint (UINT16, 0.1 °C, 300..750)
+      shiType: "holding",
+      shiModeRegister: 10005,
+      // CSV: DHW: SHI mode (1 = setpoint)
+      shiModeValue: 1,
+      configKey: "sync_modbus_holding_5"
+    }
   },
   temperature_hot_water_target: {
     folder: "Settings.03_HotWater",
@@ -271,7 +310,17 @@ const SETTINGS_MAPPING = {
     factor: 10,
     dataSource: "raw_parameter",
     required: true,
-    modbus: { type: "holding", register: 5, configKey: "sync_modbus_holding_5" }
+    modbus: {
+      type: "holding",
+      register: 5,
+      shiRegister: 10006,
+      // CSV: DHW: setpoint (UINT16, 0.1 °C, 300..750)
+      shiType: "holding",
+      shiModeRegister: 10005,
+      // CSV: DHW: SHI mode (1 = setpoint)
+      shiModeValue: 1,
+      configKey: "sync_modbus_holding_5"
+    }
   },
   hotWaterTemperatureHysteresis: {
     folder: "Settings.03_HotWater",

@@ -50,7 +50,15 @@ export const INFO_MAPPING: Record<string, StateDefinition> = {
 		factor: 10,
 		dataSource: 'raw_value',
 		required: true,
-		modbus: { type: 'holding', register: 1, configKey: 'sync_modbus_holding_1' },
+		modbus: {
+			type: 'holding',
+			register: 1,
+			shiRegister: 10001,
+			shiType: 'holding',
+			shiModeRegister: 10000,
+			shiModeValue: 1,
+			configKey: 'sync_modbus_holding_1',
+		},
 	},
 	temperature_extern_return: {
 		folder: 'Information.01_Temperatures',
@@ -84,7 +92,13 @@ export const INFO_MAPPING: Record<string, StateDefinition> = {
 		factor: 10,
 		dataSource: 'raw_value',
 		required: true,
-		modbus: { type: 'holding', register: 0, configKey: 'sync_modbus_holding_0' },
+		modbus: {
+			type: 'holding',
+			register: 0,
+			shiRegister: 10108,
+			shiType: 'input',
+			configKey: 'sync_modbus_holding_0',
+		},
 	},
 	Mitteltemperatur: {
 		folder: 'Information.01_Temperatures',
@@ -408,7 +422,7 @@ export const INFO_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: '38',
 		dataSource: 'raw_value',
 		visiIndex: 50,
-		modbus: { type: 'coil', register: 5, configKey: 'sync_modbus_coil_5' },
+		modbus: { type: 'coil', register: 5, shiRegister: 10355, shiType: 'input', configKey: 'sync_modbus_coil_5' },
 	},
 	HUPout: {
 		folder: 'Information.03_Outputs',
@@ -420,7 +434,7 @@ export const INFO_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_value',
 		required: true,
 		visiIndex: 52,
-		modbus: { type: 'coil', register: 2, configKey: 'sync_modbus_coil_2' },
+		modbus: { type: 'coil', register: 2, shiRegister: 10354, shiType: 'input', configKey: 'sync_modbus_coil_2' },
 	},
 	VENout: {
 		folder: 'Information.03_Outputs',
@@ -470,7 +484,7 @@ export const INFO_MAPPING: Record<string, StateDefinition> = {
 		dataSource: 'raw_value',
 		required: true,
 		visiIndex: 59,
-		modbus: { type: 'coil', register: 7, configKey: 'sync_modbus_coil_7' },
+		modbus: { type: 'coil', register: 7, shiRegister: 10070, shiType: 'holding', configKey: 'sync_modbus_coil_7' },
 	},
 	Virtual_ZIP_Status: {
 		folder: 'Information.03_Outputs',
@@ -619,7 +633,7 @@ export const INFO_MAPPING: Record<string, StateDefinition> = {
 		write: true,
 		luxWriteId: '9991', // Platzhalter
 		dataSource: 'raw_value',
-		modbus: { type: 'coil', register: 6, configKey: 'sync_modbus_coil_6' },
+		modbus: { type: 'coil', register: 6, shiRegister: 10350, shiType: 'input', configKey: 'sync_modbus_coil_6' },
 	},
 	FUP1out: {
 		folder: 'Information.03_Outputs',
@@ -629,7 +643,7 @@ export const INFO_MAPPING: Record<string, StateDefinition> = {
 		write: true,
 		luxWriteId: '9992', // Platzhalter
 		dataSource: 'raw_value',
-		modbus: { type: 'coil', register: 8, configKey: 'sync_modbus_coil_8' },
+		modbus: { type: 'coil', register: 8, shiRegister: 10351, shiType: 'input', configKey: 'sync_modbus_coil_8' },
 	},
 	FUP3out: {
 		folder: 'Information.03_Outputs',
@@ -639,7 +653,7 @@ export const INFO_MAPPING: Record<string, StateDefinition> = {
 		write: true,
 		luxWriteId: '9993', // Platzhalter
 		dataSource: 'raw_value',
-		modbus: { type: 'coil', register: 9, configKey: 'sync_modbus_coil_9' },
+		modbus: { type: 'coil', register: 9, shiRegister: 10353, shiType: 'input', configKey: 'sync_modbus_coil_9' },
 	},
 	SLP_out: {
 		folder: 'Information.03_Outputs',

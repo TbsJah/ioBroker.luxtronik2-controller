@@ -129,7 +129,6 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 				let fp = 21.7;
 				let ep = 23.0;
 
-				// Werte aus der Config-UI auslesen
 				if (obj.message && typeof obj.message === 'object') {
 					const msg = obj.message as Record<string, any>;
 					if (msg.fusspunkt !== undefined) {
@@ -140,7 +139,6 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 					}
 				}
 
-				// Fallbacks, falls der Nutzer Quatsch eintippt
 				if (isNaN(fp)) {
 					fp = 21.7;
 				}
@@ -148,11 +146,9 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 					ep = 23.0;
 				}
 
-				// SVG generieren und als Base64-Bild verpacken
 				const svg = generateHeatCurveSVG(fp, ep);
 				const base64 = `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`;
 
-				// Bild zurück an die Benutzeroberfläche schicken!
 				if (obj.callback) {
 					this.sendTo(obj.from, obj.command, base64, obj.callback);
 				}
@@ -169,7 +165,6 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 	 * @returns A promise that resolves when initialization completes.
 	 */
 	private async onReady(): Promise<void> {
-		// 1. Config als Record casten, um TypeScript-Fehler zu vermeiden
 		const config = this.config as Record<string, any>;
 
 		// =========================================================
@@ -177,7 +172,7 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 		// =========================================================
 		let configUpdated = false;
 		if (config.zip_control_mode === undefined) {
-			let migratedMode = 'controller'; // Default
+			let migratedMode = 'controller';
 
 			const actors = config.actors || [];
 			const validActors = actors.filter(
@@ -213,14 +208,12 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 			writeLog(`[Migration] Set operation_mode to '${config.operation_mode}' based on legacy settings.`, 'info');
 		}
 
-		// Halte modbus_active immer synchron zu operation_mode
 		const shouldModbusBeActive = config.operation_mode === 'modbus';
 		if (config.modbus_active !== shouldModbusBeActive) {
 			config.modbus_active = shouldModbusBeActive;
 			configUpdated = true;
 		}
 
-		// Falls migriert wurde -> direkt in der ioBroker-Datenbank speichern
 		if (configUpdated) {
 			try {
 				const obj = await this.getForeignObjectAsync(`system.adapter.${this.namespace}`);
@@ -242,8 +235,6 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 		await this.setState('info.connection', { val: false, ack: true });
 		writeLog(`Connecting to heat pump at ${ip}:${port}...`, 'info');
 
-		// Visibilities einmalig beim Start abfragen für den intelligenten Objekt-Filter
-		// (Wird nur ausgeführt, wenn der Nutzer die Funktion in den Settings nicht deaktiviert hat)
 		if (config.filter_visibility !== false) {
 			try {
 				this.currentVisibilities = await readAllRaw(this, 3005);
@@ -261,7 +252,6 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 				this.currentVisibilities = [];
 			}
 		} else {
-			// Nutzer hat den Filter deaktiviert -> Array bleibt leer, alles wird angezeigt
 			this.currentVisibilities = [];
 		}
 
@@ -275,7 +265,6 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 
 		const isReadOnly = config.operation_mode === 'readonly';
 
-		// Strikte Prüfung des Betriebsmodus beim Start
 		if (isReadOnly) {
 			writeLog(
 				'🔒 Operating Mode: READ-ONLY. All hardware write operations and optimizations are disabled.',
@@ -294,19 +283,17 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 		this.isDebugLogActive = debugState?.val === true;
 		setCustomDebug(this.isDebugLogActive);
 
-		// Schreib-Zähler aus ioBroker laden (sichert den Stand bei einem Adapter-Neustart)
 		const cycleTodayState = await this.getStateAsync(getDpPath('write_cycles_today'));
 		this.writeCyclesToday = cycleTodayState && typeof cycleTodayState.val === 'number' ? cycleTodayState.val : 0;
 
 		const cycleTotalState = await this.getStateAsync(getDpPath('write_cycles_total'));
 		this.writeCyclesTotal = cycleTotalState && typeof cycleTotalState.val === 'number' ? cycleTotalState.val : 0;
 
-		this.scheduleMidnightReset(); // Startet den 00:00 Uhr Timer (nur für den Tageszähler!)
+		this.scheduleMidnightReset();
 
 		if (!isReadOnly) {
 			await disableHardwareZipTimer(this);
 			subscribeMotionSensors(this);
-			// PV-Steuerung initialisieren
 			await initPvManagement(this);
 		}
 
@@ -325,7 +312,6 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 			this.log.error(`Initial data retrieval failed (device offline?): ${error.message}`);
 		}
 
-		// Virtuelle ZIP-Datenpunkte beim Start initialisieren, um 'null' Werte zu vermeiden
 		const dpActivateZip = getDpPath('Activate_Zip');
 		if (dpActivateZip) {
 			await this.setState(dpActivateZip, { val: false, ack: true });
@@ -357,14 +343,11 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 			);
 		}
 
-		// --- FIRMWARE UPDATE TIMER ---
 		if (config.update_check_active === true) {
-			// Erste Prüfung 15 Sekunden nach Adapter-Start (damit die aktuelle Firmware bereits gelesen wurde)
 			this.setTimeout(() => {
 				void checkFirmwareUpdate(this);
 			}, 15000);
 
-			// Cronjob für regelmäßige Prüfungen einrichten
 			const cronString = config.update_check_cron || '0 12 * * *';
 			try {
 				this.updateCronJob = schedule.scheduleJob(cronString, () => {
@@ -383,8 +366,6 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 				this.log.error(`Error during cyclic data retrieval loop: ${error.message}`);
 			}
 		}, intervalSeconds * 1000);
-
-		await this.setState('info.connection', true, true);
 	}
 
 	/**
@@ -398,8 +379,6 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 		this.midnightTimer = this.setTimeout(() => {
 			this.writeCyclesToday = 0;
 			void this.setState(getDpPath('write_cycles_today'), { val: 0, ack: true });
-
-			// Timer für den nächsten Tag neu aufziehen
 			this.scheduleMidnightReset();
 		}, msToMidnight);
 	}
@@ -451,8 +430,18 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 			valueToWrite = val * 10;
 		}
 
+		const isModbusEnabled = Boolean(
+			this.modbusManager &&
+			this.modbusManager.isAvailable &&
+			config.modbus_active &&
+			definition.modbus &&
+			config[definition.modbus.configKey] === true,
+		);
+
 		const writeId = definition.luxWriteId ? parseInt(definition.luxWriteId, 10) : NaN;
+		// FIX: hardwareOutOfSync NUR prüfen, wenn der Wert NICHT über Modbus (flüchtiges RAM) läuft!
 		const hardwareOutOfSync =
+			!isModbusEnabled &&
 			!definition.isVirtual &&
 			!isNaN(writeId) &&
 			writeId < 9990 &&
@@ -465,14 +454,6 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 			if (this.isDebugLogActive) {
 				writeLog(`Writing value directly into heat pump controller: ${mappingKey} = ${val}`, 'info');
 			}
-
-			const isModbusEnabled = Boolean(
-				this.modbusManager &&
-				this.modbusManager.isAvailable &&
-				config.modbus_active &&
-				definition.modbus &&
-				config[definition.modbus.configKey] === true,
-			);
 
 			if ((definition.write === true || isModbusEnabled) && !definition.isVirtual && definition.luxWriteId) {
 				try {
@@ -532,8 +513,6 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 			const config = this.config as Record<string, any>;
 			await this.syncConfigValue('heating_curve_end_point', config.endpunkt ?? 23);
 			await this.syncConfigValue('heating_curve_parallel_offset', config.fusspunkt ?? 21.7);
-
-			// FIX: Hier nicht mehr hart auf 0, sondern auf deinen eigenen Config-Wert setzen
 			await this.syncConfigValue('heating_temperature', config.sync_heating_temperature ?? 0);
 
 			await this.syncConfigValue(
@@ -549,7 +528,6 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 			await this.syncConfigValue('zip_aktiv', config.zip_aktiv ?? 0);
 			await this.syncConfigValue('Heizen_nach_Wasser', config.Heating_after_warmwater ?? false);
 
-			// WICHTIG: Wenn der PV-Boost aktiv ist, PV-Sollwerte sofort wieder über die Leerlauf-Werte bügeln!
 			if (pvIsBoostActive) {
 				await evaluatePvBoost(this, true);
 			}
@@ -596,7 +574,6 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 						? String(rawValues[80])
 						: '';
 
-			// Live-Status des ioBroker Schalters "Regelung_Aktiv" auslesen
 			const regelungAktivState = await this.getStateAsync(getDpPath('Regelung_Aktiv'));
 			const isRegelungAktiv = regelungAktivState?.val === true;
 
@@ -609,9 +586,6 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 				return;
 			}
 
-			// =========================================================
-			// 1. DYNAMIC PARAMETER ADJUSTMENT UPON STATE SWITCH
-			// =========================================================
 			if (bzVal !== this.lastBzVal) {
 				if (istLeerlauf) {
 					if (config.idle_defaults_aktiv === true) {
@@ -715,7 +689,6 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 				this.istBetriebszustandAelterAls10Min(),
 			]);
 
-			// Sichere Auswertung mit Rohdaten-Fallback (falls Datenpunkte im Objektbaum deaktiviert sind)
 			const wwSoll =
 				typeof wwSollState?.val === 'number'
 					? wwSollState.val
@@ -751,7 +724,6 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 						? (rawValues[10] - rawValues[11]) / 10
 						: 0;
 
-			// FIX: VD1out kann im State als boolean (true) oder number (1) vorliegen!
 			const vd1 =
 				vd1State?.val !== undefined && vd1State?.val !== null
 					? vd1State.val === 1 || vd1State.val === true || String(vd1State.val).toLowerCase() === 'true'
@@ -783,7 +755,6 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 						? rawParams[700] / 10
 						: 15;
 
-			// FIX: heatingLimit typsicher auf Boolean (true/false) UND Number (1/0) prüfen!
 			const isHeatingLimitEnabled =
 				heatingLimitState?.val !== undefined && heatingLimitState?.val !== null
 					? heatingLimitState.val === 1 ||
@@ -794,9 +765,6 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 
 			const nachWasser = Boolean(nachWasserState?.val);
 
-			// =========================================================
-			// 2. CONTINUOUS IN-SERVICE TELEMETRY EVALUATION
-			// =========================================================
 			if (istHeizen) {
 				if (aelterAls10 && vd1) {
 					const fusspunktState = await this.getStateAsync(getDpPath('heating_curve_parallel_offset'));
@@ -831,20 +799,14 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 						await this.syncConfigValue('Heizen_nach_Wasser', true);
 					}
 
-					// Warmwassertakt am Ende des Heiztaktes erzwingen
 					if (wwSoll - wwIst > 2 && ruecklauf >= ruecklaufSoll + heizenHysterese - 0.1) {
 						let forceSoll = wwIst + wwHysterese + 1.5;
 
-						// Handshake mit dem PV-Manager:
-						// Wenn PV aktiv ist, stellen wir sicher, dass der Takt mindestens bis zum PV-Sollwert gefahren wird
 						if (pvIsBoostActive) {
 							const baseWw =
 								parseFloat(String(config.sync_warmwater_target_temperature).replace(',', '.')) || 54;
 							const boostWw = parseFloat(String(config.pv_boost_ww).replace(',', '.')) || 0;
 							const pvTarget = baseWw + boostWw;
-
-							// Nimmt den höheren Wert: Entweder das reguläre PV-Ziel (z.B. 60) oder
-							// den Wert, der minimal nötig ist, um den Takt jetzt künstlich anzustoßen (z.B. 60.5)
 							forceSoll = Math.max(forceSoll, pvTarget);
 						}
 
@@ -857,7 +819,6 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 				}
 			}
 
-			// Typsichere Prüfung, ob die Heizgrenze das Heizen erlaubt
 			const isHeatingAllowedByLimit = !isHeatingLimitEnabled || mitteltemperatur < thresholdHeatingLimit;
 
 			if (istWarmwasser && nachWasser) {
@@ -901,9 +862,6 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 			return;
 		}
 
-		// Schreibvorgänge haben absolute Priorität!
-		// Wenn gerade geschrieben wird, überspringen wir den Lese-Zyklus,
-		// um alte Anlagen vor abstürzenden Netzwerk-Sockets zu schützen.
 		if (this.isWriting) {
 			if (this.isDebugLogActive) {
 				this.log.debug('Skipping read cycle because a write operation is currently in progress.');
@@ -917,14 +875,16 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 
 			let rawParams: number[] = [];
 			let rawValues: number[] = [];
+			let lastReadError = '';
 
 			try {
 				rawParams = await readAllRaw(this, 3003);
-				this.currentRawParams = rawParams; //Cache für Schreibschutz aktuell halten
+				if (rawParams.length > 0) {
+					this.currentRawParams = rawParams;
+				}
 			} catch (err: unknown) {
-				this.log.debug(
-					`Raw parameter acquisition response error (Command 3003): ${err instanceof Error ? err.message : String(err)}`,
-				);
+				lastReadError = err instanceof Error ? err.message : String(err);
+				this.log.debug(`Raw parameter acquisition response error (Command 3003): ${lastReadError}`);
 			}
 
 			await delayHelper(200);
@@ -932,14 +892,18 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 			try {
 				rawValues = await readAllRaw(this, 3004);
 			} catch (err: unknown) {
-				this.log.debug(
-					`Raw telemetry value acquisition response error (Command 3004): ${err instanceof Error ? err.message : String(err)}`,
+				lastReadError = err instanceof Error ? err.message : String(err);
+				this.log.debug(`Raw telemetry value acquisition response error (Command 3004): ${lastReadError}`);
+			}
+
+			if (rawParams.length === 0 && rawValues.length === 0) {
+				throw new Error(
+					`No telemetry or parameter data received from heat pump (${lastReadError || 'empty response'}).`,
 				);
 			}
 
 			const config = this.config as Record<string, any>;
 
-			// Alle Modbus-Register (Holdings 0..23 & Coils 0..13) in einem Batch aus dem RAM lesen
 			const modbusData =
 				config.modbus_active && this.modbusManager?.isAvailable
 					? await this.modbusManager.readAllRegisters()
@@ -963,7 +927,6 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 				const luxId = definition.luxWriteId || key;
 				let value: any = undefined;
 
-				// DYNAMISCHER FAKTOR FÜR HUP
 				let appliedFactor = definition.factor;
 				if (
 					key === 'heating_system_circ_pump_voltage_nominal' ||
@@ -976,14 +939,22 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 					switch (definition.dataSource) {
 						case 'raw_parameter':
 							value = rawParams?.[parseInt(luxId, 10)];
-							if (value !== undefined && appliedFactor) {
-								value /= appliedFactor;
+							if (value !== undefined) {
+								if (appliedFactor) {
+									value /= appliedFactor;
+								} else if (definition.unit === '°C') {
+									value /= 10;
+								}
 							}
 							break;
 						case 'raw_value':
 							value = rawValues?.[parseInt(luxId, 10)];
-							if (value !== undefined && appliedFactor) {
-								value /= appliedFactor;
+							if (value !== undefined) {
+								if (appliedFactor) {
+									value /= appliedFactor;
+								} else if (definition.unit === '°C') {
+									value /= 10;
+								}
 							}
 							break;
 						case 'parameter':
@@ -996,8 +967,12 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 					if (/^\d+$/.test(luxId)) {
 						const idx = parseInt(luxId, 10);
 						value = definition.folder.startsWith('Settings') ? rawParams?.[idx] : rawValues?.[idx];
-						if (value !== undefined && appliedFactor) {
-							value /= appliedFactor;
+						if (value !== undefined) {
+							if (appliedFactor) {
+								value /= appliedFactor;
+							} else if (definition.unit === '°C') {
+								value /= 10;
+							}
 						}
 					} else {
 						value = undefined;
@@ -1027,7 +1002,7 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 				}
 				// =========================================================
 
-				if (value !== undefined && typeof value === 'number' && appliedFactor) {
+				if (value !== undefined && typeof value === 'number' && (appliedFactor || definition.unit === '°C')) {
 					value = Math.round(value * 100) / 100;
 				}
 				if (value !== undefined) {
@@ -1044,7 +1019,6 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 						value = JSON.stringify(value);
 					}
 
-					// INTERNER HACK FÜR DEN LUXTRONIK ANZEIGEFEHLER (1 Sekunde -> 0 Sekunden)
 					let finalSeconds = Number(value);
 					if (definition.isDurationFormat && key === 'Time_WPein_akt' && finalSeconds === 1) {
 						finalSeconds = 0;
@@ -1085,7 +1059,6 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 
 					const stateId = `${definition.folder}.${key}`;
 
-					// ANTI-FLAPPING-SCHUTZ: Verhindert, dass die Hauptschleife Energiezähler auf 0 stürzen lässt
 					if (
 						typeof value === 'number' &&
 						(key.toLowerCase().includes('energy') ||
@@ -1096,7 +1069,7 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 							(async () => {
 								const oldState = await this.getStateAsync(stateId);
 								if (oldState && typeof oldState.val === 'number' && value < oldState.val) {
-									return; // Türsteher: Der neue Wert ist kleiner als der alte -> Ignorieren!
+									return;
 								}
 								await this.setState(stateId, { val: value, ack: true });
 							})(),
@@ -1111,9 +1084,6 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 			await calculateTotalThermalEnergy(this, rawValues);
 			await calculateTotalEnergy(this, rawValues);
 
-			// ----------------------------------------------------
-			// Fehler-Historie abarbeiten & Alarmieren
-			// ----------------------------------------------------
 			const fehlerDp = getDpPath('Fehlerspeicher');
 			const oldFehlerState = fehlerDp ? await this.getStateAsync(fehlerDp) : null;
 			const oldFehlerVal = oldFehlerState?.val as string | undefined;
@@ -1125,9 +1095,6 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 
 			await checkAndSendErrorNotifications(this, oldFehlerVal, newFehlerVal);
 
-			// ----------------------------------------------------
-			// Abschalt-Historie abarbeiten & Alarmieren (Durchfluss)
-			// ----------------------------------------------------
 			const abschaltungDp = getDpPath('Abschaltungen');
 			const oldAbschaltungState = abschaltungDp ? await this.getStateAsync(abschaltungDp) : null;
 			const oldAbschaltungVal = oldAbschaltungState?.val as string | undefined;
@@ -1138,7 +1105,6 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 			const newAbschaltungVal = newAbschaltungState?.val as string | undefined;
 
 			await checkAndSendOutageNotifications(this, oldAbschaltungVal, newAbschaltungVal);
-			// ----------------------------------------------------
 
 			await calculateTemperatureSpread(this);
 			await updateStatusStrings(this, rawValues, rawParams);
@@ -1146,7 +1112,6 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 			await updateTimerTables(this);
 			await updateSystemInfos(this, rawValues);
 
-			// Aktuellen Betriebszustand aus dem Cache oder live holen
 			const bzState = await this.getStateAsync(getDpPath('WP_BZ_akt'));
 			const currentBzVal = bzState && bzState.val !== null ? String(bzState.val).trim() : '';
 
@@ -1228,45 +1193,34 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 		const config = this.config as Record<string, any>;
 		const isReadOnly = config.operation_mode === 'readonly';
 
-		// 1. Fremd-Datenpunkte (PV-Überschuss etc.) abfangen
 		if (!id.startsWith(`${this.namespace}.`)) {
 			if (isReadOnly) {
 				return;
 			}
-			// An PV-Manager weiterleiten (wird synchron verarbeitet)
 			handlePvFeedInChange(this, id, state);
 		}
 
-		// Bewegungsmelder an den Manager auslagern (können technisch eigene oder fremde OIDs sein)
 		if (!isReadOnly) {
 			const isMotionSensor = await checkAndHandleMotionSensor(this, id, state);
 			if (isMotionSensor) {
-				return; // Der zipManager hat das Event verarbeitet, wir sind hier fertig
+				return;
 			}
 		}
 
-		// Falls wir hier noch bei einem Fremd-Datenpunkt sind, brechen wir ab
-		// (eigene Logik unten ist nur für den internen Adapter-Namespace!)
 		if (!id.startsWith(`${this.namespace}.`)) {
 			return;
 		}
 
 		if (state.ack) {
-			// PV-Sicherheits-Check beim Verdichter-Status (nur bei Ack=true, wenn der Wert echt von der WP kommt)
 			if (!isReadOnly && id.endsWith('WP_BZ_akt')) {
 				await handlePvCycleCheck(this, Number(state.val));
 			}
 			return;
 		}
 
-		// Diagnose-Aktionen (auch im Read-Only Modus erlaubt, da kein Schreibzugriff auf die Wärmepumpe erfolgt)
 		if (id.endsWith('check_firmware') && state.val === true) {
 			this.log.info('Manuelle Firmware-Update-Prüfung durch Benutzer gestartet...');
-
-			// Button direkt wieder auf false zurücksetzen, um Doppel-Trigger zu blockieren
 			void this.setState(id, false, true);
-
-			// Update-Prüfung starten
 			void checkFirmwareUpdate(this);
 			return;
 		}
@@ -1292,7 +1246,6 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 			return;
 		}
 
-		// GLOBALE SCHREIBSPERRE IM READ-ONLY MODUS
 		if (isReadOnly) {
 			writeLog(
 				`[Read-Only] Write attempt to '${id}' blocked! Change Operating Mode in adapter settings to enable hardware writes.`,
@@ -1352,10 +1305,7 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 			}
 			if (mappingKey === 'Setze_Vorgabewerte' && state.val === true) {
 				await this.setState(relativeId, { val: false, ack: true });
-
-				// FIX: Bricht einen eventuell laufenden PV-Boost hart ab, bevor die Standardwerte geladen werden
 				await forceResetPvBoost(this);
-
 				await this.setIdleDefaults();
 				return;
 			}
@@ -1427,22 +1377,15 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 				valueToWrite = state.val * 10;
 			}
 
-			// =========================================================
-			// HYBRIDE SCHREIB-WEICHE (MODBUS VS. NATIV PORT 8889)
-			// =========================================================
 			if (isModbusEnabled && definition.modbus) {
 				const isCoil = definition.modbus.type === 'coil';
 				const register = definition.modbus.register;
 
 				await this.modbusManager.writeRegister(register, Number(valueToWrite), isCoil);
-				return; // NATIVE ROUTE 8889 UMGEHEN!
+				return;
 			}
 
-			// =========================================================
-			// NATIVE ROUTE (Fallback oder Standard-Parameter via 8889)
-			// =========================================================
 			const targetWriteId = parseInt(definition.luxWriteId, 10);
-			// Platzhalter-IDs (>= 9990) niemals nativ über Port 8889 senden
 			if (isNaN(targetWriteId) || targetWriteId >= 9990) {
 				return;
 			}

@@ -298,7 +298,6 @@ class Luxtronik2Controller extends utils.Adapter {
         this.log.error(`Error during cyclic data retrieval loop: ${error.message}`);
       }
     }, intervalSeconds * 1e3);
-    await this.setState("info.connection", true, true);
   }
   /**
    * Berechnet die Zeit bis Mitternacht und setzt NUR den heutigen Schreibzähler auf 0 zurück.
@@ -349,16 +348,16 @@ class Luxtronik2Controller extends utils.Adapter {
     if (isRawWrite && definition.unit === "\xB0C" && typeof val === "number" && !appliedFactor) {
       valueToWrite = val * 10;
     }
+    const isModbusEnabled = Boolean(
+      this.modbusManager && this.modbusManager.isAvailable && config.modbus_active && definition.modbus && config[definition.modbus.configKey] === true
+    );
     const writeId = definition.luxWriteId ? parseInt(definition.luxWriteId, 10) : NaN;
-    const hardwareOutOfSync = !definition.isVirtual && !isNaN(writeId) && writeId < 9990 && this.currentRawParams.length > writeId && this.currentRawParams[writeId] !== Math.round(Number(valueToWrite));
+    const hardwareOutOfSync = !isModbusEnabled && !definition.isVirtual && !isNaN(writeId) && writeId < 9990 && this.currentRawParams.length > writeId && this.currentRawParams[writeId] !== Math.round(Number(valueToWrite));
     if (!state || state.val !== val || hardwareOutOfSync) {
       await this.setState(id, { val, ack: true });
       if (this.isDebugLogActive) {
         (0, import_logger.writeLog)(`Writing value directly into heat pump controller: ${mappingKey} = ${val}`, "info");
       }
-      const isModbusEnabled = Boolean(
-        this.modbusManager && this.modbusManager.isAvailable && config.modbus_active && definition.modbus && config[definition.modbus.configKey] === true
-      );
       if ((definition.write === true || isModbusEnabled) && !definition.isVirtual && definition.luxWriteId) {
         try {
           if (isModbusEnabled && definition.modbus) {
@@ -677,20 +676,26 @@ class Luxtronik2Controller extends utils.Adapter {
       const delayHelper = (ms) => new Promise((resolve) => this.setTimeout(resolve, ms));
       let rawParams = [];
       let rawValues = [];
+      let lastReadError = "";
       try {
         rawParams = await (0, import_rawFunctions.readAllRaw)(this, 3003);
-        this.currentRawParams = rawParams;
+        if (rawParams.length > 0) {
+          this.currentRawParams = rawParams;
+        }
       } catch (err) {
-        this.log.debug(
-          `Raw parameter acquisition response error (Command 3003): ${err instanceof Error ? err.message : String(err)}`
-        );
+        lastReadError = err instanceof Error ? err.message : String(err);
+        this.log.debug(`Raw parameter acquisition response error (Command 3003): ${lastReadError}`);
       }
       await delayHelper(200);
       try {
         rawValues = await (0, import_rawFunctions.readAllRaw)(this, 3004);
       } catch (err) {
-        this.log.debug(
-          `Raw telemetry value acquisition response error (Command 3004): ${err instanceof Error ? err.message : String(err)}`
+        lastReadError = err instanceof Error ? err.message : String(err);
+        this.log.debug(`Raw telemetry value acquisition response error (Command 3004): ${lastReadError}`);
+      }
+      if (rawParams.length === 0 && rawValues.length === 0) {
+        throw new Error(
+          `No telemetry or parameter data received from heat pump (${lastReadError || "empty response"}).`
         );
       }
       const config = this.config;
@@ -716,14 +721,22 @@ class Luxtronik2Controller extends utils.Adapter {
           switch (definition.dataSource) {
             case "raw_parameter":
               value = rawParams == null ? void 0 : rawParams[parseInt(luxId, 10)];
-              if (value !== void 0 && appliedFactor) {
-                value /= appliedFactor;
+              if (value !== void 0) {
+                if (appliedFactor) {
+                  value /= appliedFactor;
+                } else if (definition.unit === "\xB0C") {
+                  value /= 10;
+                }
               }
               break;
             case "raw_value":
               value = rawValues == null ? void 0 : rawValues[parseInt(luxId, 10)];
-              if (value !== void 0 && appliedFactor) {
-                value /= appliedFactor;
+              if (value !== void 0) {
+                if (appliedFactor) {
+                  value /= appliedFactor;
+                } else if (definition.unit === "\xB0C") {
+                  value /= 10;
+                }
               }
               break;
             case "parameter":
@@ -736,8 +749,12 @@ class Luxtronik2Controller extends utils.Adapter {
           if (/^\d+$/.test(luxId)) {
             const idx = parseInt(luxId, 10);
             value = definition.folder.startsWith("Settings") ? rawParams == null ? void 0 : rawParams[idx] : rawValues == null ? void 0 : rawValues[idx];
-            if (value !== void 0 && appliedFactor) {
-              value /= appliedFactor;
+            if (value !== void 0) {
+              if (appliedFactor) {
+                value /= appliedFactor;
+              } else if (definition.unit === "\xB0C") {
+                value /= 10;
+              }
             }
           } else {
             value = void 0;
@@ -756,7 +773,7 @@ class Luxtronik2Controller extends utils.Adapter {
             value = modbusData.coils[reg] ? 1 : 0;
           }
         }
-        if (value !== void 0 && typeof value === "number" && appliedFactor) {
+        if (value !== void 0 && typeof value === "number" && (appliedFactor || definition.unit === "\xB0C")) {
           value = Math.round(value * 100) / 100;
         }
         if (value !== void 0) {
