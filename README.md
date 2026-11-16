@@ -102,6 +102,11 @@ You might see red error messages in the installation log related to `node-gyp`, 
 //### **WORK IN PROGRESS**
 
 ## Changelog
+
+### **WORK IN PROGRESS**
+
+- **Fix i18n**
+
 ### 0.25.1 (2026-11-16)
 
 - **Removed Dependencies:**
