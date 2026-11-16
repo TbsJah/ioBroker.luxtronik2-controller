@@ -102,8 +102,7 @@ You might see red error messages in the installation log related to `node-gyp`, 
 //### **WORK IN PROGRESS**
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 0.25.2 (2026-11-16)
 
 - **Fix i18n**
 
@@ -143,13 +142,6 @@ You might see red error messages in the installation log related to `node-gyp`, 
 - **COP & Efficiency Calculation (`copManager.ts`):**
     - **Isolated Counter Tracking:** Introduced dedicated reference states for Total, Heating, and Hot Water counters (`last_raw_power_*` and `last_raw_thermal_*`). Each counter is now compared strictly against its own previous value, completely preventing cross-mode "ghost deltas" and astronomical COP spikes during cycle transitions.
     - **Automatic Total-Delta Fallback:** Added seamless fallback detection for controllers with firmware bugs (e.g., Novelan LAV) where mode-specific counters like `energy_warmwater` remain permanently at `0`. If a specific counter reports a delta of `0` during an active cycle, the adapter automatically uses the live delta of the corresponding total counter (`energy_total` / `thermalenergy_total`) without requiring manual configuration workarounds.
-
-### 0.23.1 (2026-11-07)
-
-- **COP & Efficiency Calculation Fix (`copManager.ts`):**
-    - **Fixed Astronomical COP Values:** Resolved a critical bug where the internal calculation logic switched between specific and total energy counters, causing massive "ghost deltas" and resulting in astronomical COP values (e.g., > 1000).
-    - **Restored Robust Routing:** The adapter now strictly and safely relies on the continuous total counters (`energy_total` and `thermalenergy_total`). It calculates the delta over the polling interval and dynamically routes it into the Heating or Hot Water buckets based on the active operating state.
-    - _Note:_ Users facing the hardware bug where the heat pump does not track DHW power internally should select "External Object ID" in the adapter settings and link their `energy_total` datapoint as a workaround.
 
 ## License
 
