@@ -103,7 +103,7 @@ You might see red error messages in the installation log related to `node-gyp`, 
 
 ## Changelog
 
-**WORK IN PROGRESS**
+### **WORK IN PROGRESS**
 
 - **Operating Mode & UI Protection (`jsonConfig.json`, `main.ts`):**
     - **Explicit Operating Mode Selection:** Added a central selector in the Connection tab with color-coded status banners to clearly distinguish between **Read-Only (Monitoring)**, **Read & Write without Modbus (Native via Port 8889)**, and **Read & Write with Modbus TCP (Hybrid RAM access)**.
