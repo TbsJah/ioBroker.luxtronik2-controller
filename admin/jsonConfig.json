@@ -5,18 +5,12 @@
 	"items": {
 		"connectionTab": {
 			"type": "panel",
-			"label": {
-				"en": "Connection",
-				"de": "Verbindung"
-			},
+			"label": "Connection",
 			"icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMjQgMjQiPgoJPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIgLz4KCTxwYXRoIGZpbGw9ImN1cnJlbnRDb2xvciIgZD0iTTMuMDI1IDIwLjk3NVEyIDE5Ljk1IDIgMTguNXQxLjAyNS0yLjQ3NVQ1LjUgMTVxLjQ1IDAgLjg3NS4xMTJ0LjguMzEzTDExIDExLjZWOC44NXEtMS4xLS4zMjUtMS44LTEuMjM3VDguNSA1LjVxMC0xLjQ1IDEuMDI1LTIuNDc1VDEyIDJ0Mi40NzUgMS4wMjVUMTUuNSA1LjVxMCAxLjItLjcgMi4xMTNUMTMgOC44NXYyLjc1bDMuODUgMy44MjVxLjM3NS0uMi43ODgtLjMxMlQxOC41IDE1cTEuNDUgMCAyLjQ3NSAxLjAyNVQyMiAxOC41dC0xLjAyNSAyLjQ3NVQxOC41IDIydC0yLjQ3NS0xLjAyNVQxNSAxOC41cTAtLjQ1LjExMi0uODc1dC4zMTMtLjhMMTIgMTMuNGwtMy40MjUgMy40MjVxLjIuMzc1LjMxMy44VDkgMTguNXEwIDEuNDUtMS4wMjUgMi40NzVUNS41IDIydC0yLjQ3NS0xLjAyNW0xNi41MzgtMS40MTJRMjAgMTkuMTI1IDIwIDE4LjV0LS40MzctMS4wNjJUMTguNSAxN3QtMS4wNjIuNDM4VDE3IDE4LjV0LjQzOCAxLjA2M1QxOC41IDIwdDEuMDYzLS40MzdtLTYuNS0xM3EuNDM3LS40MzguNDM3LTEuMDYzdC0uNDM3LTEuMDYyVDEyIDR0LTEuMDYyLjQzOFQxMC41IDUuNXQuNDM4IDEuMDYzVDEyIDd0MS4wNjMtLjQzN20tNi41IDEzUTcgMTkuMTI1IDcgMTguNXQtLjQzNy0xLjA2MlQ1LjUgMTd0LTEuMDYyLjQzOFQ0IDE4LjV0LjQzOCAxLjA2M1Q1LjUgMjB0MS4wNjMtLjQzNyIgLz4KPC9zdmc+Cg==",
 			"items": {
 				"headerConnection": {
 					"type": "header",
-					"text": {
-						"en": "Connection settings",
-						"de": "Verbindungseinstellungen"
-					},
+					"text": "Connection settings",
 					"size": 4,
 					"xs": 12,
 					"sm": 12,
@@ -26,10 +20,7 @@
 				},
 				"host": {
 					"type": "text",
-					"label": {
-						"en": "IP Address (Host)",
-						"de": "IP-Adresse (Host)"
-					},
+					"label": "IP Address (Host)",
 					"default": "192.168.178.81",
 					"xs": 12,
 					"sm": 12,
@@ -39,14 +30,8 @@
 				},
 				"port": {
 					"type": "number",
-					"label": {
-						"en": "Heat pump port",
-						"de": "Wärmepumpen Port"
-					},
-					"help": {
-						"en": "Standard Native TCP: 8889 (For very old V1.x firmwares: 8888)",
-						"de": "Standard Native TCP: 8889 (Bei sehr alten V1.x Firmwares: 8888)"
-					},
+					"label": "Heat pump port",
+					"help": "Standard Native TCP: 8889 (For very old V1.x firmwares: 8888)",
 					"min": 1,
 					"max": 65535,
 					"default": 8889,
@@ -58,10 +43,7 @@
 				},
 				"interval": {
 					"type": "number",
-					"label": {
-						"en": "Polling interval (seconds)",
-						"de": "Abfrageintervall (Sekunden)"
-					},
+					"label": "Polling interval (seconds)",
 					"min": 10,
 					"default": 30,
 					"xs": 12,
@@ -72,10 +54,7 @@
 				},
 				"infoInterval": {
 					"type": "staticText",
-					"text": {
-						"en": "⚠️ <b>Tip:</b> Do not set the polling interval too low! Frequent requests put a heavy load on the heat pump's CPU, making the controller very sluggish. Recommended: 30-60 seconds.",
-						"de": "⚠️ <b>Tipp:</b> Wähle das Abfrageintervall nicht zu gering! Zu häufiges Polling belastet die CPU der Wärmepumpe stark und macht die Steuerung sehr träge. Empfohlen: 30-60 Sekunden."
-					},
+					"text": "⚠️ <b>Tip:</b> Do not set the polling interval too low! Frequent requests put a heavy load on the heat pump's CPU, making the controller very sluggish. Recommended: 30-60 seconds.",
 					"style": {
 						"marginTop": "0px",
 						"marginBottom": "15px",
@@ -103,10 +82,7 @@
 				},
 				"headerOperationMode": {
 					"type": "header",
-					"text": {
-						"en": "Operating Mode & Hardware Write Access",
-						"de": "Betriebsmodus & Hardware-Schreibzugriff"
-					},
+					"text": "Operating Mode & Hardware Write Access",
 					"size": 4,
 					"xs": 12,
 					"sm": 12,
@@ -140,10 +116,7 @@
 				},
 				"infoModeReadonly": {
 					"type": "staticText",
-					"text": {
-						"en": "🔒 <b>Read-Only Mode active:</b> The adapter only reads telemetry and parameters. All write-related tabs (Modbus, Idle Defaults, Cycle Optimization, HUP, ZIP, PV Surplus) are disabled and grayed out. Manual changes in the object tree are blocked.",
-						"de": "🔒 <b>Nur-Lesen-Modus aktiv:</b> Der Adapter liest ausschließlich Messwerte und Parameter aus (z.B. für Visualisierungen und COP-Berechnung). Alle schreibenden Reiter (Modbus, Vorgaben, Takt-Optimierung, HUP, ZIP, PV-Überschuss) sind komplett deaktiviert und ausgegraut. Es finden garantiert keine Schreibzugriffe auf die Wärmepumpe statt."
-					},
+					"text": "🔒 <b>Read-Only Mode active:</b> The adapter only reads telemetry and parameters. All write-related tabs (Modbus, Idle Defaults, Cycle Optimization, HUP, ZIP, PV Surplus) are disabled and grayed out. Manual changes in the object tree are blocked.",
 					"hidden": "data.operation_mode !== 'readonly'",
 					"style": {
 						"marginTop": "10px",
@@ -163,10 +136,7 @@
 				},
 				"infoModeNative": {
 					"type": "staticText",
-					"text": {
-						"en": "✍️ <b>Write Mode (Without Modbus / Native Port 8889):</b> Active optimizations and parameter changes are written directly to the Luxtronik EEPROM via port 8889. Please enable 'Idle Defaults' when using optimizations and monitor daily flash write cycles.",
-						"de": "✍️ <b>Schreibmodus (Ohne Modbus / Nativ über Port 8889):</b> Aktive Optimierungen (Takt, HUP, ZIP, PV) und Parameter-Änderungen werden direkt über Port 8889 in den EEPROM-Speicher der Luxtronik geschrieben. Der Reiter 'Modbus (Hybrid)' ist deaktiviert."
-					},
+					"text": "✍️ <b>Write Mode (Without Modbus / Native Port 8889):</b> Active optimizations and parameter changes are written directly to the Luxtronik EEPROM via port 8889. Please enable 'Idle Defaults' when using optimizations and monitor daily flash write cycles.",
 					"hidden": "data.operation_mode !== 'native'",
 					"style": {
 						"marginTop": "10px",
@@ -186,10 +156,7 @@
 				},
 				"infoModeModbus": {
 					"type": "staticText",
-					"text": {
-						"en": "⚡ <b>Hybrid Mode (Write with Modbus TCP):</b> Volatile parameters (setpoints, offsets, coils) are written directly into the controller's RAM via Modbus TCP without causing EEPROM flash wear. Please select your active registers in the 'Modbus (Hybrid)' tab.",
-						"de": "⚡ <b>Hybrid-Modus (Schreibend mit Modbus TCP):</b> Flüchtige Parameter (Sollwerte, Parallelverschiebung, Coils) werden ohne EEPROM-Verschleiß direkt über Modbus TCP in den Arbeitsspeicher (RAM) geschrieben. Bitte wähle im Reiter 'Modbus (Hybrid)' die gewünschten Register aus."
-					},
+					"text": "⚡ <b>Hybrid Mode (Write with Modbus TCP):</b> Volatile parameters (setpoints, offsets, coils) are written directly into the controller's RAM via Modbus TCP without causing EEPROM flash wear. Please select your active registers in the 'Modbus (Hybrid)' tab.",
 					"hidden": "data.operation_mode !== 'modbus'",
 					"style": {
 						"marginTop": "10px",
@@ -209,10 +176,7 @@
 				},
 				"headerOption": {
 					"type": "header",
-					"text": {
-						"en": "Options",
-						"de": "Optionen"
-					},
+					"text": "Options",
 					"size": 4,
 					"xs": 12,
 					"sm": 12,
@@ -222,10 +186,7 @@
 				},
 				"language": {
 					"type": "select",
-					"label": {
-						"en": "Language for texts and values",
-						"de": "Sprache für Texte und Werte"
-					},
+					"label": "Language for texts and values",
 					"options": [
 						{
 							"label": "English",
@@ -245,10 +206,7 @@
 				},
 				"infoLanguage": {
 					"type": "staticText",
-					"text": {
-						"en": "Select the language in which operating states and statuses should be displayed in the ioBroker object tree.<br><br><i>Example:</i>",
-						"de": "Wähle hier die Sprache, in der Betriebszustände und Statusmeldungen im ioBroker-Objektbaum ausgegeben werden sollen.<br><br><i>Beispiel:</i>"
-					},
+					"text": "Select the language in which operating states and statuses should be displayed in the ioBroker object tree.<br><br><i>Example:</i>",
 					"xs": 12,
 					"sm": 12,
 					"md": 12,
@@ -704,18 +662,12 @@
 		"idleTab": {
 			"type": "panel",
 			"disabled": "data.operation_mode === 'readonly'",
-			"label": {
-				"en": "Idle Defaults",
-				"de": "Vorgaben"
-			},
+			"label": "Idle Defaults",
 			"icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMjQgMjQiPgoJPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIgLz4KCTxwYXRoIGZpbGw9ImN1cnJlbnRDb2xvciIgZD0ibTEyIDEzLjRsMi45IDIuOXEuMjc1LjI3NS43LjI3NXQuNy0uMjc1dC4yNzUtLjd0LS4yNzUtLjdMMTMuNCAxMmwyLjktMi45cS4yNzUtLjI3NS4yNzUtLjd0LS4yNzUtLjd0LS43LS4yNzV0LS43LjI3NUwxMiAxMC42TDkuMSA3LjdxLS4yNzUtLjI3NS0uNy0uMjc1dC0uNy4yNzV0LS4yNzUuN3QuMjc1LjdsMi45IDIuOWwtMi45IDIuOXEtLjI3NS4yNzUtLjI3NS43dC4yNzUuN3QuNy4yNzV0LjctLjI3NXpNNSAyMXEtLjgyNSAwLTEuNDEyLS41ODdUMyAxOVY1cTAtLjgyNS41ODgtMS40MTJUNSAzaDE0cS44MjUgMCAxLjQxMy41ODhUMjEgNXYxNHEwIC44MjUtLjU4NyAxLjQxM1QxOSAyMXptMC0yaDE0VjVINXpNNSA1djE0eiIgLz4KPC9zdmc+Cg==",
 			"items": {
 				"informationIdle": {
 					"type": "staticText",
-					"text": {
-						"en": "<b>⚠️ Flash Memory Protection</b><br>To prevent EEPROM/flash wear on your Luxtronik controller, parameters are only updated during active optimizations. Once the heat pump returns to idle, all modified parameters are automatically reverted to your defined default values below to ensure a safe operating state.<br><br><b>💡 Recommendation:</b> It is highly recommended to enable this feature if you use the intelligent cycle optimization (hot water + heating) and/or the dynamic HUP control!",
-						"de": "<b>⚠️ Hardware-Schutz (Flash-Memory)</b><br>Um den internen Speicher der Luxtronik zu schonen, greift dieser Adapter nur dann schreibend ein, wenn eine aktive Optimierung läuft (z.B. ein Heiztakt). Sobald die Wärmepumpe wieder in den Leerlauf (Standby) wechselt, müssen die Parameter auf sichere Standardwerte zurückgesetzt werden. <br><br><i>Trage hier unbedingt die originalen Werte deiner Heizungsanlage ein!</i><br><br><b>💡 Empfehlung:</b> Es wird dringend empfohlen, diese Vorgabewerte zu aktivieren, wenn du die intelligente Takt-Optimierung (Warmwasser + Heizen) und/oder die dynamische HUP-Steuerung nutzt!"
-					},
+					"text": "<b>⚠️ Flash Memory Protection</b><br>To prevent EEPROM/flash wear on your Luxtronik controller, parameters are only updated during active optimizations. Once the heat pump returns to idle, all modified parameters are automatically reverted to your defined default values below to ensure a safe operating state.<br><br><b>💡 Recommendation:</b> It is highly recommended to enable this feature if you use the intelligent cycle optimization (hot water + heating) and/or the dynamic HUP control!",
 					"style": {
 						"marginBottom": "15px",
 						"fontSize": "14px"
@@ -728,10 +680,7 @@
 				},
 				"heatCurveCredit": {
 					"type": "staticText",
-					"text": {
-						"en": "💡 <b>Note:</b> A big thank you to <a href='https://www.mnemotron.de/lux/heatcurve.html' target='_blank' style='color: #1976d2; text-decoration: none;'>mnemotron.de</a> for the inspiration for this visual heat curve diagram!",
-						"de": "💡 <b>Hinweis:</b> Ein großes Dankeschön an <a href='https://www.mnemotron.de/lux/heatcurve.html' target='_blank' style='color: #1976d2; text-decoration: none;'>mnemotron.de</a> für die Inspiration zu dieser Heizkurven-Darstellung!"
-					},
+					"text": "💡 <b>Note:</b> A big thank you to <a href='https://www.mnemotron.de/lux/heatcurve.html' target='_blank' style='color: #1976d2; text-decoration: none;'>mnemotron.de</a> for the inspiration for this visual heat curve diagram!",
 					"hidden": "!data.idle_defaults_aktiv",
 					"style": {
 						"fontSize": "12px",
@@ -747,22 +696,13 @@
 				},
 				"idle_defaults_aktiv": {
 					"type": "checkbox",
-					"label": {
-						"en": "Force default values during idle",
-						"de": "Standardwerte im Leerlauf erzwingen"
-					},
+					"label": "Force default values during idle",
 					"default": false,
 					"disabled": "data.operation_mode === 'readonly'",
 					"confirm": {
 						"condition": "data.idle_defaults_aktiv === true",
-						"text": {
-							"en": "Please ensure you fill in ALL default values correctly below. Empty or wrong values can disrupt your heating system!",
-							"de": "Bitte trage unbedingt alle untenstehenden Standardwerte korrekt für deine Anlage ein. Leere oder falsche Werte stören den regulären Heizbetrieb!"
-						},
-						"title": {
-							"en": "Warning",
-							"de": "Achtung: Werte eintragen!"
-						}
+						"text": "Please ensure you fill in ALL default values correctly below. Empty or wrong values can disrupt your heating system!",
+						"title": "Warning"
 					},
 					"xs": 12,
 					"sm": 12,
@@ -772,10 +712,7 @@
 				},
 				"headerHeating": {
 					"type": "header",
-					"text": {
-						"en": "Default values: Heating",
-						"de": "Vorgabewerte Heizen"
-					},
+					"text": "Default values: Heating",
 					"hidden": "!data.idle_defaults_aktiv",
 					"size": 4,
 					"xs": 12,
@@ -786,10 +723,7 @@
 				},
 				"fusspunkt": {
 					"type": "number",
-					"label": {
-						"en": "Base point (°C)",
-						"de": "Fußpunkt (°C)"
-					},
+					"label": "Base point (°C)",
 					"hidden": "!data.idle_defaults_aktiv",
 					"default": 21.7,
 					"xs": 12,
@@ -800,10 +734,7 @@
 				},
 				"endpunkt": {
 					"type": "number",
-					"label": {
-						"en": "End point (°C)",
-						"de": "Endpunkt (°C)"
-					},
+					"label": "End point (°C)",
 					"hidden": "!data.idle_defaults_aktiv",
 					"default": 23,
 					"xs": 12,
@@ -814,10 +745,7 @@
 				},
 				"sync_heating_temperature": {
 					"type": "number",
-					"label": {
-						"en": "Heating target temp offset (K)",
-						"de": "Heizen Parallelverschiebung (K)"
-					},
+					"label": "Heating target temp offset (K)",
 					"hidden": "!data.idle_defaults_aktiv",
 					"default": 0,
 					"step": 0.5,
@@ -829,10 +757,7 @@
 				},
 				"sync_return_temperature_hysteresis": {
 					"type": "number",
-					"label": {
-						"en": "Heating hysteresis (K)",
-						"de": "Heizen Hysterese (K)"
-					},
+					"label": "Heating hysteresis (K)",
 					"hidden": "!data.idle_defaults_aktiv",
 					"default": 1.5,
 					"xs": 12,
@@ -843,10 +768,7 @@
 				},
 				"sync_heating_system_circ_pump_voltage_minimal_heating": {
 					"type": "number",
-					"label": {
-						"en": "HUP Min (Heating) (V)",
-						"de": "HUP Min (Heizen) (V)"
-					},
+					"label": "HUP Min (Heating) (V)",
 					"hidden": "!data.idle_defaults_aktiv",
 					"default": 3,
 					"xs": 12,
@@ -857,10 +779,7 @@
 				},
 				"sync_heating_system_circ_pump_voltage_nominal_heating": {
 					"type": "number",
-					"label": {
-						"en": "HUP Nom (Heating) (V)",
-						"de": "HUP Nom (Heizen) (V)"
-					},
+					"label": "HUP Nom (Heating) (V)",
 					"hidden": "!data.idle_defaults_aktiv",
 					"default": 7,
 					"xs": 12,
@@ -871,10 +790,7 @@
 				},
 				"headerWater": {
 					"type": "header",
-					"text": {
-						"en": "Default values: Hot water",
-						"de": "Vorgabewerte Warmwasser"
-					},
+					"text": "Default values: Hot water",
 					"hidden": "!data.idle_defaults_aktiv",
 					"size": 4,
 					"xs": 12,
@@ -885,10 +801,7 @@
 				},
 				"sync_warmwater_target_temperature": {
 					"type": "number",
-					"label": {
-						"en": "HW Target (°C)",
-						"de": "WW Soll (°C)"
-					},
+					"label": "HW Target (°C)",
 					"hidden": "!data.idle_defaults_aktiv",
 					"default": 54,
 					"xs": 12,
@@ -899,10 +812,7 @@
 				},
 				"sync_hotwater_temperature_hysteresis": {
 					"type": "number",
-					"label": {
-						"en": "HW Hysteresis (K)",
-						"de": "WW Hysterese (K)"
-					},
+					"label": "HW Hysteresis (K)",
 					"hidden": "!data.idle_defaults_aktiv",
 					"default": 10,
 					"xs": 12,
@@ -913,10 +823,7 @@
 				},
 				"sync_heating_system_circ_pump_voltage_minimal_water": {
 					"type": "number",
-					"label": {
-						"en": "HUP Min (HW) (V)",
-						"de": "HUP Min (WW) (V)"
-					},
+					"label": "HUP Min (HW) (V)",
 					"hidden": "!data.idle_defaults_aktiv",
 					"default": 3,
 					"xs": 12,
@@ -927,10 +834,7 @@
 				},
 				"sync_heating_system_circ_pump_voltage_nominal_water": {
 					"type": "number",
-					"label": {
-						"en": "HUP Nom (HW) (V)",
-						"de": "HUP Nom (WW) (V)"
-					},
+					"label": "HUP Nom (HW) (V)",
 					"hidden": "!data.idle_defaults_aktiv",
 					"default": 10,
 					"xs": 12,
@@ -1133,18 +1037,12 @@
 		"cycleOptimizationTab": {
 			"type": "panel",
 			"disabled": "data.operation_mode === 'readonly'",
-			"label": {
-				"en": "Cycle Optimization",
-				"de": "Takt-Optimierung"
-			},
+			"label": "Cycle Optimization",
 			"icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMjQgMjQiPgoJPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIgLz4KCTxwYXRoIGZpbGw9ImN1cnJlbnRDb2xvciIgZD0iTTkuNSAxNXExLjA1IDAgMS43NzUtLjcyNWw0LTRRMTYgOS41NSAxNiA4LjV0LS43MjUtMS43NzVUMTMuNSA2dC0xLjc3NS43MjVRMTAuOCA2LjQgOS45IDYuNTc1dC0xLjUyNS44dC0uOCAxLjUyNXQuMTUgMS44MjVRNyAxMS40NSA3IDEyLjV0LjcyNSAxLjc3NVQ5LjUgMTVNNiAyMnYtNC4zcS0xLjQyNS0xLjMtMi4yMTItMy4wMzdUMyAxMXEwLTMuNzUgMi42MjUtNi4zNzVUMTIgMnEzLjEyNSAwIDUuNTM4IDEuODM4dDMuMTM3IDQuNzg3bDEuMyA1LjEyNXEuMTI1LjQ3NS0uMTc1Ljg2M1QyMSAxNWgtMnYzcTAgLjgyNS0uNTg3IDEuNDEzVDE3IDIwaC0ydjJoLTJ2LTRoNHYtNWgyLjdsLS45NS0zLjg3NXEtLjU3NS0yLjI3NS0yLjQ1LTMuN1QxMiA0UTkuMSA0IDcuMDUgNi4wMjVUNSAxMC45NXEwIDEuNS42MTMgMi44NXQxLjczNyAyLjRsLjY1LjZWMjJ6bTYuMzUtOSIgLz4KPC9zdmc+Cg==",
 			"items": {
 				"informationCycleOptimization": {
 					"type": "staticText",
-					"text": {
-						"en": "By default, the Luxtronik controller treats heating and domestic hot water (DHW) cycles as separate operations. This adapter coordinates the run so the compressor transitions seamlessly into heating without shutting down.<br><br>➔ <i>Trigger rule:</i> If <b>(DHW Target - DHW Actual) ≥ (DHW Hysteresis - 1.5 K)</b> and <b>Heating Return ≤ Return Target</b> and outdoor heating threshold is not active, heating is triggered directly with Return Target temporarily set to 35°C to force compressor operation.",
-						"de": "Standardmäßig behandelt die Luxtronik-Steuerung Heiz- und Warmwassertakte strikt getrennt. Dieser Adapter koppelt die Vorgänge, sodass der Verdichter ohne Zwischenstopp direkt in den Heizbetrieb übergeht.<br><br>➔ <i>Auslöser-Regel:</i> Wenn <b>(WW Soll - WW Ist) ≥ (WW Hysterese - 1,5 K)</b> und <b>Heizung Rücklauf ≤ Rücklauf Soll</b> und die Heizgrenze nicht aktiv ist, wird direkt der Heizbetrieb gestartet und der Rücklauf-Sollwert temporär auf 35°C gesetzt, um das Heizen zu erzwingen."
-					},
+					"text": "By default, the Luxtronik controller treats heating and domestic hot water (DHW) cycles as separate operations. This adapter coordinates the run so the compressor transitions seamlessly into heating without shutting down.<br><br>➔ <i>Trigger rule:</i> If <b>(DHW Target - DHW Actual) ≥ (DHW Hysteresis - 1.5 K)</b> and <b>Heating Return ≤ Return Target</b> and outdoor heating threshold is not active, heating is triggered directly with Return Target temporarily set to 35°C to force compressor operation.",
 					"style": {
 						"marginBottom": "20px",
 						"fontSize": "14px"
@@ -1157,22 +1055,13 @@
 				},
 				"regelung_aktiv": {
 					"type": "checkbox",
-					"label": {
-						"en": "Enable intelligent cycle optimization",
-						"de": "Intelligente Takt-Optimierung aktivieren"
-					},
+					"label": "Enable intelligent cycle optimization",
 					"disabled": "data.operation_mode === 'readonly'",
 					"default": false,
 					"confirm": {
 						"condition": "data.regelung_aktiv === true && data.idle_defaults_aktiv !== true",
-						"title": {
-							"en": "Important Recommendation",
-							"de": "Wichtige Empfehlung"
-						},
-						"text": {
-							"en": "You are activating the intelligent cycle optimization. It is highly recommended to also enable 'Force default values during idle' in the 'Idle Defaults' tab! This ensures that the heat pump returns to a safe state after the adapter intervenes.",
-							"de": "Du aktivierst die intelligente Takt-Optimierung. Es wird dringend empfohlen, im Reiter 'Leerlauf' die Option 'Standardwerte im Leerlauf erzwingen' einzuschalten! Nur so ist garantiert, dass die Wärmepumpe nach dem Eingreifen des Adapters wieder in einen sicheren Ursprungszustand zurückkehrt."
-						}
+						"title": "Important Recommendation",
+						"text": "You are activating the intelligent cycle optimization. It is highly recommended to also enable 'Force default values during idle' in the 'Idle Defaults' tab! This ensures that the heat pump returns to a safe state after the adapter intervenes."
 					},
 					"xs": 12,
 					"sm": 6,
@@ -1183,10 +1072,7 @@
 				"Heating_after_warmwater": {
 					"type": "checkbox",
 					"disabled": "data.operation_mode === 'readonly'",
-					"label": {
-						"en": "Heating after hot water",
-						"de": "Heizen nach Warmwasser erzwingen"
-					},
+					"label": "Heating after hot water",
 					"hidden": "!data.regelung_aktiv",
 					"default": false,
 					"xs": 12,
@@ -1218,18 +1104,12 @@
 		"hupTab": {
 			"type": "panel",
 			"disabled": "data.operation_mode === 'readonly'",
-			"label": {
-				"en": "HUP control",
-				"de": "HUP Steuerung"
-			},
+			"label": "HUP control",
 			"icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMjQgMjQiPgoJPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIgLz4KCTxwYXRoIGZpbGw9ImN1cnJlbnRDb2xvciIgZD0iTTE0IDE2aDJ2LTNoM3YtMmgtM1Y4aC0ydjNoLTN2Mmgzem0tOCA0LjVxLTIuNzI1LS45NS00LjM2Mi0zLjI4N1QwIDEydDEuNjM4LTUuMjEyVDYgMy41djIuMnEtMS44NS44NzUtMi45MjUgMi41NzVUMiAxMnQxLjA3NSAzLjcyNVQ2IDE4LjN6bTUuNDg4LS4yMTNxLTEuNjM4LS43MTItMi44NS0xLjkyNHQtMS45MjUtMi44NVQ2IDEydC43MTMtMy41MTJ0MS45MjUtMi44NXQyLjg1LTEuOTI1VDE1IDN0My41MTMuNzEzdDIuODUgMS45MjR0MS45MjUgMi44NVQyNCAxMnQtLjcxMiAzLjUxM3QtMS45MjUgMi44NXQtMi44NSAxLjkyNVQxNSAyMXQtMy41MTItLjcxMk0xNSAxOXEyLjkyNSAwIDQuOTYzLTIuMDM3VDIyIDEydC0yLjAzNy00Ljk2MlQxNSA1dC00Ljk2MiAyLjAzOFQ4IDEydDIuMDM4IDQuOTYzVDE1IDE5IiAvPgo8L3N2Zz4K",
 			"items": {
 				"infoHup": {
 					"type": "staticText",
-					"text": {
-						"en": "Dynamic voltage control for controllable 0–10V heating circulating pumps (HUP). (Note: PWM pumps are automatically detected and bypassed).<br><br><b>⚠️ Important Prerequisites:</b><br>1. <b>Hardware Check:</b> Only enable this if your pump is actually controlled via an analog 0-10V signal from the Luxtronik controller. If your system is configured for PWM, the adapter will automatically detect this and safely disable the regulation.<br>2. <b>System Types:</b> The ideal spread depends entirely on your heating system. Underfloor heating (FBH) typically requires 3 to 5 K, whereas traditional radiators often run optimally between 7 to 10 K.<br>3. <b>Voltage Scale:</b> Ensure you select the correct hardware multiplier for your firmware version below.",
-						"de": "Dynamische Spannungsregelung für steuerbare 0–10V Heizungsumwälzpumpen (HUP). (Hinweis: PWM-Pumpen werden automatisch erkannt und übersprungen).<br><br><b>⚠️ Wichtige Voraussetzungen:</b><br>1. <b>Hardware-Check:</b> Aktiviere dies nur, wenn deine Pumpe wirklich über ein analoges 0-10V Signal vom Luxtronik-Regler gesteuert wird. Falls deine Anlage auf PWM konfiguriert ist, erkennt der Adapter dies automatisch und deaktiviert diese Regelung sicherheitshalber.<br>2. <b>Anlagentyp:</b> Die optimale Spreizung ist extrem individuell. Eine Fußbodenheizung (FBH) benötigt meist 3 bis 5 Kelvin, Radiatoren oft 7 bis 10 Kelvin.<br>3. <b>Spannungsfaktor:</b> Wähle unten zwingend die korrekte Hardware-Skalierung passend zu deiner Firmware."
-					},
+					"text": "Dynamic voltage control for controllable 0–10V heating circulating pumps (HUP). (Note: PWM pumps are automatically detected and bypassed).<br><br><b>⚠️ Important Prerequisites:</b><br>1. <b>Hardware Check:</b> Only enable this if your pump is actually controlled via an analog 0-10V signal from the Luxtronik controller. If your system is configured for PWM, the adapter will automatically detect this and safely disable the regulation.<br>2. <b>System Types:</b> The ideal spread depends entirely on your heating system. Underfloor heating (FBH) typically requires 3 to 5 K, whereas traditional radiators often run optimally between 7 to 10 K.<br>3. <b>Voltage Scale:</b> Ensure you select the correct hardware multiplier for your firmware version below.",
 					"style": {
 						"marginBottom": "20px",
 						"fontSize": "14px"
@@ -1243,14 +1123,8 @@
 				"hup_voltage_factor": {
 					"type": "select",
 					"disabled": "data.operation_mode === 'readonly'",
-					"label": {
-						"en": "Hardware voltage scale",
-						"de": "Hardware Spannungs-Faktor"
-					},
-					"help": {
-						"en": "Select 100 for V2.x (1000 = 10.0V). Select 10 for V3.x (100 = 10.0V).",
-						"de": "Für V2.x Firmware: 100 wählen (1000 = 10,0V). Für V3.x Firmware (z.B. LWCV 82): 10 wählen (100 = 10,0V)."
-					},
+					"label": "Hardware voltage scale",
+					"help": "Select 100 for V2.x (1000 = 10.0V). Select 10 for V3.x (100 = 10.0V).",
 					"options": [
 						{
 							"label": "100 (Standard / Firmware V2.x)",
@@ -1271,21 +1145,12 @@
 				"hup_optimierung_aktiv": {
 					"type": "checkbox",
 					"disabled": "data.operation_mode === 'readonly'",
-					"label": {
-						"en": "Enable dynamic HUP spread control",
-						"de": "Dynamische HUP-Spreizungsregelung aktivieren"
-					},
+					"label": "Enable dynamic HUP spread control",
 					"default": false,
 					"confirm": {
 						"condition": "data.hup_optimierung_aktiv === true && data.idle_defaults_aktiv !== true",
-						"title": {
-							"en": "Important Recommendation",
-							"de": "Wichtige Empfehlung"
-						},
-						"text": {
-							"en": "You are activating dynamic pump control. It is highly recommended to also enable 'Force default values during idle' in the 'Idle Defaults' tab! This ensures your pump returns to its safe baseline voltage when the heating cycle finishes.",
-							"de": "Du aktivierst die dynamische Pumpensteuerung. Es wird dringend empfohlen, im Reiter 'Leerlauf' die Option 'Standardwerte im Leerlauf erzwingen' einzuschalten! Nur so ist garantiert, dass die Pumpenspannung nach dem Heizen wieder auf den sicheren Ursprungswert zurückfällt."
-						}
+						"title": "Important Recommendation",
+						"text": "You are activating dynamic pump control. It is highly recommended to also enable 'Force default values during idle' in the 'Idle Defaults' tab! This ensures your pump returns to its safe baseline voltage when the heating cycle finishes."
 					},
 					"xs": 12,
 					"sm": 12,
@@ -1295,10 +1160,7 @@
 				},
 				"headerHupLimits": {
 					"type": "header",
-					"text": {
-						"en": "Target Temperature Spread & Intervals",
-						"de": "Ziel-Temperaturspreizung & Intervalle"
-					},
+					"text": "Target Temperature Spread & Intervals",
 					"size": 4,
 					"xs": 12,
 					"sm": 12,
@@ -1308,10 +1170,7 @@
 				},
 				"hup_spreizung_min": {
 					"type": "number",
-					"label": {
-						"en": "Minimum spread (K)",
-						"de": "Minimale Spreizung (K)"
-					},
+					"label": "Minimum spread (K)",
 					"disabled": "!data.hup_optimierung_aktiv",
 					"default": 6.5,
 					"min": 1,
@@ -1325,10 +1184,7 @@
 				},
 				"hup_spreizung_max": {
 					"type": "number",
-					"label": {
-						"en": "Maximum spread (K)",
-						"de": "Maximale Spreizung (K)"
-					},
+					"label": "Maximum spread (K)",
 					"disabled": "!data.hup_optimierung_aktiv",
 					"default": 7.5,
 					"min": 1,
@@ -1342,10 +1198,7 @@
 				},
 				"hup_interval_min": {
 					"type": "number",
-					"label": {
-						"en": "Adjustment interval (minutes)",
-						"de": "Regelintervall (Minuten)"
-					},
+					"label": "Adjustment interval (minutes)",
 					"disabled": "!data.hup_optimierung_aktiv",
 					"default": 10,
 					"min": 5,
@@ -1358,10 +1211,7 @@
 				},
 				"headerHupVoltages": {
 					"type": "header",
-					"text": {
-						"en": "Voltage Boundaries",
-						"de": "Spannungsbegrenzungen"
-					},
+					"text": "Voltage Boundaries",
 					"size": 4,
 					"xs": 12,
 					"sm": 12,
@@ -1371,10 +1221,7 @@
 				},
 				"hup_voltage_limit_min": {
 					"type": "number",
-					"label": {
-						"en": "Lower limit (V)",
-						"de": "Untere Grenze (V)"
-					},
+					"label": "Lower limit (V)",
 					"disabled": "!data.hup_optimierung_aktiv",
 					"default": 3,
 					"min": 2,
@@ -1388,10 +1235,7 @@
 				},
 				"hup_voltage_limit_max": {
 					"type": "number",
-					"label": {
-						"en": "Upper limit (V)",
-						"de": "Obere Grenze (V)"
-					},
+					"label": "Upper limit (V)",
 					"disabled": "!data.hup_optimierung_aktiv",
 					"default": 10,
 					"min": 5,
@@ -1405,10 +1249,7 @@
 				},
 				"hup_voltage_step": {
 					"type": "number",
-					"label": {
-						"en": "Step size (V)",
-						"de": "Schrittweite (V)"
-					},
+					"label": "Step size (V)",
 					"disabled": "!data.hup_optimierung_aktiv",
 					"default": 0.25,
 					"min": 0.1,
@@ -1443,66 +1284,24 @@
 		"zipTab": {
 			"type": "panel",
 			"disabled": "data.operation_mode === 'readonly'",
-			"label": {
-				"en": "Circulation pump",
-				"de": "ZIP Steuerung"
-			},
+			"label": "Circulation pump",
 			"icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMjQgMjQiPgoJPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIgLz4KCTxwYXRoIGZpbGw9ImN1cnJlbnRDb2xvciIgZD0iTTEwLjU4OCAxNC40MTNRMTAgMTMuODI1IDEwIDEzcTAtLjU3NS4yMzgtMS4xMzd0LjkxMi0xLjYxM2wuNDI1LS42MjVxLjE1LS4yMjUuNDI1LS4yMjV0LjQyNS4yMjVsLjQyNS42MjVxLjY3NSAxLjA1LjkxMyAxLjYxM1QxNCAxM3EwIC44MjUtLjU4NyAxLjQxM1QxMiAxNXQtMS40MTItLjU4N00zIDE3aDQuMXEtLjQyNS0uNDI1LS43ODctLjkyNVQ1LjY3NSAxNUgzem0xMi41MzgtMS40NjNRMTcgMTQuMDc2IDE3IDEydC0xLjQ2My0zLjUzN1QxMiA3VDguNDYzIDguNDYzVDcgMTJ0MS40NjMgMy41MzhUMTIgMTd0My41MzgtMS40NjNNMTguMzI1IDlIMjFWN2gtNC4xcS40MjUuNDI1Ljc4OC45MjVUMTguMzI1IDlNMyAxOXEwIC40MjUtLjI4OC43MTNUMiAyMHQtLjcxMi0uMjg4VDEgMTl2LTZxMC0uNDI1LjI4OC0uNzEyVDIgMTJ0LjcxMy4yODhUMyAxM2gyLjA3NXEtLjA1LS4yNS0uMDYyLS40ODhUNSAxMnEwLTIuOTI1IDIuMDM4LTQuOTYyVDEyIDVoOXEwLS40MjUuMjg4LS43MTJUMjIgNHQuNzEzLjI4OFQyMyA1djZxMCAuNDI1LS4yODguNzEzVDIyIDEydC0uNzEyLS4yODhUMjEgMTFoLTIuMDc1cS4wNS4yNS4wNjMuNDg4VDE5IDEycTAgMi45MjUtMi4wMzcgNC45NjNUMTIgMTl6bTAtMnYtMnptMTgtOFY3em0tOSAzIiAvPgo8L3N2Zz4K",
 			"items": {
 				"zip_control_mode": {
 					"type": "select",
 					"disabled": "data.operation_mode === 'readonly'",
-					"label": {
-						"en": "How is your circulation pump (ZIP) controlled?",
-						"de": "Wie wird deine Zirkulationspumpe (ZIP) gesteuert?"
-					},
+					"label": "How is your circulation pump (ZIP) controlled?",
 					"options": [
 						{
-							"label": {
-								"en": "Via Luxtronik controller (Internal)",
-								"de": "Über Luxtronik Regler (Intern)",
-								"ru": "Через контроллер Luxtronik (Внутренний)",
-								"pt": "Via controlador Luxtronik (Interno)",
-								"nl": "Via Luxtronik regelaar (Intern)",
-								"fr": "Via le contrôleur Luxtronik (Interne)",
-								"it": "Tramite controller Luxtronik (Interno)",
-								"es": "A través del controlador Luxtronik (Interno)",
-								"pl": "Przez sterownik Luxtronik (Wewnętrzny)",
-								"uk": "Через контролер Luxtronik (Внутрішній)",
-								"zh-cn": "通过 Luxtronik 控制器 (内部)"
-							},
+							"label": "Via Luxtronik controller (Internal)",
 							"value": "controller"
 						},
 						{
-							"label": {
-								"en": "Via external actor (e.g. Shelly)",
-								"de": "Über externen Aktor (z.B. Shelly)",
-								"ru": "Через внешний актуатор (например, Shelly)",
-								"pt": "Via ator externo (ex. Shelly)",
-								"nl": "Via externe actor (bijv. Shelly)",
-								"fr": "Via un acteur externe (ex. Shelly)",
-								"it": "Tramite attuatore esterno (es. Shelly)",
-								"es": "A través de actor externo (ej. Shelly)",
-								"pl": "Przez zewnętrzny aktor (np. Shelly)",
-								"uk": "Через зовнішній актуатор (наприклад, Shelly)",
-								"zh-cn": "通过外部执行器 (例如 Shelly)"
-							},
+							"label": "Via external actor (e.g. Shelly)",
 							"value": "actor"
 						},
 						{
-							"label": {
-								"en": "Via Modbus TCP (Hybrid)",
-								"de": "Über Modbus TCP (Hybrid)",
-								"ru": "Через Modbus TCP (Гибрид)",
-								"pt": "Via Modbus TCP (Híbrido)",
-								"nl": "Via Modbus TCP (Hybride)",
-								"fr": "Via Modbus TCP (Hybride)",
-								"it": "Tramite Modbus TCP (Ibrido)",
-								"es": "A través de Modbus TCP (Híbrido)",
-								"pl": "Przez Modbus TCP (Hybryda)",
-								"uk": "Через Modbus TCP (Гібрид)",
-								"zh-cn": "通过 Modbus TCP (混合)"
-							},
+							"label": "Via Modbus TCP (Hybrid)",
 							"value": "modbus"
 						}
 					],
@@ -1515,10 +1314,7 @@
 				},
 				"infoController": {
 					"type": "staticText",
-					"text": {
-						"en": "⚠️ <b>Note:</b> Controlling via the Luxtronik causes write operations (wear) on the internal flash memory. Set 'Disable base ZIP values' to false if the relay is powered by the heat pump directly.",
-						"de": "⚠️ <b>Hinweis:</b> Die Steuerung über die Luxtronik verursacht Schreibvorgänge (Verschleiß) auf dem internen Flash-Speicher. Falls dein Relais Strom direkt vom ZIP-Ausgang der Wärmepumpe bezieht, entferne den Haken bei 'Deaktiviere reguläre ZIP Werte'!"
-					},
+					"text": "⚠️ <b>Note:</b> Controlling via the Luxtronik causes write operations (wear) on the internal flash memory. Set 'Disable base ZIP values' to false if the relay is powered by the heat pump directly.",
 					"hidden": "data.zip_control_mode !== 'controller'",
 					"style": {
 						"color": "#d32f2f",
@@ -1533,10 +1329,7 @@
 				},
 				"infoActor": {
 					"type": "staticText",
-					"text": {
-						"en": "✅ <b>Recommended:</b> The Luxtronik output is permanently disabled. The adapter controls your relay via Wi-Fi (0% wear). Please configure your external relays below.",
-						"de": "✅ <b>Empfohlen:</b> Der Luxtronik-Ausgang wird dauerhaft deaktiviert. Der Adapter steuert dein Relais über WLAN (0% Verschleiß). Bitte konfiguriere unten deine externen Relais."
-					},
+					"text": "✅ <b>Recommended:</b> The Luxtronik output is permanently disabled. The adapter controls your relay via Wi-Fi (0% wear). Please configure your external relays below.",
 					"hidden": "data.zip_control_mode !== 'actor'",
 					"style": {
 						"color": "#388e3c",
@@ -1551,10 +1344,7 @@
 				},
 				"infoModbus": {
 					"type": "staticText",
-					"text": {
-						"en": "ℹ️ <b>Hybrid:</b> The pump is controlled via Modbus Coil 7 without flash wear. Requires active Modbus setting.",
-						"de": "ℹ️ <b>Hybrid:</b> Die Pumpe wird ohne Flash-Verschleiß direkt über Modbus Coil 7 gesteuert. Setzt aktiviertes Modbus voraus."
-					},
+					"text": "ℹ️ <b>Hybrid:</b> The pump is controlled via Modbus Coil 7 without flash wear. Requires active Modbus setting.",
 					"hidden": "data.zip_control_mode !== 'modbus'",
 					"style": {
 						"color": "#1976d2",
@@ -1570,10 +1360,7 @@
 				"zip_lWP_aktiv": {
 					"type": "checkbox",
 					"disabled": "data.operation_mode === 'readonly'",
-					"label": {
-						"en": "Disable base ZIP values (Set Luxtronik timers to 0)",
-						"de": "Deaktiviere reguläre ZIP Werte (Luxtronik-Timer auf 0)"
-					},
+					"label": "Disable base ZIP values (Set Luxtronik timers to 0)",
 					"default": true,
 					"hidden": "data.zip_control_mode === 'modbus'",
 					"xs": 12,
@@ -1585,10 +1372,7 @@
 				"zip_optimierung_aktiv": {
 					"type": "checkbox",
 					"disabled": "data.operation_mode === 'readonly'",
-					"label": {
-						"en": "Allow ZIP optimization",
-						"de": "ZIP-Optimierung zulassen"
-					},
+					"label": "Allow ZIP optimization",
 					"default": true,
 					"xs": 12,
 					"sm": 12,
@@ -1598,10 +1382,7 @@
 				},
 				"headerZip": {
 					"type": "header",
-					"text": {
-						"en": "Values Circulation pump optimisation",
-						"de": "Vorgabewerte Zirkulationspumpenoptimierung"
-					},
+					"text": "Values Circulation pump optimisation",
 					"size": 4,
 					"style": {
 						"marginTop": "15px"
@@ -1614,10 +1395,7 @@
 				},
 				"zip_aktiv": {
 					"type": "number",
-					"label": {
-						"en": "ZIP duration ON (s)",
-						"de": "ZIP Dauer an (s)"
-					},
+					"label": "ZIP duration ON (s)",
 					"default": 120,
 					"disabled": "!data.zip_optimierung_aktiv",
 					"xs": 12,
@@ -1628,10 +1406,7 @@
 				},
 				"zip_last_run_min": {
 					"type": "number",
-					"label": {
-						"en": "ZIP duration OFF (s)",
-						"de": "ZIP Dauer aus (s)"
-					},
+					"label": "ZIP duration OFF (s)",
 					"disabled": "!data.zip_optimierung_aktiv",
 					"default": 1200,
 					"xs": 12,
@@ -1642,10 +1417,7 @@
 				},
 				"zip_aktiv_ww": {
 					"type": "number",
-					"label": {
-						"en": "ZIP duration ON Hotwater operation (s)",
-						"de": "ZIP Dauer an bei Warmwasserbetrieb (s)"
-					},
+					"label": "ZIP duration ON Hotwater operation (s)",
 					"default": 600,
 					"disabled": "!data.zip_optimierung_aktiv",
 					"xs": 12,
@@ -1670,10 +1442,7 @@
 				"motion_sensors_aktiv": {
 					"type": "checkbox",
 					"disabled": "data.operation_mode === 'readonly'",
-					"label": {
-						"en": "Actively use motion sensors",
-						"de": "Bewegungssensoren aktiv nutzen"
-					},
+					"label": "Actively use motion sensors",
 					"xs": 12,
 					"sm": 12,
 					"md": 12,
@@ -1682,10 +1451,7 @@
 				},
 				"headerMotionSensors": {
 					"type": "header",
-					"text": {
-						"en": "Motion sensors for circulation pump (ZIP)",
-						"de": "Bewegungssensoren für Zirkulationspumpe (ZIP)"
-					},
+					"text": "Motion sensors for circulation pump (ZIP)",
 					"size": 4,
 					"hidden": "!data.motion_sensors_aktiv",
 					"xs": 12,
@@ -1706,19 +1472,13 @@
 						{
 							"type": "text",
 							"attr": "name",
-							"title": {
-								"en": "Name (e.g. Bathroom)",
-								"de": "Bezeichnung (z.B. Bad)"
-							},
+							"title": "Name (e.g. Bathroom)",
 							"width": "30%"
 						},
 						{
 							"type": "objectId",
 							"attr": "oid",
-							"title": {
-								"en": "Select Object-ID",
-								"de": "Objekt-ID auswählen"
-							},
+							"title": "Select Object-ID",
 							"width": "70%"
 						}
 					]
@@ -1739,10 +1499,7 @@
 				},
 				"headerActors": {
 					"type": "header",
-					"text": {
-						"en": "External relays/actors for circulation pump",
-						"de": "Externe Relais/Aktoren für Zirkulationspumpe"
-					},
+					"text": "External relays/actors for circulation pump",
 					"hidden": "data.zip_control_mode !== 'actor'",
 					"size": 4,
 					"xs": 12,
@@ -1763,19 +1520,13 @@
 						{
 							"type": "text",
 							"attr": "name",
-							"title": {
-								"en": "Name (e.g. Zip1)",
-								"de": "Bezeichnung (z.B. Zip1)"
-							},
+							"title": "Name (e.g. Zip1)",
 							"width": "30%"
 						},
 						{
 							"type": "objectId",
 							"attr": "zip_external_relay_id",
-							"title": {
-								"en": "External Relay Object ID",
-								"de": "Objekt-ID des externen Relais"
-							},
+							"title": "External Relay Object ID",
 							"width": "70%"
 						}
 					]
@@ -1785,19 +1536,13 @@
 		"pvTab": {
 			"type": "panel",
 			"disabled": "data.operation_mode === 'readonly'",
-			"label": {
-				"en": "PV / Surplus",
-				"de": "PV-Überschuss"
-			},
+			"label": "PV / Surplus",
 			"icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMjQgMjQiPgoJPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIgLz4KCTxwYXRoIGZpbGw9ImN1cnJlbnRDb2xvciIgZD0iTTMgNFYyaDN2MnpNMiAyMmg5di00SDIuOHpNNi4xMjUgOS4zMjVMNC43IDcuOTI1TDYuODI1IDUuOEw4LjI1IDcuMnpNMy4yIDE2SDExdi00SDR6TTguNDYzIDUuNTM4UTcgNC4wNzQgNyAyaDEwcTAgMi4wNzUtMS40NjMgMy41MzhUMTIgN1Q4LjQ2MyA1LjUzN00xMSAxMVY4aDJ2M3ptMiAxMWg5bC0uOC00SDEzem0wLTZoNy44bC0uOC00aC03em00Ljg3NS02LjY3NWwtMi4xLTIuMTI1bDEuNC0xLjRMMTkuMyA3Ljl6TTE4IDRWMmgzdjJ6IiAvPgo8L3N2Zz4K",
 			"items": {
 				"pv_active": {
 					"type": "checkbox",
 					"disabled": "data.operation_mode === 'readonly'",
-					"label": {
-						"en": "Enable PV surplus management",
-						"de": "PV-Überschusssteuerung aktivieren"
-					},
+					"label": "Enable PV surplus management",
 					"newLine": true,
 					"default": false,
 					"xs": 12,
@@ -1808,10 +1553,7 @@
 				},
 				"pv_info_header": {
 					"type": "header",
-					"text": {
-						"en": "How it works: PV Surplus Control",
-						"de": "Funktionsweise: PV-Überschusssteuerung"
-					},
+					"text": "How it works: PV Surplus Control",
 					"size": 3,
 					"hidden": "!data.pv_active",
 					"xs": 12,
@@ -1822,10 +1564,7 @@
 				},
 				"pv_info_desc": {
 					"type": "staticText",
-					"text": {
-						"en": "Automatically raises the setpoints for hot water and heating when your solar system feeds enough power into the grid. The adapter waits for active cycles to finish before reverting values to protect the compressor.",
-						"de": "Hebt die Sollwerte für Warmwasser und Heizung automatisch an, wenn deine Solaranlage ausreichend Strom ins Netz einspeist. Der Adapter wartet beim Wegfall der Sonne auf das Ende laufender Takte, um den Verdichter zu schonen."
-					},
+					"text": "Automatically raises the setpoints for hot water and heating when your solar system feeds enough power into the grid. The adapter waits for active cycles to finish before reverting values to protect the compressor.",
 					"hidden": "!data.pv_active",
 					"xs": 12,
 					"sm": 12,
@@ -1835,10 +1574,7 @@
 				},
 				"pv_feed_in_dp": {
 					"type": "objectId",
-					"label": {
-						"en": "Datapoint for current grid power",
-						"de": "Datenpunkt für aktuelle Netzleistung"
-					},
+					"label": "Datapoint for current grid power",
 					"hidden": "!data.pv_active",
 					"xs": 12,
 					"sm": 12,
@@ -1848,10 +1584,7 @@
 				},
 				"pv_feed_in_unit": {
 					"type": "select",
-					"label": {
-						"en": "Unit of datapoint",
-						"de": "Einheit des Datenpunkts"
-					},
+					"label": "Unit of datapoint",
 					"options": [
 						{
 							"label": "Watt (W)",
@@ -1872,41 +1605,14 @@
 				},
 				"pv_feed_in_sign": {
 					"type": "select",
-					"label": {
-						"en": "Sign for grid feed-in",
-						"de": "Vorzeichen bei Einspeisung"
-					},
+					"label": "Sign for grid feed-in",
 					"options": [
 						{
-							"label": {
-								"en": "Negative (e.g. -2500) = Feed-in",
-								"de": "Negativ (z.B. -2500) = Einspeisung",
-								"ru": "Отрицательный (например, -2500) = подача",
-								"pt": "Negativo (ex. -2500) = injeção",
-								"nl": "Negatief (bijv. -2500) = teruglevering",
-								"fr": "Négatif (ex. -2500) = injection",
-								"it": "Negativo (es. -2500) = immissione",
-								"es": "Negativo (ej. -2500) = inyección",
-								"pl": "Ujemny (np. -2500) = wprowadzanie",
-								"uk": "Негативний (наприклад, -2500) = подача",
-								"zh-cn": "负值 (例如 -2500) = 馈入"
-							},
+							"label": "Negative (e.g. -2500) = Feed-in",
 							"value": "negative"
 						},
 						{
-							"label": {
-								"en": "Positive (e.g. 2500) = Feed-in",
-								"de": "Positiv (z.B. 2500) = Einspeisung",
-								"ru": "Положительный (например, 2500) = подача",
-								"pt": "Positivo (ex. 2500) = injeção",
-								"nl": "Positief (bijv. 2500) = teruglevering",
-								"fr": "Positif (ex. 2500) = injection",
-								"it": "Positivo (es. 2500) = immissione",
-								"es": "Positivo (ej. 2500) = inyección",
-								"pl": "Dodatni (np. 2500) = wprowadzanie",
-								"uk": "Позитивний (наприклад, 2500) = подача",
-								"zh-cn": "正值 (例如 2500) = 馈入"
-							},
+							"label": "Positive (e.g. 2500) = Feed-in",
 							"value": "positive"
 						}
 					],
@@ -1920,10 +1626,7 @@
 				},
 				"pv_battery_active": {
 					"type": "checkbox",
-					"label": {
-						"en": "Include battery charging power (Prioritize Heat Pump)",
-						"de": "Batterieladung zum Überschuss addieren (Wärmepumpe priorisieren)"
-					},
+					"label": "Include battery charging power (Prioritize Heat Pump)",
 					"newLine": true,
 					"default": false,
 					"hidden": "!data.pv_active",
@@ -1935,10 +1638,7 @@
 				},
 				"pv_battery_dp": {
 					"type": "objectId",
-					"label": {
-						"en": "Datapoint for battery power",
-						"de": "Datenpunkt für Batterieleistung"
-					},
+					"label": "Datapoint for battery power",
 					"hidden": "!data.pv_active || !data.pv_battery_active",
 					"xs": 12,
 					"sm": 12,
@@ -1948,10 +1648,7 @@
 				},
 				"pv_battery_unit": {
 					"type": "select",
-					"label": {
-						"en": "Unit",
-						"de": "Einheit"
-					},
+					"label": "Unit",
 					"options": [
 						{
 							"label": "Watt (W)",
@@ -1972,41 +1669,14 @@
 				},
 				"pv_battery_sign": {
 					"type": "select",
-					"label": {
-						"en": "Sign for charging",
-						"de": "Vorzeichen bei Ladung"
-					},
+					"label": "Sign for charging",
 					"options": [
 						{
-							"label": {
-								"en": "Positive (e.g. 1500) = Charging",
-								"de": "Positiv (z.B. 1500) = Laden",
-								"ru": "Положительный (например, 1500) = Зарядка",
-								"pt": "Positivo (ex. 1500) = Carregando",
-								"nl": "Positief (bijv. 1500) = Opladen",
-								"fr": "Positif (ex. 1500) = Charge",
-								"it": "Positivo (es. 1500) = In carica",
-								"es": "Positivo (ej. 1500) = Cargando",
-								"pl": "Dodatni (np. 1500) = Ładowanie",
-								"uk": "Позитивний (наприклад, 1500) = Заряджання",
-								"zh-cn": "正值 (例如 1500) = 充电"
-							},
+							"label": "Positive (e.g. 1500) = Charging",
 							"value": "positive"
 						},
 						{
-							"label": {
-								"en": "Negative (e.g. -1500) = Charging",
-								"de": "Negativ (z.B. -1500) = Laden",
-								"ru": "Отрицательный (например, -1500) = Зарядка",
-								"pt": "Negativo (ex. -1500) = Carregando",
-								"nl": "Negatief (bijv. -1500) = Opladen",
-								"fr": "Négatif (ex. -1500) = Charge",
-								"it": "Negativo (es. -1500) = In carica",
-								"es": "Negativo (ej. -1500) = Cargando",
-								"pl": "Ujemny (np. -1500) = Ładowanie",
-								"uk": "Негативний (наприклад, -1500) = Заряджання",
-								"zh-cn": "负值 (例如 -1500) = 充电"
-							},
+							"label": "Negative (e.g. -1500) = Charging",
 							"value": "negative"
 						}
 					],
@@ -2020,10 +1690,7 @@
 				},
 				"header_pv_start": {
 					"type": "header",
-					"text": {
-						"en": "Activation (Boost)",
-						"de": "Aktivierung (Einschaltbedingungen)"
-					},
+					"text": "Activation (Boost)",
 					"size": 5,
 					"hidden": "!data.pv_active",
 					"xs": 12,
@@ -2034,10 +1701,7 @@
 				},
 				"pv_threshold_start": {
 					"type": "number",
-					"label": {
-						"en": "Surplus threshold (Watt)",
-						"de": "Überschuss-Schwellenwert (Watt)"
-					},
+					"label": "Surplus threshold (Watt)",
 					"min": 100,
 					"default": 2000,
 					"hidden": "!data.pv_active",
@@ -2049,10 +1713,7 @@
 				},
 				"pv_delay_start": {
 					"type": "number",
-					"label": {
-						"en": "Minimum duration before start (Minutes)",
-						"de": "Mindestdauer vor Aktivierung (Minuten)"
-					},
+					"label": "Minimum duration before start (Minutes)",
 					"min": 1,
 					"default": 5,
 					"hidden": "!data.pv_active",
@@ -2064,10 +1725,7 @@
 				},
 				"pv_boost_ww": {
 					"type": "number",
-					"label": {
-						"en": "Hot water boost (+ K)",
-						"de": "Warmwasser Erhöhung (+ K)"
-					},
+					"label": "Hot water boost (+ K)",
 					"min": 0,
 					"max": 20,
 					"default": 5,
@@ -2080,10 +1738,7 @@
 				},
 				"pv_boost_hz": {
 					"type": "number",
-					"label": {
-						"en": "Heating offset boost (+ K)",
-						"de": "Heizung Parallelverschiebung Erhöhung (+ K)"
-					},
+					"label": "Heating offset boost (+ K)",
 					"min": 0,
 					"max": 10,
 					"default": 2,
@@ -2096,57 +1751,18 @@
 				},
 				"pv_priority": {
 					"type": "select",
-					"label": {
-						"en": "Boost Priority (Sequence)",
-						"de": "Boost-Priorität (Reihenfolge)"
-					},
+					"label": "Boost Priority (Sequence)",
 					"options": [
 						{
-							"label": {
-								"en": "Simultaneous (Default)",
-								"de": "Gleichzeitig (Standard)",
-								"ru": "Одновременно (по умолчанию)",
-								"pt": "Simultâneo (Padrão)",
-								"nl": "Gelijktijdig (Standaard)",
-								"fr": "Simultané (Par défaut)",
-								"it": "Simultaneo (Predefinito)",
-								"es": "Simultáneo (Por defecto)",
-								"pl": "Jednocześnie (Domyślnie)",
-								"uk": "Одночасно (За замовчуванням)",
-								"zh-cn": "同时 (默认)"
-							},
+							"label": "Simultaneous (Default)",
 							"value": "both"
 						},
 						{
-							"label": {
-								"en": "Hot Water first, then Heating",
-								"de": "Warmwasser zuerst, dann Heizen",
-								"ru": "Сначала горячая вода, затем отопление",
-								"pt": "Água Quente primeiro, depois Aquecimento",
-								"nl": "Eerst warm water, dan verwarming",
-								"fr": "Eau chaude d'abord, puis chauffage",
-								"it": "Prima Acqua Calda, poi Riscaldamento",
-								"es": "Primero Agua Caliente, luego Calefacción",
-								"pl": "Najpierw ciepła woda, potem ogrzewanie",
-								"uk": "Спочатку гаряча вода, потім опалення",
-								"zh-cn": "先热水，后加热"
-							},
+							"label": "Hot Water first, then Heating",
 							"value": "ww"
 						},
 						{
-							"label": {
-								"en": "Heating first, then Hot Water",
-								"de": "Heizen zuerst, dann Warmwasser",
-								"ru": "Сначала отопление, затем горячая вода",
-								"pt": "Aquecimento primeiro, depois Água Quente",
-								"nl": "Eerst verwarming, dan warm water",
-								"fr": "Chauffage d'abord, puis eau chaude",
-								"it": "Prima Riscaldamento, poi Acqua Calda",
-								"es": "Primero Calefacción, luego Agua Caliente",
-								"pl": "Najpierw ogrzewanie, potem ciepła woda",
-								"uk": "Спочатку опалення, потім гаряча вода",
-								"zh-cn": "先加热，后热水"
-							},
+							"label": "Heating first, then Hot Water",
 							"value": "hz"
 						}
 					],
@@ -2160,10 +1776,7 @@
 				},
 				"header_pv_stop": {
 					"type": "header",
-					"text": {
-						"en": "Deactivation (Reset)",
-						"de": "Deaktivierung (Rückfallbedingungen)"
-					},
+					"text": "Deactivation (Reset)",
 					"size": 5,
 					"hidden": "!data.pv_active",
 					"xs": 12,
@@ -2174,10 +1787,7 @@
 				},
 				"pv_threshold_stop": {
 					"type": "number",
-					"label": {
-						"en": "Stop threshold (Watt, e.g. 0 = grid draw)",
-						"de": "Ausschalt-Schwellenwert (Watt, z.B. 0 = Netzbezug)"
-					},
+					"label": "Stop threshold (Watt, e.g. 0 = grid draw)",
 					"default": 0,
 					"hidden": "!data.pv_active",
 					"xs": 12,
@@ -2188,10 +1798,7 @@
 				},
 				"pv_delay_stop": {
 					"type": "number",
-					"label": {
-						"en": "Delay before reset (Minutes)",
-						"de": "Verzögerung vor Rücksetzung (Minuten)"
-					},
+					"label": "Delay before reset (Minutes)",
 					"min": 1,
 					"default": 10,
 					"hidden": "!data.pv_active",
@@ -2203,14 +1810,8 @@
 				},
 				"pv_finish_cycle": {
 					"type": "checkbox",
-					"label": {
-						"en": "Finish active cycle to base target after reset",
-						"de": "Aktiven Takt nach Reset bis zum Normalwert zu Ende fahren"
-					},
-					"help": {
-						"en": "If deactivated, the compressor might stop immediately if current temp is higher than base target.",
-						"de": "Verhindert hartes Abschalten: Setzt den Sollwert erst auf Standard zurück, wenn der aktuelle Takt beendet ist."
-					},
+					"label": "Finish active cycle to base target after reset",
+					"help": "If deactivated, the compressor might stop immediately if current temp is higher than base target.",
 					"default": true,
 					"hidden": "!data.pv_active",
 					"xs": 12,
@@ -11583,18 +11184,12 @@
 		},
 		"notifications": {
 			"type": "panel",
-			"label": {
-				"en": "Notifications",
-				"de": "Benachrichtigungen"
-			},
+			"label": "Notifications",
 			"icon": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='currentColor' d='M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z'/%3E%3C/svg%3E",
 			"items": {
 				"telegram_warning": {
 					"type": "staticText",
-					"text": {
-						"en": "⚠️ No Telegram instance selected! Please select an instance below. (If the list is empty, please install the Telegram adapter first).",
-						"de": "⚠️ Keine Telegram-Instanz ausgewählt! Bitte wähle unten eine Instanz aus. (Falls die Liste leer ist, installiere bitte zuerst den Telegram-Adapter)."
-					},
+					"text": "⚠️ No Telegram instance selected! Please select an instance below. (If the list is empty, please install the Telegram adapter first).",
 					"style": {
 						"color": "#d32f2f",
 						"fontWeight": "bold",
@@ -11609,10 +11204,7 @@
 				},
 				"telegram_enabled": {
 					"type": "checkbox",
-					"label": {
-						"en": "Send error messages via Telegram",
-						"de": "Fehlermeldungen per Telegram senden"
-					},
+					"label": "Send error messages via Telegram",
 					"disabled": "!data.telegram_instance || data.telegram_instance === 'none'",
 					"default": false,
 					"xs": 12,
@@ -11623,10 +11215,7 @@
 				},
 				"notification_bell": {
 					"type": "checkbox",
-					"label": {
-						"en": "Show errors as notification (bell) too",
-						"de": "Fehler auch als Benachrichtigung (Glocke) zeigen"
-					},
+					"label": "Show errors as notification (bell) too",
 					"default": false,
 					"xs": 12,
 					"sm": 12,
@@ -11637,10 +11226,7 @@
 				"telegram_instance": {
 					"type": "instance",
 					"adapter": "telegram",
-					"label": {
-						"en": "Telegram instance",
-						"de": "Telegram-Instanz"
-					},
+					"label": "Telegram instance",
 					"xs": 12,
 					"sm": 12,
 					"md": 6,
@@ -11649,14 +11235,8 @@
 				},
 				"telegram_receiver": {
 					"type": "text",
-					"label": {
-						"en": "Receiver (Name / Chat ID - Optional)",
-						"de": "Empfänger (Name / Chat-ID - Optional)"
-					},
-					"help": {
-						"en": "Leave blank to send the message to all known Telegram users.",
-						"de": "Leer lassen, um die Nachricht an alle bekannten Telegram-Benutzer zu senden."
-					},
+					"label": "Receiver (Name / Chat ID - Optional)",
+					"help": "Leave blank to send the message to all known Telegram users.",
 					"disabled": "!data.telegram_instance || data.telegram_instance === 'none' || !data.telegram_enabled",
 					"xs": 12,
 					"sm": 12,
@@ -11666,10 +11246,7 @@
 				},
 				"telegram_test_btn": {
 					"type": "sendTo",
-					"label": {
-						"en": "TEST: SEND LATEST ERROR",
-						"de": "TEST: LETZTEN FEHLER SENDEN"
-					},
+					"label": "TEST: SEND LATEST ERROR",
 					"command": "testTelegram",
 					"color": "primary",
 					"variant": "outlined",
@@ -11684,18 +11261,12 @@
 		},
 		"tab_updates": {
 			"type": "panel",
-			"label": {
-				"en": "Updates",
-				"de": "Updates"
-			},
+			"label": "Updates",
 			"icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxZW0iIGhlaWdodD0iMWVtIiB2aWV3Qm94PSIwIDAgMjQgMjQiPgoJPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIgLz4KCTxwYXRoIGZpbGw9ImN1cnJlbnRDb2xvciIgZD0ibTE4IDIybDMtM2wtLjctLjdsLTEuOCAxLjhWMTZoLTF2NC4xbC0xLjgtMS44bC0uNy43ek0xMiA0TDYuMDc1IDcuNDI1TDEyIDEwLjg1bDUuOTI1LTMuNDI1ek0zIDE1Ljk3NXYtNy45NXEwLS41NS4yNjMtMVQ0IDYuM2w3LTQuMDI1cS4yNS0uMTI1LjQ4OC0uMlQxMiAydC41MjUuMDc1dC40NzUuMkwyMCA2LjNxLjQ3NS4yNzUuNzM4LjcyNXQuMjYyIDFWMTJoLTJWOS4xbC03LjAyNSA0LjA1TDUgOS4xdjYuODVsNiAzLjQ3NXYyLjNMNCAxNy43cS0uNDc1LS4yNzUtLjczNy0uNzI1dC0uMjYzLTFtMTEuNDYzIDYuNTYzUTEzIDIxLjA3NSAxMyAxOXQxLjQ2My0zLjUzN1QxOCAxNHQzLjUzOCAxLjQ2M1QyMyAxOXQtMS40NjMgMy41MzhUMTggMjR0LTMuNTM3LTEuNDYzTTEyIDExLjcyNiIgLz4KPC9zdmc+Cg==",
 			"items": {
 				"update_check_active": {
 					"type": "checkbox",
-					"label": {
-						"en": "Check for firmware updates automatically",
-						"de": "Automatisch nach Firmware-Updates suchen"
-					},
+					"label": "Check for firmware updates automatically",
 					"newLine": true,
 					"default": false,
 					"xs": 12,
@@ -11706,10 +11277,7 @@
 				},
 				"update_check_cron": {
 					"type": "cron",
-					"label": {
-						"en": "Update check schedule",
-						"de": "Zeitplan für automatische Prüfung"
-					},
+					"label": "Update check schedule",
 					"default": "0 12 * * *",
 					"hidden": "!data.update_check_active",
 					"xs": 12,
@@ -11720,10 +11288,7 @@
 				},
 				"update_check_timeout": {
 					"type": "number",
-					"label": {
-						"en": "Network timeout (seconds)",
-						"de": "Netzwerk-Timeout (Sekunden)"
-					},
+					"label": "Network timeout (seconds)",
 					"default": 120,
 					"min": 10,
 					"hidden": "!data.update_check_active",
@@ -11735,10 +11300,7 @@
 				},
 				"update_timeout_info": {
 					"type": "staticText",
-					"text": {
-						"en": "⚠️ <b>Note:</b> The official Alpha Innotec server is currently responding extremely slowly. A timeout of at least 120 seconds is highly recommended to prevent aborted checks.",
-						"de": "⚠️ <b>Hinweis:</b> Der offizielle Alpha Innotec Server (heatpump24) antwortet aktuell extrem langsam. Ein Timeout von mindestens 120 Sekunden wird dringend empfohlen, damit die Prüfung nicht abbricht."
-					},
+					"text": "⚠️ <b>Note:</b> The official Alpha Innotec server is currently responding extremely slowly. A timeout of at least 120 seconds is highly recommended to prevent aborted checks.",
 					"style": {
 						"color": "#ff9800",
 						"marginBottom": "15px",
@@ -11767,10 +11329,7 @@
 				},
 				"headerNotifications": {
 					"type": "header",
-					"text": {
-						"en": "Notification channels for new updates",
-						"de": "Benachrichtigungswege bei neuen Updates"
-					},
+					"text": "Notification channels for new updates",
 					"size": 5,
 					"hidden": "!data.update_check_active",
 					"xs": 12,
@@ -11781,10 +11340,7 @@
 				},
 				"update_check_telegram": {
 					"type": "checkbox",
-					"label": {
-						"en": "Send Telegram message",
-						"de": "Telegram-Nachricht senden"
-					},
+					"label": "Send Telegram message",
 					"default": false,
 					"hidden": "!data.update_check_active",
 					"xs": 12,
@@ -11795,10 +11351,7 @@
 				},
 				"update_check_notification": {
 					"type": "checkbox",
-					"label": {
-						"en": "Show as ioBroker notification (Bell)",
-						"de": "Als ioBroker-Benachrichtigung (Glocke) zeigen"
-					},
+					"label": "Show as ioBroker notification (Bell)",
 					"default": false,
 					"hidden": "!data.update_check_active",
 					"xs": 12,
@@ -11811,18 +11364,12 @@
 		},
 		"customValuesTab": {
 			"type": "panel",
-			"label": {
-				"en": "Custom values",
-				"de": "Eigene Werte"
-			},
+			"label": "Custom values",
 			"icon": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='currentColor' d='M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8a8 8 0 0 1-8 8zm4-9h-3V8a1 1 0 0 0-2 0v3H8a1 1 0 0 0 0 2h3v3a1 1 0 0 0 2 0v-3h3a1 1 0 0 0 0-2z'/%3E%3C/svg%3E",
 			"items": {
 				"custom_states": {
 					"type": "table",
-					"label": {
-						"en": "Custom datapoints (Folder: Custom)",
-						"de": "Benutzerdefinierte Datenpunkte (Verzeichnis: Custom)"
-					},
+					"label": "Custom datapoints (Folder: Custom)",
 					"xs": 12,
 					"sm": 12,
 					"md": 12,
@@ -11832,59 +11379,26 @@
 						{
 							"type": "checkbox",
 							"attr": "active",
-							"title": {
-								"en": "Active",
-								"de": "Aktiv"
-							},
+							"title": "Active",
 							"width": "50px"
 						},
 						{
 							"type": "number",
 							"attr": "luxId",
-							"title": {
-								"en": "Luxtronik ID (Index)",
-								"de": "Luxtronik ID (Index)"
-							},
+							"title": "Luxtronik ID (Index)",
 							"width": "120px"
 						},
 						{
 							"type": "select",
 							"attr": "source",
-							"title": {
-								"en": "Data source",
-								"de": "Datenquelle"
-							},
+							"title": "Data source",
 							"options": [
 								{
-									"label": {
-										"en": "Telemetry (rawValues)",
-										"de": "Messwert (rawValues)",
-										"ru": "Telemetry (rawValues)",
-										"pt": "Telemetry (rawValues)",
-										"nl": "Telemetry (rawValues)",
-										"fr": "Telemetry (rawValues)",
-										"it": "Telemetry (rawValues)",
-										"es": "Telemetry (rawValues)",
-										"pl": "Telemetry (rawValues)",
-										"uk": "Telemetry (rawValues)",
-										"zh-cn": "Telemetry (rawValues)"
-									},
+									"label": "Telemetry (rawValues)",
 									"value": "value"
 								},
 								{
-									"label": {
-										"en": "Parameter (rawParams)",
-										"de": "Parameter (rawParams)",
-										"ru": "Parameter (rawParams)",
-										"pt": "Parameter (rawParams)",
-										"nl": "Parameter (rawParams)",
-										"fr": "Parameter (rawParams)",
-										"it": "Parameter (rawParams)",
-										"es": "Parameter (rawParams)",
-										"pl": "Parameter (rawParams)",
-										"uk": "Parameter (rawParams)",
-										"zh-cn": "Parameter (rawParams)"
-									},
+									"label": "Parameter (rawParams)",
 									"value": "parameter"
 								}
 							],
@@ -11893,82 +11407,28 @@
 						{
 							"type": "text",
 							"attr": "name",
-							"title": {
-								"en": "Name (e.g. My temperature)",
-								"de": "Name (z.B. Meine Temperatur)"
-							},
+							"title": "Name (e.g. My temperature)",
 							"width": "200px"
 						},
 						{
 							"type": "select",
 							"attr": "type",
-							"title": {
-								"en": "Data type",
-								"de": "Datentyp"
-							},
+							"title": "Data type",
 							"options": [
 								{
-									"label": {
-										"en": "Number",
-										"de": "Zahl",
-										"ru": "Number",
-										"pt": "Number",
-										"nl": "Number",
-										"fr": "Number",
-										"it": "Number",
-										"es": "Number",
-										"pl": "Number",
-										"uk": "Number",
-										"zh-cn": "Number"
-									},
+									"label": "Number",
 									"value": "number"
 								},
 								{
-									"label": {
-										"en": "Text",
-										"de": "Text",
-										"ru": "Text",
-										"pt": "Text",
-										"nl": "Text",
-										"fr": "Text",
-										"it": "Text",
-										"es": "Text",
-										"pl": "Text",
-										"uk": "Text",
-										"zh-cn": "Text"
-									},
+									"label": "Text",
 									"value": "string"
 								},
 								{
-									"label": {
-										"en": "True/False",
-										"de": "Wahr/Falsch",
-										"ru": "True/False",
-										"pt": "True/False",
-										"nl": "True/False",
-										"fr": "True/False",
-										"it": "True/False",
-										"es": "True/False",
-										"pl": "True/False",
-										"uk": "True/False",
-										"zh-cn": "True/False"
-									},
+									"label": "True/False",
 									"value": "boolean"
 								},
 								{
-									"label": {
-										"en": "Date/Time (Unix)",
-										"de": "Datum/Uhrzeit (Unix)",
-										"ru": "Date/Time (Unix)",
-										"pt": "Date/Time (Unix)",
-										"nl": "Date/Time (Unix)",
-										"fr": "Date/Time (Unix)",
-										"it": "Date/Time (Unix)",
-										"es": "Date/Time (Unix)",
-										"pl": "Date/Time (Unix)",
-										"uk": "Date/Time (Unix)",
-										"zh-cn": "Date/Time (Unix)"
-									},
+									"label": "Date/Time (Unix)",
 									"value": "datetime"
 								}
 							],
@@ -11977,19 +11437,13 @@
 						{
 							"type": "number",
 							"attr": "factor",
-							"title": {
-								"en": "Factor (e.g. 0.1)",
-								"de": "Faktor (z.B. 0.1)"
-							},
+							"title": "Factor (e.g. 0.1)",
 							"width": "120px"
 						},
 						{
 							"type": "text",
 							"attr": "unit",
-							"title": {
-								"en": "Unit (e.g. °C)",
-								"de": "Einheit (z.B. °C)"
-							},
+							"title": "Unit (e.g. °C)",
 							"width": "100px"
 						}
 					]
@@ -11998,18 +11452,12 @@
 		},
 		"backupTab": {
 			"type": "panel",
-			"label": {
-				"en": "Backup & Diagnostics",
-				"de": "Backup & Diagnose"
-			},
+			"label": "Backup & Diagnostics",
 			"icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iY3VycmVudENvbG9yIiBkPSJNMTkgOWgtNFYzSDl2Nkg1bDcgN3pNNSAxOHYyaDE0di0yeiIvPjwvc3ZnPg==",
 			"items": {
 				"headerBackup": {
 					"type": "header",
-					"text": {
-						"en": "Manual Download",
-						"de": "Manueller Download"
-					},
+					"text": "Manual Download",
 					"size": 4,
 					"xs": 12,
 					"sm": 12,
@@ -12019,10 +11467,7 @@
 				},
 				"backupInfo": {
 					"type": "staticText",
-					"text": {
-						"en": "You can download the heat pump's internal logs (.dta) directly via its web interface.\n\n💡 Tip: To graphically analyze the .dta files on your PC, we recommend the free tool OpenDTA (<a href='https://sourceforge.net/projects/opendta/').\n\n• Live DTA (/NewProc): Generates a fresh log right now.\n• Existing DTA (/proclog): Downloads the last auto-saved log (can be 2-3 hours old).",
-						"de": "Über den internen Webserver der Luxtronik-Steuerung lassen sich System-Logs (.dta) direkt herunterladen.\n\n💡 Tipp: Zur grafischen Auswertung der .dta-Dateien am PC empfehlen wir das kostenlose Tool OpenDTA (<a href='https://sourceforge.net/projects/opendta/').\n\n• Live DTA (/NewProc): Zwingt die Anlage, sofort einen aktuellen Speicherabzug zu generieren.\n• Vorhandenes DTA (/proclog): Lädt die letzte automatisch gespeicherte Datei herunter (oft 2-3 Stunden alt)."
-					},
+					"text": "You can download the heat pump's internal logs (.dta) directly via its web interface.\n\n💡 Tip: To graphically analyze the .dta files on your PC, we recommend the free tool OpenDTA (<a href='https://sourceforge.net/projects/opendta/').\n\n• Live DTA (/NewProc): Generates a fresh log right now.\n• Existing DTA (/proclog): Downloads the last auto-saved log (can be 2-3 hours old).",
 					"style": {
 						"marginBottom": "30px",
 						"fontSize": "14px",
@@ -12036,10 +11481,7 @@
 				},
 				"linkNewProc": {
 					"type": "staticLink",
-					"label": {
-						"en": "Live DTA (/NewProc)",
-						"de": "Live DTA (/NewProc)"
-					},
+					"label": "Live DTA (/NewProc)",
 					"href": "http://${data.host}/NewProc",
 					"button": true,
 					"variant": "contained",
@@ -12052,10 +11494,7 @@
 				},
 				"linkProcLog": {
 					"type": "staticLink",
-					"label": {
-						"en": "Existing DTA (/proclog)",
-						"de": "Vorhandenes DTA (/proclog)"
-					},
+					"label": "Existing DTA (/proclog)",
 					"href": "http://${data.host}/proclog",
 					"button": true,
 					"variant": "outlined",
@@ -12080,10 +11519,7 @@
 				},
 				"headerAutoBackup": {
 					"type": "header",
-					"text": {
-						"en": "Automated DTA Backup",
-						"de": "Automatisches DTA-Backup"
-					},
+					"text": "Automated DTA Backup",
 					"size": 4,
 					"xs": 12,
 					"sm": 12,
@@ -12093,14 +11529,8 @@
 				},
 				"autoBackupActive": {
 					"type": "checkbox",
-					"label": {
-						"en": "Enable automatic DTA download",
-						"de": "Automatischen DTA-Download aktivieren"
-					},
-					"help": {
-						"en": "If enabled, the adapter will automatically download the DTA log according to the schedule and save it to the ioBroker file system.",
-						"de": "Wenn aktiviert, ruft der Adapter das DTA-Log nach dem untenstehenden Zeitplan vollautomatisch ab und speichert es im ioBroker-Dateisystem."
-					},
+					"label": "Enable automatic DTA download",
+					"help": "If enabled, the adapter will automatically download the DTA log according to the schedule and save it to the ioBroker file system.",
 					"default": false,
 					"xs": 12,
 					"sm": 12,
@@ -12110,10 +11540,7 @@
 				},
 				"autoBackupCron": {
 					"type": "cron",
-					"label": {
-						"en": "Schedule",
-						"de": "Zeitplan"
-					},
+					"label": "Schedule",
 					"default": "0 2 * * *",
 					"hidden": "!data.autoBackupActive",
 					"xs": 12,
@@ -12124,10 +11551,7 @@
 				},
 				"backupLocationInfo": {
 					"type": "staticText",
-					"text": {
-						"en": "Automated DTA backups are safely stored in the global ioBroker file system. You can find them in the main ioBroker menu under 'Files' in the folder <b>0_userdata.0.luxtronik_backups</b>. From there, you can easily download them to your PC and analyze them using tools like OpenDTA.",
-						"de": "Die automatischen DTA-Backups werden sicher im globalen ioBroker-Dateisystem abgelegt. Du findest sie im ioBroker-Hauptmenü unter dem Reiter 'Dateien' im Ordner <b>0_userdata.0.luxtronik_backups</b>. Von dort aus kannst du sie bequem auf deinen PC herunterladen und in Tools wie OpenDTA analysieren."
-					},
+					"text": "Automated DTA backups are safely stored in the global ioBroker file system. You can find them in the main ioBroker menu under 'Files' in the folder <b>0_userdata.0.luxtronik_backups</b>. From there, you can easily download them to your PC and analyze them using tools like OpenDTA.",
 					"style": {
 						"marginBottom": "20px",
 						"fontSize": "14px",
