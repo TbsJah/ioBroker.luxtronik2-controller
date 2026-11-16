@@ -102,8 +102,7 @@ You might see red error messages in the installation log related to `node-gyp`, 
 //### **WORK IN PROGRESS**
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 1.0.1 (2026-11-16)
 
 - **Update of i10n files**
 
@@ -135,16 +134,6 @@ You might see red error messages in the installation log related to `node-gyp`, 
     - **Isolated COP & Energy Tracking:** Enforced strict separation of reference states for heating, hot water, and total consumption with fallback logic for controllers affected by zero-value firmware bugs.
     - **Bug Fixes:** Fixed Modbus RAM vs. EEPROM sync loops (`hardwareOutOfSync`), unified `°C` temperature scaling across all data sources, and fixed offline detection (`info.connection` & `errorCount`) when telemetry reads fail.
     - **Repository Checker & i18n:** Completed missing 11-language translations in `jsonConfig.json` and updated `@iobroker/testing` to `6.3.2`.
-
-### 0.24.0 (2026-11-09)
-
-**🐛 Bugfixes & Tweaks**
-
-- **Operating Mode & Write Protection (`jsonConfig.json`, `main.ts`):**
-    - **Explicit Operating Mode Selection:** Added a central "Operating Mode" selector in the Connection tab with color-coded status banners to clearly distinguish between **Read-Only (Monitoring)**, **Read & Write without Modbus (Native via Port 8889)**, and **Read & Write with Modbus TCP (Hybrid RAM access)**.
-    - **Dynamic UI Locking:** When "Read-Only" is selected, all write-related configuration tabs (Modbus, Idle Defaults, Cycle Optimization, HUP, ZIP, and PV Surplus) and their inputs are automatically grayed out and disabled. Selecting native write mode unlocks the optimization tabs while keeping the Modbus tab disabled.
-    - **Strict Backend Write Lock:** Enforced a global hardware write lock in Read-Only mode across `onReady`, `syncConfigValue`, `runOptimizationSchedule`, and `onStateChange` (while keeping diagnostic functions like debug logging, raw dumps, and firmware checks active).
-    - **Automatic Config Migration:** Existing installations are seamlessly migrated on startup to the matching operating mode based on their previously active Modbus and optimization settings.
 
 ## License
 

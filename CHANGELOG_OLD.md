@@ -23,6 +23,16 @@
 ### 0.1.0 (2026-07-09)
 
 - initial release
+## 0.24.0 (2026-11-09)
+
+**🐛 Bugfixes & Tweaks**
+
+- **Operating Mode & Write Protection (`jsonConfig.json`, `main.ts`):**
+    - **Explicit Operating Mode Selection:** Added a central "Operating Mode" selector in the Connection tab with color-coded status banners to clearly distinguish between **Read-Only (Monitoring)**, **Read & Write without Modbus (Native via Port 8889)**, and **Read & Write with Modbus TCP (Hybrid RAM access)**.
+    - **Dynamic UI Locking:** When "Read-Only" is selected, all write-related configuration tabs (Modbus, Idle Defaults, Cycle Optimization, HUP, ZIP, and PV Surplus) and their inputs are automatically grayed out and disabled. Selecting native write mode unlocks the optimization tabs while keeping the Modbus tab disabled.
+    - **Strict Backend Write Lock:** Enforced a global hardware write lock in Read-Only mode across `onReady`, `syncConfigValue`, `runOptimizationSchedule`, and `onStateChange` (while keeping diagnostic functions like debug logging, raw dumps, and firmware checks active).
+    - **Automatic Config Migration:** Existing installations are seamlessly migrated on startup to the matching operating mode based on their previously active Modbus and optimization settings.
+
 ## 0.23.2 (2026-11-07)
 
 - **COP & Efficiency Calculation (`copManager.ts`):**
