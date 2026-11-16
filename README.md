@@ -102,8 +102,7 @@ You might see red error messages in the installation log related to `node-gyp`, 
 //### **WORK IN PROGRESS**
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 0.25.1 (2026-11-16)
 
 - **Removed Dependencies:**
     - WS
@@ -146,14 +145,6 @@ You might see red error messages in the installation log related to `node-gyp`, 
     - **Fixed Astronomical COP Values:** Resolved a critical bug where the internal calculation logic switched between specific and total energy counters, causing massive "ghost deltas" and resulting in astronomical COP values (e.g., > 1000).
     - **Restored Robust Routing:** The adapter now strictly and safely relies on the continuous total counters (`energy_total` and `thermalenergy_total`). It calculates the delta over the polling interval and dynamically routes it into the Heating or Hot Water buckets based on the active operating state.
     - _Note:_ Users facing the hardware bug where the heat pump does not track DHW power internally should select "External Object ID" in the adapter settings and link their `energy_total` datapoint as a workaround.
-
-### 0.23.0 (2026-11-07)
-
-**🐛 Bugfixes & Tweaks**
-
-- **Configuration & Baseline Logic:**
-    - **Custom Heating Offset Baseline:** Added a new configuration field in the "Idle Defaults" tab for the default heating target temperature offset (Parallelverschiebung)[cite: 10].
-    - **Preserved Baselines:** The idle reset mechanism (`main.ts`) and the PV surplus manager (`pvManager.ts`) now respect this custom baseline (e.g., +1 K) instead of hard-resetting the offset to `0 K`[cite: 7, 13]. This ensures that your manual baseline heating curve is perfectly preserved when returning from a PV boost or entering standby.
 
 ## License
 
