@@ -102,6 +102,12 @@ You might see red error messages in the installation log related to `node-gyp`, 
 //### **WORK IN PROGRESS**
 
 ## Changelog
+
+### **WORK IN PROGRESS**
+
+- **Removed Dependencies:**
+    - WS
+
 ### 0.25.0 (2026-11-16)
 
 - **Operating Mode & UI Protection (`jsonConfig.json`, `main.ts`):**
