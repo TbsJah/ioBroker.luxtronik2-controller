@@ -23,6 +23,22 @@
 ### 0.1.0 (2026-07-09)
 
 - initial release
+## 0.25.0 (2026-11-16)
+
+- **Operating Mode & UI Protection (`jsonConfig.json`, `main.ts`):**
+    - **Explicit Operating Mode Selection:** Added a central selector in the Connection tab with color-coded status banners to clearly distinguish between **Read-Only (Monitoring)**, **Read & Write without Modbus (Native via Port 8889)**, and **Read & Write with Modbus TCP (Hybrid RAM access)**.
+    - **Dynamic UI & Backend Write Locking:** In Read-Only mode, all write-related configuration tabs (Modbus, Idle Defaults, Cycle Optimization, HUP, ZIP, PV Surplus) are automatically grayed out and all hardware write commands are strictly blocked in the backend.
+    - **Automatic Config Migration:** Existing installations are seamlessly migrated on startup to the matching operating mode based on previously active settings.
+- **Modbus V3.9x Smart Home Interface (SHI) & Diagnostics (`modbusManager.ts`, `settings.ts`, `info.ts`):**
+    - **Dual-Protocol Auto-Detection:** The Modbus manager now automatically detects and supports both the classic Modbus register mapping (`0..23`) and the modern **V3.90+ / V3.92.x Smart Home Interface (SHI)** register architecture (`10000+`).
+    - **Automated SHI Mode-Gating:** Writing to SHI setpoints and offsets (`10001`, `10002`, `10006`) automatically activates the required SHI control mode registers (`10000`, `10005`, `10065`) and releases heating curve control (`mode = 0`) when the offset returns to `0 K`.
+    - **Granular Register Polling & Diagnostic Scanner:** Replaced rigid block reads with individual register polling to prevent `Exception 2 (Illegal data address)` crashes on unsupported registers, and integrated a full Modbus register scanner into `Dump_Raw_To_Log`.
+- **Core Stability, COP & Pure TCP Communication (`main.ts`, `rawFunctions.ts`, `copManager.ts`):**
+    - **Pure Native TCP Architecture:** Removed deprecated WebSocket (port 8214) code in favor of stable, password-free native TCP communication over port `8889`.
+    - **Isolated COP & Energy Tracking:** Enforced strict separation of reference states for heating, hot water, and total consumption with fallback logic for controllers affected by zero-value firmware bugs.
+    - **Bug Fixes:** Fixed Modbus RAM vs. EEPROM sync loops (`hardwareOutOfSync`), unified `°C` temperature scaling across all data sources, and fixed offline detection (`info.connection` & `errorCount`) when telemetry reads fail.
+    - **Repository Checker & i18n:** Completed missing 11-language translations in `jsonConfig.json` and updated `@iobroker/testing` to `6.3.2`.
+
 ## 0.24.0 (2026-11-09)
 
 **🐛 Bugfixes & Tweaks**
