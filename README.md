@@ -102,6 +102,13 @@ You might see red error messages in the installation log related to `node-gyp`, 
 //### **WORK IN PROGRESS**
 
 ## Changelog
+
+### **WORK IN PROGRESS**
+
+- Fixed `node:` protocol imports (`node:fs`, `node:path`) and repository checker lint issues
+- Completed and synchronized i18n translations across all supported languages
+- Fixed `jsonConfig` label keys in `generateConfig.ts` to prevent inline language object overrides during build
+
 ### 1.0.1 (2026-11-16)
 
 - **Update of i10n files**
