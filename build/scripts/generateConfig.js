@@ -306,14 +306,8 @@ const copTab = {
       label: { en: "Data source for power consumption", de: "Datenquelle f\xFCr Stromverbrauch" },
       disabled: "!data.cop_calculation_active",
       options: [
-        {
-          label: { en: "Internal (Luxtronik estimates)", de: "Intern (Luxtronik Sch\xE4tzwerte)" },
-          value: "internal"
-        },
-        {
-          label: { en: "External Object ID (e.g. Shelly)", de: "Externe Objekt-ID (z.B. Shelly)" },
-          value: "external"
-        }
+        { label: "Internal (Luxtronik estimates)", value: "internal" },
+        { label: "External Object ID (e.g. Shelly)", value: "external" }
       ],
       xs: 12,
       sm: 12,
@@ -348,11 +342,8 @@ const copTab = {
       label: { en: "Data source for thermal generation", de: "Datenquelle f\xFCr W\xE4rmeerzeugung" },
       disabled: "!data.cop_calculation_active",
       options: [
-        { label: { en: "Internal (Luxtronik meters)", de: "Intern (Luxtronik Z\xE4hler)" }, value: "internal" },
-        {
-          label: { en: "External Object ID (e.g. M-Bus meter)", de: "Externe Objekt-ID (z.B. M-Bus Z\xE4hler)" },
-          value: "external"
-        }
+        { label: "Internal (Luxtronik meters)", value: "internal" },
+        { label: "External Object ID (e.g. M-Bus meter)", value: "external" }
       ],
       xs: 12,
       sm: 12,

@@ -939,17 +939,11 @@
 					"disabled": "!data.cop_calculation_active",
 					"options": [
 						{
-							"label": {
-								"en": "Internal (Luxtronik estimates)",
-								"de": "Intern (Luxtronik Schätzwerte)"
-							},
+							"label": "Internal (Luxtronik estimates)",
 							"value": "internal"
 						},
 						{
-							"label": {
-								"en": "External Object ID (e.g. Shelly)",
-								"de": "Externe Objekt-ID (z.B. Shelly)"
-							},
+							"label": "External Object ID (e.g. Shelly)",
 							"value": "external"
 						}
 					],
@@ -998,17 +992,11 @@
 					"disabled": "!data.cop_calculation_active",
 					"options": [
 						{
-							"label": {
-								"en": "Internal (Luxtronik meters)",
-								"de": "Intern (Luxtronik Zähler)"
-							},
+							"label": "Internal (Luxtronik meters)",
 							"value": "internal"
 						},
 						{
-							"label": {
-								"en": "External Object ID (e.g. M-Bus meter)",
-								"de": "Externe Objekt-ID (z.B. M-Bus Zähler)"
-							},
+							"label": "External Object ID (e.g. M-Bus meter)",
 							"value": "external"
 						}
 					],
