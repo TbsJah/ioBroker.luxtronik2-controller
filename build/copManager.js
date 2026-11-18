@@ -311,12 +311,13 @@ async function calculateAndWriteCop(adapter, category) {
     const tStart = tState && typeof tState.val === "number" ? tState.val : currentThermal;
     const pUsed = currentPower - pStart;
     const tGen = currentThermal - tStart;
+    let cop = 0;
     if (pUsed > 0) {
-      const cop = Math.round(tGen / pUsed * 100) / 100;
-      const targetId = (0, import_stateMapping.getDpPath)(dpMap[category][tf]);
-      if (targetId) {
-        await adapter.setState(targetId, { val: cop, ack: true });
-      }
+      cop = Math.round(tGen / pUsed * 100) / 100;
+    }
+    const targetId = (0, import_stateMapping.getDpPath)(dpMap[category][tf]);
+    if (targetId) {
+      await adapter.setState(targetId, { val: cop, ack: true });
     }
   }
   const historyId = `hidden.cop_buckets.${category}_history_7d`;
@@ -328,12 +329,13 @@ async function calculateAndWriteCop(adapter, category) {
         const oldest = history[0];
         const pUsed = currentPower - oldest.power;
         const tGen = currentThermal - oldest.thermal;
+        let cop = 0;
         if (pUsed > 0) {
-          const cop = Math.round(tGen / pUsed * 100) / 100;
-          const targetId = (0, import_stateMapping.getDpPath)(dpMap[category]["7d"]);
-          if (targetId) {
-            await adapter.setState(targetId, { val: cop, ack: true });
-          }
+          cop = Math.round(tGen / pUsed * 100) / 100;
+        }
+        const targetId = (0, import_stateMapping.getDpPath)(dpMap[category]["7d"]);
+        if (targetId) {
+          await adapter.setState(targetId, { val: cop, ack: true });
         }
       }
     } catch {

@@ -457,12 +457,14 @@ async function calculateAndWriteCop(adapter: LuxtronikAdapter, category: string)
 		const pUsed = currentPower - pStart;
 		const tGen = currentThermal - tStart;
 
+		let cop = 0;
 		if (pUsed > 0) {
-			const cop = Math.round((tGen / pUsed) * 100) / 100;
-			const targetId = getDpPath(dpMap[category][tf]);
-			if (targetId) {
-				await adapter.setState(targetId, { val: cop, ack: true });
-			}
+			cop = Math.round((tGen / pUsed) * 100) / 100;
+		}
+
+		const targetId = getDpPath(dpMap[category][tf]);
+		if (targetId) {
+			await adapter.setState(targetId, { val: cop, ack: true });
 		}
 	}
 
@@ -476,12 +478,15 @@ async function calculateAndWriteCop(adapter: LuxtronikAdapter, category: string)
 				const oldest = history[0];
 				const pUsed = currentPower - oldest.power;
 				const tGen = currentThermal - oldest.thermal;
+
+				let cop = 0;
 				if (pUsed > 0) {
-					const cop = Math.round((tGen / pUsed) * 100) / 100;
-					const targetId = getDpPath(dpMap[category]['7d']);
-					if (targetId) {
-						await adapter.setState(targetId, { val: cop, ack: true });
-					}
+					cop = Math.round((tGen / pUsed) * 100) / 100;
+				}
+
+				const targetId = getDpPath(dpMap[category]['7d']);
+				if (targetId) {
+					await adapter.setState(targetId, { val: cop, ack: true });
 				}
 			}
 		} catch {
