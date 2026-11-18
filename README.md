@@ -103,8 +103,7 @@ _This project is not affiliated with Alpha Innotec, Novelan, ait-deutschland Gmb
 //### **WORK IN PROGRESS**
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 1.0.3 (2026-11-18)
 
 - Fixed daily COP reset in `copManager.ts` so Heating and Hot Water values reset to `0` after midnight until an active cycle starts
 
@@ -125,11 +124,6 @@ _This project is not affiliated with Alpha Innotec, Novelan, ait-deutschland Gmb
 ### 0.25.2 (2026-11-16)
 
 - **Fix i18n**
-
-### 0.25.1 (2026-11-16)
-
-- **Removed Dependencies:**
-    - WS
 
 ## License
 

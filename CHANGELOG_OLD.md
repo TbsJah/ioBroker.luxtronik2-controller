@@ -23,6 +23,11 @@
 ### 0.1.0 (2026-07-09)
 
 - initial release
+## 0.25.1 (2026-11-16)
+
+- **Removed Dependencies:**
+    - WS
+
 ## 0.25.0 (2026-11-16)
 
 - **Operating Mode & UI Protection (`jsonConfig.json`, `main.ts`):**
