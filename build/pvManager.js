@@ -65,11 +65,15 @@ async function initPvManagement(adapter) {
     const dpActive = (0, import_stateMapping.getDpPath)("pv_boost_active");
     const dpSince = (0, import_stateMapping.getDpPath)("pv_boost_active_since");
     const prevActiveState = dpActive ? await adapter.getStateAsync(dpActive) : null;
-    if ((prevActiveState == null ? void 0 : prevActiveState.val) === true || config.idle_defaults_aktiv) {
+    if ((prevActiveState == null ? void 0 : prevActiveState.val) === true) {
       const defaultWw = parseConfigFloat(config.sync_warmwater_target_temperature, 54);
-      (0, import_logger.writeLog)(`[PV] Ensuring clean baseline on startup (WW: ${defaultWw}\xB0C, Heating Offset: 0K).`, "info");
+      const defaultHz = parseConfigFloat(config.sync_heating_temperature, 0);
+      (0, import_logger.writeLog)(
+        `[PV] Previous PV boost was active before restart. Restoring baseline (WW: ${defaultWw}\xB0C, Heating Offset: ${defaultHz}K).`,
+        "info"
+      );
       await adapter.syncConfigValue("temperature_hot_water_target", defaultWw);
-      await adapter.syncConfigValue("heating_temperature", 0);
+      await adapter.syncConfigValue("heating_temperature", defaultHz);
     }
     if (dpActive) {
       await adapter.setState(dpActive, { val: false, ack: true });
@@ -291,14 +295,23 @@ async function evaluatePvBoost(adapter, forceReapply = false) {
       (0, import_logger.writeLog)(`[PV] Priority logic: Target reached. Revoking Hot Water boost.`, "info");
     }
     if (shouldBoostHz && (!activeBoostHzApplied || forceReapply) && originalHz !== null && boostHzAmount > 0) {
-      await adapter.syncConfigValue("heating_temperature", originalHz + boostHzAmount);
-      activeBoostHzApplied = true;
-      (0, import_logger.writeLog)(
-        `[PV] Priority logic: Applying Heating boost (+${boostHzAmount}K -> ${originalHz + boostHzAmount}K).`,
-        "info"
-      );
+      if (adapter.forcedHeatingShiActive) {
+        (0, import_logger.writeLog)(
+          "[PV] Priority logic: Skipping Heating boost because SHI cycle optimization (+10 K) is currently active.",
+          "debug"
+        );
+      } else {
+        await adapter.syncConfigValue("heating_temperature", originalHz + boostHzAmount);
+        activeBoostHzApplied = true;
+        (0, import_logger.writeLog)(
+          `[PV] Priority logic: Applying Heating boost (+${boostHzAmount}K -> ${originalHz + boostHzAmount}K).`,
+          "info"
+        );
+      }
     } else if (!shouldBoostHz && activeBoostHzApplied && originalHz !== null) {
-      await adapter.syncConfigValue("heating_temperature", originalHz);
+      if (!adapter.forcedHeatingShiActive) {
+        await adapter.syncConfigValue("heating_temperature", originalHz);
+      }
       activeBoostHzApplied = false;
       (0, import_logger.writeLog)(`[PV] Priority logic: Target reached. Revoking Heating boost.`, "info");
     }
@@ -314,7 +327,9 @@ async function deactivateBoost(adapter) {
     const targetHz = parseConfigFloat(config.sync_heating_temperature, 0);
     (0, import_logger.writeLog)(`[PV] Reverting values to original base targets (WW: ${targetWw}\xB0C, Hz: ${targetHz}K).`, "info");
     await adapter.syncConfigValue("temperature_hot_water_target", targetWw);
-    await adapter.syncConfigValue("heating_temperature", targetHz);
+    if (!adapter.forcedHeatingShiActive) {
+      await adapter.syncConfigValue("heating_temperature", targetHz);
+    }
     pvIsBoostActive = false;
     pvWaitingForCycleEnd = false;
     activeBoostWwApplied = false;
@@ -353,7 +368,9 @@ async function initiateDeactivation(adapter) {
         await adapter.syncConfigValue("temperature_hot_water_target", targetWw);
         activeBoostWwApplied = false;
       } else if (bzVal === 1) {
-        await adapter.syncConfigValue("heating_temperature", targetHz);
+        if (!adapter.forcedHeatingShiActive) {
+          await adapter.syncConfigValue("heating_temperature", targetHz);
+        }
         activeBoostHzApplied = false;
       }
       if (bzVal !== 5 && runningMinutes < 10) {

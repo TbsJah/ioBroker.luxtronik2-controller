@@ -100,8 +100,8 @@ const SETTINGS_MAPPING = {
     write: true,
     luxWriteId: "1",
     factor: 10,
-    min: -5,
-    max: 5,
+    min: -20,
+    max: 20,
     dataSource: "raw_parameter",
     modbus: {
       type: "holding",

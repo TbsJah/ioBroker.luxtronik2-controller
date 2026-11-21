@@ -67,6 +67,7 @@ async function handleZwangswarmwasser(adapter, id) {
   }
 }
 async function handleZwangsheizen(adapter, id) {
+  var _a;
   try {
     const localId = id.replace(`${adapter.namespace}.`, "");
     await adapter.setState(localId, { val: false, ack: true });
@@ -91,9 +92,12 @@ async function handleZwangsheizen(adapter, id) {
       );
       return;
     }
-    await adapter.syncConfigValue("heating_curve_parallel_offset", CONSTANTS.FORCE_HEATING_OFFSET);
+    await adapter.activateForcedHeatingBoost("ForcedHeating");
+    const isShi = Boolean(
+      adapter.config.modbus_active && ((_a = adapter.modbusManager) == null ? void 0 : _a.isAvailable) && adapter.modbusManager.protocolVersion === "shi" && adapter.config.sync_modbus_holding_23 === true
+    );
     (0, import_logger.writeLog)(
-      `Forced heating: Triggered - Base point temporarily set to ${CONSTANTS.FORCE_HEATING_OFFSET}\xB0C.`,
+      isShi ? "Forced heating: Triggered - Volatile SHI heating offset temporarily set to +10.0 K (Modbus RAM)." : `Forced heating: Triggered - Base point temporarily set to ${CONSTANTS.FORCE_HEATING_OFFSET}\xB0C.`,
       "info"
     );
   } catch (err) {

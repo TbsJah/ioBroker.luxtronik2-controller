@@ -72,11 +72,15 @@ export async function initPvManagement(adapter: LuxtronikAdapter): Promise<void>
 		// Falls vor einem Adapter-Neustart noch ein Boost aktiv war, setzen wir die Sollwerte
 		// sauber auf die Normalwerte zurück, damit keine 60°C als Geisterwert hängen bleiben.
 		const prevActiveState = dpActive ? await adapter.getStateAsync(dpActive) : null;
-		if (prevActiveState?.val === true || config.idle_defaults_aktiv) {
+		if (prevActiveState?.val === true) {
 			const defaultWw = parseConfigFloat(config.sync_warmwater_target_temperature, 54);
-			writeLog(`[PV] Ensuring clean baseline on startup (WW: ${defaultWw}°C, Heating Offset: 0K).`, 'info');
+			const defaultHz = parseConfigFloat(config.sync_heating_temperature, 0);
+			writeLog(
+				`[PV] Previous PV boost was active before restart. Restoring baseline (WW: ${defaultWw}°C, Heating Offset: ${defaultHz}K).`,
+				'info',
+			);
 			await adapter.syncConfigValue('temperature_hot_water_target', defaultWw);
-			await adapter.syncConfigValue('heating_temperature', 0);
+			await adapter.syncConfigValue('heating_temperature', defaultHz);
 		}
 
 		if (dpActive) {
@@ -365,14 +369,23 @@ export async function evaluatePvBoost(adapter: LuxtronikAdapter, forceReapply = 
 		}
 
 		if (shouldBoostHz && (!activeBoostHzApplied || forceReapply) && originalHz !== null && boostHzAmount > 0) {
-			await adapter.syncConfigValue('heating_temperature', originalHz + boostHzAmount);
-			activeBoostHzApplied = true;
-			writeLog(
-				`[PV] Priority logic: Applying Heating boost (+${boostHzAmount}K -> ${originalHz + boostHzAmount}K).`,
-				'info',
-			);
+			if (adapter.forcedHeatingShiActive) {
+				writeLog(
+					'[PV] Priority logic: Skipping Heating boost because SHI cycle optimization (+10 K) is currently active.',
+					'debug',
+				);
+			} else {
+				await adapter.syncConfigValue('heating_temperature', originalHz + boostHzAmount);
+				activeBoostHzApplied = true;
+				writeLog(
+					`[PV] Priority logic: Applying Heating boost (+${boostHzAmount}K -> ${originalHz + boostHzAmount}K).`,
+					'info',
+				);
+			}
 		} else if (!shouldBoostHz && activeBoostHzApplied && originalHz !== null) {
-			await adapter.syncConfigValue('heating_temperature', originalHz);
+			if (!adapter.forcedHeatingShiActive) {
+				await adapter.syncConfigValue('heating_temperature', originalHz);
+			}
 			activeBoostHzApplied = false;
 			writeLog(`[PV] Priority logic: Target reached. Revoking Heating boost.`, 'info');
 		}
@@ -398,7 +411,10 @@ async function deactivateBoost(adapter: LuxtronikAdapter): Promise<void> {
 		writeLog(`[PV] Reverting values to original base targets (WW: ${targetWw}°C, Hz: ${targetHz}K).`, 'info');
 
 		await adapter.syncConfigValue('temperature_hot_water_target', targetWw);
-		await adapter.syncConfigValue('heating_temperature', targetHz);
+		if (!adapter.forcedHeatingShiActive) {
+			await adapter.syncConfigValue('heating_temperature', targetHz);
+		}
+		//await adapter.syncConfigValue('heating_temperature', targetHz);
 
 		pvIsBoostActive = false;
 		pvWaitingForCycleEnd = false;
@@ -454,7 +470,9 @@ async function initiateDeactivation(adapter: LuxtronikAdapter): Promise<void> {
 				await adapter.syncConfigValue('temperature_hot_water_target', targetWw);
 				activeBoostWwApplied = false;
 			} else if (bzVal === 1) {
-				await adapter.syncConfigValue('heating_temperature', targetHz);
+				if (!adapter.forcedHeatingShiActive) {
+					await adapter.syncConfigValue('heating_temperature', targetHz);
+				}
 				activeBoostHzApplied = false;
 			}
 

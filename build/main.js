@@ -62,6 +62,8 @@ class Luxtronik2Controller extends utils.Adapter {
   updateRunning = false;
   /** Timestamp tracking the last dynamic pump voltage optimization execution */
   lastPumpOptimization = 0;
+  /** Merkt sich, ob Takt-Optimierung oder Zwangsheizen aktuell über den flüchtigen SHI-Modbus-Offset (+10 K) aktiv ist */
+  forcedHeatingShiActive = false;
   /** Internal array storing pending serial hardware write tasks */
   writeQueue = [];
   /** Lock flag indicating that the write queue is currently being processed */
@@ -234,19 +236,21 @@ class Luxtronik2Controller extends utils.Adapter {
     const cycleTotalState = await this.getStateAsync((0, import_stateMapping.getDpPath)("write_cycles_total"));
     this.writeCyclesTotal = cycleTotalState && typeof cycleTotalState.val === "number" ? cycleTotalState.val : 0;
     this.scheduleMidnightReset();
-    if (!isReadOnly) {
-      await (0, import_zipManager.disableHardwareZipTimer)(this);
-      (0, import_zipManager.subscribeMotionSensors)(this);
-      await (0, import_pvManager.initPvManagement)(this);
-    }
-    this.subscribeStates("*");
     this.modbusManager = new import_modbusManager.ModbusManager(this);
     if (!isReadOnly && config.modbus_active) {
       (0, import_logger.writeLog)("Checking Modbus TCP availability for hybrid operations...", "info");
       await this.modbusManager.checkAvailability();
     }
+    if (!isReadOnly) {
+      (0, import_zipManager.subscribeMotionSensors)(this);
+      await (0, import_pvManager.initPvManagement)(this);
+    }
+    this.subscribeStates("*");
     try {
       await this.updateData();
+      if (!isReadOnly) {
+        await (0, import_zipManager.disableHardwareZipTimer)(this);
+      }
     } catch (error) {
       this.log.error(`Initial data retrieval failed (device offline?): ${error.message}`);
     }
@@ -405,6 +409,82 @@ class Luxtronik2Controller extends utils.Adapter {
     }
   }
   /**
+   * Prüft, ob das moderne V3.9x Smart Home Interface (SHI) per Modbus TCP aktiv und erreichbar ist.
+   */
+  isShiModbusActive() {
+    const config = this.config;
+    return Boolean(
+      config.operation_mode !== "readonly" && config.modbus_active && this.modbusManager && this.modbusManager.isAvailable && this.modbusManager.protocolVersion === "shi" && config.sync_modbus_holding_23 === true
+    );
+  }
+  /**
+   * Aktiviert eine temporäre Heizungsanhebung (Takt-Optimierung, Vorheizen oder Zwangsheizen).
+   * Nutzt im V3.9x-SHI-Modus flüchtiges Modbus-RAM (+10.0 K über Holding 23 -> SHI 10002),
+   * sonst wie bisher den Heizkurven-Fußpunkt (35 °C).
+   *
+   * @param reason - Optionaler Kontext für das Debug-Log.
+   */
+  async activateForcedHeatingBoost(reason = "CycleOpt") {
+    if (this.isShiModbusActive()) {
+      if (!this.forcedHeatingShiActive) {
+        await this.modbusManager.writeRegister(23, 100, false);
+        this.forcedHeatingShiActive = true;
+        const dpHeatingTemp = (0, import_stateMapping.getDpPath)("heating_temperature");
+        if (dpHeatingTemp) {
+          await this.setOwnStateIfDifferent(dpHeatingTemp, 10, true);
+        }
+        if (this.isDebugLogActive) {
+          (0, import_logger.writeLog)(
+            `[${reason}] SHI Modbus active: Setting volatile heating offset to +10.0 K (Holding 23 -> SHI 10002, 0 EEPROM writes).`,
+            "info"
+          );
+        }
+      }
+      return;
+    }
+    await this.syncConfigValue("heating_curve_parallel_offset", 35);
+  }
+  /**
+   * Setzt eine aktive temporäre Heizungsanhebung sauber zurück.
+   * Im SHI-Modus wird der flüchtige Offset auf den Basiswert zurückgesetzt und ein aktiver PV-Boost optional wiederhergestellt.
+   *
+   * @param reapplyPv - Stellt bei aktivem PV-Boost dessen Sollwert im Anschluss sofort wieder her.
+   */
+  async resetForcedHeatingBoost(reapplyPv = true) {
+    var _a, _b;
+    const config = this.config;
+    if (this.isShiModbusActive()) {
+      const heatingTempState = await this.getStateAsync((0, import_stateMapping.getDpPath)("heating_temperature"));
+      const isShiOffsetStuckHigh = typeof (heatingTempState == null ? void 0 : heatingTempState.val) === "number" && heatingTempState.val >= 10;
+      if (!this.forcedHeatingShiActive && !isShiOffsetStuckHigh) {
+        return;
+      }
+      this.forcedHeatingShiActive = false;
+      const baseOffset = Number((_a = config.sync_heating_temperature) != null ? _a : 0);
+      await this.modbusManager.writeRegister(23, Math.round(baseOffset * 10), false);
+      const dpHeatingTemp = (0, import_stateMapping.getDpPath)("heating_temperature");
+      if (dpHeatingTemp) {
+        await this.setOwnStateIfDifferent(dpHeatingTemp, baseOffset, true);
+      }
+      if (this.isDebugLogActive) {
+        (0, import_logger.writeLog)(
+          `[CycleOpt] SHI Modbus active: Resetting volatile heating offset back to ${baseOffset} K (Holding 23 -> SHI 10002).`,
+          "info"
+        );
+      }
+      if (reapplyPv && import_pvManager.pvIsBoostActive) {
+        await (0, import_pvManager.evaluatePvBoost)(this, true);
+      }
+      return;
+    }
+    const fusspunktState = await this.getStateAsync((0, import_stateMapping.getDpPath)("heating_curve_parallel_offset"));
+    const currentFusspunkt = typeof (fusspunktState == null ? void 0 : fusspunktState.val) === "number" ? fusspunktState.val : this.currentRawParams[12] !== void 0 ? this.currentRawParams[12] / 10 : 0;
+    if (currentFusspunkt === 35) {
+      const fallbackFusspunkt = (_b = config.fusspunkt) != null ? _b : 21.7;
+      await this.syncConfigValue("heating_curve_parallel_offset", fallbackFusspunkt);
+    }
+  }
+  /**
    * Configures fallback factory parameter baselines for the heat pump when in an idle state.
    *
    * @returns A promise that resolves when all default configuration tasks resolve.
@@ -413,17 +493,22 @@ class Luxtronik2Controller extends utils.Adapter {
     var _a, _b, _c, _d, _e, _f, _g, _h, _i;
     try {
       const config = this.config;
-      await this.syncConfigValue("heating_curve_end_point", (_a = config.endpunkt) != null ? _a : 23);
-      await this.syncConfigValue("heating_curve_parallel_offset", (_b = config.fusspunkt) != null ? _b : 21.7);
+      await this.resetForcedHeatingBoost(false);
+      if (!this.isShiModbusActive()) {
+        await this.syncConfigValue("heating_curve_end_point", (_a = config.endpunkt) != null ? _a : 23);
+        await this.syncConfigValue("heating_curve_parallel_offset", (_b = config.fusspunkt) != null ? _b : 21.7);
+      }
       await this.syncConfigValue("heating_temperature", (_c = config.sync_heating_temperature) != null ? _c : 0);
-      await this.syncConfigValue(
-        "heating_system_circ_pump_voltage_minimal",
-        (_d = config.sync_heating_system_circ_pump_voltage_minimal_heating) != null ? _d : 3
-      );
-      await this.syncConfigValue(
-        "heating_system_circ_pump_voltage_nominal",
-        (_e = config.sync_heating_system_circ_pump_voltage_nominal_heating) != null ? _e : 7
-      );
+      if (config.hup_optimierung_aktiv === true) {
+        await this.syncConfigValue(
+          "heating_system_circ_pump_voltage_minimal",
+          (_d = config.sync_heating_system_circ_pump_voltage_minimal_heating) != null ? _d : 3
+        );
+        await this.syncConfigValue(
+          "heating_system_circ_pump_voltage_nominal",
+          (_e = config.sync_heating_system_circ_pump_voltage_nominal_heating) != null ? _e : 7
+        );
+      }
       await this.syncConfigValue("temperature_hot_water_target", (_f = config.sync_warmwater_target_temperature) != null ? _f : 54);
       await this.syncConfigValue("returnTemperatureHysteresis", (_g = config.sync_return_temperature_hysteresis) != null ? _g : 1.5);
       await this.syncConfigValue("zip_aktiv", (_h = config.zip_aktiv) != null ? _h : 0);
@@ -459,7 +544,7 @@ class Luxtronik2Controller extends utils.Adapter {
    * @returns A promise that resolves when the execution cycle finishes.
    */
   async runOptimizationSchedule(rawValues = [], rawParams = []) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j;
     try {
       const config = this.config;
       if (config.operation_mode === "readonly") {
@@ -480,6 +565,8 @@ class Luxtronik2Controller extends utils.Adapter {
         if (istLeerlauf) {
           if (config.idle_defaults_aktiv === true) {
             await this.setIdleDefaults();
+          } else if (this.forcedHeatingShiActive) {
+            await this.resetForcedHeatingBoost();
           }
         } else if (istHeizen) {
           if (this.lastBzVal === "1" && config.idle_defaults_aktiv === true) {
@@ -586,12 +673,7 @@ class Luxtronik2Controller extends utils.Adapter {
       const nachWasser = Boolean(nachWasserState == null ? void 0 : nachWasserState.val);
       if (istHeizen) {
         if (aelterAls10 && vd1) {
-          const fusspunktState = await this.getStateAsync((0, import_stateMapping.getDpPath)("heating_curve_parallel_offset"));
-          const currentFusspunkt = typeof (fusspunktState == null ? void 0 : fusspunktState.val) === "number" ? fusspunktState.val : rawParams[13] !== void 0 ? rawParams[13] / 10 : 0;
-          if (currentFusspunkt === 35) {
-            const fallbackFusspunkt = (_k = config.fusspunkt) != null ? _k : 21.7;
-            await this.syncConfigValue("heating_curve_parallel_offset", fallbackFusspunkt);
-          }
+          await this.resetForcedHeatingBoost();
         }
         if (aelterAls10 && vd1) {
           this.lastPumpOptimization = await (0, import_hupManager.handleHupOptimization)(
@@ -629,7 +711,7 @@ class Luxtronik2Controller extends utils.Adapter {
       const isHeatingAllowedByLimit = !isHeatingLimitEnabled || mitteltemperatur < thresholdHeatingLimit;
       if (istWarmwasser && nachWasser) {
         if (isRegelungAktiv && isHeatingAllowedByLimit) {
-          await this.syncConfigValue("heating_curve_parallel_offset", 35);
+          await this.activateForcedHeatingBoost("CycleOpt-AfterWW");
         }
       }
       if (istLeerlauf) {
@@ -642,11 +724,11 @@ class Luxtronik2Controller extends utils.Adapter {
           if (wwSoll - wwIst >= wwHysterese - 1.5 && ruecklauf <= ruecklaufSoll && isHeatingAllowedByLimit) {
             if (this.isDebugLogActive) {
               (0, import_logger.writeLog)(
-                `[CycleOpt] Pre-starting heating before WW (WW: ${wwIst}/${wwSoll}\xB0C, Hyst: ${wwHysterese}K, RL: ${ruecklauf}/${ruecklaufSoll}\xB0C). Setting base point to 35\xB0C.`,
+                `[CycleOpt] Pre-starting heating before WW (WW: ${wwIst}/${wwSoll}\xB0C, Hyst: ${wwHysterese}K, RL: ${ruecklauf}/${ruecklaufSoll}\xB0C).`,
                 "info"
               );
             }
-            await this.syncConfigValue("heating_curve_parallel_offset", 35);
+            await this.activateForcedHeatingBoost("CycleOpt-PreHeat");
           }
         }
       }

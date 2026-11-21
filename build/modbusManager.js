@@ -181,6 +181,15 @@ class ModbusManager {
           for (const item of shiHoldingMap) {
             if (config[`sync_modbus_holding_${item.legacyIdx}`] === true) {
               try {
+                if (item.legacyIdx === 5) {
+                  const res2 = await client.readHoldingRegisters(10005, 2);
+                  const mode = res2.data[0];
+                  const raw2 = res2.data[1];
+                  if (mode !== 0 && raw2 !== 32767) {
+                    holdings[5] = raw2 > 32767 ? raw2 - 65536 : raw2;
+                  }
+                  continue;
+                }
                 const res = item.fc === "input" ? await client.readInputRegisters(item.shiReg, 1) : await client.readHoldingRegisters(item.shiReg, 1);
                 const raw = res.data[0];
                 if (raw !== 32767) {
@@ -279,6 +288,7 @@ class ModbusManager {
       return;
     }
     return this.enqueue(async () => {
+      var _a;
       const client = new import_modbus_serial.default();
       try {
         client.setTimeout(3e3);
@@ -331,10 +341,28 @@ class ModbusManager {
               );
             }
           } else if (register === 5) {
-            await client.writeRegister(10005, 1);
-            await client.writeRegister(10006, wireValue);
-            if (this.adapter.isDebugLogActive) {
-              (0, import_logger.writeLog)(`[Modbus SHI] WW-Soll (10006) auf ${rounded} gesetzt (Mode 10005=1).`, "debug");
+            const config = this.adapter.config;
+            const baseWwRaw = Math.round(
+              parseFloat(String((_a = config.sync_warmwater_target_temperature) != null ? _a : 54).replace(",", ".")) * 10
+            );
+            if (!isNaN(baseWwRaw) && rounded === baseWwRaw) {
+              await client.writeRegister(10006, wireValue);
+              await client.writeRegister(10005, 0);
+              if (this.adapter.isDebugLogActive) {
+                (0, import_logger.writeLog)(
+                  `[Modbus SHI] WW-Soll (10006) auf Basiswert ${rounded} zur\xFCckgesetzt und SHI-Override beendet (Mode 10005=0).`,
+                  "debug"
+                );
+              }
+            } else {
+              await client.writeRegister(10005, 1);
+              await client.writeRegister(10006, wireValue);
+              if (this.adapter.isDebugLogActive) {
+                (0, import_logger.writeLog)(
+                  `[Modbus SHI] WW-Soll (10006) auf ${rounded} gesetzt (Mode 10005=1).`,
+                  "debug"
+                );
+              }
             }
           } else if (register >= 1e4) {
             await client.writeRegister(register, wireValue);

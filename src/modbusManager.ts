@@ -186,6 +186,18 @@ export class ModbusManager {
 					for (const item of shiHoldingMap) {
 						if (config[`sync_modbus_holding_${item.legacyIdx}`] === true) {
 							try {
+								// Bei WW-Soll (10006) zuerst SHI-Mode (10005) mitlesen:
+								// Ist Mode === 0, hat das Display Vorrang -> rawParams[105] nicht überschreiben!
+								if (item.legacyIdx === 5) {
+									const res = await client.readHoldingRegisters(10005, 2);
+									const mode = res.data[0];
+									const raw = res.data[1];
+									if (mode !== 0 && raw !== 0x7fff) {
+										holdings[5] = raw > 32767 ? raw - 65536 : raw;
+									}
+									continue;
+								}
+
 								const res =
 									item.fc === 'input'
 										? await client.readInputRegisters(item.shiReg, 1)
@@ -361,11 +373,30 @@ export class ModbusManager {
 							);
 						}
 					} else if (register === 5) {
-						// Warmwasser-Soll -> SHI Holding 10006 (Mode 10005 = 1)
-						await client.writeRegister(10005, 1);
-						await client.writeRegister(10006, wireValue);
-						if (this.adapter.isDebugLogActive) {
-							writeLog(`[Modbus SHI] WW-Soll (10006) auf ${rounded} gesetzt (Mode 10005=1).`, 'debug');
+						// Warmwasser-Soll -> SHI Holding 10006 (Mode 10005 = 1, oder 0 beim Rückfall auf Basiswert)
+						const config = this.adapter.config as Record<string, any>;
+						const baseWwRaw = Math.round(
+							parseFloat(String(config.sync_warmwater_target_temperature ?? 54).replace(',', '.')) * 10,
+						);
+
+						if (!isNaN(baseWwRaw) && rounded === baseWwRaw) {
+							await client.writeRegister(10006, wireValue);
+							await client.writeRegister(10005, 0); // Display-/Regler-Sollwert wieder freigeben
+							if (this.adapter.isDebugLogActive) {
+								writeLog(
+									`[Modbus SHI] WW-Soll (10006) auf Basiswert ${rounded} zurückgesetzt und SHI-Override beendet (Mode 10005=0).`,
+									'debug',
+								);
+							}
+						} else {
+							await client.writeRegister(10005, 1);
+							await client.writeRegister(10006, wireValue);
+							if (this.adapter.isDebugLogActive) {
+								writeLog(
+									`[Modbus SHI] WW-Soll (10006) auf ${rounded} gesetzt (Mode 10005=1).`,
+									'debug',
+								);
+							}
 						}
 					} else if (register >= 10000) {
 						await client.writeRegister(register, wireValue);

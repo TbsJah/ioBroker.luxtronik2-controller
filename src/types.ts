@@ -84,4 +84,21 @@ export interface LuxtronikAdapter extends AdapterInstance {
 	 * @param ack Bestätigungs-Flag (Standard: false)
 	 */
 	setOwnStateIfDifferent: (dpPath: string, value: any, ack?: boolean) => Promise<void>;
+
+	/**
+	 * Aktiviert eine temporäre Heizungsanhebung (flüchtig über SHI-Modbus oder über den Fußpunkt).
+	 *
+	 * @param reason Optionaler Kontext für das Debug-Log
+	 */
+	activateForcedHeatingBoost: (reason?: string) => Promise<void>;
+
+	/**
+	 * Setzt eine aktive temporäre Heizungsanhebung wieder zurück.
+	 *
+	 * @param reapplyPv Stellt bei aktivem PV-Boost dessen Sollwert wieder her (Standard: true)
+	 */
+	resetForcedHeatingBoost: (reapplyPv?: boolean) => Promise<void>;
+
+	/** Gibt an, ob Takt-Optimierung oder Zwangsheizen aktuell über den flüchtigen SHI-Offset (+10 K) aktiv ist */
+	forcedHeatingShiActive?: boolean;
 }
