@@ -103,8 +103,7 @@ _This project is not affiliated with Alpha Innotec, Novelan, ait-deutschland Gmb
 //### **WORK IN PROGRESS**
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 1.0.4 (2026-11-21)
 
 - Optimized V3.9x SHI Modbus Hybrid mode to achieve zero EEPROM write cycles during cycle optimization, pre-heating, and forced heating (uses volatile SHI offset `+10.0 K` via Holding 23 / `10002` instead of base point parameter `12`)
 - Fixed startup order in `onReady()` so Modbus TCP availability is checked before PV initialization and hardware ZIP timer disable runs after initial raw parameter fetch
@@ -128,10 +127,6 @@ _This project is not affiliated with Alpha Innotec, Novelan, ait-deutschland Gmb
 ### 1.0.0 (2026-11-16)
 
 **STABLE**
-
-### 0.25.2 (2026-11-16)
-
-- **Fix i18n**
 
 ## License
 
