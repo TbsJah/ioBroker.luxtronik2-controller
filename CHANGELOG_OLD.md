@@ -23,6 +23,12 @@
 ### 0.1.0 (2026-07-09)
 
 - initial release
+## 1.0.2 (2026-11-17)
+
+- Fixed `node:` protocol imports (`node:fs`, `node:path`) and repository checker lint issues
+- Completed and synchronized i18n translations across all supported languages
+- Fixed `jsonConfig` label keys in `generateConfig.ts` to prevent inline language object overrides during build
+
 ## 1.0.1 (2026-11-16)
 
 - **Update of i10n files**

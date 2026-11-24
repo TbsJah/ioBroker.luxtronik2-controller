@@ -103,8 +103,7 @@ _This project is not affiliated with Alpha Innotec, Novelan, ait-deutschland Gmb
 //### **WORK IN PROGRESS**
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 1.2.0 (2026-11-24)
 
 - Added configurable sunset cutoff buffer (`pv_sunset_cutoff_active`, `pv_sunset_buffer`) to PV surplus management to prevent starting new PV boosts shortly before local sunset using `system.config` coordinates
 - Added `@iobroker/web-components` status card (`<luxtronik-status-card>`) for Aura, VIS-2, and WebUI displaying live temperatures, operating mode, PV boost status, COP/JAZ values, and quick actions
@@ -134,12 +133,6 @@ _This project is not affiliated with Alpha Innotec, Novelan, ait-deutschland Gmb
 ### 1.0.3 (2026-11-18)
 
 - Fixed daily COP reset in `copManager.ts` so Heating and Hot Water values reset to `0` after midnight until an active cycle starts
-
-### 1.0.2 (2026-11-17)
-
-- Fixed `node:` protocol imports (`node:fs`, `node:path`) and repository checker lint issues
-- Completed and synchronized i18n translations across all supported languages
-- Fixed `jsonConfig` label keys in `generateConfig.ts` to prevent inline language object overrides during build
 
 ## License
 
