@@ -39,6 +39,9 @@ let currentGridSurplusW = 0;
 let currentBatteryChargeW = 0;
 let originalWw = null;
 let originalHz = null;
+let systemLatitude = null;
+let systemLongitude = null;
+let sunsetBlockLoggedDate = "";
 function parseConfigFloat(val, fallback = 0) {
   if (typeof val === "number" && !isNaN(val)) {
     return val;
@@ -49,11 +52,102 @@ function parseConfigFloat(val, fallback = 0) {
   }
   return fallback;
 }
+function calculateSunsetTimestamp(date, lat, lon) {
+  const rad = Math.PI / 180;
+  const deg = 180 / Math.PI;
+  const startOfYear = Date.UTC(date.getFullYear(), 0, 1);
+  const currentDay = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+  const dayOfYear = Math.floor((currentDay - startOfYear) / 864e5) + 1;
+  const lngHour = lon / 15;
+  const t = dayOfYear + (18 - lngHour) / 24;
+  const meanAnomaly = 0.9856 * t - 3.289;
+  let trueLong = meanAnomaly + 1.916 * Math.sin(meanAnomaly * rad) + 0.02 * Math.sin(2 * meanAnomaly * rad) + 282.634;
+  trueLong = (trueLong % 360 + 360) % 360;
+  let rightAscension = Math.atan(0.91764 * Math.tan(trueLong * rad)) * deg;
+  rightAscension = (rightAscension % 360 + 360) % 360;
+  const lQuadrant = Math.floor(trueLong / 90) * 90;
+  const raQuadrant = Math.floor(rightAscension / 90) * 90;
+  rightAscension = (rightAscension + (lQuadrant - raQuadrant)) / 15;
+  const sinDec = 0.39782 * Math.sin(trueLong * rad);
+  const cosDec = Math.cos(Math.asin(sinDec));
+  const cosH = (Math.cos(90.8333 * rad) - sinDec * Math.sin(lat * rad)) / (cosDec * Math.cos(lat * rad));
+  if (cosH > 1 || cosH < -1) {
+    return null;
+  }
+  const hourAngle = Math.acos(cosH) * deg / 15;
+  const localMeanTime = hourAngle + rightAscension - 0.06571 * t - 6.622;
+  const utcHours = ((localMeanTime - lngHour) % 24 + 24) % 24;
+  const solarNoonUtcHours = 12 - lngHour;
+  const hoursAfterNoon = ((utcHours - solarNoonUtcHours) % 24 + 24) % 24;
+  return currentDay + (solarNoonUtcHours + hoursAfterNoon) * 36e5;
+}
+function isBlockedBySunsetCutoff(adapter) {
+  const config = adapter.config;
+  if (!config.pv_sunset_cutoff_active || systemLatitude === null || systemLongitude === null) {
+    return false;
+  }
+  const bufferMinutes = parseConfigFloat(config.pv_sunset_buffer, 60);
+  if (bufferMinutes <= 0) {
+    return false;
+  }
+  const now = /* @__PURE__ */ new Date();
+  const sunsetTs = calculateSunsetTimestamp(now, systemLatitude, systemLongitude);
+  if (sunsetTs === null) {
+    return false;
+  }
+  const cutoffTs = sunsetTs - bufferMinutes * 6e4;
+  if (now.getTime() >= cutoffTs) {
+    const todayKey = now.toISOString().substring(0, 10);
+    if (sunsetBlockLoggedDate !== todayKey) {
+      sunsetBlockLoggedDate = todayKey;
+      const sunsetStr = new Date(sunsetTs).toLocaleTimeString("de-DE", {
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+      (0, import_logger.writeLog)(
+        `[PV] Sunset cutoff active: Blocking new PV boost starts (${bufferMinutes} min buffer before sunset at ${sunsetStr}).`,
+        "info"
+      );
+    }
+    return true;
+  }
+  return false;
+}
 async function initPvManagement(adapter) {
   const config = adapter.config;
   if (!config.pv_active || !config.pv_feed_in_dp || config.pv_feed_in_dp.trim() === "") {
     (0, import_logger.writeLog)("[PV] PV surplus management is disabled or no valid datapoint provided.", "debug");
     return;
+  }
+  systemLatitude = null;
+  systemLongitude = null;
+  sunsetBlockLoggedDate = "";
+  if (config.pv_sunset_cutoff_active) {
+    try {
+      const sysConfig = await adapter.getForeignObjectAsync("system.config");
+      const sysCommon = sysConfig == null ? void 0 : sysConfig.common;
+      const lat = parseConfigFloat(sysCommon == null ? void 0 : sysCommon.latitude, NaN);
+      const lon = parseConfigFloat(sysCommon == null ? void 0 : sysCommon.longitude, NaN);
+      if (!isNaN(lat) && !isNaN(lon) && (lat !== 0 || lon !== 0)) {
+        systemLatitude = lat;
+        systemLongitude = lon;
+        const sunsetTs = calculateSunsetTimestamp(/* @__PURE__ */ new Date(), lat, lon);
+        const sunsetStr = sunsetTs ? new Date(sunsetTs).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" }) : "n/a";
+        const bufferMin = parseConfigFloat(config.pv_sunset_buffer, 60);
+        (0, import_logger.writeLog)(
+          `[PV] Sunset cutoff enabled (${bufferMin} min before sunset). System coordinates loaded (${lat}, ${lon}, today's sunset: ${sunsetStr}).`,
+          "info"
+        );
+      } else {
+        (0, import_logger.writeLog)(
+          "[PV] Sunset cutoff is enabled, but no valid latitude/longitude found in system.config. Feature paused.",
+          "warn"
+        );
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      (0, import_logger.writeLog)(`[PV] Failed to read coordinates from system.config: ${msg}`, "warn");
+    }
   }
   try {
     currentGridSurplusW = 0;
@@ -156,6 +250,9 @@ function handlePvFeedInChange(adapter, id, state) {
     }
     pvWaitingForCycleEnd = false;
     if (!pvIsBoostActive && !pvStartTimer) {
+      if (isBlockedBySunsetCutoff(adapter)) {
+        return;
+      }
       (0, import_logger.writeLog)(
         `[PV] Surplus of ${totalSurplus} W exceeds start threshold (${thresholdStart} W). Starting ${config.pv_delay_start} min activation timer.`,
         "info"
@@ -204,6 +301,10 @@ async function activateBoost(adapter) {
       `[PV] Activation aborted: Current surplus (${totalSurplus} W) is below start threshold (${thresholdStart} W).`,
       "info"
     );
+    return;
+  }
+  if (isBlockedBySunsetCutoff(adapter)) {
+    (0, import_logger.writeLog)("[PV] Activation aborted: Sunset cutoff window reached during start delay.", "info");
     return;
   }
   try {

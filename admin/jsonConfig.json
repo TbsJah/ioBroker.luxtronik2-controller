@@ -1030,7 +1030,7 @@
 			"items": {
 				"informationCycleOptimization": {
 					"type": "staticText",
-					"text": "By default, the Luxtronik controller treats heating and domestic hot water (DHW) cycles as separate operations. This adapter coordinates the run so the compressor transitions seamlessly into heating without shutting down.<br><br>➔ <i>Trigger rule:</i> If <b>(DHW Target - DHW Actual) ≥ (DHW Hysteresis - 1.5 K)</b> and <b>Heating Return ≤ Return Target</b> and outdoor heating threshold is not active, heating is triggered directly with Return Target temporarily set to 35°C to force compressor operation.",
+					"text": "By default, the Luxtronik controller treats heating and domestic hot water (DHW) cycles as separate operations. This adapter coordinates both runs so the compressor transitions seamlessly without unnecessary stop/start cycles.<br><br>➔ <i>Trigger rule:</i> If <b>(DHW Target - DHW Actual) ≥ (DHW Hysteresis - 1.5 K)</b>, <b>Heating Return ≤ Return Target</b>, heating is enabled (no heating limit/off/vacation), and DHW is allowed within the next 25 minutes (no lock time), heating is gently pre-started by temporarily raising the heating parallel offset by <b>Heating Hysteresis + 0.5 K</b> (automatically reset once the compressor runs stably).",
 					"style": {
 						"marginBottom": "20px",
 						"fontSize": "14px"
@@ -1761,6 +1761,33 @@
 					"md": 12,
 					"lg": 12,
 					"xl": 12
+				},
+				"pv_sunset_cutoff_active": {
+					"type": "checkbox",
+					"label": "Block new boost before sunset",
+					"help": "Prevents starting a new PV boost shortly before sunset using your ioBroker system coordinates.",
+					"newLine": true,
+					"default": false,
+					"hidden": "!data.pv_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 6,
+					"lg": 6,
+					"xl": 6
+				},
+				"pv_sunset_buffer": {
+					"type": "number",
+					"label": "Buffer before sunset (Minutes)",
+					"help": "No new PV boost will be started within this time window before local sunset.",
+					"min": 0,
+					"max": 240,
+					"default": 60,
+					"hidden": "!data.pv_active || !data.pv_sunset_cutoff_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 6,
+					"lg": 6,
+					"xl": 6
 				},
 				"header_pv_stop": {
 					"type": "header",

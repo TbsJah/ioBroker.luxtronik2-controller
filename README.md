@@ -103,6 +103,13 @@ _This project is not affiliated with Alpha Innotec, Novelan, ait-deutschland Gmb
 //### **WORK IN PROGRESS**
 
 ## Changelog
+
+### **WORK IN PROGRESS**
+
+- Added configurable sunset cutoff buffer (`pv_sunset_cutoff_active`, `pv_sunset_buffer`) to PV surplus management to prevent starting new PV boosts shortly before local sunset using `system.config` coordinates
+- Added `@iobroker/web-components` status card (`<luxtronik-status-card>`) for Aura, VIS-2, and WebUI displaying live temperatures, operating mode, PV boost status, COP/JAZ values, and quick actions
+- Updated Cycle Optimization description in `jsonConfig.json` to reflect the dynamic hysteresis-based offset instead of the legacy `35 °C` wording
+
 ### 1.1.1 (2026-11-24)
 
 - Fixed temporary hot water start impulses (`forceSoll` & `Zwangswarmwasser`) overshooting the actual target temperature by immediately restoring the baseline or active PV boost target once hot water generation is actively running (`WP_BZ_akt = 1` & `VD1`)

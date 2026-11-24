@@ -1,0 +1,42 @@
+{
+	"manifestVersion": 1,
+	"tag": "luxtronik-status-card",
+	"module": "./luxtronik-status-card.js",
+	"name": {
+		"en": "Luxtronik Status Overview",
+		"de": "Luxtronik Status-Übersicht"
+	},
+	"size": {
+		"width": 420,
+		"height": 280
+	},
+	"settings": {
+		"type": "panel",
+		"items": {
+			"instance": {
+				"type": "instance",
+				"adapter": "luxtronik2-controller",
+				"label": {
+					"en": "Adapter instance",
+					"de": "Adapter-Instanz"
+				}
+			},
+			"title": {
+				"type": "text",
+				"default": "Wärmepumpe",
+				"label": {
+					"en": "Title",
+					"de": "Titel"
+				}
+			},
+			"showActions": {
+				"type": "checkbox",
+				"default": true,
+				"label": {
+					"en": "Show action buttons",
+					"de": "Aktions-Buttons anzeigen"
+				}
+			}
+		}
+	}
+}

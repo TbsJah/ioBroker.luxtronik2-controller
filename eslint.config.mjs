@@ -18,8 +18,20 @@ export default [
 			'admin/admin.d.ts',
 			'admin/blockly.js',
 			'**/adapter-config.d.ts',
-			'widgets/**/*.js'
+			'widgets/**/*.js',
 		],
+	},
+	{
+		files: ['admin/webcomponents/**/*.js'],
+		languageOptions: {
+			globals: {
+				window: 'readonly',
+				document: 'readonly',
+				HTMLElement: 'readonly',
+				customElements: 'readonly',
+				CustomEvent: 'readonly',
+			},
+		},
 	},
 	{
 		// you may disable some 'jsdoc' warnings - but using jsdoc is highly recommended

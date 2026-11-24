@@ -23,6 +23,11 @@ let currentBatteryChargeW = 0;
 let originalWw: number | null = null;
 let originalHz: number | null = null;
 
+// Koordinaten aus system.config für den Sonnenuntergangs-Puffer
+let systemLatitude: number | null = null;
+let systemLongitude: number | null = null;
+let sunsetBlockLoggedDate = '';
+
 /**
  * Hilfsfunktion zum sicheren Parsen von Zahlen (fängt deutsche Kommas wie "1,5" ab).
  *
@@ -41,6 +46,97 @@ function parseConfigFloat(val: unknown, fallback = 0): number {
 	return fallback;
 }
 
+/**
+ * Berechnet den lokalen Sonnenuntergang (Unix-Timestamp in ms) für das angegebene Datum
+ * anhand der Standard-USNO/NOAA-Formel (Zenit 90,833° inkl. Refraktion) ohne externe Abhängigkeiten.
+ *
+ * @param date - Datum, für das der Sonnenuntergang berechnet werden soll.
+ * @param lat - Breitengrad in Dezimalgrad (Nord positiv).
+ * @param lon - Längengrad in Dezimalgrad (Ost positiv).
+ * @returns Unix-Timestamp des Sonnenuntergangs in ms oder null bei Polartag/-nacht.
+ */
+function calculateSunsetTimestamp(date: Date, lat: number, lon: number): number | null {
+	const rad = Math.PI / 180;
+	const deg = 180 / Math.PI;
+
+	const startOfYear = Date.UTC(date.getFullYear(), 0, 1);
+	const currentDay = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+	const dayOfYear = Math.floor((currentDay - startOfYear) / 86400000) + 1;
+
+	const lngHour = lon / 15;
+	const t = dayOfYear + (18 - lngHour) / 24;
+
+	const meanAnomaly = 0.9856 * t - 3.289;
+	let trueLong = meanAnomaly + 1.916 * Math.sin(meanAnomaly * rad) + 0.02 * Math.sin(2 * meanAnomaly * rad) + 282.634;
+	trueLong = ((trueLong % 360) + 360) % 360;
+
+	let rightAscension = Math.atan(0.91764 * Math.tan(trueLong * rad)) * deg;
+	rightAscension = ((rightAscension % 360) + 360) % 360;
+
+	const lQuadrant = Math.floor(trueLong / 90) * 90;
+	const raQuadrant = Math.floor(rightAscension / 90) * 90;
+	rightAscension = (rightAscension + (lQuadrant - raQuadrant)) / 15;
+
+	const sinDec = 0.39782 * Math.sin(trueLong * rad);
+	const cosDec = Math.cos(Math.asin(sinDec));
+
+	const cosH = (Math.cos(90.8333 * rad) - sinDec * Math.sin(lat * rad)) / (cosDec * Math.cos(lat * rad));
+	if (cosH > 1 || cosH < -1) {
+		return null;
+	}
+
+	const hourAngle = (Math.acos(cosH) * deg) / 15;
+	const localMeanTime = hourAngle + rightAscension - 0.06571 * t - 6.622;
+	const utcHours = (((localMeanTime - lngHour) % 24) + 24) % 24;
+
+	const solarNoonUtcHours = 12 - lngHour;
+	const hoursAfterNoon = (((utcHours - solarNoonUtcHours) % 24) + 24) % 24;
+	return currentDay + (solarNoonUtcHours + hoursAfterNoon) * 3600000;
+}
+
+/**
+ * Prüft, ob ein neuer PV-Boost wegen des konfigurierten Sonnenuntergangs-Puffers blockiert ist.
+ *
+ * @param adapter - Die aktuelle Adapter-Instanz.
+ * @returns true, wenn der Puffer vor Sonnenuntergang bereits erreicht oder überschritten ist.
+ */
+function isBlockedBySunsetCutoff(adapter: LuxtronikAdapter): boolean {
+	const config = adapter.config;
+	if (!config.pv_sunset_cutoff_active || systemLatitude === null || systemLongitude === null) {
+		return false;
+	}
+
+	const bufferMinutes = parseConfigFloat(config.pv_sunset_buffer, 60);
+	if (bufferMinutes <= 0) {
+		return false;
+	}
+
+	const now = new Date();
+	const sunsetTs = calculateSunsetTimestamp(now, systemLatitude, systemLongitude);
+	if (sunsetTs === null) {
+		return false;
+	}
+
+	const cutoffTs = sunsetTs - bufferMinutes * 60000;
+	if (now.getTime() >= cutoffTs) {
+		const todayKey = now.toISOString().substring(0, 10);
+		if (sunsetBlockLoggedDate !== todayKey) {
+			sunsetBlockLoggedDate = todayKey;
+			const sunsetStr = new Date(sunsetTs).toLocaleTimeString('de-DE', {
+				hour: '2-digit',
+				minute: '2-digit',
+			});
+			writeLog(
+				`[PV] Sunset cutoff active: Blocking new PV boost starts (${bufferMinutes} min buffer before sunset at ${sunsetStr}).`,
+				'info',
+			);
+		}
+		return true;
+	}
+
+	return false;
+}
+
 // =========================================================
 // MAIN LOGIC
 // =========================================================
@@ -56,7 +152,39 @@ export async function initPvManagement(adapter: LuxtronikAdapter): Promise<void>
 		writeLog('[PV] PV surplus management is disabled or no valid datapoint provided.', 'debug');
 		return;
 	}
+	systemLatitude = null;
+	systemLongitude = null;
+	sunsetBlockLoggedDate = '';
 
+	if (config.pv_sunset_cutoff_active) {
+		try {
+			const sysConfig = await adapter.getForeignObjectAsync('system.config');
+			const sysCommon = sysConfig?.common as Record<string, unknown> | undefined;
+			const lat = parseConfigFloat(sysCommon?.latitude, NaN);
+			const lon = parseConfigFloat(sysCommon?.longitude, NaN);
+			if (!isNaN(lat) && !isNaN(lon) && (lat !== 0 || lon !== 0)) {
+				systemLatitude = lat;
+				systemLongitude = lon;
+				const sunsetTs = calculateSunsetTimestamp(new Date(), lat, lon);
+				const sunsetStr = sunsetTs
+					? new Date(sunsetTs).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+					: 'n/a';
+				const bufferMin = parseConfigFloat(config.pv_sunset_buffer, 60);
+				writeLog(
+					`[PV] Sunset cutoff enabled (${bufferMin} min before sunset). System coordinates loaded (${lat}, ${lon}, today's sunset: ${sunsetStr}).`,
+					'info',
+				);
+			} else {
+				writeLog(
+					'[PV] Sunset cutoff is enabled, but no valid latitude/longitude found in system.config. Feature paused.',
+					'warn',
+				);
+			}
+		} catch (err: unknown) {
+			const msg = err instanceof Error ? err.message : String(err);
+			writeLog(`[PV] Failed to read coordinates from system.config: ${msg}`, 'warn');
+		}
+	}
 	try {
 		currentGridSurplusW = 0;
 		currentBatteryChargeW = 0;
@@ -191,6 +319,9 @@ export function handlePvFeedInChange(adapter: LuxtronikAdapter, id: string, stat
 		pvWaitingForCycleEnd = false;
 
 		if (!pvIsBoostActive && !pvStartTimer) {
+			if (isBlockedBySunsetCutoff(adapter)) {
+				return;
+			}
 			writeLog(
 				`[PV] Surplus of ${totalSurplus} W exceeds start threshold (${thresholdStart} W). Starting ${config.pv_delay_start} min activation timer.`,
 				'info',
@@ -254,7 +385,10 @@ async function activateBoost(adapter: LuxtronikAdapter): Promise<void> {
 		);
 		return;
 	}
-
+	if (isBlockedBySunsetCutoff(adapter)) {
+		writeLog('[PV] Activation aborted: Sunset cutoff window reached during start delay.', 'info');
+		return;
+	}
 	try {
 		// GENIAL EINFACH & SICHER: Wir nehmen den Vorgabewert aus der Konfiguration
 		originalWw = parseConfigFloat(config.sync_warmwater_target_temperature, 54);
