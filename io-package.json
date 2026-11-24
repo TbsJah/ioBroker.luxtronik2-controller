@@ -121,7 +121,9 @@
 			"uk": "Доступ та управління тепловими насосами з контролером Luxtronik 2.x",
 			"zh-cn": "通过Luxtronik 2.x控制器访问和控制热泵"
 		},
-		"authors": ["TbsJah <github.tbsjah@googlemail.com>"],
+		"authors": [
+			"TbsJah <github.tbsjah@googlemail.com>"
+		],
 		"keywords": [
 			"Luxtronik2",
 			"LWD50",
@@ -152,7 +154,9 @@
 		"adminUI": {
 			"config": "json"
 		},
-		"webComponents": ["webcomponents/luxtronik-status-card.json"],
+		"webComponents": [
+			"webcomponents/luxtronik-status-card.json"
+		],
 		"dependencies": [
 			{
 				"js-controller": ">=7.0.7"
