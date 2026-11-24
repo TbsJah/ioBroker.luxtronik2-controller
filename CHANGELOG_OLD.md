@@ -23,6 +23,10 @@
 ### 0.1.0 (2026-07-09)
 
 - initial release
+## 1.0.3 (2026-11-18)
+
+- Fixed daily COP reset in `copManager.ts` so Heating and Hot Water values reset to `0` after midnight until an active cycle starts
+
 ## 1.0.2 (2026-11-17)
 
 - Fixed `node:` protocol imports (`node:fs`, `node:path`) and repository checker lint issues

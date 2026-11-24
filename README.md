@@ -103,8 +103,7 @@ _This project is not affiliated with Alpha Innotec, Novelan, ait-deutschland Gmb
 //### **WORK IN PROGRESS**
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 1.2.1 (2026-11-24)
 
 - Fixed `temperature_target_return` being overwritten with `35.0 °C` in SHI Modbus mode when `sync_modbus_holding_1` (`10060`, room thermostat target) is enabled by removing the duplicate Modbus mapping from `src/mapping/info.ts`
 - Cleaned up SHI holding register mapping in `src/modbusManager.ts` and added an SHI mode check (`10000 === 1`) when reading register `10001` for `heating_flow_out_temperature_target` (`sync_modbus_holding_2`) so its inactive `35.0 °C` default does not overwrite `P0017`
@@ -135,10 +134,6 @@ _This project is not affiliated with Alpha Innotec, Novelan, ait-deutschland Gmb
 - Fixed startup order in `onReady()` so Modbus TCP availability is checked before PV initialization and hardware ZIP timer disable runs after initial raw parameter fetch
 - Improved PV startup recovery to only reset setpoints if a PV boost was actually active before restart, and decoupled PV heating boost from active SHI cycle optimization
 - Released SHI DHW mode (`10005 = 0`) when reverting hot water target to baseline and avoided unnecessary HUP voltage writes in `setIdleDefaults()` when HUP optimization is disabled
-
-### 1.0.3 (2026-11-18)
-
-- Fixed daily COP reset in `copManager.ts` so Heating and Hot Water values reset to `0` after midnight until an active cycle starts
 
 ## License
 

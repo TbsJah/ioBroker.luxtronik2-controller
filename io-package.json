@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "luxtronik2-controller",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "news": {
+      "1.2.1": {
+        "en": "Fixed `temperature_target_return` being overwritten with `35.0 °C` in SHI Modbus mode when `sync_modbus_holding_1` (`10060`, room thermostat target) is enabled by removing the duplicate Modbus mapping from `src/mapping/info.ts`\nCleaned up SHI holding register mapping in `src/modbusManager.ts` and added an SHI mode check (`10000 === 1`) when reading register `10001` for `heating_flow_out_temperature_target` (`sync_modbus_holding_2`) so its inactive `35.0 °C` default does not overwrite `P0017`",
+        "de": "Es wurde behoben, dass `temperature_target_return` im SHI Modbus-Modus mit `35,0 °C` überschrieben wurde, wenn `sync_modbus_holding_1` (`10060`, Raumthermostat-Target) aktiviert war, indem das Modbus-Mapping aus `src/mapping/info.ts` entfernt wurde\nDie HI-Halteregister-Zuordnung in `src/ModbusManager.ts` wurde bereinigt und beim Lesen von `10001` für `heating_flow_out_temperature_target` (`sync_modbus_holding_2`) geprüft, sodass der inaktive Standard `35,0 °C` nicht überschreibt",
+        "ru": "Исправлена ошибка, из-за которой `temperater_target_return` в режиме SHI Modbus при включении `sync_modbus_holding_1` (`10060`, целевое значение комнатного термостата) путем удаления дублированного сопоставления Modbus из `src/mapping/info.ts`\nИсправлено сопоставление регистров хранения SHI в `src/ModBusManager.ts` и добавлена проверка режима SHI (`10000 === 1`) при чтении регистра `10001` для `heating_flow_out_textemperature_target` (`sync_modbus_holding_2`), поэтому значение `P0017` неактивно",
+        "pt": "Corrigido o sobrescrito de `temperature_target_return` por `35,0°C` no modo SHI Modbus quando `sync_modbus_holding_1` (`10060`, alvo do termostato ambiente) é ativado removendo o mapeamento Modbus duplicado de `src/mapping/info.ts`\nLimpou o mapeamento do registro SHI em `src/ModbusManager.ts` e adicionou uma verificação do modo SHI (`10000 === 1`) ao ler o registro `10001` para `heating_flow_out_temperature_target` (`sync_modbus_holding_2`) para que seu padrão inativo de `35,0 °C` não substitua `P0017`",
+        "nl": "Probleem opgelost dat `temperature_target_return` werd overschreven met `35,0 °C` in de SHI Modbus-modus wanneer `sync_modbus_holding_1` (`10060`, doel van de kamerthermostaat) is ingeschakeld door de dubbele Modbus-toewijzing te verwijderen uit `src/mapping/info.ts`\nDe SHI-holding-registertoewijzing is opgeschoond in `src/ModbusManager.ts` en een SHI-moduscontrole toegevoegd (`10000 === 1`) bij het lezen van register `10001` voor `heating_flow_out_temperature_target` (`sync_modbus_holding_2`), zodat de inactieve standaardinstelling van `35,0 °C` de `P0017` niet overschrijft",
+        "fr": "Correction du remplacement de « temperature_target_return » par « 35,0 °C » en mode SHI Modbus lorsque « sync_modbus_holding_1 » (« 10060 », cible du thermostat d'ambiance) est activé en supprimant le mappage Modbus dupliqué de « src/mapping/info.ts »\nLe mappage des registres SHI a été nettoyé dans « src/ModbusManager.ts » et a ajouté un check du mode SHI (« 10000 === 1 ») lors de la lecture du registre « 10001 » pour « heating_flow_out_temperature_target » (sync_modbus_holding_2). Le registre « 35,0 °C » par défaut ne remplace pas « P0017 »",
+        "it": "Risolto il problema con `temperature_target_return` sovrascritto con `35,0 °C` in modalità SHI Modbus quando `sync_modbus_holding_1` (`10060`, termostato ambiente) era abilitato rimuovendo la mappatura Modbus duplicata da `src/mapping/info.ts`\nHa ripulito la mappatura del registro SHI in `src/ModbusManager.ts` e ha aggiunto un controllo della modalità SHI (`10000 === 1`) durante la lettura del registro `10001` per `heating_flow_out_temperature_target`",
+        "es": "Se ha corregido que se sobrescribía `temperature_target_return con 35,0 °C en el modo Modbus SHI cuando `sync_modbus_holding_1` (`10060», objetivo del termostato ambiente) estaba activado al eliminar el mapeo Modbus duplicado de `src/mapping/info.ts`\nLimpió el mapa del registro de almacenamiento SHI en `src/ModbusManager.ts y añadió una comprobación del modo SHI (10000 === 1) al leer el registro `10001` para `heating_flow_out_temperature_target` (`sync_modbus_holding_2`) para que esté inactivo por defecto a 35,0 °C no sobrescribe `P0017`",
+        "pl": "Naprawiono nadpisanie `temperatura_target_return` na `35,0 °C` w trybie SHI Modbus, gdy `sync_modbus_holding_1` (`10060`, cel termostatu pokojowego) jest włączone przez usunięcie zduplikowanego mapowania Modbus z `src/mapping/info.ts`\nWyczyszczono mapowanie rejestru trzymającego SHI w `src/ModbusManager.ts` i dodano sprawdzenie trybu SHI (`10000 === 1`) podczas odczytu rejestru `10001` dla `heating_flow_out_temperature _target` (`sync_modbus_holding_2`), więc jego nieaktywne domyślne `35.0 °C` nie nadpisuje `P0017`",
+        "uk": "Виправлено перезапис `temperatur_target_retur` на `35,0 °C` у режимі SHI Modbus, коли `sync_modbus_holding_1` (`10060`, ціль кімнатного термостата) ввімкнено шляхом видалення дублікатів відображення Modbus з `src/mapping/info.ts`\nОчищено відображення реєстру утримування SHI в `src/ModbusManager.ts` та додано перевірку режиму SHI (`10000 === 1`) при читанні реєстру `10001` для `heating_flow_out_temperature_target` (`sync_modbus_holding_2`), тому його неактивний `35,0 °C` за замовчуванням не перезаписує `P0017`",
+        "zh-cn": "修复了通过从 src/mapping/info.ts 中移除重复的 Modbus 映射启用 sync_modbus_holding_1（10060，房间恒温器目标）时 SHI Modbus 模式下 “temperature_target_return” 被覆盖 “35.0 °C” 的问题\n清理了 `src/modbusManager.ts` 中的 SHI 持有寄存器映射，并在读取 `heating_flow_out_temperature_target` 寄存器 `10001`（`sync_modbus_holding_2`）时添加了 SHI 模式检查（`10000 === 1`），因此其非活动的 `35.0 °C`默认值不会覆盖 `P0017`"
+      },
       "1.2.0": {
         "en": "Added configurable sunset cutoff buffer (`pv_sunset_cutoff_active`, `pv_sunset_buffer`) to PV surplus management to prevent starting new PV boosts shortly before local sunset using `system.config` coordinates\nAdded `@iobroker/web-components` status card (`<luxtronik-status-card>`) for Aura, VIS-2, and WebUI displaying live temperatures, operating mode, PV boost status, COP/JAZ values, and quick actions\nUpdated Cycle Optimization description in `jsonConfig.json` to reflect the dynamic hysteresis-based offset instead of the legacy `35 °C` wording",
         "de": "Konfigurierbarer Puffer (`pv_sunset_cutoff_active`, `pv_sunset_buffer`) zum PV-Überschussmanagement hinzugefügt, um neue PV-Boosts kurz vor dem lokalen Sonnenuntergang mit `system.config`-Koordinaten zu verhindern\nStatuskarte (`<luxtronik-status-card>`) für Aura, VIS-2 und WebUI mit Live-Temperatur, Betriebsmodus, PV-Boost-Status, COP/JAZ-Werten und Schnellaktionen hinzugefügt @iobroker\nDie Beschreibung der Zyklusoptimierung in `JSONConfig.json` wurde um den dynamischen Hysterese-Offset ersetzt",
@@ -80,19 +93,6 @@
         "pl": "Naprawiono problemy z importem protokołu `node: `(`node:fs`, `node:path`) i kontrolera repozytorium\nUkończone i zsynchronizowane tłumaczenia i18n we wszystkich obsługiwanych językach\nNaprawiono klawisze etykiet `JSONConfig` w `GenerateConfig.ts`, aby zapobiec nadpisaniom obiektów w języku wbudowanym podczas kompilacji",
         "uk": "Виправлено імпорт протоколу `node: `(`node:fs`, `node:path`) та проблеми з перевіркою сховища\nЗавершені та синхронізовані переклади i18n на всіх підтримуваних мовах\nВиправлені ключі міток `JsonConfig` у `GenerateConfig.ts` для запобігання перекриттю вбудованих мовних об'єктів під час збирання",
         "zh-cn": "修复了 `node: `协议导入（`node: fs`、`node: path`）和存储库检查器 lint 问题\n已完成并同步所有支持语言的 i18n 翻译\n修复了 generateConfig.ts 中的 `jsonConfig` 标签键，以防止在构建期间覆盖行内语言对象"
-      },
-      "1.0.1": {
-        "en": "**Update of i10n files**",
-        "de": "**Update der I10N-Dateien**",
-        "ru": "**Обновление файлов i10n**",
-        "pt": "**Atualizar i10n**",
-        "nl": "**Update van i10n-bestanden**",
-        "fr": "**Mise à jour des fichiers i10n**",
-        "it": "**Update di file i10n**",
-        "es": "**Actualizar archivos i10n**",
-        "pl": "**Aktualizacja plików i10n**",
-        "uk": "**Оновлення файлів i10n**",
-        "zh-cn": "**更新 i10n 文件**"
       }
     },
     "titleLang": {
