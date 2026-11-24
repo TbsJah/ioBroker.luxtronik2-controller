@@ -86,11 +86,12 @@ export interface LuxtronikAdapter extends AdapterInstance {
 	setOwnStateIfDifferent: (dpPath: string, value: any, ack?: boolean) => Promise<void>;
 
 	/**
-	 * Aktiviert eine temporäre Heizungsanhebung (flüchtig über SHI-Modbus oder über den Fußpunkt).
+	 * Aktiviert eine temporäre Heizungsanhebung über die Parallelverschiebung (flüchtig via Modbus oder nativ).
 	 *
 	 * @param reason Optionaler Kontext für das Debug-Log
+	 * @param deltaK Relative Anhebung in Kelvin über dem Basis-Offset (Standard: 2.0 K)
 	 */
-	activateForcedHeatingBoost: (reason?: string) => Promise<void>;
+	activateForcedHeatingBoost: (reason?: string, deltaK?: number) => Promise<void>;
 
 	/**
 	 * Setzt eine aktive temporäre Heizungsanhebung wieder zurück.
@@ -99,6 +100,9 @@ export interface LuxtronikAdapter extends AdapterInstance {
 	 */
 	resetForcedHeatingBoost: (reapplyPv?: boolean) => Promise<void>;
 
-	/** Gibt an, ob Takt-Optimierung oder Zwangsheizen aktuell über den flüchtigen SHI-Offset (+10 K) aktiv ist */
-	forcedHeatingShiActive?: boolean;
+	/** Gibt an, ob Takt-Optimierung oder Zwangsheizen aktuell einen temporären Heiz-Offset hält */
+	forcedHeatingBoostActive?: boolean;
+
+	/** Merkt sich den ursprünglichen WW-Sollwert, falls Zwangswarmwasser oder forceSoll temporär erhöht hat */
+	forcedWwOriginalTarget?: number | null;
 }

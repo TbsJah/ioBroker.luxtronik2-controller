@@ -23,15 +23,15 @@ __export(actionHandlers_exports, {
 });
 module.exports = __toCommonJS(actionHandlers_exports);
 var import_logger = require("./logger");
+var import_pvManager = require("./pvManager");
 var import_stateMapping = require("./stateMapping");
 var import_utils = require("./utils");
 const CONSTANTS = {
   /** Status-Code für den Ruhezustand der Anlage */
-  STATE_IDLE: 5,
-  /** Befehlswert für den Fußpunkt beim Zwangsheizen */
-  FORCE_HEATING_OFFSET: 35
+  STATE_IDLE: 5
 };
 async function handleZwangswarmwasser(adapter, id) {
+  var _a;
   try {
     const localId = id.replace(`${adapter.namespace}.`, "");
     await adapter.setState(localId, { val: false, ack: true });
@@ -56,6 +56,10 @@ async function handleZwangswarmwasser(adapter, id) {
       forceSoll = MAX_WW_TEMP;
     }
     forceSoll = Math.round(forceSoll * 10) / 10;
+    if (adapter.forcedWwOriginalTarget === null || adapter.forcedWwOriginalTarget === void 0) {
+      const fallbackWw = parseFloat(String((_a = adapter.config.sync_warmwater_target_temperature) != null ? _a : 54).replace(",", ".")) || 54;
+      adapter.forcedWwOriginalTarget = adapter.config.idle_defaults_aktiv === true || import_pvManager.pvIsBoostActive ? fallbackWw : wwSoll;
+    }
     await adapter.syncConfigValue("temperature_hot_water_target", forceSoll);
     (0, import_logger.writeLog)(
       `Forced hot water: Triggered - Actual (${wwIst}\xB0C) < Target-1 (${wwSoll - 1}\xB0C). Target temperature temporarily set to ${forceSoll}\xB0C.`,
@@ -67,7 +71,6 @@ async function handleZwangswarmwasser(adapter, id) {
   }
 }
 async function handleZwangsheizen(adapter, id) {
-  var _a;
   try {
     const localId = id.replace(`${adapter.namespace}.`, "");
     await adapter.setState(localId, { val: false, ack: true });
@@ -80,7 +83,7 @@ async function handleZwangsheizen(adapter, id) {
     const bzVal = (0, import_utils.getNumber)(bzState, -1);
     const ruecklauf = (0, import_utils.getNumber)(ruecklaufState);
     const ruecklaufSoll = (0, import_utils.getNumber)(ruecklaufSollState);
-    const hysterese = (0, import_utils.getNumber)(hystereseState);
+    const hysterese = (0, import_utils.getNumber)(hystereseState, 1.5);
     if (bzVal !== CONSTANTS.STATE_IDLE) {
       (0, import_logger.writeLog)(`Forced heating: Ignored - System is not idle (Status: ${bzVal}).`, "info");
       return;
@@ -92,12 +95,13 @@ async function handleZwangsheizen(adapter, id) {
       );
       return;
     }
-    await adapter.activateForcedHeatingBoost("ForcedHeating");
-    const isShi = Boolean(
-      adapter.config.modbus_active && ((_a = adapter.modbusManager) == null ? void 0 : _a.isAvailable) && adapter.modbusManager.protocolVersion === "shi" && adapter.config.sync_modbus_holding_23 === true
+    const neededDeltaK = Math.max(
+      hysterese + 0.5,
+      Math.ceil((ruecklauf - ruecklaufSoll + hysterese + 0.5) * 10) / 10
     );
+    await adapter.activateForcedHeatingBoost("ForcedHeating", neededDeltaK);
     (0, import_logger.writeLog)(
-      isShi ? "Forced heating: Triggered - Volatile SHI heating offset temporarily set to +10.0 K (Modbus RAM)." : `Forced heating: Triggered - Base point temporarily set to ${CONSTANTS.FORCE_HEATING_OFFSET}\xB0C.`,
+      `Forced heating: Triggered - Dynamic heating offset temporarily raised by +${neededDeltaK} K.`,
       "info"
     );
   } catch (err) {

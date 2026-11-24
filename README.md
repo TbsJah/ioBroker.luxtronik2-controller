@@ -103,6 +103,16 @@ _This project is not affiliated with Alpha Innotec, Novelan, ait-deutschland Gmb
 //### **WORK IN PROGRESS**
 
 ## Changelog
+
+### **WORK IN PROGRESS**
+
+- Replaced static `35 °C` / `+10.0 K` jump in cycle optimization (`CycleOpt-PreHeat` / `CycleOpt-AfterWW`) and forced heating (`Zwangsheizen`) with a dynamic, hysteresis-based relative offset (`base offset + hysteresis + 0.5 K`) via `heating_temperature` (volatile SHI `10002` / native Param `1`) to prevent screed overshoot and short-cycling in well-insulated homes
+- Added heating release checks (`P0003` / `C0125`) and hot water lock-time schedule checks (`P0004` / `C0124` / `P405..P505`, including midnight wrap-around and 25-minute pre-heat lookahead) to cycle optimization
+- Improved `Heizen_nach_Wasser` reset handling (3-minute spike guard instead of 10 minutes once return target is reached), immediate pre-heat offset reset on WW start, and automatic cleanup of stale `CycleOpt-PreHeat` offsets in idle without affecting manual `Zwangsheizen`
+- Added automatic restoration of temporary hot water target increases (`forceSoll` & `Zwangswarmwasser`) after WW completion even when `idle_defaults_aktiv` is disabled
+- Eliminated PV boost flip-flop writes during idle and cycle transitions by delegating directly to `evaluatePvBoost` without intermediate resets to baseline
+- Fixed raw fallback indices in `calculateTotalEnergy()` to read `rawParams[1136]/[1137]` (factor `0.01`) instead of `rawValues[156]/[157]` and added 2-decimal rounding
+
 ### 1.0.4 (2026-11-21)
 
 - Optimized V3.9x SHI Modbus Hybrid mode to achieve zero EEPROM write cycles during cycle optimization, pre-heating, and forced heating (uses volatile SHI offset `+10.0 K` via Holding 23 / `10002` instead of base point parameter `12`)

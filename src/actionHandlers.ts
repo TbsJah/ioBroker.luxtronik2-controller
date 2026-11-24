@@ -1,8 +1,8 @@
 import { writeLog } from './logger';
+import { pvIsBoostActive } from './pvManager';
 import { getDpPath } from './stateMapping';
 import type { LuxtronikAdapter } from './types';
 import { getNumber } from './utils';
-
 // =========================================================
 // TYPEN & KONSTANTEN
 // =========================================================
@@ -10,8 +10,6 @@ import { getNumber } from './utils';
 const CONSTANTS = {
 	/** Status-Code für den Ruhezustand der Anlage */
 	STATE_IDLE: 5,
-	/** Befehlswert für den Fußpunkt beim Zwangsheizen */
-	FORCE_HEATING_OFFSET: 35,
 };
 
 // =========================================================
@@ -60,6 +58,13 @@ export async function handleZwangswarmwasser(adapter: LuxtronikAdapter, id: stri
 		// Auf eine Nachkommastelle runden für saubere Übergabe
 		forceSoll = Math.round(forceSoll * 10) / 10;
 
+		if (adapter.forcedWwOriginalTarget === null || adapter.forcedWwOriginalTarget === undefined) {
+			const fallbackWw =
+				parseFloat(String(adapter.config.sync_warmwater_target_temperature ?? 54).replace(',', '.')) || 54;
+			adapter.forcedWwOriginalTarget =
+				adapter.config.idle_defaults_aktiv === true || pvIsBoostActive ? fallbackWw : wwSoll;
+		}
+
 		// Statt der Hysterese wird nun der Warmwasser-Sollwert überschrieben
 		await adapter.syncConfigValue('temperature_hot_water_target', forceSoll);
 
@@ -74,7 +79,7 @@ export async function handleZwangswarmwasser(adapter: LuxtronikAdapter, id: stri
 }
 
 /**
- * Erzwingt den Heizbetrieb durch temporäre Erhöhung des Fußpunktes.
+ * Erzwingt den Heizbetrieb durch temporäre Erhöhung der Parallelverschiebung.
  *
  * @param adapter Die Instanz des ioBroker-Adapters.
  * @param id Die ID des auslösenden Datenpunkts.
@@ -94,7 +99,7 @@ export async function handleZwangsheizen(adapter: LuxtronikAdapter, id: string):
 		const bzVal = getNumber(bzState, -1);
 		const ruecklauf = getNumber(ruecklaufState);
 		const ruecklaufSoll = getNumber(ruecklaufSollState);
-		const hysterese = getNumber(hystereseState);
+		const hysterese = getNumber(hystereseState, 1.5);
 
 		if (bzVal !== CONSTANTS.STATE_IDLE) {
 			writeLog(`Forced heating: Ignored - System is not idle (Status: ${bzVal}).`, 'info');
@@ -109,17 +114,14 @@ export async function handleZwangsheizen(adapter: LuxtronikAdapter, id: string):
 			return;
 		}
 
-		await adapter.activateForcedHeatingBoost('ForcedHeating');
-		const isShi = Boolean(
-			adapter.config.modbus_active &&
-			adapter.modbusManager?.isAvailable &&
-			adapter.modbusManager.protocolVersion === 'shi' &&
-			adapter.config.sync_modbus_holding_23 === true,
+		const neededDeltaK = Math.max(
+			hysterese + 0.5,
+			Math.ceil((ruecklauf - ruecklaufSoll + hysterese + 0.5) * 10) / 10,
 		);
+
+		await adapter.activateForcedHeatingBoost('ForcedHeating', neededDeltaK);
 		writeLog(
-			isShi
-				? 'Forced heating: Triggered - Volatile SHI heating offset temporarily set to +10.0 K (Modbus RAM).'
-				: `Forced heating: Triggered - Base point temporarily set to ${CONSTANTS.FORCE_HEATING_OFFSET}°C.`,
+			`Forced heating: Triggered - Dynamic heating offset temporarily raised by +${neededDeltaK} K.`,
 			'info',
 		);
 	} catch (err: unknown) {

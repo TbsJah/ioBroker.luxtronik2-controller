@@ -282,38 +282,50 @@ async function evaluatePvBoost(adapter, forceReapply = false) {
       shouldBoostWw = true;
       shouldBoostHz = true;
     }
-    if (shouldBoostWw && (!activeBoostWwApplied || forceReapply) && originalWw !== null && boostWwAmount > 0) {
-      await adapter.syncConfigValue("temperature_hot_water_target", originalWw + boostWwAmount);
-      activeBoostWwApplied = true;
-      (0, import_logger.writeLog)(
-        `[PV] Priority logic: Applying Hot Water boost (+${boostWwAmount}K -> ${originalWw + boostWwAmount}\xB0C).`,
-        "info"
-      );
-    } else if (!shouldBoostWw && activeBoostWwApplied && originalWw !== null) {
-      await adapter.syncConfigValue("temperature_hot_water_target", originalWw);
-      activeBoostWwApplied = false;
-      (0, import_logger.writeLog)(`[PV] Priority logic: Target reached. Revoking Hot Water boost.`, "info");
-    }
-    if (shouldBoostHz && (!activeBoostHzApplied || forceReapply) && originalHz !== null && boostHzAmount > 0) {
-      if (adapter.forcedHeatingShiActive) {
-        (0, import_logger.writeLog)(
-          "[PV] Priority logic: Skipping Heating boost because SHI cycle optimization (+10 K) is currently active.",
-          "debug"
-        );
-      } else {
-        await adapter.syncConfigValue("heating_temperature", originalHz + boostHzAmount);
-        activeBoostHzApplied = true;
-        (0, import_logger.writeLog)(
-          `[PV] Priority logic: Applying Heating boost (+${boostHzAmount}K -> ${originalHz + boostHzAmount}K).`,
-          "info"
-        );
+    if (shouldBoostWw && boostWwAmount > 0 && originalWw !== null) {
+      if (!activeBoostWwApplied || forceReapply) {
+        await adapter.syncConfigValue("temperature_hot_water_target", originalWw + boostWwAmount);
+        if (!activeBoostWwApplied) {
+          activeBoostWwApplied = true;
+          (0, import_logger.writeLog)(
+            `[PV] Priority logic: Applying Hot Water boost (+${boostWwAmount}K -> ${originalWw + boostWwAmount}\xB0C).`,
+            "info"
+          );
+        }
       }
-    } else if (!shouldBoostHz && activeBoostHzApplied && originalHz !== null) {
-      if (!adapter.forcedHeatingShiActive) {
+    } else if ((activeBoostWwApplied || forceReapply) && originalWw !== null) {
+      await adapter.syncConfigValue("temperature_hot_water_target", originalWw);
+      if (activeBoostWwApplied) {
+        activeBoostWwApplied = false;
+        (0, import_logger.writeLog)(`[PV] Priority logic: Target reached. Revoking Hot Water boost.`, "info");
+      }
+    }
+    if (shouldBoostHz && boostHzAmount > 0 && originalHz !== null) {
+      if (!activeBoostHzApplied || forceReapply) {
+        if (adapter.forcedHeatingBoostActive) {
+          (0, import_logger.writeLog)(
+            "[PV] Priority logic: Skipping Heating boost because cycle optimization / forced heating is currently active.",
+            "debug"
+          );
+        } else {
+          await adapter.syncConfigValue("heating_temperature", originalHz + boostHzAmount);
+          if (!activeBoostHzApplied) {
+            activeBoostHzApplied = true;
+            (0, import_logger.writeLog)(
+              `[PV] Priority logic: Applying Heating boost (+${boostHzAmount}K -> ${originalHz + boostHzAmount}K).`,
+              "info"
+            );
+          }
+        }
+      }
+    } else if ((activeBoostHzApplied || forceReapply) && originalHz !== null) {
+      if (!adapter.forcedHeatingBoostActive) {
         await adapter.syncConfigValue("heating_temperature", originalHz);
       }
-      activeBoostHzApplied = false;
-      (0, import_logger.writeLog)(`[PV] Priority logic: Target reached. Revoking Heating boost.`, "info");
+      if (activeBoostHzApplied) {
+        activeBoostHzApplied = false;
+        (0, import_logger.writeLog)(`[PV] Priority logic: Target reached. Revoking Heating boost.`, "info");
+      }
     }
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
@@ -327,7 +339,7 @@ async function deactivateBoost(adapter) {
     const targetHz = parseConfigFloat(config.sync_heating_temperature, 0);
     (0, import_logger.writeLog)(`[PV] Reverting values to original base targets (WW: ${targetWw}\xB0C, Hz: ${targetHz}K).`, "info");
     await adapter.syncConfigValue("temperature_hot_water_target", targetWw);
-    if (!adapter.forcedHeatingShiActive) {
+    if (!adapter.forcedHeatingBoostActive) {
       await adapter.syncConfigValue("heating_temperature", targetHz);
     }
     pvIsBoostActive = false;
@@ -368,7 +380,7 @@ async function initiateDeactivation(adapter) {
         await adapter.syncConfigValue("temperature_hot_water_target", targetWw);
         activeBoostWwApplied = false;
       } else if (bzVal === 1) {
-        if (!adapter.forcedHeatingShiActive) {
+        if (!adapter.forcedHeatingBoostActive) {
           await adapter.syncConfigValue("heating_temperature", targetHz);
         }
         activeBoostHzApplied = false;

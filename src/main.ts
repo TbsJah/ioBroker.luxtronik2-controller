@@ -31,6 +31,7 @@ import {
 	handlePvFeedInChange,
 	initPvManagement,
 	pvIsBoostActive,
+	pvWaitingForCycleEnd,
 } from './pvManager';
 
 import { dumpAllRawToLog, queueWrite, readAllRaw } from './rawFunctions';
@@ -83,8 +84,8 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 	public updateRunning: boolean = false;
 	/** Timestamp tracking the last dynamic pump voltage optimization execution */
 	private lastPumpOptimization: number = 0;
-	/** Merkt sich, ob Takt-Optimierung oder Zwangsheizen aktuell über den flüchtigen SHI-Modbus-Offset (+10 K) aktiv ist */
-	public forcedHeatingShiActive: boolean = false;
+	/** Merkt sich, ob Takt-Optimierung oder Zwangsheizen aktuell einen temporären Heiz-Offset hält */
+	public forcedHeatingBoostActive: boolean = false;
 	/** Internal array storing pending serial hardware write tasks */
 	public writeQueue: (() => Promise<void>)[] = [];
 	/** Lock flag indicating that the write queue is currently being processed */
@@ -104,6 +105,11 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 	public zipEndTime?: number;
 	/** Cron-Job Handle für die Firmware-Update-Prüfung */
 	public updateCronJob?: schedule.Job;
+	/** Merker für Heizgrund */
+	private forcedHeatingReason: string = '';
+	/** Merkt sich den ursprünglichen WW-Sollwert, falls forceSoll temporär erhöht hat */
+	public forcedWwOriginalTarget: number | null = null;
+
 	/**
 	 * Initializes a new instance of the Luxtronik2Controller class.
 	 *
@@ -522,94 +528,15 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 	}
 
 	/**
-	 * Aktiviert eine temporäre Heizungsanhebung (Takt-Optimierung, Vorheizen oder Zwangsheizen).
-	 * Nutzt im V3.9x-SHI-Modus flüchtiges Modbus-RAM (+10.0 K über Holding 23 -> SHI 10002),
-	 * sonst wie bisher den Heizkurven-Fußpunkt (35 °C).
-	 *
-	 * @param reason - Optionaler Kontext für das Debug-Log.
-	 */
-	public async activateForcedHeatingBoost(reason = 'CycleOpt'): Promise<void> {
-		if (this.isShiModbusActive()) {
-			if (!this.forcedHeatingShiActive) {
-				await this.modbusManager.writeRegister(23, 100, false);
-				this.forcedHeatingShiActive = true;
-				const dpHeatingTemp = getDpPath('heating_temperature');
-				if (dpHeatingTemp) {
-					await this.setOwnStateIfDifferent(dpHeatingTemp, 10, true);
-				}
-				if (this.isDebugLogActive) {
-					writeLog(
-						`[${reason}] SHI Modbus active: Setting volatile heating offset to +10.0 K (Holding 23 -> SHI 10002, 0 EEPROM writes).`,
-						'info',
-					);
-				}
-			}
-			return;
-		}
-
-		await this.syncConfigValue('heating_curve_parallel_offset', 35);
-	}
-
-	/**
-	 * Setzt eine aktive temporäre Heizungsanhebung sauber zurück.
-	 * Im SHI-Modus wird der flüchtige Offset auf den Basiswert zurückgesetzt und ein aktiver PV-Boost optional wiederhergestellt.
-	 *
-	 * @param reapplyPv - Stellt bei aktivem PV-Boost dessen Sollwert im Anschluss sofort wieder her.
-	 */
-	public async resetForcedHeatingBoost(reapplyPv = true): Promise<void> {
-		const config = this.config as Record<string, any>;
-
-		if (this.isShiModbusActive()) {
-			const heatingTempState = await this.getStateAsync(getDpPath('heating_temperature'));
-			const isShiOffsetStuckHigh = typeof heatingTempState?.val === 'number' && heatingTempState.val >= 10;
-
-			if (!this.forcedHeatingShiActive && !isShiOffsetStuckHigh) {
-				return;
-			}
-			this.forcedHeatingShiActive = false;
-
-			const baseOffset = Number(config.sync_heating_temperature ?? 0);
-			await this.modbusManager.writeRegister(23, Math.round(baseOffset * 10), false);
-			const dpHeatingTemp = getDpPath('heating_temperature');
-			if (dpHeatingTemp) {
-				await this.setOwnStateIfDifferent(dpHeatingTemp, baseOffset, true);
-			}
-			if (this.isDebugLogActive) {
-				writeLog(
-					`[CycleOpt] SHI Modbus active: Resetting volatile heating offset back to ${baseOffset} K (Holding 23 -> SHI 10002).`,
-					'info',
-				);
-			}
-
-			if (reapplyPv && pvIsBoostActive) {
-				await evaluatePvBoost(this, true);
-			}
-			return;
-		}
-
-		const fusspunktState = await this.getStateAsync(getDpPath('heating_curve_parallel_offset'));
-		const currentFusspunkt =
-			typeof fusspunktState?.val === 'number'
-				? fusspunktState.val
-				: this.currentRawParams[12] !== undefined
-					? this.currentRawParams[12] / 10
-					: 0;
-
-		if (currentFusspunkt === 35) {
-			const fallbackFusspunkt = config.fusspunkt ?? 21.7;
-			await this.syncConfigValue('heating_curve_parallel_offset', fallbackFusspunkt);
-		}
-	}
-
-	/**
 	 * Configures fallback factory parameter baselines for the heat pump when in an idle state.
 	 *
 	 * @returns A promise that resolves when all default configuration tasks resolve.
 	 */
 	private async setIdleDefaults(): Promise<void> {
 		try {
+			this.forcedWwOriginalTarget = null;
 			const config = this.config as Record<string, any>;
-			await this.resetForcedHeatingBoost(false);
+			const isPvControlling = pvIsBoostActive && !pvWaitingForCycleEnd;
 
 			// Im SHI-Modus verändert der Adapter Endpunkt & Fußpunkt nicht;
 			// beide Parameter haben kein flüchtiges SHI-Register -> unnötige EEPROM-Writes vermeiden.
@@ -617,8 +544,6 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 				await this.syncConfigValue('heating_curve_end_point', config.endpunkt ?? 23);
 				await this.syncConfigValue('heating_curve_parallel_offset', config.fusspunkt ?? 21.7);
 			}
-
-			await this.syncConfigValue('heating_temperature', config.sync_heating_temperature ?? 0);
 
 			if (config.hup_optimierung_aktiv === true) {
 				await this.syncConfigValue(
@@ -631,13 +556,22 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 				);
 			}
 
-			await this.syncConfigValue('temperature_hot_water_target', config.sync_warmwater_target_temperature ?? 54);
 			await this.syncConfigValue('returnTemperatureHysteresis', config.sync_return_temperature_hysteresis ?? 1.5);
 			await this.syncConfigValue('zip_aktiv', config.zip_aktiv ?? 0);
 			await this.syncConfigValue('Heizen_nach_Wasser', config.Heating_after_warmwater ?? false);
 
-			if (pvIsBoostActive) {
+			if (isPvControlling) {
+				// Kein Umweg über Basiswert -> evaluatePvBoost setzt direkt PV- bzw. Basiswerte ohne Flip-Flop
+				this.forcedHeatingBoostActive = false;
+				this.forcedHeatingReason = '';
 				await evaluatePvBoost(this, true);
+			} else {
+				const baseOffset = parseFloat(String(config.sync_heating_temperature ?? 0).replace(',', '.')) || 0;
+				const baseWw =
+					parseFloat(String(config.sync_warmwater_target_temperature ?? 54).replace(',', '.')) || 54;
+				await this.resetForcedHeatingBoost(false);
+				await this.syncConfigValue('heating_temperature', baseOffset);
+				await this.syncConfigValue('temperature_hot_water_target', baseWw);
 			}
 		} catch (err: any) {
 			writeLog(`Failed to apply the baseline idle configuration defaults: ${err.message}`, 'error');
@@ -645,15 +579,220 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 	}
 
 	/**
-	 * Evaluates whether the current active operating state timestamp is older than ten minutes.
+	 * Prüft, ob die Heizung aktuell generell heizen darf (nicht Aus/Urlaub, nicht Heizgrenze/Frostschutz).
 	 *
-	 * @returns A promise that resolves to true if the state has remained unaltered for at least 10 minutes.
+	 * @param rawValues - Aktuelle Rohwerte (CMD 3004).
+	 * @param rawParams - Aktuelle Rohparameter (CMD 3003).
+	 * @param isHeatingAllowedByLimit - Ergebnis der konfigurierten Heizgrenzen-Prüfung.
+	 * @returns true, wenn Heizen erlaubt ist.
 	 */
-	private async istBetriebszustandAelterAls10Min(): Promise<boolean> {
+	private isHeatingAllowed(rawValues: number[], rawParams: number[], isHeatingAllowedByLimit: boolean): boolean {
+		if (!isHeatingAllowedByLimit) {
+			return false;
+		}
+		// P0003: 3 = Urlaub, 4 = Aus
+		const heatingOpMode = rawParams[3];
+		if (heatingOpMode === 3 || heatingOpMode === 4) {
+			return false;
+		}
+		// C0125 (opStateHeating): 0 = Abgesenkt, 1 = Normal, 2 = Heizgrenze, 3 = Aus, 4 = Frostschutz
+		const opStateHeating = rawValues[125];
+		if (opStateHeating === 2 || opStateHeating === 3 || opStateHeating === 4) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Prüft anhand der Luxtronik-WW-Zeitschaltuhr (P405..P505 = Sperrzeiten),
+	 * ob Warmwasser zum angegebenen Zeitpunkt gesperrt ist (inkl. Mitternachts-Übergang).
+	 *
+	 * @param rawParams - Aktuelle Rohparameter (CMD 3003).
+	 * @param targetDate - Zu prüfender Zeitpunkt.
+	 * @returns true, wenn zu diesem Zeitpunkt eine WW-Sperrzeit aktiv ist.
+	 */
+	private isHotWaterLockedAt(rawParams: number[], targetDate: Date): boolean {
+		if (!rawParams || rawParams.length <= 505) {
+			return false;
+		}
+
+		const tableMode = rawParams[405] ?? 0; // 0 = Woche, 1 = 5+2, 2 = Tage (So..Sa)
+		const dayOfWeek = targetDate.getDay(); // 0 = Sonntag .. 6 = Samstag
+		const prevDayOfWeek = (dayOfWeek + 6) % 7;
+		const secOfDay = targetDate.getHours() * 3600 + targetDate.getMinutes() * 60 + targetDate.getSeconds();
+
+		const getBaseIndex = (day: number): number => {
+			if (tableMode === 1) {
+				return day >= 1 && day <= 5 ? 416 : 426;
+			}
+			if (tableMode === 2) {
+				return 436 + day * 10;
+			}
+			return 406;
+		};
+
+		// 1. Slots des aktuellen Tages prüfen
+		const todayBase = getBaseIndex(dayOfWeek);
+		for (let i = 0; i < 5; i++) {
+			const start = rawParams[todayBase + i * 2];
+			const end = rawParams[todayBase + i * 2 + 1];
+			if (start === undefined || end === undefined || start === end) {
+				continue;
+			}
+			if (start < end) {
+				if (secOfDay >= start && secOfDay < end) {
+					return true;
+				}
+			} else {
+				// Sperrzeit über Mitternacht (z.B. 22:00 - 06:00)
+				if (secOfDay >= start) {
+					return true;
+				}
+			}
+		}
+
+		// 2. Überhängende Mitternachts-Slots des Vortages prüfen
+		const prevBase = getBaseIndex(prevDayOfWeek);
+		for (let i = 0; i < 5; i++) {
+			const start = rawParams[prevBase + i * 2];
+			const end = rawParams[prevBase + i * 2 + 1];
+			if (start === undefined || end === undefined || start <= end) {
+				continue;
+			}
+			if (secOfDay < end) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Prüft, ob Warmwasser aktuell (leadMinutes = 0) oder in X Minuten freigegeben ist.
+	 *
+	 * @param rawValues - Aktuelle Rohwerte (CMD 3004).
+	 * @param rawParams - Aktuelle Rohparameter (CMD 3003).
+	 * @param leadMinutes - Vorschau in Minuten (0 = jetzt sofort, z.B. 25 = Vorheiz-Check).
+	 * @returns true, wenn Warmwasser erlaubt ist.
+	 */
+	private isHotWaterAllowed(rawValues: number[], rawParams: number[], leadMinutes = 0): boolean {
+		// P0004: 2 = Party (ignoriert Sperrzeiten), 3 = Urlaub, 4 = Aus
+		const wwOpMode = rawParams[4];
+		if (wwOpMode === 3 || wwOpMode === 4) {
+			return false;
+		}
+		if (wwOpMode === 2) {
+			return true;
+		}
+
+		// Sofort-Prüfung: Live-Reglerstatus aus C0124 nutzen (0 = Sperrzeit, 1 = Frei, 3 = Aus)
+		if (leadMinutes <= 0) {
+			const opStateWw = rawValues[124];
+			if (opStateWw !== undefined) {
+				return opStateWw !== 0 && opStateWw !== 3;
+			}
+		}
+
+		const targetDate = new Date(Date.now() + leadMinutes * 60000);
+		return !this.isHotWaterLockedAt(rawParams, targetDate);
+	}
+
+	/**
+	 * Aktiviert eine temporäre Heizungsanhebung (Takt-Optimierung, Vorheizen oder Zwangsheizen)
+	 * über die Parallelverschiebung (`heating_temperature`) mit automatischem, relativem Offset.
+	 *
+	 * @param reason - Optionaler Kontext für das Debug-Log.
+	 * @param deltaK - Relative Anhebung in Kelvin über dem Basis-Offset (z.B. Hysterese + 0.5 K).
+	 */
+	public async activateForcedHeatingBoost(reason = 'CycleOpt', deltaK = 2.0): Promise<void> {
+		this.forcedHeatingReason = reason;
+		const config = this.config as Record<string, any>;
+		const baseOffset = parseFloat(String(config.sync_heating_temperature ?? 0).replace(',', '.')) || 0;
+		const maxAllowedOffset = this.isShiModbusActive() ? 10.0 : 5.0;
+
+		let targetOffset = Math.round((baseOffset + Math.max(0.5, deltaK)) * 10) / 10;
+		targetOffset = Math.min(targetOffset, maxAllowedOffset);
+
+		// Aktiven höheren PV-Boost nicht nach unten überschreiben
+		if (pvIsBoostActive) {
+			const currentState = await this.getStateAsync(getDpPath('heating_temperature'));
+			if (typeof currentState?.val === 'number' && currentState.val > targetOffset) {
+				targetOffset = currentState.val;
+			}
+		}
+
+		const currentHeatingState = await this.getStateAsync(getDpPath('heating_temperature'));
+		if (this.forcedHeatingBoostActive && currentHeatingState?.val === targetOffset) {
+			return;
+		}
+
+		this.forcedHeatingBoostActive = true;
+		await this.syncConfigValue('heating_temperature', targetOffset);
+
+		if (this.isDebugLogActive) {
+			writeLog(
+				`[${reason}] Setting dynamic heating offset to +${targetOffset} K (base: ${baseOffset} K, delta: +${deltaK} K, SHI: ${this.isShiModbusActive()}).`,
+				'info',
+			);
+		}
+	}
+
+	/**
+	 * Setzt eine aktive temporäre Heizungsanhebung sauber auf den Basis-Offset zurück
+	 * und stellt einen eventuell aktiven PV-Boost wieder her.
+	 *
+	 * @param reapplyPv - Stellt bei aktivem PV-Boost dessen Sollwert im Anschluss sofort wieder her.
+	 */
+	public async resetForcedHeatingBoost(reapplyPv = true): Promise<void> {
+		if (!this.forcedHeatingBoostActive) {
+			return;
+		}
+		this.forcedHeatingBoostActive = false;
+		this.forcedHeatingReason = '';
+
+		if (reapplyPv && pvIsBoostActive && !pvWaitingForCycleEnd) {
+			await evaluatePvBoost(this, true);
+			return;
+		}
+
+		const config = this.config as Record<string, any>;
+		const baseOffset = parseFloat(String(config.sync_heating_temperature ?? 0).replace(',', '.')) || 0;
+
+		await this.syncConfigValue('heating_temperature', baseOffset);
+		if (this.isDebugLogActive) {
+			writeLog(`[CycleOpt] Resetting temporary heating offset back to ${baseOffset} K.`, 'info');
+		}
+	}
+
+	/**
+	 * Setzt eine temporäre WW-Anhebung (z.B. durch forceSoll) nach dem WW-Takt zurück,
+	 * ohne einen aktiven PV-Boost unnötig umzuschalten.
+	 */
+	private async restoreForcedWwTarget(): Promise<void> {
+		const config = this.config as Record<string, any>;
+		const fallbackWw = parseFloat(String(config.sync_warmwater_target_temperature ?? 54).replace(',', '.')) || 54;
+		const targetWw = this.forcedWwOriginalTarget ?? fallbackWw;
+		this.forcedWwOriginalTarget = null;
+
+		if (pvIsBoostActive && !pvWaitingForCycleEnd) {
+			await evaluatePvBoost(this, true);
+			return;
+		}
+
+		await this.syncConfigValue('temperature_hot_water_target', targetWw);
+	}
+
+	/**
+	 * Prüft, ob der aktuelle Betriebszustand (WP_BZ_akt) mindestens `minutes` Minuten anliegt.
+	 *
+	 * @param minutes - Mindestdauer in Minuten.
+	 * @returns true, wenn die letzte Änderung mindestens `minutes` Minuten zurückliegt.
+	 */
+	private async istBetriebszustandAelterAls(minutes: number): Promise<boolean> {
 		try {
 			const state = await this.getStateAsync(getDpPath('WP_BZ_akt'));
 			const lastChange = state?.lc ?? 0;
-			return (Date.now() - lastChange) / 60000 >= 10;
+			return (Date.now() - lastChange) / 60000 >= minutes;
 		} catch {
 			return false;
 		}
@@ -674,6 +813,7 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 				return;
 			}
 
+			const effectiveParams = rawParams.length > 0 ? rawParams : this.currentRawParams;
 			const bzState = await this.getStateAsync(getDpPath('WP_BZ_akt'));
 			const bzVal =
 				bzState && bzState.val !== null
@@ -698,18 +838,20 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 				if (istLeerlauf) {
 					if (config.idle_defaults_aktiv === true) {
 						await this.setIdleDefaults();
-					} else if (this.forcedHeatingShiActive) {
-						await this.resetForcedHeatingBoost();
+					} else {
+						if (this.forcedHeatingBoostActive) {
+							await this.resetForcedHeatingBoost();
+						}
+						if (this.forcedWwOriginalTarget !== null) {
+							await this.restoreForcedWwTarget();
+						}
 					}
 				} else if (istHeizen) {
-					if (this.lastBzVal === '1' && config.idle_defaults_aktiv === true) {
-						await this.syncConfigValue(
-							'temperature_hot_water_target',
-							config.sync_warmwater_target_temperature ?? 54,
-						);
-						if (pvIsBoostActive) {
-							await evaluatePvBoost(this, true);
-						}
+					if (
+						this.lastBzVal === '1' &&
+						(config.idle_defaults_aktiv === true || this.forcedWwOriginalTarget !== null)
+					) {
+						await this.restoreForcedWwTarget();
 					}
 
 					if (config.zip_optimierung_aktiv === true) {
@@ -729,6 +871,10 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 						await this.syncConfigValue('Heizen_nach_Wasser', config.Heating_after_warmwater ?? false);
 					}
 				} else if (istWarmwasser) {
+					const nachWasserTransition = await this.getStateAsync(getDpPath('Heizen_nach_Wasser'));
+					if (!nachWasserTransition?.val && this.forcedHeatingBoostActive) {
+						await this.resetForcedHeatingBoost();
+					}
 					if (config.zip_optimierung_aktiv === true) {
 						const mode = config.zip_control_mode || 'controller';
 						const actors = config.actors || [];
@@ -781,6 +927,7 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 				thresholdHeatingLimitState,
 				heatingLimitState,
 				aelterAls10,
+				aelterAls3,
 			] = await Promise.all([
 				this.getStateAsync(getDpPath('Wamwassertemperatur_Soll')),
 				this.getStateAsync(getDpPath('temperature_hot_water_target')),
@@ -796,7 +943,8 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 				this.getStateAsync(getDpPath('Mitteltemperatur')),
 				this.getStateAsync(getDpPath('thresholdHeatingLimit')),
 				this.getStateAsync(getDpPath('heatingLimit')),
-				this.istBetriebszustandAelterAls10Min(),
+				this.istBetriebszustandAelterAls(10),
+				this.istBetriebszustandAelterAls(3),
 			]);
 
 			const wwSoll =
@@ -806,8 +954,8 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 						? wwTargetParamState.val
 						: rawValues[18] !== undefined
 							? rawValues[18] / 10
-							: rawParams[105] !== undefined
-								? rawParams[105] / 10
+							: effectiveParams[105] !== undefined
+								? effectiveParams[105] / 10
 								: 54;
 			const wwIst =
 				typeof wwIstState?.val === 'number'
@@ -842,15 +990,15 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 			const wwHysterese =
 				typeof wwHystereseState?.val === 'number'
 					? wwHystereseState.val
-					: rawParams[74] !== undefined
-						? rawParams[74] / 10
+					: effectiveParams[74] !== undefined
+						? effectiveParams[74] / 10
 						: 2.0;
 			const currentHupVolt = (currentHupVoltState?.val as number) ?? 7.0;
 			const heizenHysterese =
 				typeof heizenHystereseState?.val === 'number'
 					? heizenHystereseState.val
-					: rawParams[88] !== undefined
-						? rawParams[88] / 10
+					: effectiveParams[88] !== undefined
+						? effectiveParams[88] / 10
 						: 1.5;
 			const mitteltemperatur =
 				typeof mitteltempState?.val === 'number'
@@ -861,8 +1009,8 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 			const thresholdHeatingLimit =
 				typeof thresholdHeatingLimitState?.val === 'number'
 					? thresholdHeatingLimitState.val
-					: rawParams[700] !== undefined
-						? rawParams[700] / 10
+					: effectiveParams[700] !== undefined
+						? effectiveParams[700] / 10
 						: 15;
 
 			const isHeatingLimitEnabled =
@@ -871,16 +1019,19 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 						heatingLimitState.val === true ||
 						String(heatingLimitState.val) === '1' ||
 						String(heatingLimitState.val).toLowerCase() === 'true'
-					: rawParams[699] === 1;
+					: effectiveParams[699] === 1;
 
 			const nachWasser = Boolean(nachWasserState?.val);
+
+			const isHeatingAllowedByLimit = !isHeatingLimitEnabled || mitteltemperatur < thresholdHeatingLimit;
+			const heatingAllowed = this.isHeatingAllowed(rawValues, effectiveParams, isHeatingAllowedByLimit);
+			const wwAllowedNow = this.isHotWaterAllowed(rawValues, effectiveParams, 0);
+			const wwAllowedSoon = this.isHotWaterAllowed(rawValues, effectiveParams, 25);
+			const dynamicDeltaK = Math.round((heizenHysterese + 0.5) * 10) / 10;
 
 			if (istHeizen) {
 				if (aelterAls10 && vd1) {
 					await this.resetForcedHeatingBoost();
-				}
-
-				if (aelterAls10 && vd1) {
 					this.lastPumpOptimization = await handleHupOptimization(
 						this,
 						istHeizen,
@@ -891,39 +1042,50 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 				}
 
 				if (isRegelungAktiv) {
-					if (ruecklauf >= ruecklaufSoll + heizenHysterese - 0.1) {
-						if (aelterAls10) {
+					const rlZielErreicht = ruecklauf >= ruecklaufSoll + heizenHysterese - 0.1;
+
+					if (rlZielErreicht) {
+						// Nach 3 Min. (Umschalt-Spike nach WW vorbei): Heizziel erreicht -> nicht nachheizen!
+						if (aelterAls3) {
 							await this.syncConfigValue('Heizen_nach_Wasser', false);
+						}
+
+						if (aelterAls3 && wwAllowedNow && wwSoll - wwIst > 2) {
+							if (this.forcedWwOriginalTarget === null) {
+								const fallbackWw =
+									parseFloat(
+										String(config.sync_warmwater_target_temperature ?? 54).replace(',', '.'),
+									) || 54;
+								this.forcedWwOriginalTarget = config.idle_defaults_aktiv === true ? fallbackWw : wwSoll;
+							}
+
+							let forceSoll = wwIst + wwHysterese + 1.5;
+
+							if (pvIsBoostActive) {
+								const baseWw =
+									parseFloat(
+										String(config.sync_warmwater_target_temperature ?? 54).replace(',', '.'),
+									) || 54;
+								const boostWw = parseFloat(String(config.pv_boost_ww ?? 0).replace(',', '.')) || 0;
+								const pvTarget = baseWw + boostWw;
+								forceSoll = Math.max(forceSoll, pvTarget);
+							}
+
+							if (forceSoll > 70) {
+								forceSoll = 70;
+							}
+							forceSoll = Math.round(forceSoll * 10) / 10;
+							await this.syncConfigValue('temperature_hot_water_target', forceSoll);
 						}
 					} else if (!nachWasser && config.Heating_after_warmwater === true) {
 						await this.syncConfigValue('Heizen_nach_Wasser', true);
 					}
-
-					if (wwSoll - wwIst > 2 && ruecklauf >= ruecklaufSoll + heizenHysterese - 0.1) {
-						let forceSoll = wwIst + wwHysterese + 1.5;
-
-						if (pvIsBoostActive) {
-							const baseWw =
-								parseFloat(String(config.sync_warmwater_target_temperature).replace(',', '.')) || 54;
-							const boostWw = parseFloat(String(config.pv_boost_ww).replace(',', '.')) || 0;
-							const pvTarget = baseWw + boostWw;
-							forceSoll = Math.max(forceSoll, pvTarget);
-						}
-
-						if (forceSoll > 70) {
-							forceSoll = 70;
-						}
-						forceSoll = Math.round(forceSoll * 10) / 10;
-						await this.syncConfigValue('temperature_hot_water_target', forceSoll);
-					}
 				}
 			}
 
-			const isHeatingAllowedByLimit = !isHeatingLimitEnabled || mitteltemperatur < thresholdHeatingLimit;
-
 			if (istWarmwasser && nachWasser) {
-				if (isRegelungAktiv && isHeatingAllowedByLimit) {
-					await this.activateForcedHeatingBoost('CycleOpt-AfterWW');
+				if (isRegelungAktiv && heatingAllowed) {
+					await this.activateForcedHeatingBoost('CycleOpt-AfterWW', dynamicDeltaK);
 				}
 			}
 
@@ -935,14 +1097,21 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 				}
 
 				if (isRegelungAktiv) {
-					if (wwSoll - wwIst >= wwHysterese - 1.5 && ruecklauf <= ruecklaufSoll && isHeatingAllowedByLimit) {
+					if (
+						wwAllowedSoon &&
+						heatingAllowed &&
+						wwSoll - wwIst >= wwHysterese - 1.5 &&
+						ruecklauf <= ruecklaufSoll
+					) {
 						if (this.isDebugLogActive) {
 							writeLog(
-								`[CycleOpt] Pre-starting heating before WW (WW: ${wwIst}/${wwSoll}°C, Hyst: ${wwHysterese}K, RL: ${ruecklauf}/${ruecklaufSoll}°C).`,
+								`[CycleOpt] Pre-starting heating before WW (WW: ${wwIst}/${wwSoll}°C, Hyst: ${wwHysterese}K, RL: ${ruecklauf}/${ruecklaufSoll}°C, Offset: +${dynamicDeltaK}K).`,
 								'info',
 							);
 						}
-						await this.activateForcedHeatingBoost('CycleOpt-PreHeat');
+						await this.activateForcedHeatingBoost('CycleOpt-PreHeat', dynamicDeltaK);
+					} else if (this.forcedHeatingBoostActive && this.forcedHeatingReason === 'CycleOpt-PreHeat') {
+						await this.resetForcedHeatingBoost();
 					}
 				}
 			}
@@ -1182,7 +1351,7 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 
 			await Promise.all(statePromises);
 			await calculateTotalThermalEnergy(this, rawValues);
-			await calculateTotalEnergy(this, rawValues);
+			await calculateTotalEnergy(this, rawParams);
 
 			const fehlerDp = getDpPath('Fehlerspeicher');
 			const oldFehlerState = fehlerDp ? await this.getStateAsync(fehlerDp) : null;

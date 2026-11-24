@@ -54,7 +54,7 @@ async function calculateSum(
 			}
 		}
 
-		const newSum = val1 + val2;
+		const newSum = Math.round((val1 + val2) * 100) / 100;
 		const currentVal = currentState && typeof currentState.val === 'number' ? currentState.val : 0;
 
 		if (newSum >= currentVal) {
@@ -91,20 +91,20 @@ export async function calculateTotalThermalEnergy(adapter: AdapterInstance, rawV
  * Calculates the total energy consumed (heating + hot water) and writes it to the target state.
  *
  * @param adapter - ioBroker adapter instance
- * @param rawValues - Raw values array from the device
+ * @param rawParams - Raw parameters array from the device (CMD 3003)
  * @returns A promise resolving upon completion
  */
-export async function calculateTotalEnergy(adapter: AdapterInstance, rawValues?: number[]): Promise<void> {
+export async function calculateTotalEnergy(adapter: AdapterInstance, rawParams?: number[]): Promise<void> {
 	await calculateSum(
 		adapter,
 		getDpPath('energy_heating'),
 		getDpPath('energy_warmwater'),
 		getDpPath('energy_total'),
 		'Total Energy',
-		rawValues,
-		156,
-		157,
-		0.1,
+		rawParams,
+		1136,
+		1137,
+		0.01,
 	);
 }
 

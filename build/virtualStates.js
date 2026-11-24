@@ -50,7 +50,7 @@ async function calculateSum(adapter, sourceId1, sourceId2, targetId, logName, ra
         val2 = rawVal2 * factor;
       }
     }
-    const newSum = val1 + val2;
+    const newSum = Math.round((val1 + val2) * 100) / 100;
     const currentVal = currentState && typeof currentState.val === "number" ? currentState.val : 0;
     if (newSum >= currentVal) {
       await adapter.setStateChangedAsync(targetId, newSum, true);
@@ -73,17 +73,17 @@ async function calculateTotalThermalEnergy(adapter, rawValues) {
     0.1
   );
 }
-async function calculateTotalEnergy(adapter, rawValues) {
+async function calculateTotalEnergy(adapter, rawParams) {
   await calculateSum(
     adapter,
     (0, import_stateMapping.getDpPath)("energy_heating"),
     (0, import_stateMapping.getDpPath)("energy_warmwater"),
     (0, import_stateMapping.getDpPath)("energy_total"),
     "Total Energy",
-    rawValues,
-    156,
-    157,
-    0.1
+    rawParams,
+    1136,
+    1137,
+    0.01
   );
 }
 async function updateHistory(adapter, rawValues, timeStartIndex, codeStartIndex, targetStateId, fallbackPrefix, codeMap) {
