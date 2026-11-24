@@ -103,6 +103,12 @@ _This project is not affiliated with Alpha Innotec, Novelan, ait-deutschland Gmb
 //### **WORK IN PROGRESS**
 
 ## Changelog
+
+### **WORK IN PROGRESS**
+
+- Fixed `temperature_target_return` being overwritten with `35.0 °C` in SHI Modbus mode when `sync_modbus_holding_1` (`10060`, room thermostat target) is enabled by removing the duplicate Modbus mapping from `src/mapping/info.ts`
+- Cleaned up SHI holding register mapping in `src/modbusManager.ts` and added an SHI mode check (`10000 === 1`) when reading register `10001` for `heating_flow_out_temperature_target` (`sync_modbus_holding_2`) so its inactive `35.0 °C` default does not overwrite `P0017`
+
 ### 1.2.0 (2026-11-24)
 
 - Added configurable sunset cutoff buffer (`pv_sunset_cutoff_active`, `pv_sunset_buffer`) to PV surplus management to prevent starting new PV boosts shortly before local sunset using `system.config` coordinates

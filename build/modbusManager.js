@@ -169,10 +169,8 @@ class ModbusManager {
           const shiHoldingMap = [
             { legacyIdx: 0, shiReg: 10108, fc: "input" },
             // Außentemperatur (Temperatur_TA)
-            { legacyIdx: 1, shiReg: 10001, fc: "holding" },
-            // Rücklauf Soll (Heating: return setpoint)
             { legacyIdx: 2, shiReg: 10001, fc: "holding" },
-            // Feste Rücklaufsolltemperatur
+            // Feste Rücklaufsolltemperatur (Heating: return setpoint)
             { legacyIdx: 5, shiReg: 10006, fc: "holding" },
             // Warmwasser Soll (DHW: setpoint)
             { legacyIdx: 23, shiReg: 10002, fc: "holding" }
@@ -181,6 +179,15 @@ class ModbusManager {
           for (const item of shiHoldingMap) {
             if (config[`sync_modbus_holding_${item.legacyIdx}`] === true) {
               try {
+                if (item.legacyIdx === 2) {
+                  const res2 = await client.readHoldingRegisters(1e4, 2);
+                  const mode = res2.data[0];
+                  const raw2 = res2.data[1];
+                  if (mode === 1 && raw2 !== 32767) {
+                    holdings[2] = raw2 > 32767 ? raw2 - 65536 : raw2;
+                  }
+                  continue;
+                }
                 if (item.legacyIdx === 5) {
                   const res2 = await client.readHoldingRegisters(10005, 2);
                   const mode = res2.data[0];
@@ -315,7 +322,7 @@ class ModbusManager {
           }
           const rounded = Math.round(Number(value));
           const wireValue = rounded < 0 ? 65536 + rounded : rounded;
-          if (register === 1 || register === 2) {
+          if (register === 2) {
             await client.writeRegister(10065, 0);
             await client.writeRegister(1e4, 1);
             await client.writeRegister(10001, wireValue);

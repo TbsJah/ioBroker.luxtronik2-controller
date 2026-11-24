@@ -50,15 +50,6 @@ export const INFO_MAPPING: Record<string, StateDefinition> = {
 		factor: 10,
 		dataSource: 'raw_value',
 		required: true,
-		modbus: {
-			type: 'holding',
-			register: 1,
-			shiRegister: 10001,
-			shiType: 'holding',
-			shiModeRegister: 10000,
-			shiModeValue: 1,
-			configKey: 'sync_modbus_holding_1',
-		},
 	},
 	temperature_extern_return: {
 		folder: 'Information.01_Temperatures',

@@ -69,16 +69,7 @@ const INFO_MAPPING = {
     luxWriteId: "12",
     factor: 10,
     dataSource: "raw_value",
-    required: true,
-    modbus: {
-      type: "holding",
-      register: 1,
-      shiRegister: 10001,
-      shiType: "holding",
-      shiModeRegister: 1e4,
-      shiModeValue: 1,
-      configKey: "sync_modbus_holding_1"
-    }
+    required: true
   },
   temperature_extern_return: {
     folder: "Information.01_Temperatures",

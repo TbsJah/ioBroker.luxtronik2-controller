@@ -171,14 +171,14 @@ export class ModbusManager {
 
 				if (this.protocolVersion === 'shi') {
 					// V3.9x SHI-Zuordnung auf die bestehenden Config-Schalter
+					// V3.9x SHI-Zuordnung auf die bestehenden Config-Schalter
 					const shiHoldingMap: {
 						legacyIdx: number;
 						shiReg: number;
 						fc: 'holding' | 'input';
 					}[] = [
 						{ legacyIdx: 0, shiReg: 10108, fc: 'input' }, // Außentemperatur (Temperatur_TA)
-						{ legacyIdx: 1, shiReg: 10001, fc: 'holding' }, // Rücklauf Soll (Heating: return setpoint)
-						{ legacyIdx: 2, shiReg: 10001, fc: 'holding' }, // Feste Rücklaufsolltemperatur
+						{ legacyIdx: 2, shiReg: 10001, fc: 'holding' }, // Feste Rücklaufsolltemperatur (Heating: return setpoint)
 						{ legacyIdx: 5, shiReg: 10006, fc: 'holding' }, // Warmwasser Soll (DHW: setpoint)
 						{ legacyIdx: 23, shiReg: 10002, fc: 'holding' }, // Parallelverschiebung (Heating: return offset)
 					];
@@ -186,6 +186,18 @@ export class ModbusManager {
 					for (const item of shiHoldingMap) {
 						if (config[`sync_modbus_holding_${item.legacyIdx}`] === true) {
 							try {
+								// Bei Rücklauf-Soll (10001) zuerst SHI-Mode (10000) mitlesen:
+								// Nur wenn Mode === 1 (Festwert-Soll), gilt 10001 -> sonst steht dort der Default 35,0 °C!
+								if (item.legacyIdx === 2) {
+									const res = await client.readHoldingRegisters(10000, 2);
+									const mode = res.data[0];
+									const raw = res.data[1];
+									if (mode === 1 && raw !== 0x7fff) {
+										holdings[2] = raw > 32767 ? raw - 65536 : raw;
+									}
+									continue;
+								}
+
 								// Bei WW-Soll (10006) zuerst SHI-Mode (10005) mitlesen:
 								// Ist Mode === 0, hat das Display Vorrang -> rawParams[105] nicht überschreiben!
 								if (item.legacyIdx === 5) {
@@ -345,7 +357,7 @@ export class ModbusManager {
 					const rounded = Math.round(Number(value));
 					const wireValue = rounded < 0 ? 65536 + rounded : rounded;
 
-					if (register === 1 || register === 2) {
+					if (register === 2) {
 						// Rücklauf-Soll -> SHI Holding 10001 (Mode 10000 = 1, Overall 10065 = 0)
 						await client.writeRegister(10065, 0);
 						await client.writeRegister(10000, 1);

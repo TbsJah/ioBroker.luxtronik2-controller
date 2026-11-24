@@ -309,20 +309,6 @@
 					"lg": 12,
 					"xl": 12
 				},
-				"sync_modbus_holding_1": {
-					"type": "checkbox",
-					"label": {
-						"en": "Target temp room thermostat (Holding 10060)",
-						"de": "Zieltemperatur Raumthermostat (Holding 10060)"
-					},
-					"default": false,
-					"disabled": "!data.modbus_active",
-					"xs": 12,
-					"sm": 6,
-					"md": 4,
-					"lg": 3,
-					"xl": 3
-				},
 				"sync_modbus_holding_0": {
 					"type": "checkbox",
 					"label": {
@@ -412,6 +398,20 @@
 					"label": {
 						"en": "Fixed return temperature target (Holding 2)",
 						"de": "Feste Rücklaufsolltemperatur (Einst. 17) (Holding 2)"
+					},
+					"default": false,
+					"disabled": "!data.modbus_active",
+					"xs": 12,
+					"sm": 6,
+					"md": 4,
+					"lg": 3,
+					"xl": 3
+				},
+				"sync_modbus_holding_1": {
+					"type": "checkbox",
+					"label": {
+						"en": "Target temp room thermostat (Holding 10060)",
+						"de": "Zieltemperatur Raumthermostat (Holding 10060)"
 					},
 					"default": false,
 					"disabled": "!data.modbus_active",
