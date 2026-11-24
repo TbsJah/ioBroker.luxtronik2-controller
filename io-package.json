@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "luxtronik2-controller",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "news": {
+      "1.1.1": {
+        "en": "Fixed temporary hot water start impulses (`forceSoll` & `Zwangswarmwasser`) overshooting the actual target temperature by immediately restoring the baseline or active PV boost target once hot water generation is actively running (`WP_BZ_akt = 1` & `VD1`)\nAdded native controller state duration check (`rawValues[120]`) to `istBetriebszustandAelterAls()` for reliable cycle timing at longer polling intervals",
+        "de": "Temporäre Heißwasser-Startimpulse (`ForceSoll` & `Zwangswarmwasser`), die die Solltemperatur übersteigen, indem sie bei laufender Warmwasserbereitung sofort die Solltemperatur wiederherstellt (`WP_BZ_AKT = 1` & `VD1`)\nNative Controller-Statusprüfung (`RawValues [120] `) zu `istBetriebszustandAelterals ()` hinzugefügt für zuverlässiges Timing bei längeren Abfrageintervallen",
+        "ru": "Фиксированные временные импульсы запуска горячей воды («Forcesoll» и «Zwangswarmwasser»), превышающие фактическую целевую температуру, за счет немедленного восстановления базового значения или активного целевого показателя повышения мощности фотоэлектрических установок после начала производства горячей воды (`WP_BZ_Akt = 1` и `VD1`)\nДобавлена встроенная проверка длительности состояния контроллера (`rawValues [120] `) в `istBetriebsZustandaelTerals ()` для надежной синхронизации циклов при более длительных интервалах опроса",
+        "pt": "Impulsos fixos temporários de partida de água quente (`ForceSoll` e `Zwangswarmwasser`) superando a temperatura real ao restaurar imediatamente a linha de base ou o alvo ativo de PV quando a geração de água quente está ativa (`WP_BZ_Akt = 1` e `VD1`)\nFoi adicionada a verificação de duração do estado do controlador nativo (`rawValues [120] `) a `istBetriebszustandaElterals ()` para ciclos mais longos",
+        "nl": "Vaste tijdelijke startimpulsen voor warm water (`ForceSoll` & `Zwangswarmwasser`) die de werkelijke doeltemperatuur overschrijden door onmiddellijk de basislijn of de actieve PV-boostdoelstelling te herstellen zodra de warmwaterproductie actief draait (`wp_BZ_Akt = 1` & `VD1`)\nDe systeemstatusduurcontrole van de controller (`RawValues [120] `) toegevoegd aan `IstBetriebsZustandAelterals ()` voor een betrouwbare timing van de cyclus met langere polling-intervallen",
+        "fr": "Correction des impulsions temporaires de démarrage de l'eau chaude (« ForceSoll » et « Zwangswarmwasser ») qui dépassaient la température cible en rétablissant immédiatement la valeur de base ou la cible de suralimentation active une fois que la production d'eau chaude est active (« WP_BZ_Akt = 1 » et « VD1 »)\nAjout d'une vérification native de la durée de l'état du contrôleur (`RawValues [120]) à `istBetriebsZustandaElterals () `pour un chronométrage fiable à intervalles longs",
+        "it": "Risolti gli impulsi temporanei di avvio dell'acqua calda (`ForceSoll` e `Zwangswarmwasser`) che superavano la temperatura nominale effettiva ripristinando immediatamente la linea di base o attiva (`WP_BZ_Akt = 1` e `VD1`)\nAggiunto il controllo nativo della durata dello stato del controller (`rawValues [120] `) a `istBetriebszustandaElterals ()` per cicli affidabili a intervalli di polling",
+        "es": "Se corrigieron los impulsos temporales de arranque del agua caliente (`ForceSoll` y `Zwangswarmwasser`) que superaban la temperatura objetivo real al restablecer inmediatamente el objetivo básico o de aumento fotovoltaico activo una vez que se generaba agua caliente (`WP_BZ_akt = 1` y `VD1`)\nSe ha añadido el control de duración del estado del controlador nativo (`RawValues [120] `) a `istBetriebsZustandaElterals ()` para un tiempo de ciclo fiable en intervalos de sondeo más largos",
+        "pl": "Naprawiono tymczasowe impulsy uruchamiania ciepłej wody („ForceSoll” i „Zwangswarmwasser”) przekraczające rzeczywistą temperaturę docelową poprzez natychmiastowe przywrócenie linii bazowej lub aktywnego celu doładowania fotowoltaicznego po aktywnym uruchomieniu wytwarzania ciepłej wody (`WP_BZ_Akt = 1` & `VD1`)\nDodano natywne sprawdzenie czasu trwania stanu kontrolera (`rawValues [120] `) do `istbetriebszustandaElterals ()` dla niezawodnego czasu cyklu w dłuższych odstępach czasu głosowania",
+        "uk": "Виправлено тимчасові імпульси запуску гарячої води (`ForceSoll` & `Zwangswarmwasser`), що перевищують фактичну цільову температуру шляхом негайного відновлення базової або активної цілі підвищення PV, коли генерація гарячої води активно працює (`WP_bz_Akt = 1` & `VD1`)\nДодано перевірку тривалості стану власного контролера (`RawValues [120] `) до `istBetriebsZustandaElterals ()` для надійного синхронізації циклу на більш тривалих інтервалах опитування",
+        "zh-cn": "修复了临时热水启动冲动（`forceSoll`和`Zwangswarmwasser`）超出实际目标温度的问题，方法是在热水发电活跃运行后立即恢复基准或活跃的光伏增压目标（`wp_bz_AKT = 1` 和 `VD1`）\n在 `istbetriebszustandaelterals () `中添加了原生控制器状态持续时间检查 (`rawValues [120] `)，以便在更长的轮询间隔下实现可靠的循环计时"
+      },
       "1.1.0": {
         "en": "Replaced static `35 °C` / `+10.0 K` jump in cycle optimization (`CycleOpt-PreHeat` / `CycleOpt-AfterWW`) and forced heating (`Zwangsheizen`) with a dynamic, hysteresis-based relative offset (`base offset + hysteresis + 0.5 K`) via `heating_temperature` (volatile SHI `10002` / native Param `1`) to prevent screed overshoot and short-cycling in well-insulated homes\nAdded heating release checks (`P0003` / `C0125`) and hot water lock-time schedule checks (`P0004` / `C0124` / `P405..P505`, including midnight wrap-around and 25-minute pre-heat lookahead) to cycle optimization\nImproved `Heizen_nach_Wasser` reset handling (3-minute spike guard instead of 10 minutes once return target is reached), immediate pre-heat offset reset on WW start, and automatic cleanup of stale `CycleOpt-PreHeat` offsets in idle without affecting manual `Zwangsheizen`\nAdded automatic restoration of temporary hot water target increases (`forceSoll` & `Zwangswarmwasser`) after WW completion even when `idle_defaults_aktiv` is disabled\nEliminated PV boost flip-flop writes during idle and cycle transitions by delegating directly to `evaluatePvBoost` without intermediate resets to baseline\nFixed raw fallback indices in `calculateTotalEnergy()` to read `rawParams[1136]/[1137]` (factor `0.01`) instead of `rawValues[156]/[157]` and added 2-decimal rounding",
         "de": "Statischen Sprung bei der Zyklusoptimierung (`CycleOPT-Preheat`/`CycleOPT-AfterWW`) und `Zwangsbeheizen` durch einen dynamischen, hysteresebasierten Relativversatz (`base offset + hysteresis + 0,5 K`) über `heating_temperature` (volatile SHI `10002`/nativer Param `1`) ersetzt, um zu verhindern Estrichüberhöhung und Kurzschluss in gut gedämmten Häusern\nZur Zyklusoptimierung wurden Heizungsfreigabeprüfungen (`P0003`/`C0125`) und Warmwasserschleuse (`P0004`/`C0124`/`P405.. P505`, einschließlich Mitternacht und 25-minütiger Vorwärmvorlauf) hinzugefügt\nVerbessertes „Heizen_nach_Wasser“ -Reset (3-minütiger Spike-Guard statt 10 Minuten nach Erreichen des Ziels), sofortiger Reset bei WW-Start und automatische Bereinigung abgestandener `CycleOPT-Preheat`-Offsets im Leerlauf, ohne manuelle `Zwangsheizen` zu beeinflussen\nAutomatische Wiederherstellung temporärer Warmwasser-Zielerhöhungen (`forceSoll` & `Zwangswarmwasser`) nach WW-Ende hinzugefügt, auch wenn `idle_defaults_aktiv` deaktiviert ist\nPV-Boost-Flip-Flop-Writes bei Leerlauf- und Zykluswechseln durch direkte Delegierung an `EvaluatePvBoost` ohne Resets zur Ausgangslinie\nRohindizes in `calculateTotalEnergy () `wurden auf `rawParams [1136]/[1137]` (Faktor `0,01`) statt `rawValues [156]/[157] `korrigiert und 2-Dezimal-Rundung hinzugefügt",
@@ -80,19 +93,6 @@
         "pl": "*STABILNY**",
         "uk": "*СТАБІЛЬНИЙ**",
         "zh-cn": "*稳定**"
-      },
-      "0.25.2": {
-        "en": "**Fixed i18n translations**",
-        "de": "**i18n-Übersetzungen korrigiert**",
-        "ru": "**Исправлены переводы i18n**",
-        "pt": "**Traduções i18n corrigidas**",
-        "nl": "**i18n-vertalingen gerepareerd**",
-        "fr": "**Traductions i18n corrigées**",
-        "it": "**Traduzioni i18n corrette**",
-        "es": "**Traducciones i18n corregidas**",
-        "pl": "**Poprawiono tłumaczenia i18n**",
-        "uk": "**Виправлено переклади i18n**",
-        "zh-cn": "**修复了 i18n 翻译**"
       }
     },
     "titleLang": {

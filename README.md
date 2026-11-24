@@ -103,8 +103,7 @@ _This project is not affiliated with Alpha Innotec, Novelan, ait-deutschland Gmb
 //### **WORK IN PROGRESS**
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 1.1.1 (2026-11-24)
 
 - Fixed temporary hot water start impulses (`forceSoll` & `Zwangswarmwasser`) overshooting the actual target temperature by immediately restoring the baseline or active PV boost target once hot water generation is actively running (`WP_BZ_akt = 1` & `VD1`)
 - Added native controller state duration check (`rawValues[120]`) to `istBetriebszustandAelterAls()` for reliable cycle timing at longer polling intervals
@@ -134,10 +133,6 @@ _This project is not affiliated with Alpha Innotec, Novelan, ait-deutschland Gmb
 - Fixed `node:` protocol imports (`node:fs`, `node:path`) and repository checker lint issues
 - Completed and synchronized i18n translations across all supported languages
 - Fixed `jsonConfig` label keys in `generateConfig.ts` to prevent inline language object overrides during build
-
-### 1.0.1 (2026-11-16)
-
-- **Update of i10n files**
 
 ## License
 
