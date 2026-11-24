@@ -645,11 +645,16 @@ class Luxtronik2Controller extends utils.Adapter {
    * Prüft, ob der aktuelle Betriebszustand (WP_BZ_akt) mindestens `minutes` Minuten anliegt.
    *
    * @param minutes - Mindestdauer in Minuten.
+   * @param rawValues - Optionale Rohwerte (CMD 3004) zur Auswertung der Verweildauer (Index 120).
    * @returns true, wenn die letzte Änderung mindestens `minutes` Minuten zurückliegt.
    */
-  async istBetriebszustandAelterAls(minutes) {
+  async istBetriebszustandAelterAls(minutes, rawValues = []) {
     var _a;
     try {
+      const controllerSec = rawValues[120];
+      if (typeof controllerSec === "number" && controllerSec > 0 && controllerSec / 60 >= minutes) {
+        return true;
+      }
       const state = await this.getStateAsync((0, import_stateMapping.getDpPath)("WP_BZ_akt"));
       const lastChange = (_a = state == null ? void 0 : state.lc) != null ? _a : 0;
       return (Date.now() - lastChange) / 6e4 >= minutes;
@@ -783,8 +788,8 @@ class Luxtronik2Controller extends utils.Adapter {
         this.getStateAsync((0, import_stateMapping.getDpPath)("Mitteltemperatur")),
         this.getStateAsync((0, import_stateMapping.getDpPath)("thresholdHeatingLimit")),
         this.getStateAsync((0, import_stateMapping.getDpPath)("heatingLimit")),
-        this.istBetriebszustandAelterAls(10),
-        this.istBetriebszustandAelterAls(3)
+        this.istBetriebszustandAelterAls(10, rawValues),
+        this.istBetriebszustandAelterAls(3, rawValues)
       ]);
       const wwSoll = typeof (wwSollState == null ? void 0 : wwSollState.val) === "number" ? wwSollState.val : typeof (wwTargetParamState == null ? void 0 : wwTargetParamState.val) === "number" ? wwTargetParamState.val : rawValues[18] !== void 0 ? rawValues[18] / 10 : effectiveParams[105] !== void 0 ? effectiveParams[105] / 10 : 54;
       const wwIst = typeof (wwIstState == null ? void 0 : wwIstState.val) === "number" ? wwIstState.val : rawValues[17] !== void 0 ? rawValues[17] / 10 : 0;
@@ -848,8 +853,11 @@ class Luxtronik2Controller extends utils.Adapter {
           }
         }
       }
-      if (istWarmwasser && nachWasser) {
-        if (isRegelungAktiv && heatingAllowed) {
+      if (istWarmwasser) {
+        if (vd1 && this.forcedWwOriginalTarget !== null) {
+          await this.restoreForcedWwTarget();
+        }
+        if (nachWasser && isRegelungAktiv && heatingAllowed) {
           await this.activateForcedHeatingBoost("CycleOpt-AfterWW", dynamicDeltaK);
         }
       }

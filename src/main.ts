@@ -786,10 +786,15 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 	 * Prüft, ob der aktuelle Betriebszustand (WP_BZ_akt) mindestens `minutes` Minuten anliegt.
 	 *
 	 * @param minutes - Mindestdauer in Minuten.
+	 * @param rawValues - Optionale Rohwerte (CMD 3004) zur Auswertung der Verweildauer (Index 120).
 	 * @returns true, wenn die letzte Änderung mindestens `minutes` Minuten zurückliegt.
 	 */
-	private async istBetriebszustandAelterAls(minutes: number): Promise<boolean> {
+	private async istBetriebszustandAelterAls(minutes: number, rawValues: number[] = []): Promise<boolean> {
 		try {
+			const controllerSec = rawValues[120];
+			if (typeof controllerSec === 'number' && controllerSec > 0 && controllerSec / 60 >= minutes) {
+				return true;
+			}
 			const state = await this.getStateAsync(getDpPath('WP_BZ_akt'));
 			const lastChange = state?.lc ?? 0;
 			return (Date.now() - lastChange) / 60000 >= minutes;
@@ -943,8 +948,8 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 				this.getStateAsync(getDpPath('Mitteltemperatur')),
 				this.getStateAsync(getDpPath('thresholdHeatingLimit')),
 				this.getStateAsync(getDpPath('heatingLimit')),
-				this.istBetriebszustandAelterAls(10),
-				this.istBetriebszustandAelterAls(3),
+				this.istBetriebszustandAelterAls(10, rawValues),
+				this.istBetriebszustandAelterAls(3, rawValues),
 			]);
 
 			const wwSoll =
@@ -1083,8 +1088,14 @@ class Luxtronik2Controller extends utils.Adapter implements LuxtronikAdapter {
 				}
 			}
 
-			if (istWarmwasser && nachWasser) {
-				if (isRegelungAktiv && heatingAllowed) {
+			if (istWarmwasser) {
+				// Sobald WW mit aktivem Verdichter läuft, ist die Hysterese-Schwelle überwunden ->
+				// Start-Impuls (z.B. 68,1 °C) sofort auf das echte Ziel zurücksetzen (auch bei 5-Min.-Polling sicher).
+				if (vd1 && this.forcedWwOriginalTarget !== null) {
+					await this.restoreForcedWwTarget();
+				}
+
+				if (nachWasser && isRegelungAktiv && heatingAllowed) {
 					await this.activateForcedHeatingBoost('CycleOpt-AfterWW', dynamicDeltaK);
 				}
 			}
