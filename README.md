@@ -103,8 +103,7 @@ _This project is not affiliated with Alpha Innotec, Novelan, ait-deutschland Gmb
 //### **WORK IN PROGRESS**
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 1.1.0 (2026-11-24)
 
 - Replaced static `35 °C` / `+10.0 K` jump in cycle optimization (`CycleOpt-PreHeat` / `CycleOpt-AfterWW`) and forced heating (`Zwangsheizen`) with a dynamic, hysteresis-based relative offset (`base offset + hysteresis + 0.5 K`) via `heating_temperature` (volatile SHI `10002` / native Param `1`) to prevent screed overshoot and short-cycling in well-insulated homes
 - Added heating release checks (`P0003` / `C0125`) and hot water lock-time schedule checks (`P0004` / `C0124` / `P405..P505`, including midnight wrap-around and 25-minute pre-heat lookahead) to cycle optimization
@@ -133,10 +132,6 @@ _This project is not affiliated with Alpha Innotec, Novelan, ait-deutschland Gmb
 ### 1.0.1 (2026-11-16)
 
 - **Update of i10n files**
-
-### 1.0.0 (2026-11-16)
-
-**STABLE**
 
 ## License
 
