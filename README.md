@@ -104,7 +104,7 @@ _This project is not affiliated with Alpha Innotec, Novelan, ait-deutschland Gmb
 
 ## Changelog
 
-**WORK IN PROGRESS**
+### **WORK IN PROGRESS**
 
 - Fixed COP/JAZ datapoint paths (`Information.16_Efficiency.Total.*`) in `<luxtronik-status-card>` so daily COP and annual JAZ values populate correctly
 - Added shared Web Component base class (`luxtronik-base.js`) and two new `@iobroker/web-components` widgets for Aura, VIS-2, and WebUI:
