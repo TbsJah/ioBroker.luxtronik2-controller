@@ -103,8 +103,7 @@ _This project is not affiliated with Alpha Innotec, Novelan, ait-deutschland Gmb
 //### **WORK IN PROGRESS**
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 1.3.1 (2026-11-25)
 
 - Fixed missing error and outage descriptions in `<luxtronik-diagnostics-feed>` by expanding the JSON parser with a generic text-field fallback
 - Marked `hours_compressor1` and `starts_compressor1` as `required: true` in `src/mapping/info.ts` so compressor start counts and average cycle duration (`Ø MIN / TAKT`) in `<luxtronik-health-monitor>` are always populated regardless of visibility flags
@@ -140,15 +139,6 @@ _This project is not affiliated with Alpha Innotec, Novelan, ait-deutschland Gmb
 
 - Fixed temporary hot water start impulses (`forceSoll` & `Zwangswarmwasser`) overshooting the actual target temperature by immediately restoring the baseline or active PV boost target once hot water generation is actively running (`WP_BZ_akt = 1` & `VD1`)
 - Added native controller state duration check (`rawValues[120]`) to `istBetriebszustandAelterAls()` for reliable cycle timing at longer polling intervals
-
-### 1.1.0 (2026-11-24)
-
-- Replaced static `35 °C` / `+10.0 K` jump in cycle optimization (`CycleOpt-PreHeat` / `CycleOpt-AfterWW`) and forced heating (`Zwangsheizen`) with a dynamic, hysteresis-based relative offset (`base offset + hysteresis + 0.5 K`) via `heating_temperature` (volatile SHI `10002` / native Param `1`) to prevent screed overshoot and short-cycling in well-insulated homes
-- Added heating release checks (`P0003` / `C0125`) and hot water lock-time schedule checks (`P0004` / `C0124` / `P405..P505`, including midnight wrap-around and 25-minute pre-heat lookahead) to cycle optimization
-- Improved `Heizen_nach_Wasser` reset handling (3-minute spike guard instead of 10 minutes once return target is reached), immediate pre-heat offset reset on WW start, and automatic cleanup of stale `CycleOpt-PreHeat` offsets in idle without affecting manual `Zwangsheizen`
-- Added automatic restoration of temporary hot water target increases (`forceSoll` & `Zwangswarmwasser`) after WW completion even when `idle_defaults_aktiv` is disabled
-- Eliminated PV boost flip-flop writes during idle and cycle transitions by delegating directly to `evaluatePvBoost` without intermediate resets to baseline
-- Fixed raw fallback indices in `calculateTotalEnergy()` to read `rawParams[1136]/[1137]` (factor `0.01`) instead of `rawValues[156]/[157]` and added 2-decimal rounding
 
 ## License
 
