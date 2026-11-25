@@ -208,8 +208,8 @@
     "pv_sunset_cutoff_active": false,
     "pv_sunset_buffer": 60,
     "pv_wp_power_active": false,
-		"pv_wp_power_dp": "",
-		"pv_wp_power_unit": "W"
+    "pv_wp_power_dp": "",
+    "pv_wp_power_unit": "W"
   },
   "notifications": [
     {
