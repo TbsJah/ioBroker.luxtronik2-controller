@@ -103,6 +103,14 @@ _This project is not affiliated with Alpha Innotec, Novelan, ait-deutschland Gmb
 //### **WORK IN PROGRESS**
 
 ## Changelog
+
+### **WORK IN PROGRESS**
+
+- Fixed missing error and outage descriptions in `<luxtronik-diagnostics-feed>` by expanding the JSON parser with a generic text-field fallback
+- Marked `hours_compressor1` and `starts_compressor1` as `required: true` in `src/mapping/info.ts` so compressor start counts and average cycle duration (`Ø MIN / TAKT`) in `<luxtronik-health-monitor>` are always populated regardless of visibility flags
+- Added a target temperature stepper (`−` / input / `+`) to `<luxtronik-dhw-tank>` allowing direct adjustment of `temperature_hot_water_target` alongside the one-shot heating trigger
+- Switched PV surplus calculation in `src/pvManager.ts` to a signed net-balance (`grid + battery + heat pump power`) and added optional heat pump power consumption compensation (`pv_wp_power_active`, `pv_wp_power_dp`, `pv_wp_power_unit`) so an already running compressor cycle no longer cancels out available PV surplus
+
 ### 1.3.0 (2026-11-25)
 
 - Fixed COP/JAZ datapoint paths (`Information.16_Efficiency.Total.*`) in `<luxtronik-status-card>` so daily COP and annual JAZ values populate correctly

@@ -1676,6 +1676,50 @@
 					"lg": 4,
 					"xl": 4
 				},
+				"pv_wp_power_active": {
+					"type": "checkbox",
+					"label": "Include current heat pump power consumption",
+					"help": "Adds the heat pump's own power draw to the net PV balance so an already running cycle does not cancel out the PV surplus.",
+					"newLine": true,
+					"default": false,
+					"hidden": "!data.pv_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 12,
+					"lg": 12,
+					"xl": 12
+				},
+				"pv_wp_power_dp": {
+					"type": "objectId",
+					"label": "Datapoint for heat pump power",
+					"hidden": "!data.pv_active || !data.pv_wp_power_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 8,
+					"lg": 8,
+					"xl": 8
+				},
+				"pv_wp_power_unit": {
+					"type": "select",
+					"label": "Unit",
+					"options": [
+						{
+							"label": "Watt (W)",
+							"value": "W"
+						},
+						{
+							"label": "Kilowatt (kW)",
+							"value": "kW"
+						}
+					],
+					"default": "W",
+					"hidden": "!data.pv_active || !data.pv_wp_power_active",
+					"xs": 12,
+					"sm": 12,
+					"md": 4,
+					"lg": 4,
+					"xl": 4
+				},
 				"header_pv_start": {
 					"type": "header",
 					"text": "Activation (Boost)",

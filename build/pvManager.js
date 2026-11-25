@@ -35,8 +35,9 @@ let pvIsBoostActive = false;
 let pvWaitingForCycleEnd = false;
 let activeBoostWwApplied = false;
 let activeBoostHzApplied = false;
-let currentGridSurplusW = 0;
-let currentBatteryChargeW = 0;
+let currentGridNetW = 0;
+let currentBatteryNetW = 0;
+let currentWpPowerW = 0;
 let originalWw = null;
 let originalHz = null;
 let systemLatitude = null;
@@ -150,8 +151,10 @@ async function initPvManagement(adapter) {
     }
   }
   try {
-    currentGridSurplusW = 0;
-    currentBatteryChargeW = 0;
+    currentGridNetW = 0;
+    currentBatteryNetW = 0;
+    currentWpPowerW = 0;
+    pvIsBoostActive = false;
     pvIsBoostActive = false;
     pvWaitingForCycleEnd = false;
     activeBoostWwApplied = false;
@@ -190,6 +193,18 @@ async function initPvManagement(adapter) {
       } catch {
       }
     }
+    if (config.pv_wp_power_active && config.pv_wp_power_dp && config.pv_wp_power_dp.trim() !== "") {
+      const wpDp = config.pv_wp_power_dp.trim();
+      await adapter.subscribeForeignStatesAsync(wpDp);
+      (0, import_logger.writeLog)(`[PV] Heat pump power compensation active. Subscribed to WP power datapoint: ${wpDp}`, "info");
+      try {
+        const initialWpState = await adapter.getForeignStateAsync(wpDp);
+        if (initialWpState) {
+          handlePvFeedInChange(adapter, wpDp, initialWpState);
+        }
+      } catch {
+      }
+    }
     try {
       const initialGridState = await adapter.getForeignStateAsync(gridDp);
       if (initialGridState) {
@@ -203,14 +218,15 @@ async function initPvManagement(adapter) {
   }
 }
 function handlePvFeedInChange(adapter, id, state) {
-  var _a, _b;
+  var _a, _b, _c;
   const config = adapter.config;
   if (!config.pv_active || !state || state.val === null || state.val === void 0) {
     return;
   }
   const isGridDp = id === ((_a = config.pv_feed_in_dp) == null ? void 0 : _a.trim());
   const isBatteryDp = config.pv_battery_active && id === ((_b = config.pv_battery_dp) == null ? void 0 : _b.trim());
-  if (!isGridDp && !isBatteryDp) {
+  const isWpPowerDp = config.pv_wp_power_active && id === ((_c = config.pv_wp_power_dp) == null ? void 0 : _c.trim());
+  if (!isGridDp && !isBatteryDp && !isWpPowerDp) {
     return;
   }
   let rawValue = parseConfigFloat(state.val, NaN);
@@ -221,23 +237,21 @@ function handlePvFeedInChange(adapter, id, state) {
     if (config.pv_feed_in_unit === "kW") {
       rawValue *= 1e3;
     }
-    if (config.pv_feed_in_sign === "negative") {
-      currentGridSurplusW = rawValue < 0 ? Math.abs(rawValue) : 0;
-    } else {
-      currentGridSurplusW = rawValue > 0 ? rawValue : 0;
-    }
+    currentGridNetW = config.pv_feed_in_sign === "negative" ? -rawValue : rawValue;
   }
   if (isBatteryDp) {
     if (config.pv_battery_unit === "kW") {
       rawValue *= 1e3;
     }
-    if (config.pv_battery_sign === "negative") {
-      currentBatteryChargeW = rawValue < 0 ? Math.abs(rawValue) : 0;
-    } else {
-      currentBatteryChargeW = rawValue > 0 ? rawValue : 0;
-    }
+    currentBatteryNetW = config.pv_battery_sign === "negative" ? -rawValue : rawValue;
   }
-  const totalSurplus = Math.round(currentGridSurplusW + currentBatteryChargeW);
+  if (isWpPowerDp) {
+    if (config.pv_wp_power_unit === "kW") {
+      rawValue *= 1e3;
+    }
+    currentWpPowerW = rawValue > 0 ? rawValue : 0;
+  }
+  const totalSurplus = Math.round(currentGridNetW + currentBatteryNetW + currentWpPowerW);
   const thresholdStart = parseConfigFloat(config.pv_threshold_start, 2e3);
   const thresholdStop = parseConfigFloat(config.pv_threshold_stop, 0);
   const delayStartMs = parseConfigFloat(config.pv_delay_start, 5) * 6e4;
@@ -295,7 +309,7 @@ async function activateBoost(adapter) {
   }
   const config = adapter.config;
   const thresholdStart = parseConfigFloat(config.pv_threshold_start, 2e3);
-  const totalSurplus = currentGridSurplusW + currentBatteryChargeW;
+  const totalSurplus = Math.round(currentGridNetW + currentBatteryNetW + currentWpPowerW);
   if (totalSurplus < thresholdStart) {
     (0, import_logger.writeLog)(
       `[PV] Activation aborted: Current surplus (${totalSurplus} W) is below start threshold (${thresholdStart} W).`,

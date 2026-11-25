@@ -33,6 +33,7 @@ class LuxtronikDhwTank extends LuxtronikBaseCard {
 	constructor() {
 		super();
 		this._zipPeakSec = 0;
+		this._pendingTarget = null;
 	}
 
 	_renderBase() {
@@ -227,6 +228,37 @@ class LuxtronikDhwTank extends LuxtronikBaseCard {
 					opacity: 0.7;
 					line-height: 1.25;
 				}
+					.temp-ctrl {
+					display: flex;
+					align-items: center;
+					gap: 4px;
+				}
+
+				.step-btn {
+					width: 28px;
+					height: 28px;
+					border-radius: 7px;
+					border: 1px solid var(--lux-border);
+					background: var(--lux-surface);
+					color: inherit;
+					font-weight: 700;
+					cursor: pointer;
+				}
+
+				.temp-input {
+					flex: 1;
+					min-width: 0;
+					height: 28px;
+					box-sizing: border-box;
+					text-align: center;
+					border-radius: 7px;
+					border: 1px solid var(--lux-border);
+					background: var(--lux-surface);
+					color: inherit;
+					font-size: 0.78rem;
+					font-weight: 700;
+					font-variant-numeric: tabular-nums;
+				}
 			</style>
 
 			<div class="card">
@@ -296,7 +328,12 @@ class LuxtronikDhwTank extends LuxtronikBaseCard {
 							</button>
 
 							<div class="side-actions">
-								<button class="force-btn" type="button" data-action="force-ww" data-ref="forceBtn">1× Aufheizen</button>
+								<div class="temp-ctrl" data-ref="tempCtrl">
+									<button class="step-btn" type="button" data-ref="btnTempMinus">−</button>
+									<input class="temp-input" type="number" min="35" max="65" step="0.5" data-ref="tempInput" />
+									<button class="step-btn" type="button" data-ref="btnTempPlus">+</button>
+								</div>
+								<button class="force-btn" type="button" data-ref="forceBtn">1× Aufheizen</button>
 								<div class="hint" data-ref="hintText">Zirkulation bereit</div>
 							</div>
 						</div>
@@ -312,6 +349,47 @@ class LuxtronikDhwTank extends LuxtronikBaseCard {
 		const clamped = Math.max(20, Math.min(65, temp));
 		const ratio = (clamped - 20) / (65 - 20);
 		return 154 - ratio * 134;
+	}
+	_collectRefs() {
+		super._collectRefs();
+		const r = this._refs;
+		if (!r.tempInput) {
+			return;
+		}
+
+		const clamp = val => Math.max(35, Math.min(65, Math.round(val * 2) / 2));
+
+		r.btnTempMinus.addEventListener('click', () => {
+			const cur = this._pendingTarget ?? this._toNum(this._values.wwTarget) ?? 54;
+			this._pendingTarget = clamp(cur - 1);
+			this._updateView();
+		});
+
+		r.btnTempPlus.addEventListener('click', () => {
+			const cur = this._pendingTarget ?? this._toNum(this._values.wwTarget) ?? 54;
+			this._pendingTarget = clamp(cur + 1);
+			this._updateView();
+		});
+
+		r.tempInput.addEventListener('change', () => {
+			const val = this._toNum(r.tempInput.value);
+			this._pendingTarget = val !== null ? clamp(val) : null;
+			this._updateView();
+		});
+
+		r.forceBtn.addEventListener('click', () => {
+			const liveTarget = this._toNum(this._values.wwTarget);
+			if (
+				this._pendingTarget !== null &&
+				(liveTarget === null || Math.abs(this._pendingTarget - liveTarget) >= 0.1)
+			) {
+				this._writeState('Settings.03_HotWater.temperature_hot_water_target', this._pendingTarget);
+				this._pendingTarget = null;
+				this._updateView();
+			} else {
+				this._triggerAction('force-ww');
+			}
+		});
 	}
 
 	_updateView() {
@@ -335,6 +413,16 @@ class LuxtronikDhwTank extends LuxtronikBaseCard {
 		r.pvBadge.classList.toggle('hidden', !this._toBool(v.pvBoost));
 		r.forceBtn.classList.toggle('hidden', this._settings?.showForceButton === false);
 
+		const showForce = this._settings?.showForceButton !== false;
+		r.tempCtrl.classList.toggle('hidden', !showForce);
+
+		const shownTarget = this._pendingTarget ?? wwTarget;
+		const isTargetDirty =
+			this._pendingTarget !== null && (wwTarget === null || Math.abs(this._pendingTarget - wwTarget) >= 0.1);
+		if (document.activeElement !== r.tempInput && shownTarget !== null) {
+			r.tempInput.value = shownTarget.toFixed(1);
+		}
+		r.forceBtn.textContent = isTargetDirty ? `Aufheizen (${shownTarget.toFixed(1)}°)` : '1× Aufheizen';
 		if (isCharging) {
 			r.statusBadge.textContent = 'Lädt aktiv';
 			r.statusBadge.className = 'pill charging';

@@ -15,9 +15,13 @@ export let pvWaitingForCycleEnd = false;
 let activeBoostWwApplied = false;
 let activeBoostHzApplied = false;
 
-// Live-Werte für die Berechnung des Gesamt-Überschusses
-let currentGridSurplusW = 0;
-let currentBatteryChargeW = 0;
+// Vorzeichenbehaftete Live-Werte für die Netto-Überschuss-Bilanz:
+// Netz: + = Einspeisung, - = Netzbezug
+// Batterie: + = Laden, - = Entladen
+// WP: >= 0 (aktuelle Leistungsaufnahme der Wärmepumpe)
+let currentGridNetW = 0;
+let currentBatteryNetW = 0;
+let currentWpPowerW = 0;
 
 // Cache für die ursprünglichen Werte vor dem Boost
 let originalWw: number | null = null;
@@ -186,8 +190,10 @@ export async function initPvManagement(adapter: LuxtronikAdapter): Promise<void>
 		}
 	}
 	try {
-		currentGridSurplusW = 0;
-		currentBatteryChargeW = 0;
+		currentGridNetW = 0;
+		currentBatteryNetW = 0;
+		currentWpPowerW = 0;
+		pvIsBoostActive = false;
 		pvIsBoostActive = false;
 		pvWaitingForCycleEnd = false;
 		activeBoostWwApplied = false;
@@ -239,6 +245,21 @@ export async function initPvManagement(adapter: LuxtronikAdapter): Promise<void>
 			}
 		}
 
+		// 3. WP-Leistungsaufnahme abonnieren & Initialwert holen (falls aktiv)
+		if (config.pv_wp_power_active && config.pv_wp_power_dp && config.pv_wp_power_dp.trim() !== '') {
+			const wpDp = config.pv_wp_power_dp.trim();
+			await adapter.subscribeForeignStatesAsync(wpDp);
+			writeLog(`[PV] Heat pump power compensation active. Subscribed to WP power datapoint: ${wpDp}`, 'info');
+
+			try {
+				const initialWpState = await adapter.getForeignStateAsync(wpDp);
+				if (initialWpState) {
+					handlePvFeedInChange(adapter, wpDp, initialWpState);
+				}
+			} catch {
+				/* ignore initial fetch error */
+			}
+		}
 		try {
 			const initialGridState = await adapter.getForeignStateAsync(gridDp);
 			if (initialGridState) {
@@ -268,8 +289,9 @@ export function handlePvFeedInChange(adapter: LuxtronikAdapter, id: string, stat
 
 	const isGridDp = id === config.pv_feed_in_dp?.trim();
 	const isBatteryDp = config.pv_battery_active && id === config.pv_battery_dp?.trim();
+	const isWpPowerDp = config.pv_wp_power_active && id === config.pv_wp_power_dp?.trim();
 
-	if (!isGridDp && !isBatteryDp) {
+	if (!isGridDp && !isBatteryDp && !isWpPowerDp) {
 		return;
 	}
 
@@ -278,32 +300,32 @@ export function handlePvFeedInChange(adapter: LuxtronikAdapter, id: string, stat
 		return;
 	}
 
-	// Update Netz-Überschuss
+	// 1. Netz-Leistung vorzeichenbehaftet (+ = Einspeisung, - = Bezug)
 	if (isGridDp) {
 		if (config.pv_feed_in_unit === 'kW') {
 			rawValue *= 1000;
 		}
-		if (config.pv_feed_in_sign === 'negative') {
-			currentGridSurplusW = rawValue < 0 ? Math.abs(rawValue) : 0;
-		} else {
-			currentGridSurplusW = rawValue > 0 ? rawValue : 0;
-		}
+		currentGridNetW = config.pv_feed_in_sign === 'negative' ? -rawValue : rawValue;
 	}
 
-	// Update Batterie-Ladeleistung
+	// 2. Batterie-Leistung vorzeichenbehaftet (+ = Laden, - = Entladen)
 	if (isBatteryDp) {
 		if (config.pv_battery_unit === 'kW') {
 			rawValue *= 1000;
 		}
-		if (config.pv_battery_sign === 'negative') {
-			currentBatteryChargeW = rawValue < 0 ? Math.abs(rawValue) : 0;
-		} else {
-			currentBatteryChargeW = rawValue > 0 ? rawValue : 0;
-		}
+		currentBatteryNetW = config.pv_battery_sign === 'negative' ? -rawValue : rawValue;
 	}
 
-	// Effektiver Gesamtüberschuss = Reale Einspeisung + Strom, der aktuell in die Batterie fließt
-	const totalSurplus = Math.round(currentGridSurplusW + currentBatteryChargeW);
+	// 3. Aktuelle WP-Leistungsaufnahme (>= 0 W)
+	if (isWpPowerDp) {
+		if (config.pv_wp_power_unit === 'kW') {
+			rawValue *= 1000;
+		}
+		currentWpPowerW = rawValue > 0 ? rawValue : 0;
+	}
+
+	// Netto-Überschuss = Netz (+Einspeisung/-Bezug) + Batterie (+Laden/-Entladen) + WP-Eigenverbrauch
+	const totalSurplus = Math.round(currentGridNetW + currentBatteryNetW + currentWpPowerW);
 
 	const thresholdStart = parseConfigFloat(config.pv_threshold_start, 2000);
 	const thresholdStop = parseConfigFloat(config.pv_threshold_stop, 0);
@@ -377,7 +399,7 @@ async function activateBoost(adapter: LuxtronikAdapter): Promise<void> {
 
 	// SICHERHEITS-CHECK: Prüfen, ob jetzt im Moment überhaupt noch genügend Überschuss da ist!
 	const thresholdStart = parseConfigFloat(config.pv_threshold_start, 2000);
-	const totalSurplus = currentGridSurplusW + currentBatteryChargeW;
+	const totalSurplus = Math.round(currentGridNetW + currentBatteryNetW + currentWpPowerW);
 	if (totalSurplus < thresholdStart) {
 		writeLog(
 			`[PV] Activation aborted: Current surplus (${totalSurplus} W) is below start threshold (${thresholdStart} W).`,

@@ -48,6 +48,9 @@ class LuxtronikDiagnosticsFeed extends LuxtronikBaseCard {
 			return [];
 		}
 
+		const TIME_KEYS = new Set(['date', 'time', 'timestamp', 'datum', 'zeit', 'ts']);
+		const CODE_KEYS = new Set(['code', 'id', 'nr', 'number', 'errorcode']);
+
 		return parsed
 			.map(item => {
 				if (typeof item === 'string') {
@@ -56,6 +59,7 @@ class LuxtronikDiagnosticsFeed extends LuxtronikBaseCard {
 				if (!item || typeof item !== 'object') {
 					return null;
 				}
+
 				const time =
 					item.date ??
 					item.time ??
@@ -66,17 +70,32 @@ class LuxtronikDiagnosticsFeed extends LuxtronikBaseCard {
 					item.Datum ??
 					'';
 				const code = item.code ?? item.id ?? item.Code ?? item.nr ?? '';
-				const text =
+				let text =
 					item.message ??
 					item.text ??
 					item.reason ??
 					item.description ??
+					item.desc ??
+					item.name ??
+					item.label ??
+					item.title ??
 					item.error ??
 					item.meldung ??
 					item.grund ??
 					item.Grund ??
 					item.Fehler ??
 					'';
+
+				// Fallback: erstes nicht-leeres String-Feld nehmen, das weder Zeit noch Code ist
+				if (!String(text || '').trim()) {
+					for (const [k, val] of Object.entries(item)) {
+						const lk = k.toLowerCase();
+						if (!TIME_KEYS.has(lk) && !CODE_KEYS.has(lk) && typeof val === 'string' && val.trim() !== '') {
+							text = val;
+							break;
+						}
+					}
+				}
 
 				const textStr = String(text || '').trim();
 				const codeStr = code !== '' && code !== null && code !== undefined ? String(code) : '';
@@ -88,7 +107,7 @@ class LuxtronikDiagnosticsFeed extends LuxtronikBaseCard {
 				if (!textStr && !codeStr && !timeStr) {
 					return null;
 				}
-				return { time: timeStr, code: codeStr, text: textStr || 'Eintrag ohne Text' };
+				return { time: timeStr, code: codeStr, text: textStr || `Code #${codeStr}` };
 			})
 			.filter(Boolean);
 	}

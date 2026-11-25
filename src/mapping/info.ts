@@ -820,6 +820,7 @@ export const INFO_MAPPING: Record<string, StateDefinition> = {
 		luxWriteId: '56',
 		factor: 3600,
 		dataSource: 'raw_value',
+		required: true,
 		visiIndex: 80,
 	},
 	starts_compressor1: {
@@ -829,6 +830,7 @@ export const INFO_MAPPING: Record<string, StateDefinition> = {
 		type: 'number',
 		luxWriteId: '57',
 		dataSource: 'raw_value',
+		required: true,
 		visiIndex: 81,
 	},
 	hours_compressor2: {
