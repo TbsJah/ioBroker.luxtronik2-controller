@@ -17,8 +17,8 @@ const STATE_MAP = {
 	compressor: 'Information.03_Outputs.VD1out',
 	zipActive: 'Information.03_Outputs.Virtual_ZIP_Status',
 	hupVoltage: 'Settings.04_HUP.heating_system_circ_pump_voltage_nominal',
-	copToday: 'Information.16_Efficiency.cop_total_today',
-	jazYear: 'Information.16_Efficiency.cop_total_year',
+	copToday: 'Information.16_Efficiency.Total.cop_total_today',
+	jazYear: 'Information.16_Efficiency.Total.cop_total_year',
 	pvBoost: 'Information.17_PV_Surplus.pv_boost_active',
 };
 

@@ -1,0 +1,44 @@
+{
+	"manifestVersion": 1,
+	"tag": "luxtronik-health-monitor",
+	"module": "./luxtronik-health-monitor.js",
+	"name": {
+		"en": "Luxtronik Compressor Health & Timers",
+		"de": "Luxtronik Verdichter-Gesundheit & Takt-Tacho"
+	},
+	"size": {
+		"width": 440,
+		"height": 290
+	},
+	"settings": {
+		"type": "panel",
+		"items": {
+			"instance": {
+				"type": "instance",
+				"adapter": "luxtronik2-controller",
+				"label": {
+					"en": "Adapter instance",
+					"de": "Adapter-Instanz"
+				}
+			},
+			"title": {
+				"type": "text",
+				"default": "Verdichter & Takte",
+				"label": {
+					"en": "Title",
+					"de": "Titel"
+				}
+			},
+			"targetMinutes": {
+				"type": "number",
+				"default": 60,
+				"min": 30,
+				"max": 180,
+				"label": {
+					"en": "Gauge max minutes/cycle",
+					"de": "Tacho-Skala Max. Min/Takt"
+				}
+			}
+		}
+	}
+}

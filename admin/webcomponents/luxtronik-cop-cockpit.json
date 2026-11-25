@@ -1,0 +1,44 @@
+{
+	"manifestVersion": 1,
+	"tag": "luxtronik-cop-cockpit",
+	"module": "./luxtronik-cop-cockpit.js",
+	"name": {
+		"en": "Luxtronik COP & Efficiency Cockpit",
+		"de": "Luxtronik COP- & Effizienz-Cockpit"
+	},
+	"size": {
+		"width": 460,
+		"height": 280
+	},
+	"settings": {
+		"type": "panel",
+		"items": {
+			"instance": {
+				"type": "instance",
+				"adapter": "luxtronik2-controller",
+				"label": {
+					"en": "Adapter instance",
+					"de": "Adapter-Instanz"
+				}
+			},
+			"title": {
+				"type": "text",
+				"default": "Effizienz / COP",
+				"label": {
+					"en": "Title",
+					"de": "Titel"
+				}
+			},
+			"maxScale": {
+				"type": "number",
+				"default": 5.5,
+				"min": 3,
+				"max": 8,
+				"label": {
+					"en": "Bar max COP scale",
+					"de": "Balken-Skala Max-COP"
+				}
+			}
+		}
+	}
+}

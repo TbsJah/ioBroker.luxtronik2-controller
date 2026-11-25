@@ -1,0 +1,42 @@
+{
+	"manifestVersion": 1,
+	"tag": "luxtronik-diagnostics-feed",
+	"module": "./luxtronik-diagnostics-feed.js",
+	"name": {
+		"en": "Luxtronik Diagnostics & Error Feed",
+		"de": "Luxtronik Diagnose- & Störungs-Feed"
+	},
+	"size": {
+		"width": 460,
+		"height": 310
+	},
+	"settings": {
+		"type": "panel",
+		"items": {
+			"instance": {
+				"type": "instance",
+				"adapter": "luxtronik2-controller",
+				"label": {
+					"en": "Adapter instance",
+					"de": "Adapter-Instanz"
+				}
+			},
+			"title": {
+				"type": "text",
+				"default": "Diagnose & Meldungen",
+				"label": {
+					"en": "Title",
+					"de": "Titel"
+				}
+			},
+			"showResetButton": {
+				"type": "checkbox",
+				"default": false,
+				"label": {
+					"en": "Show Modbus error reset button",
+					"de": "Modbus Fehler-Reset-Button anzeigen"
+				}
+			}
+		}
+	}
+}

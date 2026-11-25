@@ -1,0 +1,42 @@
+{
+	"manifestVersion": 1,
+	"tag": "luxtronik-dhw-tank",
+	"module": "./luxtronik-dhw-tank.js",
+	"name": {
+		"en": "Luxtronik Hot Water Tank & ZIP",
+		"de": "Luxtronik Warmwasser-Speicher & ZIP"
+	},
+	"size": {
+		"width": 360,
+		"height": 250
+	},
+	"settings": {
+		"type": "panel",
+		"items": {
+			"instance": {
+				"type": "instance",
+				"adapter": "luxtronik2-controller",
+				"label": {
+					"en": "Adapter instance",
+					"de": "Adapter-Instanz"
+				}
+			},
+			"title": {
+				"type": "text",
+				"default": "Warmwasser",
+				"label": {
+					"en": "Title",
+					"de": "Titel"
+				}
+			},
+			"showForceButton": {
+				"type": "checkbox",
+				"default": true,
+				"label": {
+					"en": "Show 'Heat once' button",
+					"de": "'1× Aufheizen'-Button anzeigen"
+				}
+			}
+		}
+	}
+}

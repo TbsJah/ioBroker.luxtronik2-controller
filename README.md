@@ -103,6 +103,21 @@ _This project is not affiliated with Alpha Innotec, Novelan, ait-deutschland Gmb
 //### **WORK IN PROGRESS**
 
 ## Changelog
+
+**WORK IN PROGRESS**
+
+- Fixed COP/JAZ datapoint paths (`Information.16_Efficiency.Total.*`) in `<luxtronik-status-card>` so daily COP and annual JAZ values populate correctly
+- Added shared Web Component base class (`luxtronik-base.js`) and two new `@iobroker/web-components` widgets for Aura, VIS-2, and WebUI:
+    - `<luxtronik-hydraulics-flow>`: animated hydraulics & energy flow diagram (heating, DHW, defrost reverse flow, ZWE1, dynamic inverter speed)
+    - `<luxtronik-dhw-tank>`: hot water tank level gauge with hysteresis recharge threshold, one-shot heating trigger, and animated ZIP countdown ring
+
+- Added five additional `@iobroker/web-components` widgets for Aura, VIS-2, and WebUI (completing the 8-widget suite):
+    - `<luxtronik-heatcurve-tuner>`: interactive live heating curve with hysteresis band, heating limit indicator, live operating point, and parallel offset slider with preview and apply controls
+    - `<luxtronik-cop-cockpit>`: COP/JAZ efficiency matrix (Total, Heating, Hot Water across Today, 7 Days, Month, Year) with live COP calculation and lifetime totals
+    - `<luxtronik-health-monitor>`: compressor cycle duration gauge (avg. min/cycle), context-aware active lock/delay/defrost timers, and EEPROM write cycle monitor
+    - `<luxtronik-schedule-radar>`: 24-hour schedule bars for heating reduction, hot water lock times, and circulation pump windows with a live time marker
+    - `<luxtronik-diagnostics-feed>`: switchable error log and outage history feed with firmware update banner, changelog preview, and optional Modbus error reset
+
 ### 1.2.1 (2026-11-24)
 
 - Fixed `temperature_target_return` being overwritten with `35.0 °C` in SHI Modbus mode when `sync_modbus_holding_1` (`10060`, room thermostat target) is enabled by removing the duplicate Modbus mapping from `src/mapping/info.ts`

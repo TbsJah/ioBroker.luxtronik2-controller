@@ -1,0 +1,42 @@
+{
+	"manifestVersion": 1,
+	"tag": "luxtronik-heatcurve-tuner",
+	"module": "./luxtronik-heatcurve-tuner.js",
+	"name": {
+		"en": "Luxtronik Live Heating Curve & Offset",
+		"de": "Luxtronik Live-Heizkurve & Offset"
+	},
+	"size": {
+		"width": 500,
+		"height": 340
+	},
+	"settings": {
+		"type": "panel",
+		"items": {
+			"instance": {
+				"type": "instance",
+				"adapter": "luxtronik2-controller",
+				"label": {
+					"en": "Adapter instance",
+					"de": "Adapter-Instanz"
+				}
+			},
+			"title": {
+				"type": "text",
+				"default": "Heizkurve",
+				"label": {
+					"en": "Title",
+					"de": "Titel"
+				}
+			},
+			"allowEdit": {
+				"type": "checkbox",
+				"default": true,
+				"label": {
+					"en": "Allow offset adjustment",
+					"de": "Parallelverschiebung verstellbar"
+				}
+			}
+		}
+	}
+}

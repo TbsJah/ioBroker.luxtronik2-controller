@@ -1,0 +1,34 @@
+{
+	"manifestVersion": 1,
+	"tag": "luxtronik-schedule-radar",
+	"module": "./luxtronik-schedule-radar.js",
+	"name": {
+		"en": "Luxtronik 24h Schedule Radar",
+		"de": "Luxtronik 24h-Zeitschaltuhr-Radar"
+	},
+	"size": {
+		"width": 500,
+		"height": 265
+	},
+	"settings": {
+		"type": "panel",
+		"items": {
+			"instance": {
+				"type": "instance",
+				"adapter": "luxtronik2-controller",
+				"label": {
+					"en": "Adapter instance",
+					"de": "Adapter-Instanz"
+				}
+			},
+			"title": {
+				"type": "text",
+				"default": "Zeitschaltprogramme (Heute)",
+				"label": {
+					"en": "Title",
+					"de": "Titel"
+				}
+			}
+		}
+	}
+}

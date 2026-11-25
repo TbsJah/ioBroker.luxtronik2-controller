@@ -32,6 +32,9 @@ export default [
 				CustomEvent: 'readonly',
 			},
 		},
+		rules: {
+			'jsdoc/require-jsdoc': 'off',
+		},
 	},
 	{
 		// you may disable some 'jsdoc' warnings - but using jsdoc is highly recommended
