@@ -1,339 +1,341 @@
 {
-	"common": {
-		"name": "luxtronik2-controller",
-		"version": "1.2.1",
-		"news": {
-			"1.2.1": {
-				"en": "Fixed `temperature_target_return` being overwritten with `35.0 °C` in SHI Modbus mode when `sync_modbus_holding_1` (`10060`, room thermostat target) is enabled by removing the duplicate Modbus mapping from `src/mapping/info.ts`\nCleaned up SHI holding register mapping in `src/modbusManager.ts` and added an SHI mode check (`10000 === 1`) when reading register `10001` for `heating_flow_out_temperature_target` (`sync_modbus_holding_2`) so its inactive `35.0 °C` default does not overwrite `P0017`",
-				"de": "Es wurde behoben, dass `temperature_target_return` im SHI Modbus-Modus mit `35,0 °C` überschrieben wurde, wenn `sync_modbus_holding_1` (`10060`, Raumthermostat-Target) aktiviert war, indem das Modbus-Mapping aus `src/mapping/info.ts` entfernt wurde\nDie HI-Halteregister-Zuordnung in `src/ModbusManager.ts` wurde bereinigt und beim Lesen von `10001` für `heating_flow_out_temperature_target` (`sync_modbus_holding_2`) geprüft, sodass der inaktive Standard `35,0 °C` nicht überschreibt",
-				"ru": "Исправлена ошибка, из-за которой `temperater_target_return` в режиме SHI Modbus при включении `sync_modbus_holding_1` (`10060`, целевое значение комнатного термостата) путем удаления дублированного сопоставления Modbus из `src/mapping/info.ts`\nИсправлено сопоставление регистров хранения SHI в `src/ModBusManager.ts` и добавлена проверка режима SHI (`10000 === 1`) при чтении регистра `10001` для `heating_flow_out_textemperature_target` (`sync_modbus_holding_2`), поэтому значение `P0017` неактивно",
-				"pt": "Corrigido o sobrescrito de `temperature_target_return` por `35,0°C` no modo SHI Modbus quando `sync_modbus_holding_1` (`10060`, alvo do termostato ambiente) é ativado removendo o mapeamento Modbus duplicado de `src/mapping/info.ts`\nLimpou o mapeamento do registro SHI em `src/ModbusManager.ts` e adicionou uma verificação do modo SHI (`10000 === 1`) ao ler o registro `10001` para `heating_flow_out_temperature_target` (`sync_modbus_holding_2`) para que seu padrão inativo de `35,0 °C` não substitua `P0017`",
-				"nl": "Probleem opgelost dat `temperature_target_return` werd overschreven met `35,0 °C` in de SHI Modbus-modus wanneer `sync_modbus_holding_1` (`10060`, doel van de kamerthermostaat) is ingeschakeld door de dubbele Modbus-toewijzing te verwijderen uit `src/mapping/info.ts`\nDe SHI-holding-registertoewijzing is opgeschoond in `src/ModbusManager.ts` en een SHI-moduscontrole toegevoegd (`10000 === 1`) bij het lezen van register `10001` voor `heating_flow_out_temperature_target` (`sync_modbus_holding_2`), zodat de inactieve standaardinstelling van `35,0 °C` de `P0017` niet overschrijft",
-				"fr": "Correction du remplacement de « temperature_target_return » par « 35,0 °C » en mode SHI Modbus lorsque « sync_modbus_holding_1 » (« 10060 », cible du thermostat d'ambiance) est activé en supprimant le mappage Modbus dupliqué de « src/mapping/info.ts »\nLe mappage des registres SHI a été nettoyé dans « src/ModbusManager.ts » et a ajouté un check du mode SHI (« 10000 === 1 ») lors de la lecture du registre « 10001 » pour « heating_flow_out_temperature_target » (sync_modbus_holding_2). Le registre « 35,0 °C » par défaut ne remplace pas « P0017 »",
-				"it": "Risolto il problema con `temperature_target_return` sovrascritto con `35,0 °C` in modalità SHI Modbus quando `sync_modbus_holding_1` (`10060`, termostato ambiente) era abilitato rimuovendo la mappatura Modbus duplicata da `src/mapping/info.ts`\nHa ripulito la mappatura del registro SHI in `src/ModbusManager.ts` e ha aggiunto un controllo della modalità SHI (`10000 === 1`) durante la lettura del registro `10001` per `heating_flow_out_temperature_target`",
-				"es": "Se ha corregido que se sobrescribía `temperature_target_return con 35,0 °C en el modo Modbus SHI cuando `sync_modbus_holding_1` (`10060», objetivo del termostato ambiente) estaba activado al eliminar el mapeo Modbus duplicado de `src/mapping/info.ts`\nLimpió el mapa del registro de almacenamiento SHI en `src/ModbusManager.ts y añadió una comprobación del modo SHI (10000 === 1) al leer el registro `10001` para `heating_flow_out_temperature_target` (`sync_modbus_holding_2`) para que esté inactivo por defecto a 35,0 °C no sobrescribe `P0017`",
-				"pl": "Naprawiono nadpisanie `temperatura_target_return` na `35,0 °C` w trybie SHI Modbus, gdy `sync_modbus_holding_1` (`10060`, cel termostatu pokojowego) jest włączone przez usunięcie zduplikowanego mapowania Modbus z `src/mapping/info.ts`\nWyczyszczono mapowanie rejestru trzymającego SHI w `src/ModbusManager.ts` i dodano sprawdzenie trybu SHI (`10000 === 1`) podczas odczytu rejestru `10001` dla `heating_flow_out_temperature _target` (`sync_modbus_holding_2`), więc jego nieaktywne domyślne `35.0 °C` nie nadpisuje `P0017`",
-				"uk": "Виправлено перезапис `temperatur_target_retur` на `35,0 °C` у режимі SHI Modbus, коли `sync_modbus_holding_1` (`10060`, ціль кімнатного термостата) ввімкнено шляхом видалення дублікатів відображення Modbus з `src/mapping/info.ts`\nОчищено відображення реєстру утримування SHI в `src/ModbusManager.ts` та додано перевірку режиму SHI (`10000 === 1`) при читанні реєстру `10001` для `heating_flow_out_temperature_target` (`sync_modbus_holding_2`), тому його неактивний `35,0 °C` за замовчуванням не перезаписує `P0017`",
-				"zh-cn": "修复了通过从 src/mapping/info.ts 中移除重复的 Modbus 映射启用 sync_modbus_holding_1（10060，房间恒温器目标）时 SHI Modbus 模式下 “temperature_target_return” 被覆盖 “35.0 °C” 的问题\n清理了 `src/modbusManager.ts` 中的 SHI 持有寄存器映射，并在读取 `heating_flow_out_temperature_target` 寄存器 `10001`（`sync_modbus_holding_2`）时添加了 SHI 模式检查（`10000 === 1`），因此其非活动的 `35.0 °C`默认值不会覆盖 `P0017`"
-			},
-			"1.2.0": {
-				"en": "Added configurable sunset cutoff buffer (`pv_sunset_cutoff_active`, `pv_sunset_buffer`) to PV surplus management to prevent starting new PV boosts shortly before local sunset using `system.config` coordinates\nAdded `@iobroker/web-components` status card (`<luxtronik-status-card>`) for Aura, VIS-2, and WebUI displaying live temperatures, operating mode, PV boost status, COP/JAZ values, and quick actions\nUpdated Cycle Optimization description in `jsonConfig.json` to reflect the dynamic hysteresis-based offset instead of the legacy `35 °C` wording",
-				"de": "Konfigurierbarer Puffer (`pv_sunset_cutoff_active`, `pv_sunset_buffer`) zum PV-Überschussmanagement hinzugefügt, um neue PV-Boosts kurz vor dem lokalen Sonnenuntergang mit `system.config`-Koordinaten zu verhindern\nStatuskarte (`<luxtronik-status-card>`) für Aura, VIS-2 und WebUI mit Live-Temperatur, Betriebsmodus, PV-Boost-Status, COP/JAZ-Werten und Schnellaktionen hinzugefügt @iobroker\nDie Beschreibung der Zyklusoptimierung in `JSONConfig.json` wurde um den dynamischen Hysterese-Offset ersetzt",
-				"ru": "Добавлен настраиваемый буфер отсечения заката (`pv_sunset_cutoff_active`, `pv_sunset_buffer`) для предотвращения запуска новых фотоэлектрических бустеров незадолго до локального захода солнца с использованием координат `system.config`\nДобавлена карточка состояния @iobroker /web-components (<luxtronik-status-card>`) для Aura, VIS-2 и WebUI, отображающая температуру в реальном времени, режим работы, состояние фотоэлектрического буста, значения COP/JAZ и быстрые действия\nОбновлено описание оптимизации цикла в `JsonConfig.json`, чтобы отразить смещение, основанное на динамическом гистерезисе, вместо устаревшей формулировки «35 °C»",
-				"pt": "Foi adicionado um buffer de corte configurável ao pôr do sol (`pv_sunset_cutoff_active`, `pv_sunset_buffer`) para evitar o início de novos reforços fotovoltaicos pouco antes do pôr do sol local usando coordenadas `system.config`\nAdicionada placa de status `@iobroker /web-components` (`<luxtronik-status-card>`) para Aura, VIS-2 e WebUI exibindo temperaturas ao vivo, modo operacional, valores COP/JAZ e ações rápidas\nAtualizamos a descrição do Cycle Optimization em `jsonConfig.json` para refletir o offset dinâmico baseado em histerese em vez do antigo texto `35 °C`",
-				"nl": "Configureerbare buffer voor het afsnijden van zonsondergangen (`pv_sunset_cutoff_active`, `pv_sunset_buffer`) toegevoegd aan het beheer van PV-overschotten om te voorkomen dat er kort voor zonsondergang nieuwe PV-verhogingen worden gestart met behulp van `system.config` coördinaten\nStatuskaart van `@iobroker /web-components` toegevoegd (`<luxtronik-status-card>`) voor Aura, VIS-2 en WebUI met actuele temperaturen, bedrijfsmodus, PV-booststatus, COP/JAZ-waarden en snelle acties\nDe beschrijving van Cycle Optimization in `JSONConfig.json` is bijgewerkt om de dynamische offset op basis van hysterese weer te geven in plaats van de oude formulering van `35°C`",
-				"fr": "Ajout d'un tampon de coupure de soleil configurable (« pv_sunset_cutoff_active », « pv_sunset_buffer ») à la gestion des excédents PV afin d'éviter d'en démarrer de nouveaux peu avant le coucher du soleil local en utilisant les coordonnées « system.config »\nAjout de la carte d'état « @iobroker /web-components » (`<luxtronik-status-card>`) pour Aura, VIS-2 et WebUI affichant les températures en temps réel, le mode de fonctionnement, l'état PV Boost, les valeurs COP/JAZ et les actions rapides\nDescription de l'optimisation des cycles mise à jour dans « JSONConfig.json » pour refléter le décalage dynamique basé sur l'hystérésis au lieu de l'ancien « 35 °C »",
-				"it": "Aggiunto un buffer configurabile (`pv_sunset_cutoff_active`, `pv_sunset_buffer`) alla gestione del surplus fotovoltaico per evitare nuovi aumenti PV poco prima del tramonto locale usando le coordinate `system.config`\nAggiunta la scheda di stato `@iobroker /web-components<luxtronik-status-card>` per Aura, VIS-2 e WebUI con temperature in tempo reale, modalità operativa, PV boost, valori COP/JAZ e azioni rapide\nDescrizione aggiornata di Cycle Optimization in `JSONConfig.json` per riflettere l'offset basato sull'isteresi dinamica anziché `35 °C`",
-				"es": "Se ha añadido un búfer de límite de puesta de sol configurable (`pv_sunset_cutoff_active», `pv_sunset_buffer`) a la gestión del excedente fotovoltaico para evitar iniciar nuevas ampliaciones fotovoltaicas poco antes de la puesta de sol local mediante coordenadas `system.config`\nSe ha añadido la tarjeta de estado `@iobroker /web-components` (<luxtronik-status-card>`) para Aura, VIS-2 y WebUI que muestra las temperaturas en vivo, el modo de operación, el estado de PV Boost, los valores de COP/JAZ y acciones rápidas\nSe actualizó la descripción de Cycle Optimization en `JSONConfig.json` para reflejar el desfase dinámico basado en la histéresis en lugar del antiguo texto de 35°C",
-				"pl": "Dodano konfigurowalny bufor odcięcia zachodu słońca (`pv_sunset_cutoff_active`, `pv_sunset_buffer`) do zarządzania nadwyżkami fotowoltaicznymi, aby zapobiec uruchamianiu nowych impulsów fotowoltaicznych na krótko przed lokalnym zachodem słońca przy użyciu współrzędnych `system.config`\nDodano kartę statusu „@iobroker /web-components” (<luxtronik-status-card>`) dla Aura, VIS-2 i WebUI wyświetlającą temperaturę na żywo, tryb pracy, status wzmocnienia fotowoltaicznego, wartości COP/JAZ i szybkie działania\nZaktualizowano opis optymalizacji cyklu w `JSONConfig.json` w celu odzwierciedlenia dynamicznego przesunięcia opartego na histerezie zamiast starszego sformułowania `35 °C'",
-				"uk": "Додано настроюваний буфер відмикання заходу сонця (`pv_sunset_cutoff_active`, `pv_sunset_buffer`) до керування надлишками PV, щоб запобігти запуску нових PV посилень незадовго до локального заходу сонця за допомогою координат `system.config`\nДодана картка стану `@iobroker /web-components` (`<luxtronik-status-card>`) для Aura, VIS-2 та WebUI, що відображає живі температури, режим роботи, стан підвищення PV, значення COP/JAZ та швидкі дії\nОновлений опис оптимізації циклу в `JsonConfig.json`, щоб відобразити зміщення на основі динамічного гістерезису замість застарілого формулювання `35 °C`",
-				"zh-cn": "在光伏剩余管理中添加了可配置的日落截止缓冲区（`pv_sunset_cutoff_active`，`pv_sunset_buffer`），以防止在本地日落前不久使用 “system.config” 坐标启动新的光伏强化\n为 <luxtronik-status-card>Aura、VIS-2 和 WebUI 添加了 “@iobroker /web-components” 状态卡 (`)，显示实时温度、运行模式、光伏增压状态、COP/JAZ 值和快速操作\n更新了 `jsonConfig.json` 中的循环优化描述，以反映基于动态迟滞的偏移量，而不是传统的 “35 °C” 措辞"
-			},
-			"1.1.1": {
-				"en": "Fixed temporary hot water start impulses (`forceSoll` & `Zwangswarmwasser`) overshooting the actual target temperature by immediately restoring the baseline or active PV boost target once hot water generation is actively running (`WP_BZ_akt = 1` & `VD1`)\nAdded native controller state duration check (`rawValues[120]`) to `istBetriebszustandAelterAls()` for reliable cycle timing at longer polling intervals",
-				"de": "Temporäre Heißwasser-Startimpulse (`ForceSoll` & `Zwangswarmwasser`), die die Solltemperatur übersteigen, indem sie bei laufender Warmwasserbereitung sofort die Solltemperatur wiederherstellt (`WP_BZ_AKT = 1` & `VD1`)\nNative Controller-Statusprüfung (`RawValues [120] `) zu `istBetriebszustandAelterals ()` hinzugefügt für zuverlässiges Timing bei längeren Abfrageintervallen",
-				"ru": "Фиксированные временные импульсы запуска горячей воды («Forcesoll» и «Zwangswarmwasser»), превышающие фактическую целевую температуру, за счет немедленного восстановления базового значения или активного целевого показателя повышения мощности фотоэлектрических установок после начала производства горячей воды (`WP_BZ_Akt = 1` и `VD1`)\nДобавлена встроенная проверка длительности состояния контроллера (`rawValues [120] `) в `istBetriebsZustandaelTerals ()` для надежной синхронизации циклов при более длительных интервалах опроса",
-				"pt": "Impulsos fixos temporários de partida de água quente (`ForceSoll` e `Zwangswarmwasser`) superando a temperatura real ao restaurar imediatamente a linha de base ou o alvo ativo de PV quando a geração de água quente está ativa (`WP_BZ_Akt = 1` e `VD1`)\nFoi adicionada a verificação de duração do estado do controlador nativo (`rawValues [120] `) a `istBetriebszustandaElterals ()` para ciclos mais longos",
-				"nl": "Vaste tijdelijke startimpulsen voor warm water (`ForceSoll` & `Zwangswarmwasser`) die de werkelijke doeltemperatuur overschrijden door onmiddellijk de basislijn of de actieve PV-boostdoelstelling te herstellen zodra de warmwaterproductie actief draait (`wp_BZ_Akt = 1` & `VD1`)\nDe systeemstatusduurcontrole van de controller (`RawValues [120] `) toegevoegd aan `IstBetriebsZustandAelterals ()` voor een betrouwbare timing van de cyclus met langere polling-intervallen",
-				"fr": "Correction des impulsions temporaires de démarrage de l'eau chaude (« ForceSoll » et « Zwangswarmwasser ») qui dépassaient la température cible en rétablissant immédiatement la valeur de base ou la cible de suralimentation active une fois que la production d'eau chaude est active (« WP_BZ_Akt = 1 » et « VD1 »)\nAjout d'une vérification native de la durée de l'état du contrôleur (`RawValues [120]) à `istBetriebsZustandaElterals () `pour un chronométrage fiable à intervalles longs",
-				"it": "Risolti gli impulsi temporanei di avvio dell'acqua calda (`ForceSoll` e `Zwangswarmwasser`) che superavano la temperatura nominale effettiva ripristinando immediatamente la linea di base o attiva (`WP_BZ_Akt = 1` e `VD1`)\nAggiunto il controllo nativo della durata dello stato del controller (`rawValues [120] `) a `istBetriebszustandaElterals ()` per cicli affidabili a intervalli di polling",
-				"es": "Se corrigieron los impulsos temporales de arranque del agua caliente (`ForceSoll` y `Zwangswarmwasser`) que superaban la temperatura objetivo real al restablecer inmediatamente el objetivo básico o de aumento fotovoltaico activo una vez que se generaba agua caliente (`WP_BZ_akt = 1` y `VD1`)\nSe ha añadido el control de duración del estado del controlador nativo (`RawValues [120] `) a `istBetriebsZustandaElterals ()` para un tiempo de ciclo fiable en intervalos de sondeo más largos",
-				"pl": "Naprawiono tymczasowe impulsy uruchamiania ciepłej wody („ForceSoll” i „Zwangswarmwasser”) przekraczające rzeczywistą temperaturę docelową poprzez natychmiastowe przywrócenie linii bazowej lub aktywnego celu doładowania fotowoltaicznego po aktywnym uruchomieniu wytwarzania ciepłej wody (`WP_BZ_Akt = 1` & `VD1`)\nDodano natywne sprawdzenie czasu trwania stanu kontrolera (`rawValues [120] `) do `istbetriebszustandaElterals ()` dla niezawodnego czasu cyklu w dłuższych odstępach czasu głosowania",
-				"uk": "Виправлено тимчасові імпульси запуску гарячої води (`ForceSoll` & `Zwangswarmwasser`), що перевищують фактичну цільову температуру шляхом негайного відновлення базової або активної цілі підвищення PV, коли генерація гарячої води активно працює (`WP_bz_Akt = 1` & `VD1`)\nДодано перевірку тривалості стану власного контролера (`RawValues [120] `) до `istBetriebsZustandaElterals ()` для надійного синхронізації циклу на більш тривалих інтервалах опитування",
-				"zh-cn": "修复了临时热水启动冲动（`forceSoll`和`Zwangswarmwasser`）超出实际目标温度的问题，方法是在热水发电活跃运行后立即恢复基准或活跃的光伏增压目标（`wp_bz_AKT = 1` 和 `VD1`）\n在 `istbetriebszustandaelterals () `中添加了原生控制器状态持续时间检查 (`rawValues [120] `)，以便在更长的轮询间隔下实现可靠的循环计时"
-			},
-			"1.1.0": {
-				"en": "Replaced static `35 °C` / `+10.0 K` jump in cycle optimization (`CycleOpt-PreHeat` / `CycleOpt-AfterWW`) and forced heating (`Zwangsheizen`) with a dynamic, hysteresis-based relative offset (`base offset + hysteresis + 0.5 K`) via `heating_temperature` (volatile SHI `10002` / native Param `1`) to prevent screed overshoot and short-cycling in well-insulated homes\nAdded heating release checks (`P0003` / `C0125`) and hot water lock-time schedule checks (`P0004` / `C0124` / `P405..P505`, including midnight wrap-around and 25-minute pre-heat lookahead) to cycle optimization\nImproved `Heizen_nach_Wasser` reset handling (3-minute spike guard instead of 10 minutes once return target is reached), immediate pre-heat offset reset on WW start, and automatic cleanup of stale `CycleOpt-PreHeat` offsets in idle without affecting manual `Zwangsheizen`\nAdded automatic restoration of temporary hot water target increases (`forceSoll` & `Zwangswarmwasser`) after WW completion even when `idle_defaults_aktiv` is disabled\nEliminated PV boost flip-flop writes during idle and cycle transitions by delegating directly to `evaluatePvBoost` without intermediate resets to baseline\nFixed raw fallback indices in `calculateTotalEnergy()` to read `rawParams[1136]/[1137]` (factor `0.01`) instead of `rawValues[156]/[157]` and added 2-decimal rounding",
-				"de": "Statischen Sprung bei der Zyklusoptimierung (`CycleOPT-Preheat`/`CycleOPT-AfterWW`) und `Zwangsbeheizen` durch einen dynamischen, hysteresebasierten Relativversatz (`base offset + hysteresis + 0,5 K`) über `heating_temperature` (volatile SHI `10002`/nativer Param `1`) ersetzt, um zu verhindern Estrichüberhöhung und Kurzschluss in gut gedämmten Häusern\nZur Zyklusoptimierung wurden Heizungsfreigabeprüfungen (`P0003`/`C0125`) und Warmwasserschleuse (`P0004`/`C0124`/`P405.. P505`, einschließlich Mitternacht und 25-minütiger Vorwärmvorlauf) hinzugefügt\nVerbessertes „Heizen_nach_Wasser“ -Reset (3-minütiger Spike-Guard statt 10 Minuten nach Erreichen des Ziels), sofortiger Reset bei WW-Start und automatische Bereinigung abgestandener `CycleOPT-Preheat`-Offsets im Leerlauf, ohne manuelle `Zwangsheizen` zu beeinflussen\nAutomatische Wiederherstellung temporärer Warmwasser-Zielerhöhungen (`forceSoll` & `Zwangswarmwasser`) nach WW-Ende hinzugefügt, auch wenn `idle_defaults_aktiv` deaktiviert ist\nPV-Boost-Flip-Flop-Writes bei Leerlauf- und Zykluswechseln durch direkte Delegierung an `EvaluatePvBoost` ohne Resets zur Ausgangslinie\nRohindizes in `calculateTotalEnergy () `wurden auf `rawParams [1136]/[1137]` (Faktor `0,01`) statt `rawValues [156]/[157] `korrigiert und 2-Dezimal-Rundung hinzugefügt",
-				"ru": "Статический скачок при оптимизации цикла («Cycleopt-Preheat»/«+10,0 K») и принудительный нагрев («Zwangsheizen») заменен динамическим относительным смещением, основанным на гистерезисе («смещение основания + гистерезис + 0,5 K») с помощью «температуры нагрева» (изменчивое значение SHI `10002`/собственный параметр `1`) для предотвращения перегрева стяжки и короткого замыкания в хорошо изолированных домах\nДля оптимизации цикла добавлены проверки спуска тепла (`P0003`/`C0125`) и проверки графика блокировки горячей воды (`P0004`/`C0124`/`P405`, включая полночь и 25-минутный предварительный нагрев)\nУлучшенная обработка перезагрузки `heizen_nach_wasser` (3-минутная защита от спайков вместо 10 минут после достижения цели возврата), немедленный сброс смещения предварительного нагрева при запуске WW и автоматическая очистка устаревших смещений «Cycleopt-Preheat» на холостом ходу без влияния на режим «Zwangsheizen» вручную\nДобавлено автоматическое восстановление временных целевых значений по горячей воде (`Forcesoll` и `Zwangswarmwasser`) после завершения WW, даже если `idle_defaults_aktiv` отключен\nУстранена возможность записи на триггере PV Boost во время простоя и циклических переходов за счет прямого делегирования функции `EvaluatePVBoost` без промежуточных переходов к базовому уровню\nИсправлены необработанные резервные индексы в `calculateTotalEnergy () `, которые читали `rawParams [1136]/[1137]` (коэффициент 0,01) вместо `rawValues [156]/[157] `и добавлено округление на 2 десятичных дроби",
-				"pt": "Substituiu o salto estático de `35 °C`/`+10,0 K` na otimização do ciclo (`Cycleopt-preheat`/`Cycleopt-afterWW`) por um deslocamento relativo dinâmico baseado em histerese (`base offset + histerese + 0,5 K`) via `heating_temperature` (volátil SHI `10002`) `/native Param `1`) para evitar quedas e ciclos curtos em casas bem isoladas\nForam adicionadas verificações de liberação de aquecimento (`P0003`/`C0125`) e cronograma de bloqueio de água quente (`P0004`/`C0124`/`P405.. P505`, incluindo meia-noite e pré-aquecimento de 25 minutos) à otimização do ciclo\nMelhor reinicialização de `Heizen_nach_wasser` (proteção contra picos de 3 minutos em vez de 10 minutos após atingir a meta de retorno), reinicialização imediata no início da WW e limpeza automática de offsets obsoletos de `Cycleopt-Preheat` em modo inativo sem afetar o manual `Zwangsheizen`\nFoi adicionada a restauração automática de metas temporárias de água quente (`ForceSoll` e `Zwangswarmwasser`) após a WW, mesmo com `idle_defaults_aktiv` desativado\nEliminou as gravações de flip-flop durante transições inativas e cíclicas ao delegar diretamente a `evaluatePVBoost` sem redefinições intermediárias\nCorrigidos índices brutos em `calculateTotalEnergy () `para ler `rawParams [1136]/[1137]` (fator `0,01`) em vez de `rawValues [156]/[157] `e arredondamento de 2 decimais",
-				"nl": "Statische sprong van `35°C`/`+10,0 K` in de cyclusoptimalisatie (`CycleOpt-Preheat`/`CycleOpt-afterWW`) en geforceerde verwarming (`Zwangsheizen`) vervangen door een dynamische, op hysterese gebaseerde relatieve offset (`base offset + hysteresis + 0.5 K`) via `heating_temperature` (vluchtige SHI `10002`/native Param `1`) naar voorkom overlopen van de dekvloer en kortsluiting in goed geïsoleerde huizen\nControles voor de verwarming toegevoegd (`P0003`/`C0125`) en controles van het vergrendelingsschema voor warm water (`P0004`/`C0124`/`P405.. P505`, inclusief middernacht en een vooruitblik van 25 minuten voor de voorverwarming) om de cyclus te optimaliseren\nVerbeterde reset van de `Heizen_Nach_Wasser` (spike-guard van 3 minuten in plaats van 10 minuten nadat het retourdoel is bereikt), onmiddellijke reset van de offset voor de voorverwarming bij het starten van de WW, en automatische opschoning van oude `CycleOpt-Preheat` offsets bij stationair gebruik, zonder dat dit gevolgen heeft voor de handmatige `Zwangsheizen`\nAutomatisch herstel toegevoegd van tijdelijke verhogingen van de doelen voor warm water (`ForceSoll` & `Zwangswarmwasser`) na voltooiing van de WW, zelfs als `idle_defaults_aktiv` is uitgeschakeld\nElimineerde flip-flop-schrijfbewerkingen met PV-boost tijdens stationair toerental en cyclusovergangen door rechtstreeks naar `EvaluatePVBoost` te delegeren zonder tussentijdse resets naar de basislijn\nRuwe terugvalindexen opgelost in `CalculateTotalEnergy () `om `RawParams [1136]/[1137]` te lezen (factor `0,01 `) in plaats van `RawValues [156]/[157]` en een afronding met twee decimalen toegevoegd",
-				"fr": "Remplacement du saut statique « 35 °C »/« +10,0 K » lors de l'optimisation des cycles (« CycleOpt-Preheat »/« CycleOpt-AfterWW») et du chauffage forcé (« Zwangsheizen ») par un décalage relatif dynamique basé sur l'hystérésis (« décalage de base + hystérésis + 0,5 K ») via « heating_temperature » (SHI volatil « 10002 »/paramètre natif « 1 ») pour éviter de dépasser la chape et de court-circuiter les maisons bien isolées\nAjout de contrôles du déclenchement du chauffage (`P0003`/`C0125`) et de l'heure de verrouillage de l'eau chaude (`P0004`/`C0124`/`P405.. P505`, y compris minuit et 25 minutes de préchauffage) pour optimiser le cycle\nGestion améliorée de la réinitialisation de « Heizen_Nach_Wasser » (protection contre les pointes de 3 minutes au lieu de 10 minutes une fois l'objectif de retour atteint), réinitialisation immédiate du décalage de préchauffage au démarrage de WW et nettoyage automatique des décalages « CycleOpt-Preheat » périmés au ralenti sans affecter le mode manuel\nAjout du rétablissement automatique des objectifs d'eau chaude temporaires (« ForceSoll » et « Zwangswarmwasser ») à la fin de la Seconde Guerre mondiale, même si « idle_defaults_aktiv » est désactivé\nLes écritures PV Boost ont été éliminées pendant les transitions d'inactivité et de cycle en déléguant directement à « EvaluatePVBoost » sans réinitialisation intermédiaire\nCorrection d'indices de repli bruts dans « CalculateTotalEnergy () » comme « RawParams [1136]/[1137] » (facteur « 0,01 ») au lieu de « RawValues [156]/[157] » et a été arrondi à 2 décimales",
-				"it": "Sostituita l'ottimizzazione statica del ciclo `35 °C`/`+10,0 K` (`CycleOpt-Preheat`/`CycleOpt-afterWW`) e forzata (`Zwangsheizen`) con un offset relativo dinamico basato sull'isteresi (`offset base + isteresi + 0,5 K`) tramite `heating_temperature` (volatile SHI `10002`/nativo di Param `1`) per evitare massetti e cicli brevi in case ben isolate\nAggiunti i controlli del rilascio del calore (`P0003`/`C0125`) e del tempo di blocco dell'acqua calda (`P0004`/`C0124`/`P405.. P505`, inclusi mezzanotte e preriscaldamento di 25 minuti) per l'ottimizzazione del ciclo\nMigliore gestione del reset di `Heizen_nach_wasser` (protezione spike guard di 3 minuti anziché 10 minuti dopo il ritorno), reset immediato dell'offset di preriscaldamento all'avvio di WW e pulizia automatica degli offset `CycleOpt-Preheat` obsoleti senza influire sul manuale `Zwangsheizen`\nAggiunto il ripristino automatico degli aumenti temporanei di acqua calda (`ForceSoll` e `Zwangswarmwasser`) al termine del WW anche se `idle_defaults_aktiv è disabilitato\nHa eliminato le scritture flip-flop PV Boost durante le transizioni di inattività e ciclo delegando direttamente a `EvaluatePVBoost` senza reset intermedi\nHa corretto gli indici di riserva grezzi in `calculateTotalEnergy () `per leggere `rawParams [1136]/[1137]` (fattore `0,01`) invece di `RawValues [156]/[157] `e ha aggiunto 2 decimali",
-				"es": "Sustituyó la optimización estática del salto en el ciclo (`Cycleopt-Precalent`/`Cycleopt-AfterWW`) y el calentamiento forzado (`Zwangsheizen`) por un desfase relativo dinámico basado en la histéresis (`compensación base+ histéresis + 0,5 K) por `heating_temperatura` (volátil SHI `10002` /parámetro nativo `1`) para evitar que la solera se sobrepase y se acorte en casas bien aisladas\nSe han añadido comprobaciones de liberación de calefacción (`P0003`/`C0125`) y comprobaciones del horario de bloqueo del agua caliente (`P0004`/`C0124`/`P405.. P505`, incluidas medianoche y 25 minutos de precalentamiento anticipadas) a la optimización del ciclo\nSe mejoró el manejo del reinicio de Heizen_nach_wasser (3 minutos de protección contra picos en lugar de 10 minutos una vez alcanzado el objetivo de devolución), se restablece inmediatamente al iniciar la Guerra Mundial y se limpian automáticamente las compensaciones obsoletas de «Cycleopt-preheat» en ralentí sin afectar al `Zwangsheizen` manual\nSe ha añadido la restauración automática de los aumentos temporales del objetivo de agua caliente (ForceSoll y Zwangswarmwasser) al terminar la Guerra Mundial, incluso con «idle_defaults_aktiv`\nEliminó las escrituras invertidas de PV Boost durante las transiciones de inactividad y ciclo al delegar directamente en «EvaluatePVBoost» sin restablecimientos intermedios a la línea base\nSe corrigieron los índices alternativos sin procesar en `CalculateTotalEnergy () `para leer `RawParams [1136]/[1137]` (factor 0,01) en lugar de `RawValues [156]/[157] `y se añadió el redondeo con 2 decimales",
-				"pl": "Zastąpiony statyczny skok `35 °C`/`+10,0 K` w optymalizacji cyklu (`Cycleopt-Preheat `/`Cycleopt-AfterWW`) i wymuszonym ogrzewaniu (`Zwangsheizen`) dynamicznym, opartym na histerezie przesunięciem względnym (`przesunięcie bazowe+histereza + 0,5 K`) poprzez `temperatura_ogrzewania` (lotny natywny SHI `10002`/Param ``1), aby zapobiec przewyższaniu jastrychu i krótkim cyklom w dobrze ocieplonych domach\nDodano kontrole uwalniania ogrzewania (`P0003`/`C0125`) i kontrole harmonogramu blokady ciepłej wody (`P0004`/`C0124`/`P405.. P505`, w tym podgrzewanie o północy i 25-minutowe podgrzewanie wstępne) w celu optymalizacji cyklu\nUlepszona obsługa resetowania „Heizen_Nach_Wasser” (3-minutowa osłona kolców zamiast 10 minut po osiągnięciu celu powrotu), natychmiastowy reset przesunięcia wstępnego nagrzewania przy starcie WW i automatyczne czyszczenie nieaktualnych przesunięć „CycleOpt-Preheat” na biegu jałowym bez wpływu na ręczne „Zwangsheizen”\nDodano automatyczne przywracanie tymczasowych wzrostów docelowych ciepłej wody (`ForceSoll' & `Zwangswarmwasser`) po zakończeniu wojny światowej, nawet gdy `idle_defaults_aktiv` jest wyłączone\nWyeliminowano zapisy flip-flop PV boost podczas przejścia na biegu jałowym i cyklu poprzez delegowanie bezpośrednio do `EvaluatePVBoost` bez pośrednich resetów do linii bazowej\nNaprawiono nieprzetworzone indeksy rezerwowe w `CalculateTotalEnergy () `, aby odczytać `RawParams [1136]/[1137]` (współczynnik `0,01`) zamiast `rawValues [156]/[157] `i dodano zaokrąglanie 2-dziesiętne",
-				"uk": "Замінено статичний стрибок `35 °C`/`+10,0 K` в оптимізації циклу (`Cycleopt-PreHeat`/`Cycleopt-AfterWW`) та примусовий нагрів (`Zwangsheizen`) з динамічним відносним зміщенням на основі гістерезису (`базовий зсув + гістерезис+ 0, 5 К`) через `температура_опалення` (летючий SHI `10002`/native Param `1`) на запобігання переливу стяжки та короткого циклу в добре утеплених будинках\nДля оптимізації циклу додані перевірки випуску опалення (`P0003`/`C0125`) та перевірки графіка блокування гарячої води (`P0004`/`C0124`/`P405.. P505`, включаючи опівнічне обгортання та 25-хвилинний перегляд попереднього нагрівання)\nПокращено обробку скидання `Heizen_nach_wasser` (3-хвилинний захист від спайків замість 10 хвилин після досягнення мети повернення), негайне скидання зсуву попереднього нагрівання при запуску WW та автоматичне очищення застарілих зсувів `Cycleopt-preheat` на холостому ходу, не впливаючи на ручне `Zwangsheizen`\nДодано автоматичне відновлення тимчасового збільшення цілі гарячої води (`ForceSoll` & `Zwangswarmwasser`) після завершення світової війни, навіть якщо `idle_defaults_aktiv` вимкнено\nУсунено записи фліп-шльопанів PV boost під час простою та переходу циклу шляхом делегування безпосередньо до `evaluatePVBoost` без проміжних скидань до базової лінії\nВиправлені необроблені запасні індекси в `calculateTotalEnergy () `для читання `RawParams [1136]/[1137]` (коефіцієнт `0,01`) замість `RaWValues [156]/[157] `та додано 2-десяткове округлення",
-				"zh-cn": "通过 `heating_temperure'（易失性 SHI `10002` /原生参数 `1`）将静态的 `35 °C`/ `+10.0 K` 跳跃循环优化（`cycleopt-AfterWW`）和强制加热（`Zwangsheizen`）替换为基于迟滞的动态相对偏移（`基本偏移量+滞后+ 0.5 K`）防止在隔热良好的房屋中出现熨平板过冲和短时间循环\n为循环优化添加了供暖释放检查（`P0003`/`C0125`）和热水锁定时间表检查（`P0004`/`C0124`/`P405.. P505`，包括午夜回转和预热时间表25分钟）\n改进了 “Heizen_nach_Wasser” 重置处理（3 分钟尖刺保护，而不是达到返回目标后的 10 分钟），WW 启动时立即重置预热偏移量，在不影响手动 “Zwangsheizen” 的情况下自动清理空闲状态下陈旧的 “Cycleopt-Preheat” 偏移量\n添加了在 WW 完成后自动恢复临时热水目标增量（`forceSoll` 和 `Zwangswarmwasser`），即使禁用 `idle_defaults_aktiv` 也是如此\n通过直接委托给 “EvaluatePVBoost”，无需中间重置到基线，从而消除了空闲和周期过渡期间的 PV boost 触发器写入\n修复了 `calculateTotalEnergy () `中的原始回退索引以读取 `rawParams [1136]/[1137] `（系数 `0.01`）而不是 `rawValues [156]/[157]` 并添加了 2 位十进制舍入"
-			},
-			"1.0.4": {
-				"en": "Optimized V3.9x SHI Modbus Hybrid mode to achieve zero EEPROM write cycles during cycle optimization, pre-heating, and forced heating (uses volatile SHI offset `+10.0 K` via Holding 23 / `10002` instead of base point parameter `12`)\nFixed startup order in `onReady()` so Modbus TCP availability is checked before PV initialization and hardware ZIP timer disable runs after initial raw parameter fetch\nImproved PV startup recovery to only reset setpoints if a PV boost was actually active before restart, and decoupled PV heating boost from active SHI cycle optimization\nReleased SHI DHW mode (`10005 = 0`) when reverting hot water target to baseline and avoided unnecessary HUP voltage writes in `setIdleDefaults()` when HUP optimization is disabled",
-				"de": "Optimierter V3.9x SHI Modbus Hybrid-Modus für null EEPROM-Schreibzyklen bei Zyklusoptimierung, Vor- und Aufheizen (nutzt flüchtigen SHIOffset `+10,0 K` über Holding 23/`10002` statt Basispunktparameter `12`)\nDie Startreihenfolge in `onReady () `wurde korrigiert, sodass Modbus TCP vor der PV-Initialisierung geprüft wird und der ZIP-Timer nach dem ersten Raw-Parameterabruf\nVerbesserter PV-Startmodus, der nur Sollwerte zurücksetzt, wenn vor dem Start ein PV-Boost aktiv war, und PV-Heizboost von der SHI-Zyklusoptimierung entkoppelt\nGibt den SHI-DHW-Modus (`10005 = 0`) frei, wenn der Sollwert für Warmwasser auf Grundwert gesetzt wird, und vermeidet bei deaktivierter HUP-Optimierung",
-				"ru": "Оптимизированный гибридный режим SHI Modbus V3.9x для достижения нулевых циклов записи EEPROM во время оптимизации цикла, предварительного нагрева и принудительного нагрева (вместо параметра базовой точки «12» используется изменчивое смещение SHI «+10,0 K» за счет удержания 23/ «10002»)\nИсправлен порядок запуска в `onReady () `, поэтому доступность Modbus TCP проверяется до инициализации PV, а аппаратный таймер ZIP отключается после первоначальной выборки необработанных параметров\nУлучшено восстановление фотоэлектрической системы при запуске: заданные значения восстанавливаются только в том случае, если до перезапуска фотоэлектрическая система действительно была активна, а также отделите ускорение нагрева фотоэлектрической станции от активной оптимизации цикла SHI\nОтключен режим SHI DHW (`10005 = 0`) при возврате целевого значения горячей воды к исходному уровню и устранен ненужный режим записи напряжения HUP в `setIdleDefaults () `, когда оптимизация HUP отключена",
-				"pt": "Modo híbrido Modbus V3.9x SHI otimizado para zero ciclos de gravação EEPROM durante a otimização, pré-aquecimento e aquecimento forçado (usa offset SHI volátil `+10,0 K` via Holding 23/`10002` em vez do parâmetro base `12`)\nA ordem de inicialização em `onReady () `permite verificar a disponibilidade do Modbus TCP antes da inicialização do PV e desativar o ZIP timer após a busca inicial do parâmetro bruto\nRecuperação aprimorada da inicialização fotovoltaica para redefinir os pontos de ajuste somente se um reforço fotovoltaico estiver ativo e desacoplado da otimização ativa do ciclo SHI\nLançou o modo SHI DHW (`10005 = 0`) ao reverter o alvo de água quente para a linha de base e evitou gravações de tensão HUP em `setIdleDefaults () `ao desativar a otimização",
-				"nl": "Geoptimaliseerde V3.9x SHI Modbus Hybrid-modus om nul EEPROM-schrijfcycli te bereiken tijdens cyclusoptimalisatie, voorverwarming en geforceerde verwarming (maakt gebruik van vluchtige SHI-offset `+10,0 K` via Holding 23/`10002` in plaats van basispuntparameter `12`)\nOpstartvolgorde is opgelost in `OnReady () `, zodat de beschikbaarheid van Modbus TCP wordt gecontroleerd voordat de PV-initialisatie plaatsvindt en de ZIP-timer van de hardware wordt uitgeschakeld nadat de onbewerkte parameters zijn opgehaald\nVerbeterd herstel van de PV-opstart om de instelpunten alleen opnieuw in te stellen als er vóór de herstart daadwerkelijk een PV-boost actief was, en de PV-verwarmingsboost werd losgekoppeld van de actieve SHI-cyclusoptimalisatie\nDe SHI DHW-modus (`10005 = 0`) is vrijgegeven toen de warmwaterdoelstelling werd teruggezet naar de basislijn en werd onnodige HUP-spanning vermeden, geschreven in `setIdleDefaults () `wanneer de HUP-optimalisatie is uitgeschakeld",
-				"fr": "Mode hybride SHI Modbus V3.9x optimisé pour atteindre zéro cycle d'écriture EEPROM lors de l'optimisation, du préchauffage et du chauffage forcé (utilise un décalage SHI volatil « +10,0 K » en maintenant 23/« 10002 » au lieu du paramètre de base « 12 »)\nOrdre de démarrage fixe dans `onReady () `afin de vérifier la disponibilité du protocole Modbus TCP avant l'initialisation du PV et de désactiver le minuteur ZIP après la récupération des paramètres bruts\nAmélioration de la reprise au démarrage pour ne réinitialiser les points de consigne que si un boost PV était réellement actif avant le redémarrage, et isolation du chauffage PV de l'optimisation du cycle SHI actif\nA activé le mode SHI DHW (« 10005 = 0 ») lors du retour à la normale et évité les écritures inutiles de tension HUP dans setIdleDefaults () lorsque l'optimisation du HUP est désactivée",
-				"it": "Modalità SHI Modbus Hybrid V3.9x ottimizzata per zero cicli di scrittura EEPROM durante l'ottimizzazione del ciclo, il preriscaldamento e il riscaldamento forzato (usa l'offset SHI volatile `+10,0 K` via Holding 23/`10002` invece del parametro base `12`)\nOrdine di avvio fisso in `onReady () `per verificare la disponibilità del Modbus TCP prima dell'inizializzazione del PV e del timer ZIP hardware\nMigliore ripristino all'avvio del PV per azzerare i setpoint solo se il PV boost era attivo prima del riavvio e disaccoppiato dal ciclo SHI attivo\nHa attivato la modalità SHI DHW (`10005 = 0`) ripristinando il valore base di acqua calda ed evita inutili scritture di tensione HUP in `setIdleDefaults ()",
-				"es": "Modo Modbus Hybrid SHI V3.9x optimizado para lograr cero ciclos de escritura EEPROM durante la optimización del ciclo, el precalentamiento y el calentamiento forzado (utiliza un desfase SHI volátil de +10,0 K mediante Holding 23/ `10002` en lugar del parámetro de punto base `12`)\nSe ha fijado el orden de inicio en OnReady () para comprobar la disponibilidad de Modbus TCP antes de la inicialización de PV y la desactivación del temporizador ZIP por hardware tras la búsqueda inicial\nMejora de la recuperación de la energía fotovoltaica para restablecer solo los puntos de ajuste si un impulso fotovoltaico estaba realmente activo antes de reiniciarse y desacoplar el impulso de calefacción fotovoltaica de la optimización activa del ciclo SHI\nLanzó el modo DHW SHI (`10005 = 0') al revertir el objetivo de agua caliente a la base y evitó escribir voltaje HUP innecesarias en `setIdleDefaults () `cuando la optimización HUP está desactivada",
-				"pl": "Zoptymalizowany tryb hybrydowy v3.9x SHI Modbus do osiągnięcia zerowych cykli zapisu EEPROM podczas optymalizacji cyklu, podgrzewania wstępnego i wymuszonego ogrzewania (wykorzystuje lotne przesunięcie SHI `+10,0 K` poprzez Holding 23/`10002` zamiast parametru punktu bazowego `12`)\nNaprawiono kolejność uruchamiania w `onReady () `, dzięki czemu dostępność Modbus TCP jest sprawdzana przed inicjalizacją PV i wyłączeniem sprzętowego zegara ZIP po wstępnym pobraniu parametrów surowych\nUlepszone odzyskiwanie uruchamiania fotowoltaicznego w celu zresetowania wartości zadanych tylko wtedy, gdy wzmocnienie fotowoltaiczne było faktycznie aktywne przed ponownym uruchomieniem, i odłączenie wzmocnienia ogrzewania fotowoltaicznego od aktywnej optymalizacji cyklu SHI\nWydano tryb SHI CWU (`10005 = 0`) podczas przywracania celu ciepłej wody do linii bazowej i uniknięto niepotrzebnego zapisu napięcia HUP w `setIdleDefaults () `, gdy optymalizacja HUP jest wyłączona",
-				"uk": "Оптимізований гібридний режим V3.9x SHI Modbus для досягнення нульових циклів запису EEPROM під час оптимізації циклу, попереднього нагрівання та примусового нагрівання (використовує летючий зсув SHI `+10,0 K` через Holding 23/`10002` замість параметра базової точки `12`)\nВиправлено порядок запуску в `onReady () `, тому доступність Modbus TCP перевіряється перед ініціалізацією PV та відключенням апаратного ZIP таймера після початкового отримання необроблених параметрів\nПокращено відновлення запуску фотоелектричної енергії, щоб скинути задані значення лише в тому випадку, якщо підсилення фотоелектричної енергії було фактично активним перед перезапуском, і від'єднано прискорення фотоелектричного опалення від активної оптимізації циклу SHI\nВідпущений режим ГВП SHI (`10005 = 0`) при поверненні цілі гарячої води до базової лінії та уникнення непотрібних записів напруги HUP в `setIdleDefaults () `, коли оптимізація HUP відключена",
-				"zh-cn": "经过优化 V3.9x SHI Modbus 混合模式，在循环优化、预热和强制加热期间实现零 EEPROM 写入周期（使用 Holding 23/`10002` 的挥发性 SHI 偏移量 `+10.0 K`而不是基点参数 `12`）\n修复了 `onReady () `中的启动顺序，因此在 PV 初始化之前会检查 Modbus TCP 的可用性，并在提取初始原始参数后禁用硬件 ZIP 计时器运行\n改进了光伏启动恢复，只有在重启前实际处于活动状态的光伏助推器才会重置设定值，并将光伏加热提升与主动SHI循环优化解耦在一起\n在将热水目标恢复到基线时发布了 SHI DHW 模式（`10005 = 0`），并避免在禁用 HUP 优化时在 `setIdleDefaults () `中写入不必要的 HUP 电压"
-			},
-			"1.0.3": {
-				"en": "Fixed daily COP reset in `copManager.ts` so Heating and Hot Water values reset to `0` after midnight until an active cycle starts",
-				"de": "Der tägliche COP-Reset in `CopManager.TS` wurde behoben, sodass Heiz- und Warmwasserwerte bis Mitternacht auf 0 fallen",
-				"ru": "Исправлен ежедневный сброс COP в «CopManager.TS», в результате чего значения нагрева и горячей воды возвращались к «0» после полуночи до начала активного цикла",
-				"pt": "Corrigido o COP diário em `COPManager.ts` para `0` após a meia-noite até o início do ciclo ativo",
-				"nl": "De dagelijkse COP-reset in `COPManager.ts` is opgelost, zodat de waarden voor verwarming en warm water na middernacht worden teruggezet naar `0` totdat een actieve cyclus begint",
-				"fr": "Correction de la réinitialisation quotidienne du COP dans « COPManager.ts » pour le chauffage et l'eau chaude à « 0 » après minuit",
-				"it": "Risolto il reset giornaliero del COP in `COPManager.ts` per il riscaldamento e l'acqua calda a `0` dopo mezzanotte",
-				"es": "Se ha fijado el COP diario en «CopManager.ts» para que los valores de calefacción y agua caliente pasen a 0 después de medianoche hasta que comience un ciclo activo",
-				"pl": "Naprawiono dzienny reset COP w „CopManager.ts”, dzięki czemu wartości ogrzewania i ciepłej wody zresetowały się do `0` po północy aż do rozpoczęcia aktywnego cyklu",
-				"uk": "Виправлено щоденне скидання COP в `CopManager.ts`, тому значення опалення та гарячої води скидаються до `0` після півночі, поки не почнеться активний цикл",
-				"zh-cn": "修复了 `copManager.ts` 中的每日 COP 重置问题，因此在活动周期开始之前，暖气和热水的值会在午夜之后重置为 “0”"
-			},
-			"1.0.2": {
-				"en": "Fixed `node:` protocol imports (`node:fs`, `node:path`) and repository checker lint issues\nCompleted and synchronized i18n translations across all supported languages\nFixed `jsonConfig` label keys in `generateConfig.ts` to prevent inline language object overrides during build",
-				"de": "Probleme mit `Node: `Protokollimporten (`node:fs`, `node:path`) und Repository-Checker-Lint behoben\nFertige und synchronisierte i18n-Übersetzungen in allen Sprachen\n`JSONConfig`-Labelschlüssel in `generateConfig.ts` gefixt, um Sprachüberschreibungen beim Build zu verhindern",
-				"ru": "Исправлены проблемы с импортом протоколов «node:» (`node:fs`, `node:path`) и линтом для проверки репозитория\nЗавершенные и синхронизированные переводы i18n на все поддерживаемые языки\nИсправлены ключи надписей JsonConfig в `generateConfig.ts` для предотвращения переопределения встроенных языковых объектов во время сборки",
-				"pt": "Corrigidos problemas de importação de protocolos `node: `(`node:fs`, `node:path`) e do repositório\nTraduções i18n concluídas e sincronizadas em todos os idiomas aceitos\nCorrigido o rótulo `jsonConfig` em `generateConfig.ts` para evitar a substituição de objetos na compilação",
-				"nl": "Problemen met de import van het protocol van `node: `(`node:fs`, `node:path`) en problemen met de repository checker opgelost\nVoltooide en gesynchroniseerde i18n-vertalingen in alle ondersteunde talen\nLabelsleutels van `JSONConfig` opgelost in `GenerateConfig.ts` om te voorkomen dat tijdens het bouwen inline-taalobjecten worden overschreven",
-				"fr": "Correction de problèmes d'import de protocoles « node : » (« node:fs », « node:path ») et de lint dans Repository Checker\nTraductions i18n terminées et synchronisées dans toutes les langues prises en charge\nCorrection des clés de label « JSONConfig » dans « GenerateConfig.ts » pour empêcher le remplacement d'objets en ligne",
-				"it": "Risolti i problemi di importazione del protocollo node: (node:fs, node:path) e Repository Checker\nTraduzioni i18n completate e sincronizzate in tutte le lingue supportate\nRisolte le chiavi `JsonConfig` in `GenerateConfig.ts` per evitare l'override degli oggetti in linea",
-				"es": "Se corrigieron problemas de lint en `node: `protocol import (`node:fs`, `node:path) y repository checker\nTraducciones i18n completadas y sincronizadas en todos los idiomas admitidos\nSe corrigieron las claves de etiqueta «JsonConfig» en «GenerateConfig.ts» para evitar que los objetos del lenguaje en línea",
-				"pl": "Naprawiono problemy z importem protokołu `node: `(`node:fs`, `node:path`) i kontrolera repozytorium\nUkończone i zsynchronizowane tłumaczenia i18n we wszystkich obsługiwanych językach\nNaprawiono klawisze etykiet `JSONConfig` w `GenerateConfig.ts`, aby zapobiec nadpisaniom obiektów w języku wbudowanym podczas kompilacji",
-				"uk": "Виправлено імпорт протоколу `node: `(`node:fs`, `node:path`) та проблеми з перевіркою сховища\nЗавершені та синхронізовані переклади i18n на всіх підтримуваних мовах\nВиправлені ключі міток `JsonConfig` у `GenerateConfig.ts` для запобігання перекриттю вбудованих мовних об'єктів під час збирання",
-				"zh-cn": "修复了 `node: `协议导入（`node: fs`、`node: path`）和存储库检查器 lint 问题\n已完成并同步所有支持语言的 i18n 翻译\n修复了 generateConfig.ts 中的 `jsonConfig` 标签键，以防止在构建期间覆盖行内语言对象"
-			}
-		},
-		"titleLang": {
-			"en": "Luxtronik2 Controller",
-			"de": "Luxtronik2-Controller",
-			"ru": "Контроллер Luxtronik2",
-			"pt": "Controlador Luxtronik2",
-			"nl": "Luxtronik2-controller",
-			"fr": "Contrôleur Luxtronik2",
-			"it": "Controllore Luxtronik2",
-			"es": "Controlador Luxtronik2",
-			"pl": "Kontroler Luxtronik2",
-			"uk": "Контролер Luxtronik2",
-			"zh-cn": "Luxtronik2控制器"
-		},
-		"desc": {
-			"en": "Access and control of heat pumps with a Luxtronik 2.x controller",
-			"de": "Zugriff und Steuerung von Wärmepumpen mit einer Luxtronik 2.x Steuereinheit",
-			"ru": "Доступ и управление тепловыми насосами с контроллером Luxtronik 2.x",
-			"pt": "Acesso e controle de bombas de calor com um controlador Luxtronik 2.x",
-			"nl": "Toegang en controle van warmtepompen met een Luxtronik 2.x controller",
-			"fr": "Accès et contrôle des pompes à chaleur avec un contrôleur Luxtronik 2.x",
-			"it": "Accesso e controllo di pompe di calore con un controller Luxtronik 2.x",
-			"es": "Acceso y control de bombas de calor con un controlador Luxtronik 2.x",
-			"pl": "Dostęp i sterowanie pompami ciepła za pomocą sterownika Luxtronik 2.x",
-			"uk": "Доступ та управління тепловими насосами з контролером Luxtronik 2.x",
-			"zh-cn": "通过Luxtronik 2.x控制器访问和控制热泵"
-		},
-		"authors": ["TbsJah <github.tbsjah@googlemail.com>"],
-		"keywords": [
-			"Luxtronik2",
-			"LWD50",
-			"Luft Wärme Pumpe",
-			"Heizung",
-			"LWP",
-			"Alpha InnoTec AIT",
-			"Buderus",
-			"Novelan"
-		],
-		"licenseInformation": {
-			"type": "free",
-			"license": "MIT"
-		},
-		"platform": "Javascript/Node.js",
-		"icon": "luxtronik2-controller.png",
-		"enabled": true,
-		"extIcon": "https://raw.githubusercontent.com/TbsJah/ioBroker.luxtronik2-controller/main/admin/luxtronik2-controller.png",
-		"readme": "https://github.com/TbsJah/ioBroker.luxtronik2-controller/blob/main/README.md",
-		"loglevel": "info",
-		"tier": 3,
-		"mode": "daemon",
-		"type": "climate-control",
-		"compact": true,
-		"messagebox": true,
-		"connectionType": "local",
-		"dataSource": "poll",
-		"adminUI": {
-			"config": "json"
-		},
-		"webComponents": [
-			"webcomponents/luxtronik-status-card.json",
-			"webcomponents/luxtronik-hydraulics-flow.json",
-			"webcomponents/luxtronik-dhw-tank.json",
-			"webcomponents/luxtronik-heatcurve-tuner.json",
-			"webcomponents/luxtronik-cop-cockpit.json",
-			"webcomponents/luxtronik-health-monitor.json",
-			"webcomponents/luxtronik-schedule-radar.json",
-			"webcomponents/luxtronik-diagnostics-feed.json"
-		],
-		"dependencies": [
-			{
-				"js-controller": ">=7.0.7"
-			}
-		],
-		"globalDependencies": [
-			{
-				"admin": ">=7.8.23"
-			}
-		]
-	},
-	"native": {
-		"host": "192.168.178.81",
-		"port": 8889,
-		"interval": 30,
-		"fusspunkt": 21.7,
-		"endpunkt": 23,
-		"zip_aktiv_ww": 600,
-		"zip_aktiv": 120,
-		"sync_warmwater_target_temperature": 54,
-		"sync_hotwater_temperature_hysteresis": 10,
-		"sync_heating_system_circ_pump_voltage_minimal_heating": 3,
-		"sync_heating_system_circ_pump_voltage_nominal_heating": 7,
-		"sync_heating_system_circ_pump_voltage_minimal_water": 3,
-		"sync_heating_system_circ_pump_voltage_nominal_water": 10,
-		"sync_return_temperature_hysteresis": 1.5,
-		"zip_last_run_min": 600,
-		"regelung_aktiv": false,
-		"Heating_after_warmwater": true,
-		"telegram_enabled": false,
-		"notification_bell": false,
-		"telegram_receiver": "",
-		"telegram_instance": "",
-		"motionSensors": [],
-		"motion_sensors_aktiv": false,
-		"cop_calculation_active": false,
-		"cop_source_power": "internal",
-		"cop_oid_power_total": "",
-		"cop_source_thermal": "internal",
-		"cop_oid_thermal_total": "",
-		"operation_mode": "readonly",
-		"pv_sunset_cutoff_active": false,
-		"pv_sunset_buffer": 60
-	},
-	"notifications": [
-		{
-			"scope": "luxtronik2-controller",
-			"name": {
-				"en": "Luxtronik2-Controller",
-				"de": "Luxtronik2-Controller",
-				"ru": "Контроллер Luxtronik2",
-				"pt": "Controlador Luxtronik2",
-				"nl": "Luxtronik2-controller",
-				"fr": "Contrôleur Luxtronik2",
-				"it": "Controllore Luxtronik2",
-				"es": "Controlador Luxtronik2",
-				"pl": "Kontroler Luxtronik2",
-				"uk": "Контролер Luxtronik2",
-				"zh-cn": "Luxtronik2控制器"
-			},
-			"description": {
-				"en": "Notifications from the Luxtronik2-Controller adapter",
-				"de": "Benachrichtigungen vom Luxtronik2-Controller Adapter",
-				"ru": "Уведомления от адаптера Luxtronik2-Controller",
-				"pt": "Notificações do adaptador Luxtronik2-Controller",
-				"nl": "Meldingen van de Luxtronik2-Controller adapter",
-				"fr": "Notifications de l'adaptateur Luxtronik2-Controller",
-				"it": "Notifiche dall'adattatore Luxtronik2-Controller",
-				"es": "Notificaciones del adaptador Luxtronik2-Controller",
-				"pl": "Powiadomienia z adaptera Luxtronik2-Controller",
-				"uk": "Сповіщення від адаптера Luxtronik2-Controller",
-				"zh-cn": "来自 Luxtronik2-Controller 适配器的通知"
-			},
-			"categories": [
-				{
-					"category": "lwpError",
-					"name": {
-						"en": "Heat Pump Errors",
-						"de": "Wärmepumpen-Fehler",
-						"ru": "Ошибки теплового насоса",
-						"pt": "Erros da bomba de calor",
-						"nl": "Fouten warmtepomp",
-						"fr": "Erreurs de la pompe à chaleur",
-						"it": "Errori della pompa di calore",
-						"es": "Errores de la bomba de calor",
-						"pl": "Błędy pompy ciepła",
-						"uk": "Помилки теплового насоса",
-						"zh-cn": "热泵错误"
-					},
-					"severity": "alert",
-					"description": {
-						"en": "Error messages from the heating system",
-						"de": "Fehlermeldungen aus der Heizungsanlage",
-						"ru": "Сообщения об ошибках от системы отопления",
-						"pt": "Mensagens de erro do sistema de aquecimento",
-						"nl": "Foutmeldingen van het verwarmingssysteem",
-						"fr": "Messages d'erreur du système de chauffage",
-						"it": "Messaggi di errore dal sistema di riscaldamento",
-						"es": "Mensajes de error del sistema de calefacción",
-						"pl": "Komunikaty o błędach z systemu grzewczego",
-						"uk": "Повідомлення про помилки від системи опалення",
-						"zh-cn": "来自供暖系统的错误消息"
-					},
-					"regex": [],
-					"limit": 10
-				},
-				{
-					"category": "lwpSystem",
-					"name": {
-						"en": "Heat Pump Updates & Info",
-						"de": "Wärmepumpen Updates & Info",
-						"ru": "Обновления и информация о тепловом насосе",
-						"pt": "Atualizações e informações da bomba de calor",
-						"nl": "Warmtepomp updates & info",
-						"fr": "Mises à jour et infos de la pompe à chaleur",
-						"it": "Aggiornamenti e informazioni sulla pompa di calore",
-						"es": "Actualizaciones e información de la bomba de calor",
-						"pl": "Aktualizacje i informacje o pompie ciepła",
-						"uk": "Оновлення та інформація про тепловий насос",
-						"zh-cn": "热泵更新和信息"
-					},
-					"severity": "info",
-					"description": {
-						"en": "System information and firmware updates",
-						"de": "Systeminformationen und Firmware-Updates",
-						"ru": "Системная информация и обновления прошивки",
-						"pt": "Informações do sistema e atualizações de firmware",
-						"nl": "Systeeminformatie en firmware-updates",
-						"fr": "Informations système et mises à jour du firmware",
-						"it": "Informazioni di sistema e aggiornamenti firmware",
-						"es": "Información del sistema y actualizaciones de firmware",
-						"pl": "Informacje o systemie i aktualizacje oprogramowania",
-						"uk": "Системна інформація та оновлення прошивки",
-						"zh-cn": "系统信息和固件更新"
-					},
-					"regex": [],
-					"limit": 10
-				}
-			]
-		}
-	],
-	"objects": [],
-	"instanceObjects": [
-		{
-			"_id": "info",
-			"type": "channel",
-			"common": {
-				"name": "Information"
-			},
-			"native": {}
-		},
-		{
-			"_id": "backups",
-			"type": "meta",
-			"common": {
-				"name": "Luxtronik DTA Backups",
-				"type": "meta.user"
-			},
-			"native": {}
-		},
-		{
-			"_id": "info.connection",
-			"type": "state",
-			"common": {
-				"role": "indicator.connected",
-				"name": "Device or service connected",
-				"type": "boolean",
-				"read": true,
-				"write": false,
-				"def": false
-			},
-			"native": {}
-		}
-	]
+  "common": {
+    "name": "luxtronik2-controller",
+    "version": "1.3.0",
+    "news": {
+      "1.3.0": {
+        "en": "Fixed COP/JAZ datapoint paths (`Information.16_Efficiency.Total.*`) in `<luxtronik-status-card>` so daily COP and annual JAZ values populate correctly\nAdded shared Web Component base class (`luxtronik-base.js`) and two new `@iobroker/web-components` widgets for Aura, VIS-2, and WebUI:\n`<luxtronik-hydraulics-flow>`: animated hydraulics & energy flow diagram (heating, DHW, defrost reverse flow, ZWE1, dynamic inverter speed)\n`<luxtronik-dhw-tank>`: hot water tank level gauge with hysteresis recharge threshold, one-shot heating trigger, and animated ZIP countdown ring\n\nAdded five additional `@iobroker/web-components` widgets for Aura, VIS-2, and WebUI (completing the 8-widget suite):\n`<luxtronik-heatcurve-tuner>`: interactive live heating curve with hysteresis band, heating limit indicator, live operating point, and parallel offset slider with preview and apply controls\n`<luxtronik-cop-cockpit>`: COP/JAZ efficiency matrix (Total, Heating, Hot Water across Today, 7 Days, Month, Year) with live COP calculation and lifetime totals\n`<luxtronik-health-monitor>`: compressor cycle duration gauge (avg. min/cycle), context-aware active lock/delay/defrost timers, and EEPROM write cycle monitor\n`<luxtronik-schedule-radar>`: 24-hour schedule bars for heating reduction, hot water lock times, and circulation pump windows with a live time marker\n`<luxtronik-diagnostics-feed>`: switchable error log and outage history feed with firmware update banner, changelog preview, and optional Modbus error reset",
+        "de": "<luxtronik-status-card>COP/JAZ-Datenpunktpfade (`Information.16_Efficiency.Total.*`) in `` korrigiert, sodass tägliche COP- und JAZ-Werte korrekt gefüllt sind\nGemeinsame Webkomponenten-Basisklasse (`luxtronik-base.js`) und zwei neue `@iobroker /web-component`-Widgets für Aura, VIS-2 und WebUI hinzugefügt:\n`<luxtronik-hydraulics-flow>`: animiertes Hydraulik- und Energieflussdiagramm (Heizen, Warmwasser, Abtauung, ZWE1, dynamischer Umrichter)\n`<luxtronik-dhw-tank>`: Tankfüllstandsanzeige mit Hystereseschwelle, One-Shot-Heizauslöser und animiertem ZIP-Countdown-Ring\n\nFünf weitere `@iobroker /web-components` Widgets für Aura, VIS-2 und WebUI hinzugefügt (ergänzt die 8-Widget-Suite):\n`<luxtronik-heatcurve-tuner>`: interaktive Live-Heizkurve mit Hystereseband, Heizgrenzanzeige, Live-Betriebspunkt und parallelem Offset-Slider mit Vorschau und Anwenden\n`<luxtronik-cop-cockpit>`: COP/JAZ-Effizienzmatrix (Gesamt, Heizung, Warmwasser für heute, 7 Tage, Monat, Jahr) mit Live-COP-Berechnung und Gesamtwerten\n`<luxtronik-health-monitor>`: Kompressorzyklus-Dauer (avg. min/Zyklus), kontextabhängige Stop-/Abtautimer und EEPROM-Schreibzyklusmonitor\n`<luxtronik-schedule-radar>`: 24-Stunden-Zeitbalken für Heizungsreduzierung, Warmwassersperre und Umwälzpumpenfenster mit Live-Zeitanzeige\n`<luxtronik-diagnostics-feed>`: umschaltbares Fehler- und Ausfallprotokoll mit Firmware-Banner, Changelog-Vorschau und optionalem Modbus-Reset",
+        "ru": "<luxtronik-status-card>Исправлены пути к точкам данных COP/JAZ (`Information.16_Efficiency.Total.*`) в `, поэтому ежедневные значения COP и годовые значения JAZ заполняются правильно\nДобавлен общий базовый класс веб-компонентов (`luxtronik-base.js`) и два новых виджета «@iobroker /web-components» для Aura, VIS-2 и WebUI:\n`<luxtronik-hydraulics-flow>`: анимированная диаграмма гидравлики и потока энергии (отопление, ГВС, обратный поток размораживания, ZWE1, динамическая частота вращения инвертора)\n`<luxtronik-dhw-tank>`: уровнемер в резервуаре для горячей воды с порогом гистерезиса, триггером нагрева одним выстрелом и анимированным кольцом обратного отсчета ZIP\n\nДобавлено пять дополнительных виджетов «@iobroker /web-components» для Aura, VIS-2 и WebUI (дополнение к набору из 8 виджетов):\n`<luxtronik-heatcurve-tuner>`: интерактивная кривая нагрева в реальном времени с полосой гистерезиса, индикатором предела нагрева, рабочей точкой в реальном времени и ползунком параллельного смещения с элементами управления предварительным просмотром и применением\n`<luxtronik-cop-cockpit>`: Матрица эффективности COP/JAZ (общая эффективность, отопление, горячая вода за сегодня, 7 дней, месяц, год) с расчетом COP в реальном времени и итоговыми показателями срока службы\n`<luxtronik-health-monitor>`: индикатор продолжительности цикла компрессора (среднее значение мин/цикл), контекстно-зависимые таймеры активной блокировки/задержки/размораживания и монитор цикла записи EEPROM\n`<luxtronik-schedule-radar>`: 24-часовые шкалы снижения нагрева, время блокировки горячей воды и окна циркуляционных насосов с индикатором времени в реальном времени\n`<luxtronik-diagnostics-feed>`: переключаемый журнал ошибок и лента истории сбоев с баннером обновления прошивки, предварительным просмотром журнала изменений и опциональным сбросом ошибок Modbus",
+        "pt": "<luxtronik-status-card>Caminhos de dados COP/JAZ fixos (`Information.16_Efficiency.Total.*`) em `` para que os valores diários de COP e JAZ anuais\nAdicionamos a classe base compartilhada (`luxtronik-base.js`) e dois novos widgets `@iobroker /web-components` para Aura, VIS-2 e WebUI:\n`<luxtronik-hydraulics-flow>`: diagrama animado de hidráulica e energia (aquecimento, DHW, degelo reverso, ZWE1, inversor dinâmico)\n`<luxtronik-dhw-tank>`: medidor de nível de água quente com limiar de histerese, gatilho de aquecimento único e anel ZIP animado\n\nForam adicionados 5 widgets `@iobroker /web-components` para Aura, VIS-2 e WebUI (completando a suíte de 8 widgets):\n`<luxtronik-heatcurve-tuner>`: curva interativa de aquecimento ao vivo com banda de histerese, limite de aquecimento, ponto de operação e controle paralelo com controles\n`<luxtronik-cop-cockpit>`: matriz de eficiência COP/JAZ (total, aquecimento, água quente hoje, 7 dias, mês, ano) com cálculo de COP ao vivo e totais de vida\n`<luxtronik-health-monitor>`: medidor de duração do ciclo do compressor (média min/ciclo), temporizadores contextuais e monitor de ciclo de gravação EEPROM\n`<luxtronik-schedule-radar>`: barras de 24 horas para redução de aquecimento, travas de água quente e janelas com marcador de tempo real\n`<luxtronik-diagnostics-feed>`: log de erros e histórico de interrupções com banner de atualização de firmware, prévia e reset de erro Modbus opcional",
+        "nl": "<luxtronik-status-card>Vaste COP/JAZ-datapuntpaden (`Information.16_Efficiency.Total.*`) in `` zodat de dagelijkse COP- en jaarlijkse JAZ-waarden correct worden ingevuld\nGedeelde basisklasse voor webcomponenten (`luxtronik-base.js`) en twee nieuwe widgets `@iobroker /web-components` toegevoegd voor Aura, VIS-2 en WebUI:\n`<luxtronik-hydraulics-flow>`: geanimeerd stroomschema voor hydrauliek en energie (verwarming, warm water, omgekeerde ontdooiingsstroom, ZWE1, dynamisch toerental van de omvormer)\n`<luxtronik-dhw-tank>`: niveaumeter voor de warmwatertank met oplaaddrempel voor hysterese, verwarmingstrigger met één druk op de knop en geanimeerde aftelring met ritssluiting\n\nVijf extra widgets `@iobroker /web-components` toegevoegd voor Aura, VIS-2 en WebUI (waarmee de 8-widgetsuite is voltooid):\n`<luxtronik-heatcurve-tuner>`: interactieve live-verwarmingscurve met hystereseband, verwarmingsgrensindicator, actief bedieningspunt en parallelle offsetschuifregelaar met voorvertoning en bedieningselementen voor toepassen\n`<luxtronik-cop-cockpit>`: COP/JAZ-efficiëntiematrix (totaal, verwarming, warm water vandaag, 7 dagen, maand, jaar) met actuele COP-berekening en totale levensduur\n`<luxtronik-health-monitor>`: meter voor de duur van de compressorcyclus (gemiddeld min/cyclus), contextbewuste timers voor actieve vergrendeling/vertraging/ontdooiing en EEPROM-schrijfcyclusmonitor\n`<luxtronik-schedule-radar>`: tijdsbalken die 24 uur per dag geopend zijn om de verwarming te verlagen, sluitingstijden voor warm water en ramen van de circulatiepomp met een actuele tijdmarkering\n`<luxtronik-diagnostics-feed>`: omschakelbaar foutenlogboek en feed met uitvalgeschiedenis, met banner voor firmware-updates, preview van het wijzigingslogboek en optionele Modbus-foutreset",
+        "fr": "<luxtronik-status-card>Chemins de points de données COP/JAZ fixes (`Information.16_Efficiency.Total.*`) dans ``, donc les valeurs COP et JAZ annuelles sont correctement renseignées\nAjout de la classe de base partagée (luxtronik-base.js) et de deux nouveaux widgets @iobroker /web-components pour Aura, VIS-2 et WebUI :\n`<luxtronik-hydraulics-flow>` : schéma hydraulique et énergétique animé (chauffage, ECS, dégivrage inversé, ZWE1, variateur dynamique)\n`<luxtronik-dhw-tank>` : jauge de niveau du ballon d'eau chaude avec seuil de recharge par hystérésis, déclenchement du chauffage en un coup et compte à rebours animé\n\nAjout de cinq widgets « @iobroker /web-components » supplémentaires pour Aura, VIS-2 et WebUI (complétant la suite de 8 widgets) :\n`<luxtronik-heatcurve-tuner>` : courbe de chauffage interactive en direct avec bande d'hystérésis, indicateur de limite de chauffe, point de fonctionnement en temps réel et curseur de décalage parallèle avec prévisualisation et application\n`<luxtronik-cop-cockpit>` : Matrice d'efficacité COP/JAZ (total, chauffage, eau chaude aujourd'hui, 7 jours, mois, année) avec calcul du COP en direct et totaux à vie\n`<luxtronik-health-monitor>` : indicateur de durée du cycle du compresseur (min/cycle en moyenne), minuterie contextuelle active et moniteur de cycles d'écriture EEPROM\n`<luxtronik-schedule-radar>` : Barres horaires 24 heures sur 24 pour la réduction du chauffage, les temps de blocage de l'eau chaude et les vitres des circulateurs\n`<luxtronik-diagnostics-feed>` : journal des erreurs commutable et historique des pannes avec bannière de mise à jour du firmware, aperçu du changelog et réinitialisation des erreurs Modbus en option",
+        "it": "<luxtronik-status-card>Percorsi dati COP/JAZ fissi (`Information.16_Efficiency.Total.*`) in `` per i valori COP giornalieri e JAZ annuali\nAggiunta la classe base condivisa Web Component (`luxtronik-base.js`) e due nuovi widget @iobroker /web-components per Aura, VIS-2 e WebUI:\n`<luxtronik-hydraulics-flow>`: diagramma animato di idraulica ed energia (riscaldamento, ACS, defrost reverse flow, ZWE1, inverter dinamico)\n`<luxtronik-dhw-tank>`: indicatore del livello del serbatoio con soglia di ricarica per isteresi, riscaldamento istantaneo e conto alla rovescia animato\n\nAggiunti altri cinque widget `@iobroker /web-components` per Aura, VIS-2 e WebUI (completando la suite da 8 widget):\n`<luxtronik-heatcurve-tuner>`: curva di riscaldamento interattiva in tempo reale con banda di isteresi, limite di calore, punto operativo live e cursore parallelo con anteprima e comandi\n`<luxtronik-cop-cockpit>`: matrice di efficienza COP/JAZ (totale, riscaldamento, acqua calda oggi, 7 giorni, mese, anno) con calcolo del COP in tempo reale e durata\n`<luxtronik-health-monitor>`: indicatore della durata del ciclo del compressore (min media/ciclo), timer contestuali attivi e monitor del ciclo di scrittura EEPROM\n`<luxtronik-schedule-radar>`: barre orarie 24 ore su 24 per la riduzione del riscaldamento, acqua calda e finestre per pompe di circolazione\n`<luxtronik-diagnostics-feed>`: registro errori e interruzioni commutabile con banner di aggiornamento del firmware, anteprima e reset Modbus opzionale",
+        "es": "<luxtronik-status-card>Rutas de puntos de datos COP/JAZ fijas (`Inform.16_Efficiency.Total.*`) en `` para que los valores diarios de COP y JAZ anuales se rellenen correctamente\nSe ha añadido la clase base de componentes web compartida (`luxtronik-base.js) y dos nuevos widgets `@iobroker /web-components` para Aura, VIS-2 y WebUI:\n`<luxtronik-hydraulics-flow>`: diagrama animado de hidráulica y flujo de energía (calefacción, ACS, deshielo, flujo inverso, ZWE1, inversor dinámico)\n`<luxtronik-dhw-tank>`: indicador de nivel de tanque de agua caliente con umbral de recarga por histéresis, disparador de calentamiento de un tiro y anillo animado de cuenta regresiva\n\nSe han añadido cinco widgets `@iobroker /web-components` adicionales para Aura, VIS-2 y WebUI (completando la suite de 8 widgets):\n`<luxtronik-heatcurve-tuner>`: curva de calentamiento en vivo interactiva con banda de histéresis, indicador de límite de calor, punto de operación en vivo y control de desfase paralelo con controles de vista previa y aplicación\n`<luxtronik-cop-cockpit>`: Matriz de eficiencia COP/JAZ (total, calefacción, agua caliente hoy, 7 días, mes, año) con cálculo de COP en vivo y totales de por vida\n`<luxtronik-health-monitor>`: indicador de duración del ciclo del compresor (media min/ciclo), temporizadores de bloqueo, retraso y descongelación activos según el contexto y monitor de ciclo de escritura EEPROM\n`<luxtronik-schedule-radar>`: barras de 24 horas para reducir la calefacción, bloquear el agua caliente y ventanas de la bomba de circulación con un marcador de hora en vivo\n`<luxtronik-diagnostics-feed>`: registro de errores e historial de cortes intercambiables con anuncio de actualización del firmware, vista previa de cambios y restablecimiento de errores de Modbus opcional",
+        "pl": "<luxtronik-status-card>Naprawiono ścieżki punktów danych COP/JAZ (`Information.16_Efficiency.Total.*`) w `, tak aby dzienne wartości COP i roczne JAZ były wypełniane poprawnie\nDodano współdzieloną klasę bazową Web Component (`luxtronik-base.js) oraz dwa nowe widżety `@iobroker /web-components` dla Aura, VIS-2 i WebUI:\n`<luxtronik-hydraulics-flow>`: animowana hydraulika i schemat przepływu energii (ogrzewanie, CWU, przepływ wsteczny rozmrażania, ZWE1, dynamiczna prędkość falownika)\n<luxtronik-dhw-tank>`: wskaźnik poziomu zbiornika ciepłej wody z progiem ładowania histerezy, wyzwalaczem nagrzewania za jednym strzałem i animowanym pierścieniem odliczającym ZIP\n\nDodano pięć dodatkowych widżetów „@iobroker /web-components” dla Aura, VIS-2 i WebUI (uzupełniając pakiet 8 widgetów):\n`<luxtronik-heatcurve-tuner>`: interaktywna krzywa ogrzewania na żywo z pasmem histerezy, wskaźnikiem granicy ogrzewania, punktem pracy pod napięciem i równoległym suwakiem przesunięcia z kontrolkami podglądu i zastosowania\n`<luxtronik-cop-cockpit>`: Macierz wydajności COP/JAZ (ogółem, ogrzewanie, ciepła woda w dniu dzisiejszym, 7 dni, miesiąc, rok) z obliczeniami COP na żywo i sumy żywotności\n<luxtronik-health-monitor>`: miernik czasu trwania cyklu sprężarki (śr. min/cykl), aktywne czasy blokady, opóźnienia/rozmrażania z uwzględnieniem kontekstu oraz monitor cyklu zapisu EEPROM\n<luxtronik-schedule-radar>`: 24-godzinne paski harmonogramu redukcji ogrzewania, czasy blokady ciepłej wody i okna pompy cyrkulacyjnej ze znacznikiem czasu pracy\n`<luxtronik-diagnostics-feed>`: przełączalny dziennik błędów i kanał historii awarii z banerem aktualizacji oprogramowania układowego, podglądem dziennika zmian i opcjonalnym resetowaniem błędów Modbus",
+        "uk": "<luxtronik-status-card>Виправлені шляхи координат даних COP/JAZ (`Information.16_Efficiency.Total.*`) у ``, тому щоденні значення COP та річні JAZ заповнюються правильно\nДодано спільний базовий клас веб-компонента (`luxtronik-base.js`) та два нових віджети `@iobroker /web-components` для Aura, VIS-2 та WebUI:\n`<luxtronik-hydraulics-flow>`: анімована схема гідравліки та енергетичного потоку (опалення, ГВП, зворотний потік розморожування, ZWE1, динамічна швидкість інвертора)\n`<luxtronik-dhw-tank>`: вимірювач рівня резервуара для гарячої води з порогом зарядки гістерезису, одноразовим спусковим гачком нагріву та анімованим кільцем зворотного відліку ZIP\n\nДодано п'ять додаткових віджетів `@iobroker /web-components` для Aura, VIS-2 та WebUI (доповнення набору 8-віджетів):\n`<luxtronik-heatcurve-tuner>`: інтерактивна крива нагріву в режимі реального часу з смугою гістерезису, індикатором межі нагрівання, робочою точкою в режимі реального часу та повзунком паралельного зміщення з попереднім переглядом та застосуванням елементів керування\n`<luxtronik-cop-cockpit>`: Матриця ефективності COP/JAZ (загальна, опалення, гаряча вода протягом сьогоднішнього дня, 7 днів, місяця, року) з розрахунком COP в реальному часі та підсумками терміну служби\n`<luxtronik-health-monitor>`: індикатор тривалості циклу компресора (середн. хв/цикл), контекстно-орієнтовані таймери активного блокування/затримання/розморожування та монітор циклу запису EEPROM\n`<luxtronik-schedule-radar>`: 24-годинні плани для скорочення опалення, час блокування гарячої води та вікна циркуляційного насоса з індикатором реального часу\n`<luxtronik-diagnostics-feed>`: перемикається журнал помилок та стрічка історії збоїв із банером оновлення мікропрограми, попереднім переглядом журналу змін та додатковим скиданням помилок Modbus",
+        "zh-cn": "<luxtronik-status-card>修复了 ``中的 COP/JAZ 数据点路径（`Information.16_Efficiency.Total.*`），因此每日 COP 和年度 JAZ 值可以正确填充\n为 Aura、VIS-2 和 WebUI 添加了共享的 Web 组件基类（`luxtronik-base.js`）和两个新的 @iobroker /web-components 插件：\n`<luxtronik-hydraulics-flow>`：动画液压和能量流程图（加热、DHW、除霜反向流、ZWE1、动态逆变器速度）\n`<luxtronik-dhw-tank>`：带有滞后再充值阈值的热水箱液位计、一键式加热触发器和动画 ZIP 倒计时环\n\n为 Aura、VIS-2 和 WebUI 添加了另外五个 “@iobroker /web-components” 小部件（完善了 8 个小部件套件）：\n`<luxtronik-heatcurve-tuner>`：交互式实时加热曲线，带滞后频带、加热极限指示器、实时操作点和带有预览和应用控件的平行偏移滑块\n<luxtronik-cop-cockpit>`：COP/JAZ 效率矩阵（当天、7 天、月、年）的总计、供暖、热水），包含实时 COP 计算和生命周期总计\n<luxtronik-health-monitor>`：压缩机循环持续时间计（平均分钟/周期）、上下文感知的主动锁定/延迟/除霜计时器和 EEPROM 写入周期监视器\n`<luxtronik-schedule-radar>`：24 小时计划栏，用于减少供暖、热水锁定时间和带有实时时间标记的循环泵窗口\n`<luxtronik-diagnostics-feed>`：可切换的错误日志和中断历史记录源，包括固件更新标题、变更日志预览和可选的 Modbus 错误重置"
+      },
+      "1.2.1": {
+        "en": "Fixed `temperature_target_return` being overwritten with `35.0 °C` in SHI Modbus mode when `sync_modbus_holding_1` (`10060`, room thermostat target) is enabled by removing the duplicate Modbus mapping from `src/mapping/info.ts`\nCleaned up SHI holding register mapping in `src/modbusManager.ts` and added an SHI mode check (`10000 === 1`) when reading register `10001` for `heating_flow_out_temperature_target` (`sync_modbus_holding_2`) so its inactive `35.0 °C` default does not overwrite `P0017`",
+        "de": "Es wurde behoben, dass `temperature_target_return` im SHI Modbus-Modus mit `35,0 °C` überschrieben wurde, wenn `sync_modbus_holding_1` (`10060`, Raumthermostat-Target) aktiviert war, indem das Modbus-Mapping aus `src/mapping/info.ts` entfernt wurde\nDie HI-Halteregister-Zuordnung in `src/ModbusManager.ts` wurde bereinigt und beim Lesen von `10001` für `heating_flow_out_temperature_target` (`sync_modbus_holding_2`) geprüft, sodass der inaktive Standard `35,0 °C` nicht überschreibt",
+        "ru": "Исправлена ошибка, из-за которой `temperater_target_return` в режиме SHI Modbus при включении `sync_modbus_holding_1` (`10060`, целевое значение комнатного термостата) путем удаления дублированного сопоставления Modbus из `src/mapping/info.ts`\nИсправлено сопоставление регистров хранения SHI в `src/ModBusManager.ts` и добавлена проверка режима SHI (`10000 === 1`) при чтении регистра `10001` для `heating_flow_out_textemperature_target` (`sync_modbus_holding_2`), поэтому значение `P0017` неактивно",
+        "pt": "Corrigido o sobrescrito de `temperature_target_return` por `35,0°C` no modo SHI Modbus quando `sync_modbus_holding_1` (`10060`, alvo do termostato ambiente) é ativado removendo o mapeamento Modbus duplicado de `src/mapping/info.ts`\nLimpou o mapeamento do registro SHI em `src/ModbusManager.ts` e adicionou uma verificação do modo SHI (`10000 === 1`) ao ler o registro `10001` para `heating_flow_out_temperature_target` (`sync_modbus_holding_2`) para que seu padrão inativo de `35,0 °C` não substitua `P0017`",
+        "nl": "Probleem opgelost dat `temperature_target_return` werd overschreven met `35,0 °C` in de SHI Modbus-modus wanneer `sync_modbus_holding_1` (`10060`, doel van de kamerthermostaat) is ingeschakeld door de dubbele Modbus-toewijzing te verwijderen uit `src/mapping/info.ts`\nDe SHI-holding-registertoewijzing is opgeschoond in `src/ModbusManager.ts` en een SHI-moduscontrole toegevoegd (`10000 === 1`) bij het lezen van register `10001` voor `heating_flow_out_temperature_target` (`sync_modbus_holding_2`), zodat de inactieve standaardinstelling van `35,0 °C` de `P0017` niet overschrijft",
+        "fr": "Correction du remplacement de « temperature_target_return » par « 35,0 °C » en mode SHI Modbus lorsque « sync_modbus_holding_1 » (« 10060 », cible du thermostat d'ambiance) est activé en supprimant le mappage Modbus dupliqué de « src/mapping/info.ts »\nLe mappage des registres SHI a été nettoyé dans « src/ModbusManager.ts » et a ajouté un check du mode SHI (« 10000 === 1 ») lors de la lecture du registre « 10001 » pour « heating_flow_out_temperature_target » (sync_modbus_holding_2). Le registre « 35,0 °C » par défaut ne remplace pas « P0017 »",
+        "it": "Risolto il problema con `temperature_target_return` sovrascritto con `35,0 °C` in modalità SHI Modbus quando `sync_modbus_holding_1` (`10060`, termostato ambiente) era abilitato rimuovendo la mappatura Modbus duplicata da `src/mapping/info.ts`\nHa ripulito la mappatura del registro SHI in `src/ModbusManager.ts` e ha aggiunto un controllo della modalità SHI (`10000 === 1`) durante la lettura del registro `10001` per `heating_flow_out_temperature_target`",
+        "es": "Se ha corregido que se sobrescribía `temperature_target_return con 35,0 °C en el modo Modbus SHI cuando `sync_modbus_holding_1` (`10060», objetivo del termostato ambiente) estaba activado al eliminar el mapeo Modbus duplicado de `src/mapping/info.ts`\nLimpió el mapa del registro de almacenamiento SHI en `src/ModbusManager.ts y añadió una comprobación del modo SHI (10000 === 1) al leer el registro `10001` para `heating_flow_out_temperature_target` (`sync_modbus_holding_2`) para que esté inactivo por defecto a 35,0 °C no sobrescribe `P0017`",
+        "pl": "Naprawiono nadpisanie `temperatura_target_return` na `35,0 °C` w trybie SHI Modbus, gdy `sync_modbus_holding_1` (`10060`, cel termostatu pokojowego) jest włączone przez usunięcie zduplikowanego mapowania Modbus z `src/mapping/info.ts`\nWyczyszczono mapowanie rejestru trzymającego SHI w `src/ModbusManager.ts` i dodano sprawdzenie trybu SHI (`10000 === 1`) podczas odczytu rejestru `10001` dla `heating_flow_out_temperature _target` (`sync_modbus_holding_2`), więc jego nieaktywne domyślne `35.0 °C` nie nadpisuje `P0017`",
+        "uk": "Виправлено перезапис `temperatur_target_retur` на `35,0 °C` у режимі SHI Modbus, коли `sync_modbus_holding_1` (`10060`, ціль кімнатного термостата) ввімкнено шляхом видалення дублікатів відображення Modbus з `src/mapping/info.ts`\nОчищено відображення реєстру утримування SHI в `src/ModbusManager.ts` та додано перевірку режиму SHI (`10000 === 1`) при читанні реєстру `10001` для `heating_flow_out_temperature_target` (`sync_modbus_holding_2`), тому його неактивний `35,0 °C` за замовчуванням не перезаписує `P0017`",
+        "zh-cn": "修复了通过从 src/mapping/info.ts 中移除重复的 Modbus 映射启用 sync_modbus_holding_1（10060，房间恒温器目标）时 SHI Modbus 模式下 “temperature_target_return” 被覆盖 “35.0 °C” 的问题\n清理了 `src/modbusManager.ts` 中的 SHI 持有寄存器映射，并在读取 `heating_flow_out_temperature_target` 寄存器 `10001`（`sync_modbus_holding_2`）时添加了 SHI 模式检查（`10000 === 1`），因此其非活动的 `35.0 °C`默认值不会覆盖 `P0017`"
+      },
+      "1.2.0": {
+        "en": "Added configurable sunset cutoff buffer (`pv_sunset_cutoff_active`, `pv_sunset_buffer`) to PV surplus management to prevent starting new PV boosts shortly before local sunset using `system.config` coordinates\nAdded `@iobroker/web-components` status card (`<luxtronik-status-card>`) for Aura, VIS-2, and WebUI displaying live temperatures, operating mode, PV boost status, COP/JAZ values, and quick actions\nUpdated Cycle Optimization description in `jsonConfig.json` to reflect the dynamic hysteresis-based offset instead of the legacy `35 °C` wording",
+        "de": "Konfigurierbarer Puffer (`pv_sunset_cutoff_active`, `pv_sunset_buffer`) zum PV-Überschussmanagement hinzugefügt, um neue PV-Boosts kurz vor dem lokalen Sonnenuntergang mit `system.config`-Koordinaten zu verhindern\nStatuskarte (`<luxtronik-status-card>`) für Aura, VIS-2 und WebUI mit Live-Temperatur, Betriebsmodus, PV-Boost-Status, COP/JAZ-Werten und Schnellaktionen hinzugefügt @iobroker\nDie Beschreibung der Zyklusoptimierung in `JSONConfig.json` wurde um den dynamischen Hysterese-Offset ersetzt",
+        "ru": "Добавлен настраиваемый буфер отсечения заката (`pv_sunset_cutoff_active`, `pv_sunset_buffer`) для предотвращения запуска новых фотоэлектрических бустеров незадолго до локального захода солнца с использованием координат `system.config`\nДобавлена карточка состояния @iobroker /web-components (<luxtronik-status-card>`) для Aura, VIS-2 и WebUI, отображающая температуру в реальном времени, режим работы, состояние фотоэлектрического буста, значения COP/JAZ и быстрые действия\nОбновлено описание оптимизации цикла в `JsonConfig.json`, чтобы отразить смещение, основанное на динамическом гистерезисе, вместо устаревшей формулировки «35 °C»",
+        "pt": "Foi adicionado um buffer de corte configurável ao pôr do sol (`pv_sunset_cutoff_active`, `pv_sunset_buffer`) para evitar o início de novos reforços fotovoltaicos pouco antes do pôr do sol local usando coordenadas `system.config`\nAdicionada placa de status `@iobroker /web-components` (`<luxtronik-status-card>`) para Aura, VIS-2 e WebUI exibindo temperaturas ao vivo, modo operacional, valores COP/JAZ e ações rápidas\nAtualizamos a descrição do Cycle Optimization em `jsonConfig.json` para refletir o offset dinâmico baseado em histerese em vez do antigo texto `35 °C`",
+        "nl": "Configureerbare buffer voor het afsnijden van zonsondergangen (`pv_sunset_cutoff_active`, `pv_sunset_buffer`) toegevoegd aan het beheer van PV-overschotten om te voorkomen dat er kort voor zonsondergang nieuwe PV-verhogingen worden gestart met behulp van `system.config` coördinaten\nStatuskaart van `@iobroker /web-components` toegevoegd (`<luxtronik-status-card>`) voor Aura, VIS-2 en WebUI met actuele temperaturen, bedrijfsmodus, PV-booststatus, COP/JAZ-waarden en snelle acties\nDe beschrijving van Cycle Optimization in `JSONConfig.json` is bijgewerkt om de dynamische offset op basis van hysterese weer te geven in plaats van de oude formulering van `35°C`",
+        "fr": "Ajout d'un tampon de coupure de soleil configurable (« pv_sunset_cutoff_active », « pv_sunset_buffer ») à la gestion des excédents PV afin d'éviter d'en démarrer de nouveaux peu avant le coucher du soleil local en utilisant les coordonnées « system.config »\nAjout de la carte d'état « @iobroker /web-components » (`<luxtronik-status-card>`) pour Aura, VIS-2 et WebUI affichant les températures en temps réel, le mode de fonctionnement, l'état PV Boost, les valeurs COP/JAZ et les actions rapides\nDescription de l'optimisation des cycles mise à jour dans « JSONConfig.json » pour refléter le décalage dynamique basé sur l'hystérésis au lieu de l'ancien « 35 °C »",
+        "it": "Aggiunto un buffer configurabile (`pv_sunset_cutoff_active`, `pv_sunset_buffer`) alla gestione del surplus fotovoltaico per evitare nuovi aumenti PV poco prima del tramonto locale usando le coordinate `system.config`\nAggiunta la scheda di stato `@iobroker /web-components<luxtronik-status-card>` per Aura, VIS-2 e WebUI con temperature in tempo reale, modalità operativa, PV boost, valori COP/JAZ e azioni rapide\nDescrizione aggiornata di Cycle Optimization in `JSONConfig.json` per riflettere l'offset basato sull'isteresi dinamica anziché `35 °C`",
+        "es": "Se ha añadido un búfer de límite de puesta de sol configurable (`pv_sunset_cutoff_active», `pv_sunset_buffer`) a la gestión del excedente fotovoltaico para evitar iniciar nuevas ampliaciones fotovoltaicas poco antes de la puesta de sol local mediante coordenadas `system.config`\nSe ha añadido la tarjeta de estado `@iobroker /web-components` (<luxtronik-status-card>`) para Aura, VIS-2 y WebUI que muestra las temperaturas en vivo, el modo de operación, el estado de PV Boost, los valores de COP/JAZ y acciones rápidas\nSe actualizó la descripción de Cycle Optimization en `JSONConfig.json` para reflejar el desfase dinámico basado en la histéresis en lugar del antiguo texto de 35°C",
+        "pl": "Dodano konfigurowalny bufor odcięcia zachodu słońca (`pv_sunset_cutoff_active`, `pv_sunset_buffer`) do zarządzania nadwyżkami fotowoltaicznymi, aby zapobiec uruchamianiu nowych impulsów fotowoltaicznych na krótko przed lokalnym zachodem słońca przy użyciu współrzędnych `system.config`\nDodano kartę statusu „@iobroker /web-components” (<luxtronik-status-card>`) dla Aura, VIS-2 i WebUI wyświetlającą temperaturę na żywo, tryb pracy, status wzmocnienia fotowoltaicznego, wartości COP/JAZ i szybkie działania\nZaktualizowano opis optymalizacji cyklu w `JSONConfig.json` w celu odzwierciedlenia dynamicznego przesunięcia opartego na histerezie zamiast starszego sformułowania `35 °C'",
+        "uk": "Додано настроюваний буфер відмикання заходу сонця (`pv_sunset_cutoff_active`, `pv_sunset_buffer`) до керування надлишками PV, щоб запобігти запуску нових PV посилень незадовго до локального заходу сонця за допомогою координат `system.config`\nДодана картка стану `@iobroker /web-components` (`<luxtronik-status-card>`) для Aura, VIS-2 та WebUI, що відображає живі температури, режим роботи, стан підвищення PV, значення COP/JAZ та швидкі дії\nОновлений опис оптимізації циклу в `JsonConfig.json`, щоб відобразити зміщення на основі динамічного гістерезису замість застарілого формулювання `35 °C`",
+        "zh-cn": "在光伏剩余管理中添加了可配置的日落截止缓冲区（`pv_sunset_cutoff_active`，`pv_sunset_buffer`），以防止在本地日落前不久使用 “system.config” 坐标启动新的光伏强化\n为 <luxtronik-status-card>Aura、VIS-2 和 WebUI 添加了 “@iobroker /web-components” 状态卡 (`)，显示实时温度、运行模式、光伏增压状态、COP/JAZ 值和快速操作\n更新了 `jsonConfig.json` 中的循环优化描述，以反映基于动态迟滞的偏移量，而不是传统的 “35 °C” 措辞"
+      },
+      "1.1.1": {
+        "en": "Fixed temporary hot water start impulses (`forceSoll` & `Zwangswarmwasser`) overshooting the actual target temperature by immediately restoring the baseline or active PV boost target once hot water generation is actively running (`WP_BZ_akt = 1` & `VD1`)\nAdded native controller state duration check (`rawValues[120]`) to `istBetriebszustandAelterAls()` for reliable cycle timing at longer polling intervals",
+        "de": "Temporäre Heißwasser-Startimpulse (`ForceSoll` & `Zwangswarmwasser`), die die Solltemperatur übersteigen, indem sie bei laufender Warmwasserbereitung sofort die Solltemperatur wiederherstellt (`WP_BZ_AKT = 1` & `VD1`)\nNative Controller-Statusprüfung (`RawValues [120] `) zu `istBetriebszustandAelterals ()` hinzugefügt für zuverlässiges Timing bei längeren Abfrageintervallen",
+        "ru": "Фиксированные временные импульсы запуска горячей воды («Forcesoll» и «Zwangswarmwasser»), превышающие фактическую целевую температуру, за счет немедленного восстановления базового значения или активного целевого показателя повышения мощности фотоэлектрических установок после начала производства горячей воды (`WP_BZ_Akt = 1` и `VD1`)\nДобавлена встроенная проверка длительности состояния контроллера (`rawValues [120] `) в `istBetriebsZustandaelTerals ()` для надежной синхронизации циклов при более длительных интервалах опроса",
+        "pt": "Impulsos fixos temporários de partida de água quente (`ForceSoll` e `Zwangswarmwasser`) superando a temperatura real ao restaurar imediatamente a linha de base ou o alvo ativo de PV quando a geração de água quente está ativa (`WP_BZ_Akt = 1` e `VD1`)\nFoi adicionada a verificação de duração do estado do controlador nativo (`rawValues [120] `) a `istBetriebszustandaElterals ()` para ciclos mais longos",
+        "nl": "Vaste tijdelijke startimpulsen voor warm water (`ForceSoll` & `Zwangswarmwasser`) die de werkelijke doeltemperatuur overschrijden door onmiddellijk de basislijn of de actieve PV-boostdoelstelling te herstellen zodra de warmwaterproductie actief draait (`wp_BZ_Akt = 1` & `VD1`)\nDe systeemstatusduurcontrole van de controller (`RawValues [120] `) toegevoegd aan `IstBetriebsZustandAelterals ()` voor een betrouwbare timing van de cyclus met langere polling-intervallen",
+        "fr": "Correction des impulsions temporaires de démarrage de l'eau chaude (« ForceSoll » et « Zwangswarmwasser ») qui dépassaient la température cible en rétablissant immédiatement la valeur de base ou la cible de suralimentation active une fois que la production d'eau chaude est active (« WP_BZ_Akt = 1 » et « VD1 »)\nAjout d'une vérification native de la durée de l'état du contrôleur (`RawValues [120]) à `istBetriebsZustandaElterals () `pour un chronométrage fiable à intervalles longs",
+        "it": "Risolti gli impulsi temporanei di avvio dell'acqua calda (`ForceSoll` e `Zwangswarmwasser`) che superavano la temperatura nominale effettiva ripristinando immediatamente la linea di base o attiva (`WP_BZ_Akt = 1` e `VD1`)\nAggiunto il controllo nativo della durata dello stato del controller (`rawValues [120] `) a `istBetriebszustandaElterals ()` per cicli affidabili a intervalli di polling",
+        "es": "Se corrigieron los impulsos temporales de arranque del agua caliente (`ForceSoll` y `Zwangswarmwasser`) que superaban la temperatura objetivo real al restablecer inmediatamente el objetivo básico o de aumento fotovoltaico activo una vez que se generaba agua caliente (`WP_BZ_akt = 1` y `VD1`)\nSe ha añadido el control de duración del estado del controlador nativo (`RawValues [120] `) a `istBetriebsZustandaElterals ()` para un tiempo de ciclo fiable en intervalos de sondeo más largos",
+        "pl": "Naprawiono tymczasowe impulsy uruchamiania ciepłej wody („ForceSoll” i „Zwangswarmwasser”) przekraczające rzeczywistą temperaturę docelową poprzez natychmiastowe przywrócenie linii bazowej lub aktywnego celu doładowania fotowoltaicznego po aktywnym uruchomieniu wytwarzania ciepłej wody (`WP_BZ_Akt = 1` & `VD1`)\nDodano natywne sprawdzenie czasu trwania stanu kontrolera (`rawValues [120] `) do `istbetriebszustandaElterals ()` dla niezawodnego czasu cyklu w dłuższych odstępach czasu głosowania",
+        "uk": "Виправлено тимчасові імпульси запуску гарячої води (`ForceSoll` & `Zwangswarmwasser`), що перевищують фактичну цільову температуру шляхом негайного відновлення базової або активної цілі підвищення PV, коли генерація гарячої води активно працює (`WP_bz_Akt = 1` & `VD1`)\nДодано перевірку тривалості стану власного контролера (`RawValues [120] `) до `istBetriebsZustandaElterals ()` для надійного синхронізації циклу на більш тривалих інтервалах опитування",
+        "zh-cn": "修复了临时热水启动冲动（`forceSoll`和`Zwangswarmwasser`）超出实际目标温度的问题，方法是在热水发电活跃运行后立即恢复基准或活跃的光伏增压目标（`wp_bz_AKT = 1` 和 `VD1`）\n在 `istbetriebszustandaelterals () `中添加了原生控制器状态持续时间检查 (`rawValues [120] `)，以便在更长的轮询间隔下实现可靠的循环计时"
+      },
+      "1.1.0": {
+        "en": "Replaced static `35 °C` / `+10.0 K` jump in cycle optimization (`CycleOpt-PreHeat` / `CycleOpt-AfterWW`) and forced heating (`Zwangsheizen`) with a dynamic, hysteresis-based relative offset (`base offset + hysteresis + 0.5 K`) via `heating_temperature` (volatile SHI `10002` / native Param `1`) to prevent screed overshoot and short-cycling in well-insulated homes\nAdded heating release checks (`P0003` / `C0125`) and hot water lock-time schedule checks (`P0004` / `C0124` / `P405..P505`, including midnight wrap-around and 25-minute pre-heat lookahead) to cycle optimization\nImproved `Heizen_nach_Wasser` reset handling (3-minute spike guard instead of 10 minutes once return target is reached), immediate pre-heat offset reset on WW start, and automatic cleanup of stale `CycleOpt-PreHeat` offsets in idle without affecting manual `Zwangsheizen`\nAdded automatic restoration of temporary hot water target increases (`forceSoll` & `Zwangswarmwasser`) after WW completion even when `idle_defaults_aktiv` is disabled\nEliminated PV boost flip-flop writes during idle and cycle transitions by delegating directly to `evaluatePvBoost` without intermediate resets to baseline\nFixed raw fallback indices in `calculateTotalEnergy()` to read `rawParams[1136]/[1137]` (factor `0.01`) instead of `rawValues[156]/[157]` and added 2-decimal rounding",
+        "de": "Statischen Sprung bei der Zyklusoptimierung (`CycleOPT-Preheat`/`CycleOPT-AfterWW`) und `Zwangsbeheizen` durch einen dynamischen, hysteresebasierten Relativversatz (`base offset + hysteresis + 0,5 K`) über `heating_temperature` (volatile SHI `10002`/nativer Param `1`) ersetzt, um zu verhindern Estrichüberhöhung und Kurzschluss in gut gedämmten Häusern\nZur Zyklusoptimierung wurden Heizungsfreigabeprüfungen (`P0003`/`C0125`) und Warmwasserschleuse (`P0004`/`C0124`/`P405.. P505`, einschließlich Mitternacht und 25-minütiger Vorwärmvorlauf) hinzugefügt\nVerbessertes „Heizen_nach_Wasser“ -Reset (3-minütiger Spike-Guard statt 10 Minuten nach Erreichen des Ziels), sofortiger Reset bei WW-Start und automatische Bereinigung abgestandener `CycleOPT-Preheat`-Offsets im Leerlauf, ohne manuelle `Zwangsheizen` zu beeinflussen\nAutomatische Wiederherstellung temporärer Warmwasser-Zielerhöhungen (`forceSoll` & `Zwangswarmwasser`) nach WW-Ende hinzugefügt, auch wenn `idle_defaults_aktiv` deaktiviert ist\nPV-Boost-Flip-Flop-Writes bei Leerlauf- und Zykluswechseln durch direkte Delegierung an `EvaluatePvBoost` ohne Resets zur Ausgangslinie\nRohindizes in `calculateTotalEnergy () `wurden auf `rawParams [1136]/[1137]` (Faktor `0,01`) statt `rawValues [156]/[157] `korrigiert und 2-Dezimal-Rundung hinzugefügt",
+        "ru": "Статический скачок при оптимизации цикла («Cycleopt-Preheat»/«+10,0 K») и принудительный нагрев («Zwangsheizen») заменен динамическим относительным смещением, основанным на гистерезисе («смещение основания + гистерезис + 0,5 K») с помощью «температуры нагрева» (изменчивое значение SHI `10002`/собственный параметр `1`) для предотвращения перегрева стяжки и короткого замыкания в хорошо изолированных домах\nДля оптимизации цикла добавлены проверки спуска тепла (`P0003`/`C0125`) и проверки графика блокировки горячей воды (`P0004`/`C0124`/`P405`, включая полночь и 25-минутный предварительный нагрев)\nУлучшенная обработка перезагрузки `heizen_nach_wasser` (3-минутная защита от спайков вместо 10 минут после достижения цели возврата), немедленный сброс смещения предварительного нагрева при запуске WW и автоматическая очистка устаревших смещений «Cycleopt-Preheat» на холостом ходу без влияния на режим «Zwangsheizen» вручную\nДобавлено автоматическое восстановление временных целевых значений по горячей воде (`Forcesoll` и `Zwangswarmwasser`) после завершения WW, даже если `idle_defaults_aktiv` отключен\nУстранена возможность записи на триггере PV Boost во время простоя и циклических переходов за счет прямого делегирования функции `EvaluatePVBoost` без промежуточных переходов к базовому уровню\nИсправлены необработанные резервные индексы в `calculateTotalEnergy () `, которые читали `rawParams [1136]/[1137]` (коэффициент 0,01) вместо `rawValues [156]/[157] `и добавлено округление на 2 десятичных дроби",
+        "pt": "Substituiu o salto estático de `35 °C`/`+10,0 K` na otimização do ciclo (`Cycleopt-preheat`/`Cycleopt-afterWW`) por um deslocamento relativo dinâmico baseado em histerese (`base offset + histerese + 0,5 K`) via `heating_temperature` (volátil SHI `10002`) `/native Param `1`) para evitar quedas e ciclos curtos em casas bem isoladas\nForam adicionadas verificações de liberação de aquecimento (`P0003`/`C0125`) e cronograma de bloqueio de água quente (`P0004`/`C0124`/`P405.. P505`, incluindo meia-noite e pré-aquecimento de 25 minutos) à otimização do ciclo\nMelhor reinicialização de `Heizen_nach_wasser` (proteção contra picos de 3 minutos em vez de 10 minutos após atingir a meta de retorno), reinicialização imediata no início da WW e limpeza automática de offsets obsoletos de `Cycleopt-Preheat` em modo inativo sem afetar o manual `Zwangsheizen`\nFoi adicionada a restauração automática de metas temporárias de água quente (`ForceSoll` e `Zwangswarmwasser`) após a WW, mesmo com `idle_defaults_aktiv` desativado\nEliminou as gravações de flip-flop durante transições inativas e cíclicas ao delegar diretamente a `evaluatePVBoost` sem redefinições intermediárias\nCorrigidos índices brutos em `calculateTotalEnergy () `para ler `rawParams [1136]/[1137]` (fator `0,01`) em vez de `rawValues [156]/[157] `e arredondamento de 2 decimais",
+        "nl": "Statische sprong van `35°C`/`+10,0 K` in de cyclusoptimalisatie (`CycleOpt-Preheat`/`CycleOpt-afterWW`) en geforceerde verwarming (`Zwangsheizen`) vervangen door een dynamische, op hysterese gebaseerde relatieve offset (`base offset + hysteresis + 0.5 K`) via `heating_temperature` (vluchtige SHI `10002`/native Param `1`) naar voorkom overlopen van de dekvloer en kortsluiting in goed geïsoleerde huizen\nControles voor de verwarming toegevoegd (`P0003`/`C0125`) en controles van het vergrendelingsschema voor warm water (`P0004`/`C0124`/`P405.. P505`, inclusief middernacht en een vooruitblik van 25 minuten voor de voorverwarming) om de cyclus te optimaliseren\nVerbeterde reset van de `Heizen_Nach_Wasser` (spike-guard van 3 minuten in plaats van 10 minuten nadat het retourdoel is bereikt), onmiddellijke reset van de offset voor de voorverwarming bij het starten van de WW, en automatische opschoning van oude `CycleOpt-Preheat` offsets bij stationair gebruik, zonder dat dit gevolgen heeft voor de handmatige `Zwangsheizen`\nAutomatisch herstel toegevoegd van tijdelijke verhogingen van de doelen voor warm water (`ForceSoll` & `Zwangswarmwasser`) na voltooiing van de WW, zelfs als `idle_defaults_aktiv` is uitgeschakeld\nElimineerde flip-flop-schrijfbewerkingen met PV-boost tijdens stationair toerental en cyclusovergangen door rechtstreeks naar `EvaluatePVBoost` te delegeren zonder tussentijdse resets naar de basislijn\nRuwe terugvalindexen opgelost in `CalculateTotalEnergy () `om `RawParams [1136]/[1137]` te lezen (factor `0,01 `) in plaats van `RawValues [156]/[157]` en een afronding met twee decimalen toegevoegd",
+        "fr": "Remplacement du saut statique « 35 °C »/« +10,0 K » lors de l'optimisation des cycles (« CycleOpt-Preheat »/« CycleOpt-AfterWW») et du chauffage forcé (« Zwangsheizen ») par un décalage relatif dynamique basé sur l'hystérésis (« décalage de base + hystérésis + 0,5 K ») via « heating_temperature » (SHI volatil « 10002 »/paramètre natif « 1 ») pour éviter de dépasser la chape et de court-circuiter les maisons bien isolées\nAjout de contrôles du déclenchement du chauffage (`P0003`/`C0125`) et de l'heure de verrouillage de l'eau chaude (`P0004`/`C0124`/`P405.. P505`, y compris minuit et 25 minutes de préchauffage) pour optimiser le cycle\nGestion améliorée de la réinitialisation de « Heizen_Nach_Wasser » (protection contre les pointes de 3 minutes au lieu de 10 minutes une fois l'objectif de retour atteint), réinitialisation immédiate du décalage de préchauffage au démarrage de WW et nettoyage automatique des décalages « CycleOpt-Preheat » périmés au ralenti sans affecter le mode manuel\nAjout du rétablissement automatique des objectifs d'eau chaude temporaires (« ForceSoll » et « Zwangswarmwasser ») à la fin de la Seconde Guerre mondiale, même si « idle_defaults_aktiv » est désactivé\nLes écritures PV Boost ont été éliminées pendant les transitions d'inactivité et de cycle en déléguant directement à « EvaluatePVBoost » sans réinitialisation intermédiaire\nCorrection d'indices de repli bruts dans « CalculateTotalEnergy () » comme « RawParams [1136]/[1137] » (facteur « 0,01 ») au lieu de « RawValues [156]/[157] » et a été arrondi à 2 décimales",
+        "it": "Sostituita l'ottimizzazione statica del ciclo `35 °C`/`+10,0 K` (`CycleOpt-Preheat`/`CycleOpt-afterWW`) e forzata (`Zwangsheizen`) con un offset relativo dinamico basato sull'isteresi (`offset base + isteresi + 0,5 K`) tramite `heating_temperature` (volatile SHI `10002`/nativo di Param `1`) per evitare massetti e cicli brevi in case ben isolate\nAggiunti i controlli del rilascio del calore (`P0003`/`C0125`) e del tempo di blocco dell'acqua calda (`P0004`/`C0124`/`P405.. P505`, inclusi mezzanotte e preriscaldamento di 25 minuti) per l'ottimizzazione del ciclo\nMigliore gestione del reset di `Heizen_nach_wasser` (protezione spike guard di 3 minuti anziché 10 minuti dopo il ritorno), reset immediato dell'offset di preriscaldamento all'avvio di WW e pulizia automatica degli offset `CycleOpt-Preheat` obsoleti senza influire sul manuale `Zwangsheizen`\nAggiunto il ripristino automatico degli aumenti temporanei di acqua calda (`ForceSoll` e `Zwangswarmwasser`) al termine del WW anche se `idle_defaults_aktiv è disabilitato\nHa eliminato le scritture flip-flop PV Boost durante le transizioni di inattività e ciclo delegando direttamente a `EvaluatePVBoost` senza reset intermedi\nHa corretto gli indici di riserva grezzi in `calculateTotalEnergy () `per leggere `rawParams [1136]/[1137]` (fattore `0,01`) invece di `RawValues [156]/[157] `e ha aggiunto 2 decimali",
+        "es": "Sustituyó la optimización estática del salto en el ciclo (`Cycleopt-Precalent`/`Cycleopt-AfterWW`) y el calentamiento forzado (`Zwangsheizen`) por un desfase relativo dinámico basado en la histéresis (`compensación base+ histéresis + 0,5 K) por `heating_temperatura` (volátil SHI `10002` /parámetro nativo `1`) para evitar que la solera se sobrepase y se acorte en casas bien aisladas\nSe han añadido comprobaciones de liberación de calefacción (`P0003`/`C0125`) y comprobaciones del horario de bloqueo del agua caliente (`P0004`/`C0124`/`P405.. P505`, incluidas medianoche y 25 minutos de precalentamiento anticipadas) a la optimización del ciclo\nSe mejoró el manejo del reinicio de Heizen_nach_wasser (3 minutos de protección contra picos en lugar de 10 minutos una vez alcanzado el objetivo de devolución), se restablece inmediatamente al iniciar la Guerra Mundial y se limpian automáticamente las compensaciones obsoletas de «Cycleopt-preheat» en ralentí sin afectar al `Zwangsheizen` manual\nSe ha añadido la restauración automática de los aumentos temporales del objetivo de agua caliente (ForceSoll y Zwangswarmwasser) al terminar la Guerra Mundial, incluso con «idle_defaults_aktiv`\nEliminó las escrituras invertidas de PV Boost durante las transiciones de inactividad y ciclo al delegar directamente en «EvaluatePVBoost» sin restablecimientos intermedios a la línea base\nSe corrigieron los índices alternativos sin procesar en `CalculateTotalEnergy () `para leer `RawParams [1136]/[1137]` (factor 0,01) en lugar de `RawValues [156]/[157] `y se añadió el redondeo con 2 decimales",
+        "pl": "Zastąpiony statyczny skok `35 °C`/`+10,0 K` w optymalizacji cyklu (`Cycleopt-Preheat `/`Cycleopt-AfterWW`) i wymuszonym ogrzewaniu (`Zwangsheizen`) dynamicznym, opartym na histerezie przesunięciem względnym (`przesunięcie bazowe+histereza + 0,5 K`) poprzez `temperatura_ogrzewania` (lotny natywny SHI `10002`/Param ``1), aby zapobiec przewyższaniu jastrychu i krótkim cyklom w dobrze ocieplonych domach\nDodano kontrole uwalniania ogrzewania (`P0003`/`C0125`) i kontrole harmonogramu blokady ciepłej wody (`P0004`/`C0124`/`P405.. P505`, w tym podgrzewanie o północy i 25-minutowe podgrzewanie wstępne) w celu optymalizacji cyklu\nUlepszona obsługa resetowania „Heizen_Nach_Wasser” (3-minutowa osłona kolców zamiast 10 minut po osiągnięciu celu powrotu), natychmiastowy reset przesunięcia wstępnego nagrzewania przy starcie WW i automatyczne czyszczenie nieaktualnych przesunięć „CycleOpt-Preheat” na biegu jałowym bez wpływu na ręczne „Zwangsheizen”\nDodano automatyczne przywracanie tymczasowych wzrostów docelowych ciepłej wody (`ForceSoll' & `Zwangswarmwasser`) po zakończeniu wojny światowej, nawet gdy `idle_defaults_aktiv` jest wyłączone\nWyeliminowano zapisy flip-flop PV boost podczas przejścia na biegu jałowym i cyklu poprzez delegowanie bezpośrednio do `EvaluatePVBoost` bez pośrednich resetów do linii bazowej\nNaprawiono nieprzetworzone indeksy rezerwowe w `CalculateTotalEnergy () `, aby odczytać `RawParams [1136]/[1137]` (współczynnik `0,01`) zamiast `rawValues [156]/[157] `i dodano zaokrąglanie 2-dziesiętne",
+        "uk": "Замінено статичний стрибок `35 °C`/`+10,0 K` в оптимізації циклу (`Cycleopt-PreHeat`/`Cycleopt-AfterWW`) та примусовий нагрів (`Zwangsheizen`) з динамічним відносним зміщенням на основі гістерезису (`базовий зсув + гістерезис+ 0, 5 К`) через `температура_опалення` (летючий SHI `10002`/native Param `1`) на запобігання переливу стяжки та короткого циклу в добре утеплених будинках\nДля оптимізації циклу додані перевірки випуску опалення (`P0003`/`C0125`) та перевірки графіка блокування гарячої води (`P0004`/`C0124`/`P405.. P505`, включаючи опівнічне обгортання та 25-хвилинний перегляд попереднього нагрівання)\nПокращено обробку скидання `Heizen_nach_wasser` (3-хвилинний захист від спайків замість 10 хвилин після досягнення мети повернення), негайне скидання зсуву попереднього нагрівання при запуску WW та автоматичне очищення застарілих зсувів `Cycleopt-preheat` на холостому ходу, не впливаючи на ручне `Zwangsheizen`\nДодано автоматичне відновлення тимчасового збільшення цілі гарячої води (`ForceSoll` & `Zwangswarmwasser`) після завершення світової війни, навіть якщо `idle_defaults_aktiv` вимкнено\nУсунено записи фліп-шльопанів PV boost під час простою та переходу циклу шляхом делегування безпосередньо до `evaluatePVBoost` без проміжних скидань до базової лінії\nВиправлені необроблені запасні індекси в `calculateTotalEnergy () `для читання `RawParams [1136]/[1137]` (коефіцієнт `0,01`) замість `RaWValues [156]/[157] `та додано 2-десяткове округлення",
+        "zh-cn": "通过 `heating_temperure'（易失性 SHI `10002` /原生参数 `1`）将静态的 `35 °C`/ `+10.0 K` 跳跃循环优化（`cycleopt-AfterWW`）和强制加热（`Zwangsheizen`）替换为基于迟滞的动态相对偏移（`基本偏移量+滞后+ 0.5 K`）防止在隔热良好的房屋中出现熨平板过冲和短时间循环\n为循环优化添加了供暖释放检查（`P0003`/`C0125`）和热水锁定时间表检查（`P0004`/`C0124`/`P405.. P505`，包括午夜回转和预热时间表25分钟）\n改进了 “Heizen_nach_Wasser” 重置处理（3 分钟尖刺保护，而不是达到返回目标后的 10 分钟），WW 启动时立即重置预热偏移量，在不影响手动 “Zwangsheizen” 的情况下自动清理空闲状态下陈旧的 “Cycleopt-Preheat” 偏移量\n添加了在 WW 完成后自动恢复临时热水目标增量（`forceSoll` 和 `Zwangswarmwasser`），即使禁用 `idle_defaults_aktiv` 也是如此\n通过直接委托给 “EvaluatePVBoost”，无需中间重置到基线，从而消除了空闲和周期过渡期间的 PV boost 触发器写入\n修复了 `calculateTotalEnergy () `中的原始回退索引以读取 `rawParams [1136]/[1137] `（系数 `0.01`）而不是 `rawValues [156]/[157]` 并添加了 2 位十进制舍入"
+      },
+      "1.0.4": {
+        "en": "Optimized V3.9x SHI Modbus Hybrid mode to achieve zero EEPROM write cycles during cycle optimization, pre-heating, and forced heating (uses volatile SHI offset `+10.0 K` via Holding 23 / `10002` instead of base point parameter `12`)\nFixed startup order in `onReady()` so Modbus TCP availability is checked before PV initialization and hardware ZIP timer disable runs after initial raw parameter fetch\nImproved PV startup recovery to only reset setpoints if a PV boost was actually active before restart, and decoupled PV heating boost from active SHI cycle optimization\nReleased SHI DHW mode (`10005 = 0`) when reverting hot water target to baseline and avoided unnecessary HUP voltage writes in `setIdleDefaults()` when HUP optimization is disabled",
+        "de": "Optimierter V3.9x SHI Modbus Hybrid-Modus für null EEPROM-Schreibzyklen bei Zyklusoptimierung, Vor- und Aufheizen (nutzt flüchtigen SHIOffset `+10,0 K` über Holding 23/`10002` statt Basispunktparameter `12`)\nDie Startreihenfolge in `onReady () `wurde korrigiert, sodass Modbus TCP vor der PV-Initialisierung geprüft wird und der ZIP-Timer nach dem ersten Raw-Parameterabruf\nVerbesserter PV-Startmodus, der nur Sollwerte zurücksetzt, wenn vor dem Start ein PV-Boost aktiv war, und PV-Heizboost von der SHI-Zyklusoptimierung entkoppelt\nGibt den SHI-DHW-Modus (`10005 = 0`) frei, wenn der Sollwert für Warmwasser auf Grundwert gesetzt wird, und vermeidet bei deaktivierter HUP-Optimierung",
+        "ru": "Оптимизированный гибридный режим SHI Modbus V3.9x для достижения нулевых циклов записи EEPROM во время оптимизации цикла, предварительного нагрева и принудительного нагрева (вместо параметра базовой точки «12» используется изменчивое смещение SHI «+10,0 K» за счет удержания 23/ «10002»)\nИсправлен порядок запуска в `onReady () `, поэтому доступность Modbus TCP проверяется до инициализации PV, а аппаратный таймер ZIP отключается после первоначальной выборки необработанных параметров\nУлучшено восстановление фотоэлектрической системы при запуске: заданные значения восстанавливаются только в том случае, если до перезапуска фотоэлектрическая система действительно была активна, а также отделите ускорение нагрева фотоэлектрической станции от активной оптимизации цикла SHI\nОтключен режим SHI DHW (`10005 = 0`) при возврате целевого значения горячей воды к исходному уровню и устранен ненужный режим записи напряжения HUP в `setIdleDefaults () `, когда оптимизация HUP отключена",
+        "pt": "Modo híbrido Modbus V3.9x SHI otimizado para zero ciclos de gravação EEPROM durante a otimização, pré-aquecimento e aquecimento forçado (usa offset SHI volátil `+10,0 K` via Holding 23/`10002` em vez do parâmetro base `12`)\nA ordem de inicialização em `onReady () `permite verificar a disponibilidade do Modbus TCP antes da inicialização do PV e desativar o ZIP timer após a busca inicial do parâmetro bruto\nRecuperação aprimorada da inicialização fotovoltaica para redefinir os pontos de ajuste somente se um reforço fotovoltaico estiver ativo e desacoplado da otimização ativa do ciclo SHI\nLançou o modo SHI DHW (`10005 = 0`) ao reverter o alvo de água quente para a linha de base e evitou gravações de tensão HUP em `setIdleDefaults () `ao desativar a otimização",
+        "nl": "Geoptimaliseerde V3.9x SHI Modbus Hybrid-modus om nul EEPROM-schrijfcycli te bereiken tijdens cyclusoptimalisatie, voorverwarming en geforceerde verwarming (maakt gebruik van vluchtige SHI-offset `+10,0 K` via Holding 23/`10002` in plaats van basispuntparameter `12`)\nOpstartvolgorde is opgelost in `OnReady () `, zodat de beschikbaarheid van Modbus TCP wordt gecontroleerd voordat de PV-initialisatie plaatsvindt en de ZIP-timer van de hardware wordt uitgeschakeld nadat de onbewerkte parameters zijn opgehaald\nVerbeterd herstel van de PV-opstart om de instelpunten alleen opnieuw in te stellen als er vóór de herstart daadwerkelijk een PV-boost actief was, en de PV-verwarmingsboost werd losgekoppeld van de actieve SHI-cyclusoptimalisatie\nDe SHI DHW-modus (`10005 = 0`) is vrijgegeven toen de warmwaterdoelstelling werd teruggezet naar de basislijn en werd onnodige HUP-spanning vermeden, geschreven in `setIdleDefaults () `wanneer de HUP-optimalisatie is uitgeschakeld",
+        "fr": "Mode hybride SHI Modbus V3.9x optimisé pour atteindre zéro cycle d'écriture EEPROM lors de l'optimisation, du préchauffage et du chauffage forcé (utilise un décalage SHI volatil « +10,0 K » en maintenant 23/« 10002 » au lieu du paramètre de base « 12 »)\nOrdre de démarrage fixe dans `onReady () `afin de vérifier la disponibilité du protocole Modbus TCP avant l'initialisation du PV et de désactiver le minuteur ZIP après la récupération des paramètres bruts\nAmélioration de la reprise au démarrage pour ne réinitialiser les points de consigne que si un boost PV était réellement actif avant le redémarrage, et isolation du chauffage PV de l'optimisation du cycle SHI actif\nA activé le mode SHI DHW (« 10005 = 0 ») lors du retour à la normale et évité les écritures inutiles de tension HUP dans setIdleDefaults () lorsque l'optimisation du HUP est désactivée",
+        "it": "Modalità SHI Modbus Hybrid V3.9x ottimizzata per zero cicli di scrittura EEPROM durante l'ottimizzazione del ciclo, il preriscaldamento e il riscaldamento forzato (usa l'offset SHI volatile `+10,0 K` via Holding 23/`10002` invece del parametro base `12`)\nOrdine di avvio fisso in `onReady () `per verificare la disponibilità del Modbus TCP prima dell'inizializzazione del PV e del timer ZIP hardware\nMigliore ripristino all'avvio del PV per azzerare i setpoint solo se il PV boost era attivo prima del riavvio e disaccoppiato dal ciclo SHI attivo\nHa attivato la modalità SHI DHW (`10005 = 0`) ripristinando il valore base di acqua calda ed evita inutili scritture di tensione HUP in `setIdleDefaults ()",
+        "es": "Modo Modbus Hybrid SHI V3.9x optimizado para lograr cero ciclos de escritura EEPROM durante la optimización del ciclo, el precalentamiento y el calentamiento forzado (utiliza un desfase SHI volátil de +10,0 K mediante Holding 23/ `10002` en lugar del parámetro de punto base `12`)\nSe ha fijado el orden de inicio en OnReady () para comprobar la disponibilidad de Modbus TCP antes de la inicialización de PV y la desactivación del temporizador ZIP por hardware tras la búsqueda inicial\nMejora de la recuperación de la energía fotovoltaica para restablecer solo los puntos de ajuste si un impulso fotovoltaico estaba realmente activo antes de reiniciarse y desacoplar el impulso de calefacción fotovoltaica de la optimización activa del ciclo SHI\nLanzó el modo DHW SHI (`10005 = 0') al revertir el objetivo de agua caliente a la base y evitó escribir voltaje HUP innecesarias en `setIdleDefaults () `cuando la optimización HUP está desactivada",
+        "pl": "Zoptymalizowany tryb hybrydowy v3.9x SHI Modbus do osiągnięcia zerowych cykli zapisu EEPROM podczas optymalizacji cyklu, podgrzewania wstępnego i wymuszonego ogrzewania (wykorzystuje lotne przesunięcie SHI `+10,0 K` poprzez Holding 23/`10002` zamiast parametru punktu bazowego `12`)\nNaprawiono kolejność uruchamiania w `onReady () `, dzięki czemu dostępność Modbus TCP jest sprawdzana przed inicjalizacją PV i wyłączeniem sprzętowego zegara ZIP po wstępnym pobraniu parametrów surowych\nUlepszone odzyskiwanie uruchamiania fotowoltaicznego w celu zresetowania wartości zadanych tylko wtedy, gdy wzmocnienie fotowoltaiczne było faktycznie aktywne przed ponownym uruchomieniem, i odłączenie wzmocnienia ogrzewania fotowoltaicznego od aktywnej optymalizacji cyklu SHI\nWydano tryb SHI CWU (`10005 = 0`) podczas przywracania celu ciepłej wody do linii bazowej i uniknięto niepotrzebnego zapisu napięcia HUP w `setIdleDefaults () `, gdy optymalizacja HUP jest wyłączona",
+        "uk": "Оптимізований гібридний режим V3.9x SHI Modbus для досягнення нульових циклів запису EEPROM під час оптимізації циклу, попереднього нагрівання та примусового нагрівання (використовує летючий зсув SHI `+10,0 K` через Holding 23/`10002` замість параметра базової точки `12`)\nВиправлено порядок запуску в `onReady () `, тому доступність Modbus TCP перевіряється перед ініціалізацією PV та відключенням апаратного ZIP таймера після початкового отримання необроблених параметрів\nПокращено відновлення запуску фотоелектричної енергії, щоб скинути задані значення лише в тому випадку, якщо підсилення фотоелектричної енергії було фактично активним перед перезапуском, і від'єднано прискорення фотоелектричного опалення від активної оптимізації циклу SHI\nВідпущений режим ГВП SHI (`10005 = 0`) при поверненні цілі гарячої води до базової лінії та уникнення непотрібних записів напруги HUP в `setIdleDefaults () `, коли оптимізація HUP відключена",
+        "zh-cn": "经过优化 V3.9x SHI Modbus 混合模式，在循环优化、预热和强制加热期间实现零 EEPROM 写入周期（使用 Holding 23/`10002` 的挥发性 SHI 偏移量 `+10.0 K`而不是基点参数 `12`）\n修复了 `onReady () `中的启动顺序，因此在 PV 初始化之前会检查 Modbus TCP 的可用性，并在提取初始原始参数后禁用硬件 ZIP 计时器运行\n改进了光伏启动恢复，只有在重启前实际处于活动状态的光伏助推器才会重置设定值，并将光伏加热提升与主动SHI循环优化解耦在一起\n在将热水目标恢复到基线时发布了 SHI DHW 模式（`10005 = 0`），并避免在禁用 HUP 优化时在 `setIdleDefaults () `中写入不必要的 HUP 电压"
+      },
+      "1.0.3": {
+        "en": "Fixed daily COP reset in `copManager.ts` so Heating and Hot Water values reset to `0` after midnight until an active cycle starts",
+        "de": "Der tägliche COP-Reset in `CopManager.TS` wurde behoben, sodass Heiz- und Warmwasserwerte bis Mitternacht auf 0 fallen",
+        "ru": "Исправлен ежедневный сброс COP в «CopManager.TS», в результате чего значения нагрева и горячей воды возвращались к «0» после полуночи до начала активного цикла",
+        "pt": "Corrigido o COP diário em `COPManager.ts` para `0` após a meia-noite até o início do ciclo ativo",
+        "nl": "De dagelijkse COP-reset in `COPManager.ts` is opgelost, zodat de waarden voor verwarming en warm water na middernacht worden teruggezet naar `0` totdat een actieve cyclus begint",
+        "fr": "Correction de la réinitialisation quotidienne du COP dans « COPManager.ts » pour le chauffage et l'eau chaude à « 0 » après minuit",
+        "it": "Risolto il reset giornaliero del COP in `COPManager.ts` per il riscaldamento e l'acqua calda a `0` dopo mezzanotte",
+        "es": "Se ha fijado el COP diario en «CopManager.ts» para que los valores de calefacción y agua caliente pasen a 0 después de medianoche hasta que comience un ciclo activo",
+        "pl": "Naprawiono dzienny reset COP w „CopManager.ts”, dzięki czemu wartości ogrzewania i ciepłej wody zresetowały się do `0` po północy aż do rozpoczęcia aktywnego cyklu",
+        "uk": "Виправлено щоденне скидання COP в `CopManager.ts`, тому значення опалення та гарячої води скидаються до `0` після півночі, поки не почнеться активний цикл",
+        "zh-cn": "修复了 `copManager.ts` 中的每日 COP 重置问题，因此在活动周期开始之前，暖气和热水的值会在午夜之后重置为 “0”"
+      }
+    },
+    "titleLang": {
+      "en": "Luxtronik2 Controller",
+      "de": "Luxtronik2-Controller",
+      "ru": "Контроллер Luxtronik2",
+      "pt": "Controlador Luxtronik2",
+      "nl": "Luxtronik2-controller",
+      "fr": "Contrôleur Luxtronik2",
+      "it": "Controllore Luxtronik2",
+      "es": "Controlador Luxtronik2",
+      "pl": "Kontroler Luxtronik2",
+      "uk": "Контролер Luxtronik2",
+      "zh-cn": "Luxtronik2控制器"
+    },
+    "desc": {
+      "en": "Access and control of heat pumps with a Luxtronik 2.x controller",
+      "de": "Zugriff und Steuerung von Wärmepumpen mit einer Luxtronik 2.x Steuereinheit",
+      "ru": "Доступ и управление тепловыми насосами с контроллером Luxtronik 2.x",
+      "pt": "Acesso e controle de bombas de calor com um controlador Luxtronik 2.x",
+      "nl": "Toegang en controle van warmtepompen met een Luxtronik 2.x controller",
+      "fr": "Accès et contrôle des pompes à chaleur avec un contrôleur Luxtronik 2.x",
+      "it": "Accesso e controllo di pompe di calore con un controller Luxtronik 2.x",
+      "es": "Acceso y control de bombas de calor con un controlador Luxtronik 2.x",
+      "pl": "Dostęp i sterowanie pompami ciepła za pomocą sterownika Luxtronik 2.x",
+      "uk": "Доступ та управління тепловими насосами з контролером Luxtronik 2.x",
+      "zh-cn": "通过Luxtronik 2.x控制器访问和控制热泵"
+    },
+    "authors": [
+      "TbsJah <github.tbsjah@googlemail.com>"
+    ],
+    "keywords": [
+      "Luxtronik2",
+      "LWD50",
+      "Luft Wärme Pumpe",
+      "Heizung",
+      "LWP",
+      "Alpha InnoTec AIT",
+      "Buderus",
+      "Novelan"
+    ],
+    "licenseInformation": {
+      "type": "free",
+      "license": "MIT"
+    },
+    "platform": "Javascript/Node.js",
+    "icon": "luxtronik2-controller.png",
+    "enabled": true,
+    "extIcon": "https://raw.githubusercontent.com/TbsJah/ioBroker.luxtronik2-controller/main/admin/luxtronik2-controller.png",
+    "readme": "https://github.com/TbsJah/ioBroker.luxtronik2-controller/blob/main/README.md",
+    "loglevel": "info",
+    "tier": 3,
+    "mode": "daemon",
+    "type": "climate-control",
+    "compact": true,
+    "messagebox": true,
+    "connectionType": "local",
+    "dataSource": "poll",
+    "adminUI": {
+      "config": "json"
+    },
+    "webComponents": [
+      "webcomponents/luxtronik-status-card.json",
+      "webcomponents/luxtronik-hydraulics-flow.json",
+      "webcomponents/luxtronik-dhw-tank.json",
+      "webcomponents/luxtronik-heatcurve-tuner.json",
+      "webcomponents/luxtronik-cop-cockpit.json",
+      "webcomponents/luxtronik-health-monitor.json",
+      "webcomponents/luxtronik-schedule-radar.json",
+      "webcomponents/luxtronik-diagnostics-feed.json"
+    ],
+    "dependencies": [
+      {
+        "js-controller": ">=7.0.7"
+      }
+    ],
+    "globalDependencies": [
+      {
+        "admin": ">=7.8.23"
+      }
+    ]
+  },
+  "native": {
+    "host": "192.168.178.81",
+    "port": 8889,
+    "interval": 30,
+    "fusspunkt": 21.7,
+    "endpunkt": 23,
+    "zip_aktiv_ww": 600,
+    "zip_aktiv": 120,
+    "sync_warmwater_target_temperature": 54,
+    "sync_hotwater_temperature_hysteresis": 10,
+    "sync_heating_system_circ_pump_voltage_minimal_heating": 3,
+    "sync_heating_system_circ_pump_voltage_nominal_heating": 7,
+    "sync_heating_system_circ_pump_voltage_minimal_water": 3,
+    "sync_heating_system_circ_pump_voltage_nominal_water": 10,
+    "sync_return_temperature_hysteresis": 1.5,
+    "zip_last_run_min": 600,
+    "regelung_aktiv": false,
+    "Heating_after_warmwater": true,
+    "telegram_enabled": false,
+    "notification_bell": false,
+    "telegram_receiver": "",
+    "telegram_instance": "",
+    "motionSensors": [],
+    "motion_sensors_aktiv": false,
+    "cop_calculation_active": false,
+    "cop_source_power": "internal",
+    "cop_oid_power_total": "",
+    "cop_source_thermal": "internal",
+    "cop_oid_thermal_total": "",
+    "operation_mode": "readonly",
+    "pv_sunset_cutoff_active": false,
+    "pv_sunset_buffer": 60
+  },
+  "notifications": [
+    {
+      "scope": "luxtronik2-controller",
+      "name": {
+        "en": "Luxtronik2-Controller",
+        "de": "Luxtronik2-Controller",
+        "ru": "Контроллер Luxtronik2",
+        "pt": "Controlador Luxtronik2",
+        "nl": "Luxtronik2-controller",
+        "fr": "Contrôleur Luxtronik2",
+        "it": "Controllore Luxtronik2",
+        "es": "Controlador Luxtronik2",
+        "pl": "Kontroler Luxtronik2",
+        "uk": "Контролер Luxtronik2",
+        "zh-cn": "Luxtronik2控制器"
+      },
+      "description": {
+        "en": "Notifications from the Luxtronik2-Controller adapter",
+        "de": "Benachrichtigungen vom Luxtronik2-Controller Adapter",
+        "ru": "Уведомления от адаптера Luxtronik2-Controller",
+        "pt": "Notificações do adaptador Luxtronik2-Controller",
+        "nl": "Meldingen van de Luxtronik2-Controller adapter",
+        "fr": "Notifications de l'adaptateur Luxtronik2-Controller",
+        "it": "Notifiche dall'adattatore Luxtronik2-Controller",
+        "es": "Notificaciones del adaptador Luxtronik2-Controller",
+        "pl": "Powiadomienia z adaptera Luxtronik2-Controller",
+        "uk": "Сповіщення від адаптера Luxtronik2-Controller",
+        "zh-cn": "来自 Luxtronik2-Controller 适配器的通知"
+      },
+      "categories": [
+        {
+          "category": "lwpError",
+          "name": {
+            "en": "Heat Pump Errors",
+            "de": "Wärmepumpen-Fehler",
+            "ru": "Ошибки теплового насоса",
+            "pt": "Erros da bomba de calor",
+            "nl": "Fouten warmtepomp",
+            "fr": "Erreurs de la pompe à chaleur",
+            "it": "Errori della pompa di calore",
+            "es": "Errores de la bomba de calor",
+            "pl": "Błędy pompy ciepła",
+            "uk": "Помилки теплового насоса",
+            "zh-cn": "热泵错误"
+          },
+          "severity": "alert",
+          "description": {
+            "en": "Error messages from the heating system",
+            "de": "Fehlermeldungen aus der Heizungsanlage",
+            "ru": "Сообщения об ошибках от системы отопления",
+            "pt": "Mensagens de erro do sistema de aquecimento",
+            "nl": "Foutmeldingen van het verwarmingssysteem",
+            "fr": "Messages d'erreur du système de chauffage",
+            "it": "Messaggi di errore dal sistema di riscaldamento",
+            "es": "Mensajes de error del sistema de calefacción",
+            "pl": "Komunikaty o błędach z systemu grzewczego",
+            "uk": "Повідомлення про помилки від системи опалення",
+            "zh-cn": "来自供暖系统的错误消息"
+          },
+          "regex": [],
+          "limit": 10
+        },
+        {
+          "category": "lwpSystem",
+          "name": {
+            "en": "Heat Pump Updates & Info",
+            "de": "Wärmepumpen Updates & Info",
+            "ru": "Обновления и информация о тепловом насосе",
+            "pt": "Atualizações e informações da bomba de calor",
+            "nl": "Warmtepomp updates & info",
+            "fr": "Mises à jour et infos de la pompe à chaleur",
+            "it": "Aggiornamenti e informazioni sulla pompa di calore",
+            "es": "Actualizaciones e información de la bomba de calor",
+            "pl": "Aktualizacje i informacje o pompie ciepła",
+            "uk": "Оновлення та інформація про тепловий насос",
+            "zh-cn": "热泵更新和信息"
+          },
+          "severity": "info",
+          "description": {
+            "en": "System information and firmware updates",
+            "de": "Systeminformationen und Firmware-Updates",
+            "ru": "Системная информация и обновления прошивки",
+            "pt": "Informações do sistema e atualizações de firmware",
+            "nl": "Systeeminformatie en firmware-updates",
+            "fr": "Informations système et mises à jour du firmware",
+            "it": "Informazioni di sistema e aggiornamenti firmware",
+            "es": "Información del sistema y actualizaciones de firmware",
+            "pl": "Informacje o systemie i aktualizacje oprogramowania",
+            "uk": "Системна інформація та оновлення прошивки",
+            "zh-cn": "系统信息和固件更新"
+          },
+          "regex": [],
+          "limit": 10
+        }
+      ]
+    }
+  ],
+  "objects": [],
+  "instanceObjects": [
+    {
+      "_id": "info",
+      "type": "channel",
+      "common": {
+        "name": "Information"
+      },
+      "native": {}
+    },
+    {
+      "_id": "backups",
+      "type": "meta",
+      "common": {
+        "name": "Luxtronik DTA Backups",
+        "type": "meta.user"
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.connection",
+      "type": "state",
+      "common": {
+        "role": "indicator.connected",
+        "name": "Device or service connected",
+        "type": "boolean",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {}
+    }
+  ]
 }

@@ -103,8 +103,7 @@ _This project is not affiliated with Alpha Innotec, Novelan, ait-deutschland Gmb
 //### **WORK IN PROGRESS**
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 1.3.0 (2026-11-25)
 
 - Fixed COP/JAZ datapoint paths (`Information.16_Efficiency.Total.*`) in `<luxtronik-status-card>` so daily COP and annual JAZ values populate correctly
 - Added shared Web Component base class (`luxtronik-base.js`) and two new `@iobroker/web-components` widgets for Aura, VIS-2, and WebUI:
@@ -142,13 +141,6 @@ _This project is not affiliated with Alpha Innotec, Novelan, ait-deutschland Gmb
 - Added automatic restoration of temporary hot water target increases (`forceSoll` & `Zwangswarmwasser`) after WW completion even when `idle_defaults_aktiv` is disabled
 - Eliminated PV boost flip-flop writes during idle and cycle transitions by delegating directly to `evaluatePvBoost` without intermediate resets to baseline
 - Fixed raw fallback indices in `calculateTotalEnergy()` to read `rawParams[1136]/[1137]` (factor `0.01`) instead of `rawValues[156]/[157]` and added 2-decimal rounding
-
-### 1.0.4 (2026-11-21)
-
-- Optimized V3.9x SHI Modbus Hybrid mode to achieve zero EEPROM write cycles during cycle optimization, pre-heating, and forced heating (uses volatile SHI offset `+10.0 K` via Holding 23 / `10002` instead of base point parameter `12`)
-- Fixed startup order in `onReady()` so Modbus TCP availability is checked before PV initialization and hardware ZIP timer disable runs after initial raw parameter fetch
-- Improved PV startup recovery to only reset setpoints if a PV boost was actually active before restart, and decoupled PV heating boost from active SHI cycle optimization
-- Released SHI DHW mode (`10005 = 0`) when reverting hot water target to baseline and avoided unnecessary HUP voltage writes in `setIdleDefaults()` when HUP optimization is disabled
 
 ## License
 
