@@ -3230,11 +3230,11 @@
 						"sync_hours_compressor1": {
 							"type": "checkbox",
 							"label": {
-								"en": "Operating hours compressor 1",
-								"de": "Operating hours compressor 1"
+								"en": "Operating hours compressor 1 (System critical)",
+								"de": "Operating hours compressor 1 (Systemrelevant)"
 							},
 							"default": true,
-							"disabled": "!data.sync_category_information_05_operatinghours",
+							"disabled": true,
 							"xs": 12,
 							"sm": 6,
 							"md": 3,
@@ -3244,11 +3244,11 @@
 						"sync_starts_compressor1": {
 							"type": "checkbox",
 							"label": {
-								"en": "Switch cycles compressor 1",
-								"de": "Switch cycles compressor 1"
+								"en": "Switch cycles compressor 1 (System critical)",
+								"de": "Switch cycles compressor 1 (Systemrelevant)"
 							},
 							"default": true,
-							"disabled": "!data.sync_category_information_05_operatinghours",
+							"disabled": true,
 							"xs": 12,
 							"sm": 6,
 							"md": 3,
