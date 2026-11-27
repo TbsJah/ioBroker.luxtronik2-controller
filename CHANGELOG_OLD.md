@@ -23,6 +23,11 @@
 ### 0.1.0 (2026-07-09)
 
 - initial release
+## 1.1.1 (2026-11-24)
+
+- Fixed temporary hot water start impulses (`forceSoll` & `Zwangswarmwasser`) overshooting the actual target temperature by immediately restoring the baseline or active PV boost target once hot water generation is actively running (`WP_BZ_akt = 1` & `VD1`)
+- Added native controller state duration check (`rawValues[120]`) to `istBetriebszustandAelterAls()` for reliable cycle timing at longer polling intervals
+
 ## 1.1.0 (2026-11-24)
 
 - Replaced static `35 °C` / `+10.0 K` jump in cycle optimization (`CycleOpt-PreHeat` / `CycleOpt-AfterWW`) and forced heating (`Zwangsheizen`) with a dynamic, hysteresis-based relative offset (`base offset + hysteresis + 0.5 K`) via `heating_temperature` (volatile SHI `10002` / native Param `1`) to prevent screed overshoot and short-cycling in well-insulated homes
