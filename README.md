@@ -103,6 +103,11 @@ _This project is not affiliated with Alpha Innotec, Novelan, ait-deutschland Gmb
 //### **WORK IN PROGRESS**
 
 ## Changelog
+
+### **WORK IN PROGRESS**
+
+- Resolved ioBroker repository checker and i18n translation warnings (`W5604`, `W5606`, `W5611`, `W5612`, `E1144`)
+
 ### 1.3.1 (2026-11-25)
 
 - Fixed missing error and outage descriptions in `<luxtronik-diagnostics-feed>` by expanding the JSON parser with a generic text-field fallback
