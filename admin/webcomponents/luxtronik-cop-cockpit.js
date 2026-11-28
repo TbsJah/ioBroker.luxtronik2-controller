@@ -1,14 +1,14 @@
 /**
  * <luxtronik-cop-cockpit>
- * COP- & JAZ-Vergleichsmatrix (Gesamt / Heizen / Warmwasser) inkl. Live-COP
+ * Moderne COP- & JAZ-Übersicht mit Hero-KPIs, Zeilen-Karten und realistischer WW-Farbskala
  * für `@iobroker/web-components`.
  */
 import { LuxtronikBaseCard } from './luxtronik-base.js';
 
 const MATRIX_ROWS = [
-	{ key: 'total', label: 'Gesamt', color: '#22c55e' },
-	{ key: 'heating', label: 'Heizen', color: '#f97316' },
-	{ key: 'water', label: 'Warmwasser', color: '#3b82f6' },
+	{ key: 'total', label: 'Gesamt', icon: '⚡', color: '#22c55e', isWater: false },
+	{ key: 'heating', label: 'Heizen', icon: '🔥', color: '#f97316', isWater: false },
+	{ key: 'water', label: 'Warmwasser', icon: '💧', color: '#3b82f6', isWater: true },
 ];
 
 const MATRIX_COLS = [
@@ -42,9 +42,21 @@ class LuxtronikCopCockpit extends LuxtronikBaseCard {
 		};
 	}
 
-	_copColor(val) {
+	_copColor(val, isWater) {
 		if (val === null || val <= 0) {
-			return 'rgba(148, 163, 184, 0.45)';
+			return 'rgba(148, 163, 184, 0.35)';
+		}
+		if (isWater) {
+			if (val < 2.0) {
+				return '#ef4444';
+			}
+			if (val < 2.6) {
+				return '#f59e0b';
+			}
+			if (val < 3.3) {
+				return '#22c55e';
+			}
+			return '#06b6d4';
 		}
 		if (val < 2.5) {
 			return '#ef4444';
@@ -60,7 +72,7 @@ class LuxtronikCopCockpit extends LuxtronikBaseCard {
 
 	_renderBase() {
 		const headerCols = MATRIX_COLS.map(c => `<div class="col-head">${c.label}</div>`).join('');
-		const bodyRows = MATRIX_ROWS.map(row => {
+		const rowCards = MATRIX_ROWS.map(row => {
 			const cells = MATRIX_COLS.map(col => {
 				const id = `${row.key}_${col.key}`;
 				return `
@@ -71,11 +83,13 @@ class LuxtronikCopCockpit extends LuxtronikBaseCard {
 				`;
 			}).join('');
 			return `
-				<div class="row-label">
-					<span class="dot" style="background:${row.color}"></span>
-					<span>${row.label}</span>
+				<div class="row-card" style="--row-accent:${row.color}">
+					<div class="row-label">
+						<span class="row-icon">${row.icon}</span>
+						<span>${row.label}</span>
+					</div>
+					${cells}
 				</div>
-				${cells}
 			`;
 		}).join('');
 
@@ -84,7 +98,8 @@ class LuxtronikCopCockpit extends LuxtronikBaseCard {
 			<style>
 				:host {
 					--lux-surface: rgba(127, 127, 127, 0.11);
-					--lux-border: rgba(127, 127, 127, 0.24);
+					--lux-surface-soft: rgba(127, 127, 127, 0.07);
+					--lux-border: rgba(127, 127, 127, 0.22);
 					--lux-pv: #eab308;
 					--lux-ok: #22c55e;
 					display: block;
@@ -121,7 +136,7 @@ class LuxtronikCopCockpit extends LuxtronikBaseCard {
 				.pill {
 					padding: 3px 9px;
 					border-radius: 999px;
-					font-size: 0.74rem;
+					font-size: 0.73rem;
 					font-weight: 700;
 					background: var(--lux-surface);
 					border: 1px solid var(--lux-border);
@@ -132,41 +147,89 @@ class LuxtronikCopCockpit extends LuxtronikBaseCard {
 				.pill.pv { color: var(--lux-pv); border-color: rgba(234, 179, 8, 0.45); background: rgba(234, 179, 8, 0.14); }
 				.hidden { display: none !important; }
 
-				.matrix {
+				.hero-grid {
 					display: grid;
-					grid-template-columns: minmax(90px, 1.15fr) repeat(4, minmax(56px, 1fr));
-					gap: 7px;
-					align-items: center;
-					flex: 1;
+					grid-template-columns: repeat(3, minmax(0, 1fr));
+					gap: 8px;
+				}
+
+				.kpi {
+					background: var(--lux-surface);
+					border: 1px solid var(--lux-border);
+					border-radius: 10px;
+					padding: 8px 10px;
+					display: flex;
+					flex-direction: column;
+					gap: 2px;
+				}
+
+				.kpi.highlight {
+					border-color: rgba(34, 197, 94, 0.4);
+					background: rgba(34, 197, 94, 0.1);
+				}
+
+				.kpi-lbl {
+					font-size: 0.68rem;
+					font-weight: 600;
+					text-transform: uppercase;
+					letter-spacing: 0.04em;
+					opacity: 0.7;
+				}
+
+				.kpi-val {
+					font-size: 1.05rem;
+					font-weight: 700;
+					font-variant-numeric: tabular-nums;
+				}
+
+				.kpi.highlight .kpi-val { color: var(--lux-ok); }
+
+				.col-heads {
+					display: grid;
+					grid-template-columns: minmax(104px, 1.25fr) repeat(4, minmax(52px, 1fr));
+					gap: 6px;
+					padding: 0 10px;
 				}
 
 				.col-head {
-					font-size: 0.7rem;
-					font-weight: 600;
-					opacity: 0.68;
+					font-size: 0.68rem;
+					font-weight: 700;
+					opacity: 0.65;
 					text-transform: uppercase;
 					text-align: center;
-					letter-spacing: 0.03em;
+					letter-spacing: 0.04em;
+				}
+
+				.rows-wrap {
+					display: flex;
+					flex-direction: column;
+					gap: 8px;
+				}
+
+				.row-card {
+					display: grid;
+					grid-template-columns: minmax(104px, 1.25fr) repeat(4, minmax(52px, 1fr));
+					gap: 6px;
+					align-items: center;
+					background: var(--lux-surface);
+					border: 1px solid var(--lux-border);
+					border-left: 3px solid var(--row-accent);
+					border-radius: 10px;
+					padding: 8px 10px;
 				}
 
 				.row-label {
 					display: flex;
 					align-items: center;
 					gap: 6px;
-					font-size: 0.8rem;
+					font-size: 0.82rem;
 					font-weight: 600;
 				}
 
-				.row-label .dot {
-					width: 8px;
-					height: 8px;
-					border-radius: 50%;
-					flex-shrink: 0;
-				}
+				.row-icon { font-size: 0.88rem; }
 
 				.cell {
-					background: var(--lux-surface);
-					border: 1px solid var(--lux-border);
+					background: var(--lux-surface-soft);
 					border-radius: 8px;
 					padding: 6px 6px 5px;
 					display: flex;
@@ -176,7 +239,7 @@ class LuxtronikCopCockpit extends LuxtronikBaseCard {
 				}
 
 				.cell-val {
-					font-size: 0.92rem;
+					font-size: 0.94rem;
 					font-weight: 700;
 					font-variant-numeric: tabular-nums;
 				}
@@ -195,21 +258,6 @@ class LuxtronikCopCockpit extends LuxtronikBaseCard {
 					border-radius: 999px;
 					transition: width 0.35s ease, background-color 0.35s ease;
 				}
-
-				.footer {
-					display: flex;
-					justify-content: space-between;
-					align-items: center;
-					flex-wrap: wrap;
-					gap: 8px;
-					padding-top: 6px;
-					border-top: 1px solid var(--lux-border);
-					font-size: 0.74rem;
-					opacity: 0.82;
-					font-variant-numeric: tabular-nums;
-				}
-
-				.footer strong { font-weight: 600; }
 			</style>
 
 			<div class="card">
@@ -220,21 +268,31 @@ class LuxtronikCopCockpit extends LuxtronikBaseCard {
 					</div>
 					<div class="badges">
 						<span class="pill pv hidden" data-ref="pvBadge">PV-Boost</span>
-						<span class="pill" data-ref="liveCopBadge">Live: –</span>
+						<span class="pill" data-ref="liveCopBadge">Standby</span>
 					</div>
 				</div>
 
-				<div class="matrix">
-					<div></div>
-					${headerCols}
-					${bodyRows}
+				<div class="hero-grid">
+					<div class="kpi highlight">
+						<span class="kpi-lbl">Gesamt-JAZ</span>
+						<span class="kpi-val" data-ref="lifetimeJaz">–</span>
+					</div>
+					<div class="kpi">
+						<span class="kpi-lbl">Wärme ges.</span>
+						<span class="kpi-val" data-ref="thermalTotal">–</span>
+					</div>
+					<div class="kpi">
+						<span class="kpi-lbl">Strom ges.</span>
+						<span class="kpi-val" data-ref="energyTotal">–</span>
+					</div>
 				</div>
 
-				<div class="footer">
-					<span>Wärme ges.: <strong data-ref="thermalTotal">–</strong></span>
-					<span>Strom ges.: <strong data-ref="energyTotal">–</strong></span>
-					<span>Gesamt-JAZ: <strong data-ref="lifetimeJaz">–</strong></span>
+				<div class="col-heads">
+					<div></div>
+					${headerCols}
 				</div>
+
+				<div class="rows-wrap">${rowCards}</div>
 			</div>
 		`;
 		this.shadowRoot.appendChild(tpl.content.cloneNode(true));
@@ -252,7 +310,6 @@ class LuxtronikCopCockpit extends LuxtronikBaseCard {
 		r.title.textContent = this._settings?.title || 'Effizienz / COP';
 		r.pvBadge.classList.toggle('hidden', !this._toBool(v.pvBoost));
 
-		// Live-COP berechnen (falls Verdichter läuft und Leistungswerte vorhanden)
 		const heatW = this._toNum(v.heatPower);
 		const elecW = this._toNum(v.elecPower);
 		const vd1 = this._toBool(v.vd1);
@@ -268,7 +325,6 @@ class LuxtronikCopCockpit extends LuxtronikBaseCard {
 			r.subtitle.textContent = 'Arbeitszahlen nach Zeitraum';
 		}
 
-		// Matrix-Zellen aktualisieren
 		for (const row of MATRIX_ROWS) {
 			for (const col of MATRIX_COLS) {
 				const id = `${row.key}_${col.key}`;
@@ -278,9 +334,10 @@ class LuxtronikCopCockpit extends LuxtronikBaseCard {
 
 				if (num !== null && num > 0) {
 					valEl.textContent = num.toFixed(2);
-					const pct = Math.max(4, Math.min(100, (num / maxScale) * 100));
+					const scale = row.isWater ? Math.min(maxScale, 4.2) : maxScale;
+					const pct = Math.max(5, Math.min(100, (num / scale) * 100));
 					barEl.style.width = `${pct.toFixed(0)}%`;
-					barEl.style.backgroundColor = this._copColor(num);
+					barEl.style.backgroundColor = this._copColor(num, row.isWater);
 				} else {
 					valEl.textContent = '–';
 					barEl.style.width = '0%';
@@ -289,7 +346,6 @@ class LuxtronikCopCockpit extends LuxtronikBaseCard {
 			}
 		}
 
-		// Gesamtzähler & Lebenszeit-JAZ
 		const th = this._toNum(v.thermalTotal);
 		const el = this._toNum(v.energyTotal);
 		r.thermalTotal.textContent = th !== null ? `${Math.round(th).toLocaleString('de-DE')} kWh` : '–';

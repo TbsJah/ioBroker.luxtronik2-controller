@@ -103,6 +103,13 @@ _This project is not affiliated with Alpha Innotec, Novelan, ait-deutschland Gmb
 //### **WORK IN PROGRESS**
 
 ## Changelog
+
+### **WORK IN PROGRESS**
+
+- Redesigned `<luxtronik-hydraulics-flow>` with a wider layout, non-overlapping supply/return (`VL`/`RL`) pill badges, an integrated hot water tank cylinder (showing target/recharge thresholds and reserve percentage), and an optional control bar for ZIP circulation and one-shot hot water heating
+- Redesigned `<luxtronik-cop-cockpit>` with top hero KPI cards (lifetime JAZ, total thermal and electrical energy), compact row cards with icons, and a dedicated realistic color scale for hot water COP values
+- Added missing i18n translation keys for PV heat pump power compensation, sunset cutoff settings, and cycle-optimization descriptions
+
 ### 1.3.2 (2026-11-27)
 
 - Resolved ioBroker repository checker and i18n translation warnings (`W5604`, `W5606`, `W5611`, `W5612`, `E1144`)

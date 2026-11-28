@@ -7,8 +7,8 @@
 		"de": "Luxtronik Hydraulik- & Energiefluss"
 	},
 	"size": {
-		"width": 520,
-		"height": 290
+		"width": 560,
+		"height": 330
 	},
 	"settings": {
 		"type": "panel",
@@ -27,6 +27,14 @@
 				"label": {
 					"en": "Title",
 					"de": "Titel"
+				}
+			},
+			"showControls": {
+				"type": "checkbox",
+				"default": true,
+				"label": {
+					"en": "Show ZIP & Hot Water buttons",
+					"de": "ZIP- & Aufheizen-Buttons anzeigen"
 				}
 			}
 		}
