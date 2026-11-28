@@ -103,8 +103,7 @@ _This project is not affiliated with Alpha Innotec, Novelan, ait-deutschland Gmb
 //### **WORK IN PROGRESS**
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 1.3.3 (2026-11-28)
 
 - Redesigned `<luxtronik-hydraulics-flow>` with a wider layout, non-overlapping supply/return (`VL`/`RL`) pill badges, an integrated hot water tank cylinder (showing target/recharge thresholds and reserve percentage), and an optional control bar for ZIP circulation and one-shot hot water heating
 - Redesigned `<luxtronik-cop-cockpit>` with top hero KPI cards (lifetime JAZ, total thermal and electrical energy), compact row cards with icons, and a dedicated realistic color scale for hot water COP values
@@ -139,12 +138,6 @@ _This project is not affiliated with Alpha Innotec, Novelan, ait-deutschland Gmb
 
 - Fixed `temperature_target_return` being overwritten with `35.0 °C` in SHI Modbus mode when `sync_modbus_holding_1` (`10060`, room thermostat target) is enabled by removing the duplicate Modbus mapping from `src/mapping/info.ts`
 - Cleaned up SHI holding register mapping in `src/modbusManager.ts` and added an SHI mode check (`10000 === 1`) when reading register `10001` for `heating_flow_out_temperature_target` (`sync_modbus_holding_2`) so its inactive `35.0 °C` default does not overwrite `P0017`
-
-### 1.2.0 (2026-11-24)
-
-- Added configurable sunset cutoff buffer (`pv_sunset_cutoff_active`, `pv_sunset_buffer`) to PV surplus management to prevent starting new PV boosts shortly before local sunset using `system.config` coordinates
-- Added `@iobroker/web-components` status card (`<luxtronik-status-card>`) for Aura, VIS-2, and WebUI displaying live temperatures, operating mode, PV boost status, COP/JAZ values, and quick actions
-- Updated Cycle Optimization description in `jsonConfig.json` to reflect the dynamic hysteresis-based offset instead of the legacy `35 °C` wording
 
 ## License
 
